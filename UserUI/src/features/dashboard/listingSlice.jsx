@@ -1,65 +1,98 @@
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// import axios from "axios";
-// import { ADMIN_LISTINGS_URL } from "../../Constant/constant.js";
+// src/redux/listingSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { fetchListingsAPI } from "../../Constant/constant.js";
 
-// // CREATE LISTING WITH FILES
-// export const createListing = createAsyncThunk(
-//   "listing/createListing",
-//   async (formData, thunkAPI) => {
-//     try {
-//       const token = localStorage.getItem("token");
+// ----------------------
+// Async Thunk
+// ----------------------
+export const fetchListings = createAsyncThunk(
+  "listings/fetchListings",
+  async (page = 1, thunkAPI) => {
+    try {
+      const response = await axios.get(
+        `${fetchListingsAPI}?page=${page}`
+      );
 
-//       const response = await axios.post(
-//       ADMIN_LISTINGS_URL ,
-//         formData, // FormData object
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//             "Content-Type": "multipart/form-data",
-//           },
-//         }
-//       );
+      return response.data;
+    } catch (error) {
+      console.error("FETCH LISTINGS ERROR:", error);
 
-//       return response.data;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(
-//         error.response?.data?.message || "Failed to create listing"
-//       );
-//     }
-//   }
-// );
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch listings"
+      );
+    }
+  }
+);
 
-// const listingSlice = createSlice({
-//   name: "listing",
-//   initialState: {
-//     loading: false,
-//     success: false,
-//     error: null,
-//   },
-//   reducers: {
-//     resetListingState: (state) => {
-//       state.loading = false;
-//       state.success = false;
-//       state.error = null;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(createListing.pending, (state) => {
-//         state.loading = true;
-//         state.success = false;
-//         state.error = null;
-//       })
-//       .addCase(createListing.fulfilled, (state) => {
-//         state.loading = false;
-//         state.success = true;
-//       })
-//       .addCase(createListing.rejected, (state, action) => {
-//         state.loading = false;
-//         state.error = action.payload;
-//       });
-//   },
-// });
+// ----------------------
+// Slice
+// ----------------------
+const listingSlice = createSlice({
+  name: "listings",
+  initialState: {
+    listings: [],
+    page: 1,
+    perPage: 20,
+    total: 0,
+    totalPages: 0,
+    loading: false,
+    success: false,
+    error: null,
+  },
 
-// export const { resetListingState } = listingSlice.actions;
-// export default listingSlice.reducer;
+  reducers: {
+    resetListingsState: (state) => {
+      state.listings = [];
+      state.page = 1;
+      state.perPage = 20;
+      state.total = 0;
+      state.totalPages = 0;
+      state.loading = false;
+      state.success = false;
+      state.error = null;
+    },
+  },
+
+  extraReducers: (builder) => {
+    builder
+      // ----------------------
+      // Pending
+      // ----------------------
+      .addCase(fetchListings.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+
+      // ----------------------
+      // Fulfilled
+      // ----------------------
+      .addCase(fetchListings.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+
+        const payload = action.payload || {};
+
+        state.listings = payload.listings ?? [];
+        state.page = payload.page ?? 1;
+        state.perPage = payload.perPage ?? 20;
+        state.total = payload.total ?? 0;
+        state.totalPages = payload.totalPages ?? 0;
+      })
+
+      // ----------------------
+      // Rejected
+      // ----------------------
+      .addCase(fetchListings.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload || "Failed to fetch listings";
+      });
+  },
+});
+
+export const { resetListingsState } = listingSlice.actions;
+export default listingSlice.reducer;
