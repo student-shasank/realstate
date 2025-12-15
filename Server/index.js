@@ -13,10 +13,14 @@ const app = express();
 connectDB();
 app.use(express.json());
 app.use(cors());
+app.set("trust proxy", true);
+
+
+app.use(express.urlencoded({ extended: true })); // add this
 
 // Routes
 app.use("/api/user/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/user/show", userRoutes);
 
 
 const PORT = process.env.PORT || 5000;
