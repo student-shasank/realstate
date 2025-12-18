@@ -1,7 +1,8 @@
-// src/pages/Listings.jsx
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchListings } from "../features/dashboard/listingSlice";
+// Import the new ListingCard component
+import ListingCard from "../Components/listingCard"; 
 
 const Listings = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,9 @@ const Listings = () => {
 
   // Initial fetch
   useEffect(() => {
-    dispatch(fetchListings(1));
+    // You might want to remove this if you handle initial fetch elsewhere
+    // or ensure your API uses a default page size (e.g., 20)
+    dispatch(fetchListings(1)); 
   }, [dispatch]);
 
   const handlePageChange = (newPage) => {
@@ -26,6 +29,14 @@ const Listings = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       dispatch(fetchListings(newPage));
     }
+  };
+
+  // Grid style to display cards side-by-sideff  eee
+  const listingsGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', // Responsive grid
+    gap: '20px',
+    marginTop: '20px',
   };
 
   return (
@@ -45,33 +56,23 @@ const Listings = () => {
         <p>No listings found.</p>
       )}
 
-      {/* Listings */}
-      {!loading &&
-        listings.map((item) => (
-          <div
-            key={item._id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <h4>{item.title}</h4>
-
-            {item.description && <p>{item.description}</p>}
-
-            <p>
-              <strong>Price:</strong> {item.currency || "AED"} {item.price}
-            </p>
-          </div>
-        ))}
+      {/* Listings Container using the Grid Style */}
+      {!loading && listings.length > 0 && (
+        <div style={listingsGridStyle}>
+          {listings.map((item) => (
+            // Use the new ListingCard for each item
+            <ListingCard key={item._id} listing={item} />
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div style={{ marginTop: "20px" }}>
+        <div style={{ marginTop: "20px", textAlign: 'center' }}>
           <button
             disabled={page === 1 || loading}
             onClick={() => handlePageChange(page - 1)}
+            style={{ padding: '8px 15px', marginRight: '10px' }}
           >
             Prev
           </button>
@@ -83,6 +84,7 @@ const Listings = () => {
           <button
             disabled={page === totalPages || loading}
             onClick={() => handlePageChange(page + 1)}
+            style={{ padding: '8px 15px', marginLeft: '10px' }}
           >
             Next
           </button>

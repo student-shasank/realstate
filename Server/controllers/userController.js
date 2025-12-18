@@ -18,7 +18,8 @@ export const dashboard = async (req, res) => {
     });
   }
 };
-
+5
+ nhm
 export const getListings = async (req, res) => {
   try {
     // ✅ Use query param (BEST PRACTICE)
