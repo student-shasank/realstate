@@ -16,6 +16,7 @@ export const ADMIN_LISTING_STATUS_URL = (id) => `${BASE_URL}/admin/listings/${id
 export const ADMIN_LISTING_AVAILABILITY_URL = (id) =>
   `${BASE_URL}/admin/listings/${id}/availability`;
 
-
+export const sendListingPdfAPI=`${BASE_URL}/listing/send-pdf`
+export const PROJECTS_API = `${BASE_URL}/listing/search`
 
 export const fetchListingsAPI  = `${BASE_URL}/show/listings`;

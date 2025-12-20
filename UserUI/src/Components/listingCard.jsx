@@ -1,225 +1,253 @@
-import React from 'react';
-
-// =========================================================
-// === 1. ListingCard Styles (Refined to match the image) ===
-// =========================================================
-const cardStyle = {
-  // Base Card Look
-  border: '1px solid #e0e0e0', 
-  borderRadius: '8px',
-  marginBottom: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)', // Subtle, professional shadow
-  maxWidth: '350px',
-  backgroundColor: '#fff',
-};
-
-const imageContainerStyle = {
-  height: '220px', 
-  position: 'relative',
-  overflow: 'hidden',
-};
-
-const imageStyle = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-};
-
-const detailsStyle = {
-  padding: '15px',
-  flexGrow: 1, 
-};
-
-// Price and Currency Style
-const priceWrapperStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '10px',
-    fontSize: '1.6em',
-    fontWeight: '700',
-    color: '#004c7d', // Deep blue color 
-};
-
-// --- Feature/Icon Styles ---
-const featuresWrapperStyle = {
-  display: 'flex',
-  gap: '15px',
-  fontSize: '1em',
-  color: '#555',
-  marginBottom: '15px',
-  paddingBottom: '10px',
-  borderBottom: '1px solid #f0f0f0',
-};
-
-const featureItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  whiteSpace: 'nowrap',
-};
-
-// --- Badge Styles ---
-const badgeBaseStyle = {
-  padding: '4px 8px',
-  borderRadius: '4px',
-  fontSize: '0.75em',
-  fontWeight: '600',
-  marginRight: '8px',
-  display: 'inline-block',
-};
-
-const truCheckStyle = {
-  ...badgeBaseStyle,
-  backgroundColor: '#007bff', // Blue
-  color: 'white',
-};
-
-const offPlanStyle = {
-  ...badgeBaseStyle,
-  backgroundColor: '#ffc107', // Yellow/Orange
-  color: '#333',
-};
-
-const badgeContainerStyle = {
-    position: 'absolute',
-    top: '10px',
-    left: '10px',
-    display: 'flex',
-    zIndex: 10,
-};
-
-const handoverBadgeStyle = {
-    position: 'absolute',
-    bottom: '0',
-    left: '0',
-    backgroundColor: '#387373', // Dark Teal/Green background (matches the image element)
-    color: 'white',
-    padding: '8px 12px',
-    fontSize: '0.85em',
-    fontWeight: '600',
-    borderTopRightRadius: '8px',
-};
-
-// --- Agent Info Styles ---
-const agentSectionStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  marginTop: '15px',
-  paddingTop: '15px',
-  borderTop: '1px solid #eee',
-  // No borderBottom needed since there are no buttons below it
-};
-
-const agentImageStyle = {
-  width: '45px', 
-  height: '45px',
-  borderRadius: '50%',
-  objectFit: 'cover',
-  marginRight: '12px',
-};
-
-
-// =========================================================
-// === 2. ListingCard Component Implementation =============
-// =========================================================
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom'; // 1. Import ReactDOM for Portal
+import { useDispatch, useSelector } from 'react-redux';
+import { sendListingPdf } from '../features/dashboard/listingpdfSlice';
 
 const ListingCard = ({ listing }) => {
-  const mainImage = listing.images && listing.images.length > 0 
-                    ? listing.images[0] 
-                    : 'https://via.placeholder.com/350x220?text=Image+Unavailable';
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [isHovered, setIsHovered] = useState(false);
 
-  const agentProfileImage = listing.agent?.profileImage || 'https://via.placeholder.com/45?text=A';
-  
-  const { 
-    title = 'Property Listing', 
-    price = 0, 
-    currency = 'AED', 
-    bedrooms, 
-    bathrooms, 
-    builtUpArea, 
-    location,
-    projectInfo,
-  } = listing;
+  const dispatch = useDispatch();
 
-  const area = builtUpArea ? `${builtUpArea.toLocaleString()}` : 'N/A';
-  const beds = bedrooms !== null && bedrooms !== undefined ? `${bedrooms}` : 'N/A';
-  const baths = bathrooms !== null && bathrooms !== undefined ? `${bathrooms}` : 'N/A';
-  const community = location?.community || 'Dubai';
-  const handoverDate = projectInfo?.handoverDate;
-  
-  // Example Logic for Badges (replace with your actual data flags)
-  const isTruChecked = true; 
-  const isOffPlan = listing.completionStatus !== 'Completed';
+  const { loading, success, error } = useSelector(
+    (state) => state.pdf
+  );
 
+  const handleSendPdf = () => {
+    if (!email) {
+      alert('Please enter email');
+      return;
+    }
+    dispatch(sendListingPdf({ listingId: listing._id, email: email }));
+  };
+
+  useEffect(() => {
+    if (success && isPopupOpen) {
+      const timer = setTimeout(() => {
+        setIsPopupOpen(false);
+        setEmail('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, isPopupOpen]);
+
+  const styles = {
+    card: {
+      border: '1px solid #e0e0e0',
+      borderRadius: '8px',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+      maxWidth: '350px',
+      backgroundColor: '#fff',
+      fontFamily: 'Arial, sans-serif',
+    },
+    imageContainer: {
+      height: '220px',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    image: { width: '100%', height: '100%', objectFit: 'cover' },
+    badgeContainer: {
+      position: 'absolute',
+      top: '10px',
+      left: '10px',
+      display: 'flex',
+      gap: '8px',
+      zIndex: 10,
+    },
+    truCheck: {
+      backgroundColor: '#007bff',
+      color: 'white',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '0.75em',
+      fontWeight: '600',
+    },
+    offPlan: {
+      backgroundColor: '#ffc107',
+      color: '#333',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '0.75em',
+      fontWeight: '600',
+    },
+    handoverBadge: {
+      position: 'absolute',
+      bottom: '0',
+      left: '0',
+      backgroundColor: '#387373',
+      color: 'white',
+      padding: '8px 12px',
+      fontSize: '0.85em',
+      fontWeight: '600',
+      borderTopRightRadius: '8px',
+    },
+    details: { padding: '15px' },
+    price: { 
+      fontSize: '1.6em', 
+      fontWeight: '700', 
+      color: '#004c7d', 
+      marginBottom: '10px' 
+    },
+    featuresWrapper: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '15px',
+      fontSize: '1em',
+      color: '#555',
+      marginBottom: '15px',
+      paddingBottom: '10px',
+      borderBottom: '1px solid #f0f0f0',
+    },
+    shortDownloadBtn: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+      padding: '5px 10px',
+      backgroundColor: isHovered ? '#003a61' : '#004c7d',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '0.8em',
+      fontWeight: '600',
+      marginLeft: 'auto',
+      transition: '0.2s',
+    },
+    agentSection: {
+      display: 'flex',
+      alignItems: 'center',
+      marginTop: '15px',
+      paddingTop: '15px',
+      borderTop: '1px solid #eee',
+    },
+    agentImage: {
+      width: '45px',
+      height: '45px',
+      borderRadius: '50%',
+      marginRight: '12px',
+      objectFit: 'cover',
+    },
+    // MODAL STYLES (COVER ENTIRE SCREEN)
+    modalOverlay: {
+      position: 'fixed',
+      top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', // Darken background
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 9999, // Very high z-index
+      backdropFilter: 'blur(8px)', // Blur the whole background
+    },
+    popup: {
+      backgroundColor: 'white',
+      padding: '30px',
+      borderRadius: '16px',
+      width: '350px',
+      textAlign: 'center',
+      boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+    }
+  };
 
   return (
-    <div style={cardStyle}>
-      <div style={imageContainerStyle}>
-        <img src="https://images.bayut.com/thumbnails/803707122-1066x800.webp" alt={title} style={imageStyle} />
-        
-        {/* Badges - Top Left */}
-        <div style={badgeContainerStyle}>
-            {isTruChecked && <span style={truCheckStyle}>✅ TruCheck</span>}
-            {isOffPlan && <span style={offPlanStyle}>🚧 Off Plan</span>}
+    <div style={styles.card}>
+      <div style={styles.imageContainer}>
+        <img src="https://images.bayut.com/thumbnails/803707122-1066x800.webp" style={styles.image} alt="Property" />
+        <div style={styles.badgeContainer}>
+          <span style={styles.truCheck}>✓ TruCheck</span>
+          <span style={styles.offPlan}>Off Plan</span>
         </div>
-
-        {/* Handover Date Badge - Bottom Left */}
-        {handoverDate && (
-            <div style={handoverBadgeStyle}>
-                Handover Q3 {new Date(handoverDate).getFullYear()}
-            </div>
-        )}
+        <div style={styles.handoverBadge}>Handover Q3 2023</div>
       </div>
-      
-      <div style={detailsStyle}>
-        {/* Price Section */}
-        <div style={priceWrapperStyle}>
-          {currency} {price.toLocaleString()}
-        </div>
-        
-        {/* Features Row */}
-        <div style={featuresWrapperStyle}>
-            <div style={featureItemStyle}>
-                <span role="img" aria-label="Bed Icon" style={{marginRight: '5px'}}>🛏️</span> {beds}
-            </div>
-            <div style={featureItemStyle}>
-                <span role="img" aria-label="Bath Icon" style={{marginRight: '5px'}}>🛁</span> {baths}
-            </div>
-            <div style={featureItemStyle}>
-                <span role="img" aria-label="Area Icon" style={{marginRight: '5px'}}>📐</span> {area} sqft
-            </div>
+
+      <div style={styles.details}>
+        <div style={styles.price}>AED 8,500,000</div>
+
+        <div style={styles.featuresWrapper}>
+          <span>🛏️ 4</span>
+          <span>🛁 5</span>
+          <span>📐 5,200 sqft</span>
+
+          <button
+            style={styles.shortDownloadBtn}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={() => setIsPopupOpen(true)}
+          >
+            📩 PDF
+          </button>
         </div>
 
-        {/* Title/Sub-Title */}
-        <div style={{fontSize: '1.1em', fontWeight: '600', color: '#333', marginBottom: '5px'}}>
-          {title}
-        </div>
-        
-        {/* Community/Location */}
-        <p style={{ fontSize: '0.9em', color: '#888', marginBottom: '10px' }}>
-          {community}, {location?.city || 'UAE'}
+        <h3 style={{fontSize: '1.1em', fontWeight: '600', color: '#333', margin: '0 0 5px 0'}}>
+          Luxury 4BR Villa in Palm Jumeirah
+        </h3>
+        <p style={{ fontSize: '0.9em', color: '#888', margin: 0 }}>
+          Palm Jumeirah, Dubai
         </p>
 
-        {/* Agent Info */}
-        {listing.agent && (
-          <div style={agentSectionStyle}>
-            <img 
-              src="https://images.bayut.com/thumbnails/764386701-800x600.webp" 
-              alt={listing.agent.name} 
-              style={agentImageStyle} 
-            />
-            <div>
-              <div style={{ fontWeight: 'bold', fontSize: '0.95em' }}>{listing.agent.name}</div>
-              <div style={{ fontSize: '0.8em', color: '#888' }}>{listing.agent.agency}</div>
-            </div>
+        <div style={styles.agentSection}>
+          <img 
+            src="https://images.bayut.com/thumbnails/764386701-800x600.webp" 
+            style={styles.agentImage} 
+            alt="Agent" 
+          />
+          <div>
+            <div style={{ fontWeight: 'bold', fontSize: '0.95em' }}>John Smith</div>
+            <div style={{ fontSize: '0.8em', color: '#888' }}>Dream Homes Real Estate</div>
           </div>
-        )}
+        </div>
       </div>
-      
-      {/* Action Buttons section removed */}
 
+      {/* 2. Wrap the popup in a Portal */}
+      {isPopupOpen && ReactDOM.createPortal(
+        <div style={styles.modalOverlay} onClick={() => setIsPopupOpen(false)}>
+          <div style={styles.popup} onClick={(e) => e.stopPropagation()}>
+            {success ? (
+              <div>
+                <div style={{fontSize: '3em', color: '#387373', marginBottom: '10px'}}>✅</div>
+                <h3 style={{margin: '0 0 5px 0'}}>PDF Sent!</h3>
+                <p style={{fontSize: '0.9em', color: '#666'}}>Check your inbox for the brochure.</p>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ marginTop: 0, color: '#004c7d' }}>Send Brochure</h3>
+                <p style={{ fontSize: '0.85em', color: '#666' }}>
+                  Enter your Gmail to receive the full details.
+                </p>
+
+                <input
+                  type="email"
+                  placeholder="yourname@gmail.com"
+                  style={{
+                    width: '100%', padding: '12px', margin: '15px 0',
+                    borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box'
+                  }}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+                {error && <p style={{color: 'red', fontSize: '0.75em'}}>{"Invalid email ID"}</p>}
+
+                <button
+                  onClick={handleSendPdf}
+                  disabled={loading}
+                  style={{
+                    width: '100%', padding: '12px', background: '#387373', color: 'white',
+                    border: 'none', borderRadius: '8px', fontWeight: 'bold',
+                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1
+                  }}
+                >
+                  {loading ? 'Sending...' : 'Send PDF Now'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>,
+        document.body // This renders the popup at the root level
+      )}
     </div>
   );
 };

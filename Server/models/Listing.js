@@ -1,17 +1,3 @@
-// import mongoose from "mongoose";
-
-// const ListingSchema = new mongoose.Schema(
-//   {
-//     title: { type: String, required: true },
-//     price: { type: Number, required: true },
-//     location: { type: String, required: true },
-//     description: { type: String },
-    
-//   },
-// );
-
-// export default mongoose.model("Listing", ListingSchema);
-
 import mongoose from "mongoose";
 
 // Agent Schema
@@ -53,7 +39,6 @@ const locationSchema = new mongoose.Schema({
     coordinates: { type: [Number], default: [0, 0] } // [lng, lat]
   }
 });
-
 locationSchema.index({ coordinates: "2dsphere" });
 
 // ⭐ FINAL LISTING SCHEMA ⭐
@@ -69,7 +54,7 @@ const ListingSchema = new mongoose.Schema(
     purpose: { type: String },
     completionStatus: { type: String },
     addedOn: { type: Date },
-   availability: {
+    availability: {
       type: String,
       enum: ["Available", "Unavailable"],
       default: "Available",
@@ -79,7 +64,6 @@ const ListingSchema = new mongoose.Schema(
     builtUpArea: { type: Number },
     plotArea: { type: Number },
     furnishing: { type: String },
-
 
     features: [{ type: String }],
     images: [{ type: String }],
@@ -97,7 +81,12 @@ const ListingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// 🔹 INDEXES FOR SEARCH OPTIMIZATION
+ListingSchema.index({ "location.city": 1 });      // regex / prefix search
+ListingSchema.index({ bedrooms: 1 });            // >= comparison
+ListingSchema.index({ bathrooms: 1 });           // >= comparison
+ListingSchema.index({ price: 1 });               // price range
+ListingSchema.index({ type: 1 });                // property type
+ListingSchema.index({ completionStatus: 1 });    // completion filter
 
-// Export as Listing (NOT Property)
 export default mongoose.model("Listing", ListingSchema);
-

@@ -6,6 +6,8 @@ import loginReducer from "../features/Authentation/login";
 import listingReducer from "../features/dashboard/listingSlice";
 //  import dashboardReducer from "../features/dashboard/dashboardSlice"
 // import listingReducer from "../features/dashboard/listingSlice"
+import pdfReducer from "../features/dashboard/listingpdfSlice"
+import searchReducer from "../features/dashboard/searchSlice"
 
 
 export const store = configureStore({
@@ -14,6 +16,8 @@ export const store = configureStore({
     registerAuth: registerReducer, // registration slice
     loginAuth: loginReducer,
      listings: listingReducer,
+       pdf: pdfReducer,
+        search: searchReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

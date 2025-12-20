@@ -21,6 +21,7 @@ app.use(express.urlencoded({ extended: true })); // add this
 // Routes
 app.use("/api/user/auth", authRoutes);
 app.use("/api/user/show", userRoutes);
+app.use("/api/user/listing", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("http://localhost:5000"));
