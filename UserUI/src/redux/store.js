@@ -8,7 +8,7 @@ import listingReducer from "../features/dashboard/listingSlice";
 // import listingReducer from "../features/dashboard/listingSlice"
 import pdfReducer from "../features/dashboard/listingpdfSlice"
 import searchReducer from "../features/dashboard/searchSlice"
-
+import listingDetailReducer from "../features/dashboard/listingDetailSlice"
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +18,7 @@ export const store = configureStore({
      listings: listingReducer,
        pdf: pdfReducer,
         search: searchReducer,
+        listingDetail: listingDetailReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

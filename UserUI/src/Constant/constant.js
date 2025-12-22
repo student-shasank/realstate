@@ -20,3 +20,6 @@ export const sendListingPdfAPI=`${BASE_URL}/listing/send-pdf`
 export const PROJECTS_API = `${BASE_URL}/listing/search`
 
 export const fetchListingsAPI  = `${BASE_URL}/show/listings`;
+
+export const fetchListingDetailAPI =
+  "http://localhost:5000/api/user/listing/detail";

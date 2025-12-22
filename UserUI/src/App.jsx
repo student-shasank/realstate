@@ -7,6 +7,7 @@ import Login from "./Pages/Login";
 import React from "react";
 import Register from "./Pages/Register";
 import Listings from "./Pages/Listings";
+import ListingDetail from "./Pages/ListingDetail/ListingDetail";
 // import Dashboard from "./Pages/Dashboard";
 // import ListingCreation from "./Pages/ListingCreation";
 
@@ -26,6 +27,7 @@ function App() {
             {/* <Route path="/dashboard" element={<Dashboard/>}/> */}
           {/* <Route path="/listingcreation" element={<ListingCreation/>}/> */}
            <Route path="/listings" element={<Listings />}/>
+             <Route path="/listing/:id" element={<ListingDetail/>} />
 
       </Routes>
 

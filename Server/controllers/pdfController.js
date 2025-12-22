@@ -1,6 +1,7 @@
 import Listing from "../models/Listing.js";
 import { generateListingPdf } from "../utils/generatePdf.js";
 import { sendEmailWithPdf } from "../utils/sendEmail.js";
+import fs  from "fs"
 
 export const sendListingPdf = async (req, res) => {
   try {
@@ -27,7 +28,8 @@ export const sendListingPdf = async (req, res) => {
     };
 
     const pdfBuffer = await generateListingPdf(pdfData);
-    await sendEmailWithPdf(email, pdfBuffer);
+    fs.writeFileSync("temporary.pdf",pdfBuffer)
+    // await sendEmailWithPdf(email, pdfBuffer);
 
     res.json({ success: true, message: "PDF sent successfully" });
 

@@ -14,7 +14,7 @@ import {
   closeDropdowns,
   fetchProjects
 } from '../features/dashboard/searchSlice';
-import ListingCard from "../Components/listingCard";
+import ListingCard from "../Components/Card/listingCard";
 import { Link } from 'react-router-dom';
 
 const Home = () => {

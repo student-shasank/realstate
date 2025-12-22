@@ -1,0 +1,297 @@
+{% assign animation_class = '' %}
+
+{% if settings.animations_reveal_on_scroll and section.settings.animation != 'none' %}
+  {% assign animation_class = 'scroll-trigger animate--' | append: section.settings.animation | append: ' scroll-trigger--offscreen' %}
+{% endif %}
+
+<section class="section our-categories page-width {{ animation_class }}">
+  <div class="teevoque-container">
+    
+    <!-- Image Column -->
+    <div class="category-image">
+      <!-- Default image -->
+      <img
+          src="{{ section.settings.left_img | image_url }}"
+          width="{{ section.settings.left_img.width }}"
+          height="{{ section.settings.left_img.height }}"
+          alt="Main"
+          class="main-category-image active"
+      />
+
+      <!-- Category-specific images -->
+      {% for block in section.blocks %}
+        {% if block.settings.category_img %}
+        <img
+            src="{{ block.settings.category_img | image_url }}"
+            width="{{ block.settings.category_img.width }}"
+            height="{{ block.settings.category_img.height }}"
+            alt="{{ block.settings.anchor_text }}"
+            class="cat-img"
+            data-block-id="{{ block.id }}"
+        />
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Content Column -->
+    <div class="categories-content">
+      <div class="category-heading">
+        <h1 style="color:{{ section.settings.catogory_heading_color }};">
+          {{ section.settings.catogory_heading }}
+        </h1>
+        <p style="color:{{ section.settings.catogory_text_color }};">
+          {{ section.settings.catogory_text }}
+        </p>
+      </div>
+      <div class="categories-list">
+        {% for block in section.blocks %}
+          <a href="{{ block.settings.anchor_link }}" class="category-item" data-block-id="{{ block.id }}">
+            {{ block.settings.anchor_text }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.our-categories {
+  padding-top: 75px;
+  padding-bottom: var(--section-vertical-spacing);
+}
+
+.teevoque-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+}
+
+/* Image column */
+.category-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  {% comment %} overflow: hidden; {% endcomment %}
+  display: flex;
+}
+
+.category-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: 475px;
+  {% comment %} height: 100%; {% endcomment %}
+  height: auto;
+  {% comment %} aspect-ratio: 4/5; {% endcomment %}
+  {% comment %} object-fit: cover; {% endcomment %}
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.category-image img.active {
+  opacity: 1;
+}
+
+/* Content column */
+.categories-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  text-align: right;
+}
+
+.category-heading h1 {
+  {% comment %} font-size: clamp(28px, 4vw, 69px); {% endcomment %}
+  font-size: clamp(3rem, 4.362vw + 0.619rem, 6rem);
+  color: var(--color-foreground);
+  margin: 0;
+  line-height: 100%;
+}
+
+.category-heading p {
+  font-size: clamp(14px, 1.2vw, 18px);
+  color: rgba(var(--color-foreground_rgb), 0.8);
+  {% comment %} margin: 10px 0 0; {% endcomment %}
+   margin: 8px 0 0 0;
+}
+
+/* Category list links */
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.categories-list a {
+  font-family: 'DM Sans';
+  font-weight: 300;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  color: rgba(87, 94, 180, 0.5);
+  font-size: clamp(20px, 4vw, 32px);
+}
+
+.categories-list a:hover {
+  color: rgba(55, 61, 131, 1);
+  text-decoration:underline;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .teevoque-container {
+    /* future adjustment placeholder */
+  }
+  .categories-content {
+    order: 2;
+  }
+  .category-image {
+    order: 1;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .our-categories {
+    padding-top: 75px;
+    {% comment %} padding-top: calc(var(--section-vertical-spacing)/1.5);
+    padding-bottom: calc(var(--section-vertical-spacing)/1.5); {% endcomment %}
+  }
+  .category-heading h1 {
+    {% comment %} font-size: clamp(28px, 7vw, 48px); {% endcomment %}
+  }
+  .categories-list a {
+    font-size: clamp(18px, 4vw, 24px);
+  }
+}
+
+/* Small Mobile Fix */
+@media (max-width: 500px) {
+  .our-categories {
+    padding-top: 60px;
+  }
+  .teevoque-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .category-image {
+    position: relative;
+    aspect-ratio: 1/1.2;
+  }
+
+  .category-image img {
+    position: absolute; /* keep absolute for correct overlay */
+    inset: 0;
+  }
+
+  .categories-content {
+    text-align: center;
+  }
+
+  .categories-list {
+    text-align: center;
+  }
+}
+</style>
+
+{% javascript %}
+document.addEventListener('DOMContentLoaded', function() {
+  const items = document.querySelectorAll('.category-item');
+  const defaultImg = document.querySelector('.main-category-image');
+  const catImgs = document.querySelectorAll('.cat-img');
+
+  items.forEach(item => {
+    const id = item.dataset.blockId;
+    const imgToShow = document.querySelector(`.cat-img[data-block-id="${id}"]`);
+
+    // Hover effect for desktop
+    item.addEventListener('mouseenter', () => {
+      defaultImg.classList.remove('active');
+      catImgs.forEach(img => img.classList.remove('active'));
+      if (imgToShow) imgToShow.classList.add('active');
+    });
+
+    item.addEventListener('mouseleave', () => {
+      catImgs.forEach(img => img.classList.remove('active'));
+      defaultImg.classList.add('active');
+    });
+
+    // Click effect for mobile
+    item.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768) e.preventDefault(); // Prevent redirect on small screens
+      defaultImg.classList.remove('active');
+      catImgs.forEach(img => img.classList.remove('active'));
+      if (imgToShow) imgToShow.classList.add('active');
+    });
+  });
+});
+{% endjavascript %}
+
+
+{% comment %} {% schema %}
+{
+  "name": "Custom Categories",
+  "settings": [
+    { "type": "header", "content": "Image" },
+    { "type": "image_picker", "id": "left_img", "label": "Left Image" },
+    { "type": "text", "id": "catogory_heading", "label": "Heading", "default": "Our Categories" },
+    { "type": "color", "id": "catogory_heading_color", "label": "Heading Color", "default": "#000000" },
+    { "type": "text", "id": "catogory_text", "label": "Text", "default": "Explore curated collections to match every mood and style" },
+    { "type": "color", "id": "catogory_text_color", "label": "Text Color", "default": "rgba(0,0,0,0.7)" }
+  ],
+  "blocks": [
+    {
+      "type": "items_list",
+      "name": "Category Items",
+      "settings": [
+        { "type": "text", "id": "anchor_text", "label": "Categories Text", "default": "Items" },
+        { "type": "url", "id": "anchor_link", "label": "Categories Link" },
+        { "type": "image_picker", "id": "category_img", "label": "Category Image" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Custom Categories" }]
+}
+{% endschema %} {% endcomment %}
+ {% schema %} 
+{
+  "name": "Custom Categories",
+  "settings": [
+    { "type": "header", "content": "Image" },
+    { "type": "image_picker", "id": "left_img", "label": "Left Image" },
+
+     {
+      "type": "select",
+      "id": "animation",
+      "label": "Animation",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "fade-in", "label": "Fade in" },
+        { "value": "slide-in", "label": "Slide in" }
+      ],
+      "default": "slide-in"
+    },
+
+    { "type": "text", "id": "catogory_heading", "label": "Heading", "default": "Our Categories" },
+    { "type": "color", "id": "catogory_heading_color", "label": "Heading Color", "default": "#000000" },
+    { "type": "text", "id": "catogory_text", "label": "Text", "default": "Explore curated collections to match every mood and style" },
+    { "type": "color", "id": "catogory_text_color", "label": "Text Color", "default": "rgba(0,0,0,0.7)" }
+  ],
+  "blocks": [
+    {
+      "type": "items_list",
+      "name": "Category Items",
+      "settings": [
+        { "type": "text", "id": "anchor_text", "label": "Categories Text", "default": "Items" },
+        { "type": "url", "id": "anchor_link", "label": "Categories Link" },
+        { "type": "image_picker", "id": "category_img", "label": "Category Image" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Custom Categories" }]
+}
+{% endschema %}
+

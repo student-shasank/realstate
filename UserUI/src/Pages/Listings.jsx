@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchListings } from "../features/dashboard/listingSlice";
 // Import the new ListingCard component
-import ListingCard from "../Components/listingCard"; 
+import ListingCard from "../Components/Card/listingCard"; 
 
 const Listings = () => {
   const dispatch = useDispatch();
