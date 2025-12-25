@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAsync, resetLoginState } from "../features/Authentation/login";
-import { useNavigate } from "react-router-dom";
+import { useNavigate  ,useLocation } from "react-router-dom";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,9 +10,14 @@ import { Link } from "react-router-dom";
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/";
+
   const { user, loading, error, success } = useSelector(
     (state) => state.loginAuth
   );
+
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -32,23 +37,33 @@ function Login() {
     dispatch(resetLoginState());
     setFormData({ email: "", password: "" });
   };
+useEffect(() => {
+  if (success && user) {
+    toast.success("Login Successful!");
 
-  // ✅ Toast when login success
-  useEffect(() => {
-    if (success && user) {
-      toast.success("Login Successful!");
+    // 🔁 Redirect back to last page
+    navigate(from, { replace: true });
 
-      if (user.role === "admin") {
-        navigate("/dashboard");
-      } else {
-        navigate("/");
-      }
+    dispatch(resetLoginState());
+  }
+}, [success, user, navigate, dispatch, from]);
 
-      dispatch(resetLoginState());
-    }
-  }, [success, user, navigate, dispatch]);
+  // Toast when login success
+  // useEffect(() => {
+  //   if (success && user) {
+  //     toast.success("Login Successful!");
 
-  // ✅ Toast when error comes from backend
+  //     if (user.role === "admin") {
+  //       navigate("/dashboard");
+  //     } else {
+  //       navigate("/");
+  //     }
+
+  //     dispatch(resetLoginState());
+  //   }
+  // }, [success, user, navigate, dispatch]);
+
+  //  Toast when error comes from backend
   useEffect(() => {
     if (error) {
       toast.error(

@@ -31,7 +31,7 @@ function Register() {
     setFormData({ name: "", email: "", password: "", role: "user" });
   };
 
-  // ✅ Toast when registration success
+  //  Toast when registration success
   useEffect(() => {
     if (success) {
       toast.success("Registration successful!");
@@ -40,7 +40,7 @@ function Register() {
     }
   }, [success, dispatch]);
 
-  // ✅ Toast when error comes from backend
+  //  Toast when error comes from backend
   useEffect(() => {
     if (error) {
       toast.error(

@@ -149,6 +149,43 @@ const styles = {
     borderRadius: '6px',
     cursor: 'pointer',
   },
+  iconBtn: {
+    // Layout
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    
+    // Sizing & Spacing
+    padding: '8px 20px',
+    minWidth: '100px',
+    
+    // Aesthetic
+    backgroundColor: '#ffffff',
+    color: '#333333',
+    fontSize: '14px',
+    fontWeight: '600',
+    fontFamily: 'Inter, sans-serif', // Use a clean font
+    
+    // Border & Corners
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+    
+    // Interaction
+    cursor: 'pointer',
+    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.04)',
+    outline: 'none',
+  },
+
+  // Add these effects for a "Premium" feel
+  hoverEffect: {
+    backgroundColor: '#fff',
+    borderColor: '#ff4d6d', // Soft pink/red border on hover
+    color: '#ff4d6d',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 10px 20px rgba(255, 77, 109, 0.15)',
+  },
   loading: { padding: '40px', textAlign: 'center' },
   error: { padding: '40px', color: 'red', textAlign: 'center' },
 };

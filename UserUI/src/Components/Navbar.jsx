@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../features/Authentation/login";
+import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
 
 function Navbar() {
   const [open, setOpen] = React.useState(false);
@@ -15,6 +16,8 @@ function Navbar() {
     dispatch(logoutUser());
     setProfileOpen(false);
     navigate("/");
+ 
+dispatch(clearFavorites());
   };
 
   return (

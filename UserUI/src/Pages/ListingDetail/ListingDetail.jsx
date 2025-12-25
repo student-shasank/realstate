@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation  } from "react-router-dom";
 import {
   fetchListingDetail,
   resetListingDetailState,
 } from "../../features/dashboard/listingDetailSlice";
 import styles from './ListingDetail.styles';
+import { toggleFavorite } from "../../features/dashboard/favoriteligting/favoriteSlice";
+
 
 const ListingDetail = () => {
   const { id } = useParams();
@@ -16,6 +18,37 @@ const ListingDetail = () => {
     dispatch(fetchListingDetail(id));
     return () => { dispatch(resetListingDetailState()); };
   }, [dispatch, id]);
+
+const { favorites = [], loading: favLoading } = useSelector(
+  (state) => state.favorites || {}
+);
+
+ const isFavorite = favorites.includes(listing?._id);
+
+// const isFavorite = favorites?.includes(listing?._id);
+
+const handleFavorite = () => {
+  if (!listing?._id) return;
+
+  // 🚫 User not logged in → go to login
+  if (!isLoggedIn) {
+    navigate("/login", {
+      state: { from: location.pathname },
+    });
+    return;
+  }
+
+  // ✅ Logged in → toggle favorite
+  dispatch(toggleFavorite(listing._id));
+};
+
+
+const navigate = useNavigate();
+const location = useLocation();
+
+// 🔐 login check
+const isLoggedIn = Boolean(localStorage.getItem("token"));
+
 
   if (loading) return <div style={styles.loading}>Loading Listing...</div>;
   if (error) return <div style={styles.error}>{error}</div>;
@@ -51,7 +84,38 @@ const ListingDetail = () => {
           <div style={styles.headerRow}>
             <h1 style={styles.priceText}>{listing.currency} {listing.price?.toLocaleString()}</h1>
             <div style={styles.actionBtns}>
-              <button style={styles.iconBtn}>♡ Save</button>
+                  <button
+      onClick={handleFavorite}
+      style={{
+        padding: "8px 16px",
+        borderRadius: "8px",
+        border: "1px solid #ddd",
+        backgroundColor: isFavorite ? "#ffe6e6" : "#fff",
+        color: isFavorite ? "red" : "#333",
+        cursor: "pointer",
+      }}
+    >
+      {isFavorite ? "❤️ Saved" : "♡ Save"}
+    </button>
+      {/* <button
+  style={{
+    ...styles.iconBtn,
+    backgroundColor: isFavorite ? "#e11d48" : "#fff",
+    color: isFavorite ? "#fff" : "#e11d48",
+    opacity: favLoading ? 0.6 : 1,
+    cursor: favLoading ? "not-allowed" : "pointer",
+  }}
+  disabled={favLoading}
+  onClick={handleFavorite}
+>
+  {favLoading
+    ? "Saving..."
+    : isFavorite
+    ? "❤️ Saved"
+    : "♡ Save"}
+</button> */}
+
+
               <button style={styles.iconBtn}>➦ Share</button>
             </div>
           </div>
@@ -129,40 +193,6 @@ const ListingDetail = () => {
   );
 };
 
-// ... Styles remain the same as previous response ...
-// const styles = {
-//   pageWrapper: { maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' },
-//   breadcrumb: { fontSize: '13px', color: '#0078c1', marginBottom: '15px' },
-//   galleryGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px', height: '480px', marginBottom: '30px' },
-//   mainImageWrap: { position: 'relative' },
-//   fullImg: { width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px 0 0 8px' },
-//   sideImagesWrap: { display: 'flex', flexDirection: 'column', gap: '8px' },
-//   sideImg: { width: '100%', height: '100%', objectFit: 'cover', flex: 1, borderRadius: '0 8px 0 0' },
-//   sideImgWithCount: { flex: 1, position: 'relative' },
-//   photoCount: { position: 'absolute', bottom: '15px', right: '15px', background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '5px 10px', borderRadius: '4px' },
-//   badgeOverlay: { position: 'absolute', top: '20px', left: '20px', display: 'flex', gap: '10px' },
-//   truCheckBadge: { background: '#fff', padding: '5px 10px', fontWeight: 'bold', borderRadius: '4px', fontSize: '12px' },
-//   offPlanBadge: { background: '#000', color: '#fff', padding: '5px 10px', borderRadius: '4px', fontSize: '12px' },
-//   mainContent: { display: 'flex', gap: '40px' },
-//   leftCol: { flex: 2 },
-//   sidebar: { flex: 1 },
-//   priceText: { fontSize: '32px', fontWeight: 'bold', margin: 0 },
-//   headerRow: { display: 'flex', justifyContent: 'space-between' },
-//   listingTitle: { fontSize: '18px', color: '#555', marginTop: '10px' },
-//   specRow: { display: 'flex', gap: '20px', marginTop: '15px', fontWeight: 'bold' },
-//   sectionDivider: { height: '1px', background: '#eee', margin: '30px 0' },
-//   sectionHeading: { fontSize: '20px', marginBottom: '20px' },
-//   infoTable: { display: 'flex', flexDirection: 'column', gap: '15px' },
-//   infoRow: { display: 'grid', gridTemplateColumns: '150px 1fr 150px 1fr', borderBottom: '1px solid #f5f5f5', paddingBottom: '10px' },
-//   label: { color: '#888', fontSize: '14px' },
-//   value: { fontWeight: 'bold', fontSize: '14px' },
-//   amenityGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' },
-//   amenityItem: { background: '#f8f8f8', padding: '15px', borderRadius: '8px', fontSize: '13px' },
-//   agentCard: { border: '1px solid #eee', padding: '25px', borderRadius: '12px', sticky: 'top', position: 'sticky', top: '20px' },
-//   agentAvatar: { width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' },
-//   agentInfo: { display: 'flex', gap: '15px', marginBottom: '20px' },
-//   btnPrimary: { width: '100%', padding: '12px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', marginBottom: '10px' },
-//   btnWhatsapp: { width: '100%', padding: '12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-// };
+
 
 export default ListingDetail;

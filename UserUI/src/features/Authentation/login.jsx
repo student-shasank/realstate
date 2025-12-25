@@ -1,9 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { LOGIN_URL } from "../../Constant/constant.js"
+import { LOGIN_URL } from "../../Constant/constant.js";
+import { setFavorites } from "../dashboard/favoriteligting/favoriteSlice.jsx"; // ✅ IMPORT
 
-// Async thunk for login
 export const loginAsync = createAsyncThunk(
   "login/loginUser",
   async (userData, thunkAPI) => {
@@ -12,29 +11,28 @@ export const loginAsync = createAsyncThunk(
         LOGIN_URL,
         userData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      // Save token & user
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-    //   const navigate = useNavigate()
-    //   navigate ("/")
-      
+      const { token, user } = response.data;
 
-      return response.data; // includes {message, token, user}
+      // ✅ Save to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // ✅ SET FAVORITES INTO REDUX
+      thunkAPI.dispatch(setFavorites(user.favorites || []));
+
+      return response.data;
     } catch (error) {
-        console.log(error)
-     return thunkAPI.rejectWithValue(
-  error.response?.data?.message || "Login request failed"
-);
-
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Login request failed"
+      );
     }
   }
 );
+
 
 // Initial state
 const initialState = {
@@ -72,8 +70,8 @@ const loginSlice = createSlice({
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user; // ✅ correct
-        state.token = action.payload.token; // ✅ correct
+        state.user = action.payload.user; //  correct
+        state.token = action.payload.token; //  correct
         state.success = true;
       })
       .addCase(loginAsync.rejected, (state, action) => {
