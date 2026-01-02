@@ -10,7 +10,6 @@ dotenv.config();
 
 const app = express();
 
-// IMPORTANT: connect DB safely
 connectDB();
 
 app.use(express.json());
@@ -24,5 +23,5 @@ app.use("/api/user/show", userRoutes);
 app.use("/api/user/listing", userRoutes);
 
 // ❌ REMOVE app.listen()
-// ✅ EXPORT app instead
+// ✅ EXPORT app
 export default app;
