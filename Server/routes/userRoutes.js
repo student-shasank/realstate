@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { protect} from "../middleware/authMiddleware.js";
-import { dashboard, getListingById, getListings } from "../controllers/Usercontroller.js";
-import { sendListingPdf } from "../controllers/pdfController.js"
-import { searchListings } from "../controllers/searchController.js"
-import { toggleFavoriteListing } from "../controllers/toggleFavoriteListing.js";
+import { dashboard, getListingById, getListings } from "../controllers/usercontroller.js";
+import { sendListingPdf } from "../controllers/pdfcontroller.js"
+import { searchListings } from "../controllers/searchcontroller.js"
+import { toggleFavoriteListing } from "../controllers/togglefavoriteListing.js";
 import { protect2 } from "../middleware/Favmiddleware.js";
 
 const router = Router();
