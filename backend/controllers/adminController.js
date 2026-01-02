@@ -1,5 +1,6 @@
 import Listing from "../models/Listing.js";
 import cloudinary from "../config/cloudinary.js";
+import { geocodeAddress } from "../utils/geocode.js";
 
 
 
@@ -24,60 +25,81 @@ export const dashboard = async (req, res) => {
 
 
 // Create Listing with Cloudinary Upload
-
-
 export const createListing = async (req, res) => {
   try {
     const imageUrls = [];
 
-    // 1️⃣ Upload PHYSICAL FILES (form-data)
-    if (req.files && req.files.length > 0) {
-      const uploads = req.files.map((file) => {
-        return new Promise((resolve, reject) => {
+    // 1️⃣ Upload images
+    if (req.files?.length) {
+      const uploads = req.files.map((file) =>
+        new Promise((resolve, reject) => {
           cloudinary.uploader.upload_stream(
             { folder: "listings" },
             (err, result) => {
-              if (err) return reject(err);
-              resolve(result.secure_url);
+              if (err) reject(err);
+              else resolve(result.secure_url);
             }
           ).end(file.buffer);
-        });
-      });
+        })
+      );
 
-      const uploadedFiles = await Promise.all(uploads);
-      imageUrls.push(...uploadedFiles);
+      imageUrls.push(...(await Promise.all(uploads)));
     }
 
-    // 2️⃣ Accept IMAGE URLs from req.body (JSON)
+    // 2️⃣ Image URLs
     if (req.body.images) {
-      let urls = [];
-
-      if (typeof req.body.images === "string") {
-        // If it's a single value, convert to array
-        urls = [req.body.images];
-      } else {
-        urls = req.body.images;
-      }
-
+      const urls = Array.isArray(req.body.images)
+        ? req.body.images
+        : [req.body.images];
       imageUrls.push(...urls);
     }
 
-    // 3️⃣ Create Listing
+    // ✅ 3️⃣ LOCATION (FormData se flat values)
+    const loc = req.body.location || {};
+const locationText = (loc.location || "").toLowerCase();
+const city = (loc.city || "").toLowerCase();
+const country = (loc.country || "").toLowerCase();
+
+
+    if (!locationText || !city || !country) {
+      throw new Error("Location, city and country are required");
+    }
+
+    // 4️⃣ Geocode
+    const { lat, lng } = await geocodeAddress({
+      location: locationText,
+      city,
+      country,
+    });
+
+    // 5️⃣ Create Listing
     const listing = await Listing.create({
       ...req.body,
+      location: {
+        location: locationText,
+        city,
+        country,
+        coordinates: {
+          type: "Point",
+          coordinates: [lng, lat], // MongoDB order
+        },
+      },
       images: imageUrls,
     });
 
-    return res.json({
+    res.status(201).json({
       success: true,
       message: "Listing created successfully",
       listing,
     });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("CREATE LISTING ERROR:", error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
-
 
 // UPDATE LISTING STATUS
 // -------------------------------------------------------

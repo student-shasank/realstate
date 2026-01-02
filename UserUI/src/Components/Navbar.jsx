@@ -1,6 +1,7 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { User, Menu } from "lucide-react";
 import { logoutUser } from "../features/Authentation/login";
 import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
 
@@ -9,121 +10,88 @@ function Navbar() {
   const [profileOpen, setProfileOpen] = React.useState(false);
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.loginAuth);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useSelector((state) => state.loginAuth);
 
   const handleLogout = () => {
     dispatch(logoutUser());
     setProfileOpen(false);
     navigate("/");
- 
-dispatch(clearFavorites());
+    dispatch(clearFavorites());
   };
 
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: "Communities", path: "/communities" },
+    { name: "Blogs", path: "/blogs" },
+    { name: "About us", path: "/about" },
+    { name: "Contact us", path: "/contact" },
+  ];
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link to="/" className="text-2xl font-bold text-indigo-600 tracking-tight">
-          Abc
+   <nav className="fixed top-0 w-full z-50 h-[72px] md:h-[100px] flex justify-center bg-white/20 backdrop-blur-md border-b border-white/10">
+
+     <div className="w-full max-w-[1200px] px-4 md:px-6 flex items-center justify-between">
+
+        
+        {/* Brand Logo */}
+        <Link to="/" className="text-[#01155E] text-2xl font-black tracking-tight">
+          yupland
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link className="nav-link" to="/">Home</Link>
-          <Link className="nav-link" to="/about">About</Link>
-          <Link className="nav-link" to="/contact">Contact</Link>
-             <Link className="nav-link" to="/listings">Listing</Link>
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center gap-x-10">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`text-[#01155E] text-[17px] transition-all hover:opacity-70 ${
+                  isActive ? "font-black" : "font-semibold"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
 
-          {/* Search */}
-          <div className="hidden lg:flex items-center bg-gray-100 rounded-full px-4 py-1">
-            <input
-              type="text"
-              placeholder="Search products"
-              className="bg-transparent outline-none text-sm w-48"
-            />
-          </div>
-
-          {/* Auth */}
+        {/* Login/Auth Section */}
+        <div className="flex items-center">
           {!user ? (
-            <Link
-              to="/login"
-              className="px-6 py-2 rounded-full bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-            >
-              Login
+            <Link to="/login" className="flex items-center gap-3 group">
+              <span className="text-white text-lg font-bold drop-shadow-md">Login</span>
+              <div className="bg-[#01155E] p-1.5 rounded-full">
+                <User size={18} className="text-white fill-current" />
+              </div>
             </Link>
           ) : (
             <div className="relative">
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold shadow"
-              >
-                {user.name?.charAt(0).toUpperCase()}
+              <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-3 group">
+                <span className="text-white font-bold drop-shadow-md">{user.name}</span>
+                <div className="bg-[#01155E] p-1.5 rounded-full">
+                  <User size={18} className="text-white fill-current" />
+                </div>
               </button>
-
               {profileOpen && (
-                <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border overflow-hidden">
-                  <div className="px-4 py-3 border-b">
-                    <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                  >
+                <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden">
+                  <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50">
                     Logout
                   </button>
                 </div>
               )}
             </div>
           )}
+          <button onClick={() => setOpen(!open)} className="md:hidden ml-4 text-[#01155E]">
+            <Menu size={28} />
+          </button>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-        >
-          <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
       </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden bg-white border-t shadow-sm">
-          <div className="px-6 py-4 space-y-3">
-            <Link className="block nav-link" to="/">Home</Link>
-            <Link className="block nav-link" to="/about">About</Link>
-            <Link className="block nav-link" to="/contact">Contact</Link>
-
-            {!user ? (
-              <Link
-                to="/login"
-                className="block text-center mt-4 px-6 py-2 rounded-full bg-indigo-600 text-white"
-              >
-                Login
-              </Link>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="block w-full mt-4 px-6 py-2 rounded-full bg-red-500 text-white"
-              >
-                Logout
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
 
 export default Navbar;
-
-/* Tailwind helper class (add to globals.css)
-.nav-link {
-  @apply text-gray-700 font-medium hover:text-indigo-600 transition;
-}
-*/

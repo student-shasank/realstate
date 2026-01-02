@@ -7,6 +7,9 @@ import {
 } from "../../features/dashboard/listingDetailSlice";
 import styles from './ListingDetail.styles';
 import { toggleFavorite } from "../../features/dashboard/favoriteligting/favoriteSlice";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { VITE_MAPBOX_TOKEN } from "../../Constant/constant";
 
 
 const ListingDetail = () => {
@@ -14,10 +17,35 @@ const ListingDetail = () => {
   const dispatch = useDispatch();
   const { listing, loading, error } = useSelector((state) => state.listingDetail);
 
+
+  useEffect(() => {
+  if (!listing?.location?.coordinates?.coordinates) return;
+
+  const [lng, lat] = listing.location.coordinates.coordinates;
+
+  mapboxgl.accessToken = VITE_MAPBOX_TOKEN;
+
+  const map = new mapboxgl.Map({
+    container: "listing-map",
+    style: "mapbox://styles/mapbox/streets-v11",
+    center: [lng, lat],
+    zoom: 14,
+  });
+
+  new mapboxgl.Marker()
+    .setLngLat([lng, lat])
+    .addTo(map);
+
+  return () => map.remove();
+}, [listing]);
+
+
   useEffect(() => {
     dispatch(fetchListingDetail(id));
     return () => { dispatch(resetListingDetailState()); };
   }, [dispatch, id]);
+
+
 
 const { favorites = [], loading: favLoading } = useSelector(
   (state) => state.favorites || {}
@@ -174,20 +202,33 @@ const isLoggedIn = Boolean(localStorage.getItem("token"));
           </div>
         </div>
 
-        {/* SIDEBAR */}
-        <div style={styles.sidebar}>
-          <div style={styles.agentCard}>
-            <div style={styles.agentInfo}>
-              <img src="https://images.bayut.com/thumbnails/764386701-800x600.webp" style={styles.agentAvatar} alt="Agent" />
-              <div>
-                <h4 style={styles.agentName}>{listing.agent?.name}</h4>
-                <p style={styles.agencyName}>{listing.agent?.agency}</p> 
-              </div>
-            </div>
-            <button style={styles.btnPrimary}>Call Agent</button>
-            <button style={styles.btnWhatsapp}>WhatsApp</button>
-          </div>
-        </div>
+
+
+
+      {/* SIDEBAR */}
+<div style={styles.sidebar}>
+  <div style={styles.agentCard}>
+    <div style={styles.agentInfo}>
+      <img src="https://images.bayut.com/thumbnails/764386701-800x600.webp" style={styles.agentAvatar} alt="Agent" />
+      <div>
+        <h4 style={styles.agentName}>{listing.agent?.name}</h4>
+        <p style={styles.agencyName}>{listing.agent?.agency}</p> 
+      </div>
+    </div>
+    <button style={styles.btnPrimary}>Call Agent</button>
+    <button style={styles.btnWhatsapp}>WhatsApp</button>
+
+    {/* 📍 MAP SECTION ADDED HERE */}
+    <div style={styles.mapSectionWrapper}>
+      <h3 style={styles.sectionHeading}>Location on Map</h3>
+      <div
+        id="listing-map"
+        style={styles.mapSquareBox}
+      />
+    </div>
+    
+  </div>
+</div>
       </div>
     </div>
   );

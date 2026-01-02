@@ -45,14 +45,18 @@ const projectInfoSchema = new mongoose.Schema({
 
 // Location Schema
 const locationSchema = new mongoose.Schema({
-  city: String,
-  community: String,
-  subCommunity: String,
+  location: String, // Palm Jumeirah
+  city: String,     // Dubai
+  country: String,  // UAE
   coordinates: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], default: [0, 0] } // [lng, lat]
+    coordinates: {
+      type: [Number], // [lng, lat]
+      index: "2dsphere"
+    }
   }
 });
+
 
 locationSchema.index({ coordinates: "2dsphere" });
 

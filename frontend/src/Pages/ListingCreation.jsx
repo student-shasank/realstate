@@ -54,11 +54,11 @@ function ListingCreation() {
     lastInspected: "",
 
     // --- Location ---
-    city: "",
-    community: "",
-    subCommunity: "",
-    latitude: "",
-    longitude: "",
+    // --- Location ---
+location: "",
+city: "",
+country: "",
+
 
     // --- Payment Plan ---
     downPayment: "",
@@ -278,17 +278,33 @@ function ListingCreation() {
         </div>
 
         {/* ==== LOCATION ==== */}
-        <div className="border-b pb-10">
-          <h2 className="text-lg font-semibold">Location</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mt-6">
+        <h2 className="text-lg font-semibold">Location</h2>
+  <input
+    name="location"
+    placeholder="Location / Area (e.g. Palm Jumeirah)"
+    value={formData.location}
+    onChange={handleChange}
+    className="border px-3 py-2 rounded sm:col-span-6"
+  />
 
-          <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mt-6">
-            <input name="city" placeholder="City" onChange={handleChange} className="border px-3 py-2 rounded" />
-            <input name="community" placeholder="Community" onChange={handleChange} className="border px-3 py-2 rounded" />
-            <input name="subCommunity" placeholder="Sub-Community" onChange={handleChange} className="border px-3 py-2 rounded" />
-            <input name="latitude" placeholder="Latitude" onChange={handleChange} className="border px-3 py-2 rounded" />
-            <input name="longitude" placeholder="Longitude" onChange={handleChange} className="border px-3 py-2 rounded" />
-          </div>
-        </div>
+  <input
+    name="city"
+    placeholder="City"
+    value={formData.city}
+    onChange={handleChange}
+    className="border px-3 py-2 rounded sm:col-span-3"
+  />
+
+  <input
+    name="country"
+    placeholder="Country"
+    value={formData.country}
+    onChange={handleChange}
+    className="border px-3 py-2 rounded sm:col-span-3"
+  />
+</div>
+
 
         {/* ==== PAYMENT PLAN ==== */}
         <div className="border-b pb-10">

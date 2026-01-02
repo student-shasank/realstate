@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { MapPin, ChevronDown, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import FeaturesSection from '../Components/HomePageComponents/FeaturesSection';
 import {
   setCompletion,
   setPropertyType,
@@ -16,6 +17,11 @@ import {
 } from '../features/dashboard/searchSlice';
 import ListingCard from "../Components/Card/listingCard";
 import { Link } from 'react-router-dom';
+import backgroundVideo from '../assets/Untitled design (14).mp4';
+import Services from '../Components/HomePageComponents/Service';
+import CommunitiesBrief from '../Components/HomePageComponents/CommunitiesBrief';
+import UpcomingProjects from '../Components/HomePageComponents/UpcomingProjects';
+import BlogSection from '../Components/HomePageComponents/BlogSection';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -34,8 +40,8 @@ const Home = () => {
     minPrice,
     maxPrice,
     projects, 
-  loading,  
-  error
+    loading,  
+    error
   } = useSelector((state) => state.search);
 
   useEffect(() => {
@@ -82,72 +88,112 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 flex flex-col items-center overflow-x-hidden p-4 bg-cover bg-center bg-fixed"
-      style={{ backgroundImage: `url('https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')` }}>
+    <>
+    <div className="min-h-screen w-full flex flex-col items-center overflow-x-hidden relative">
+      
+      {/* 📹 Background Video Container - Set to 926px as requested */}
+      <div className="absolute top-0 left-0 h-[70vh] md:h-[926px] w-full overflow-hidden -z-10">
 
-      <div className="w-full max-w-5xl mt-20">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
+        {/* Transparent overlay to protect video visibility */}
+        <div className="absolute inset-0 bg-transparent" />
+      </div>
+
+      {/* Hero Content Wrapper */}
+     <div className="w-full max-w-[1200px] px-4 md:px-6 pt-[110px] md:pt-[180px]">
+
+        
+        {/* Headline */}
+        <h1 className="text-white text-5xl md:text-6xl font-extrabold mb-12 drop-shadow-2xl text-center">
+          Finding Your New Home Is Simple
+        </h1>
+
         {/* Tabs */}
-        <div className="flex bg-white/90 backdrop-blur-md rounded-t-xl border-b overflow-hidden w-fit">
-          {['Properties', 'New Projects'].map((tab) => (
-            <button key={tab} className={`px-8 py-4 text-sm font-bold transition-colors ${tab === 'Properties'
-              ? 'text-green-600 bg-white border-b-2 border-green-600'
-              : 'text-gray-700 hover:bg-gray-50'}`}>
+        <div className="flex justify-center mb-8 gap-2">
+          {['Properties', 'New Project', 'Transaction', 'Agents'].map((tab) => (
+            <button key={tab} className={`px-10 py-3 rounded-md font-bold text-lg shadow-xl transition-all ${
+              tab === 'Properties' ? 'bg-[#01155E] text-white scale-105' : 'bg-white text-gray-500 hover:bg-gray-50'
+            }`}>
               {tab}
             </button>
           ))}
         </div>
 
-        {/* Main Search Container */}
-        <div className="bg-white rounded-b-xl rounded-tr-xl shadow-2xl p-6 space-y-5">
-          <div className="flex flex-col md:flex-row gap-3">
+        {/* 🌫️ Frosted Glass Container */}
+        <div className="bg-white/30 backdrop-blur-2xl border border-white/40 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
+          
+          {/* Row 1: Buy, Location, Search */}
+          <div className="flex flex-col md:flex-row gap-3 mb-5">
+            <div className="bg-white rounded-lg px-8 py-2.5 font-bold text-[#01155E] flex items-center justify-center shadow-sm min-w-[120px]">
+              Buy
+            </div>
+
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <MapPin className="h-5 w-5 text-green-600" />
+                <MapPin className="h-5 w-5 text-[#01155E]" />
               </div>
               <input
                 type="text"
-                placeholder="Enter location"
-                className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-all text-gray-700"
+                placeholder="Enter Location"
+                className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium shadow-sm"
                 value={location}
                 onChange={(e) => dispatch(setLocation(e.target.value))}
               />
             </div>
 
-            <button onClick={handleSearch}
-              className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-14 py-3.5 rounded-lg font-bold text-lg shadow-lg transition-all transform active:scale-95">
+            <button 
+              onClick={handleSearch}
+              className="bg-[#01155E] text-white px-10 py-2.5 rounded-lg font-bold text-lg shadow-md min-w-[160px]"
+            >
               Search
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="flex bg-gray-50 p-1 rounded-lg border border-gray-200">
+          {/* Row 2: Logic Restored */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+            <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
               {['All', 'Ready', 'Off-Plan'].map((status) => (
-                <button key={status} type="button"
+                <button 
+                  key={status}
                   onClick={() => dispatch(setCompletion(status))}
-                  className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-md transition-all ${completion === status
-                    ? 'bg-[#e8f5e9] text-green-700 border border-green-200 shadow-sm'
-                    : 'text-gray-400'}`}>
+                  className={`flex-1 py-1.5 px-3 text-sm font-bold rounded-lg transition-all ${
+                    completion === status 
+                    ? 'bg-[#2B3964] text-white shadow-md' 
+                    : 'text-[#2B3964]'
+                  }`}
+                >
                   {status}
                 </button>
               ))}
             </div>
 
             <div className="relative">
-              <select value={propertyType}
+              <select 
+                value={propertyType}
                 onChange={(e) => dispatch(setPropertyType(e.target.value))}
-                className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-green-500">
-                <option value="Apartment">Apartment</option>
+                className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 outline-none shadow-sm cursor-pointer"
+              >
+                <option value="Apartment">Residential</option>
                 <option value="Villa">Villa</option>
-                <option value="Townhouse">Townhouse</option>
               </select>
-              <ChevronDown className="absolute right-3 top-3.5 h-4 w-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
             </div>
 
-            {/* Beds & Baths Dropdown - RESTORED */}
+            {/* BEDS & BATHS DROPDOWN */}
             <div className="relative" ref={bedBathRef}>
-              <button type="button"
+              <button 
+                type="button"
                 onClick={() => dispatch(toggleBedBath())}
-                className="w-full flex items-center justify-between bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 outline-none hover:border-gray-400 focus:ring-2 focus:ring-green-500 transition-all">
+                className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm"
+              >
                 <span className="truncate">{beds} Beds / {baths} Baths</span>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -157,9 +203,9 @@ const Home = () => {
                   <div className="mb-6">
                     <h3 className="text-gray-900 font-bold text-sm mb-4">Beds</h3>
                     <div className="flex flex-wrap gap-2">
-                      {['Studio', '1', '2', '3', '4', '5', '6', '7', '8+'].map((opt) => (
+                      {['Studio', '1', '2', '3', '4', '5', '6', '7', '8'].map((opt) => (
                         <button key={opt} type="button" onClick={() => dispatch(setBeds(opt))}
-                          className={`w-[45px] h-[45px] flex items-center justify-center rounded-full border text-sm font-medium transition-all ${beds === opt ? 'bg-[#006169] text-white border-[#006169]' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'}`}
+                          className={`w-[40px] h-[40px] flex items-center justify-center rounded-full border text-sm font-medium transition-all ${beds === opt ? 'bg-[#01155E] text-white' : 'bg-white text-gray-600'}`}
                         >{opt}</button>
                       ))}
                     </div>
@@ -167,25 +213,28 @@ const Home = () => {
                   <div className="mb-6">
                     <h3 className="text-gray-900 font-bold text-sm mb-4">Baths</h3>
                     <div className="flex flex-wrap gap-2">
-                      {['1', '2', '3', '4', '5', '6+'].map((opt) => (
+                      {['1', '2', '3', '4', '5', '6'].map((opt) => (
                         <button key={opt} type="button" onClick={() => dispatch(setBaths(opt))}
-                          className={`w-[45px] h-[45px] flex items-center justify-center rounded-full border text-sm font-medium transition-all ${baths === opt ? 'bg-[#006169] text-white border-[#006169]' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'}`}
+                          className={`w-[40px] h-[40px] flex items-center justify-center rounded-full border text-sm font-medium transition-all ${baths === opt ? 'bg-[#01155E] text-white' : 'bg-white text-gray-600'}`}
                         >{opt}</button>
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-2.5 border border-[#006169] text-[#006169] font-bold rounded-lg hover:bg-gray-50">Reset</button>
-                    <button type="button" onClick={() => dispatch(closeDropdowns())} className="flex-1 py-2.5 bg-[#006169] text-white font-bold rounded-lg hover:bg-[#004d54]">Done</button>
+                  <div className="flex gap-3 pt-4 border-t">
+                    <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-2 border border-[#01155E] text-[#01155E] font-bold rounded-lg">Reset</button>
+                    <button type="button" onClick={() => dispatch(closeDropdowns())} className="flex-1 py-2 bg-[#01155E] text-white font-bold rounded-lg">Done</button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Price Dropdown - RESTORED */}
+            {/* PRICE DROPDOWN */}
             <div className="relative" ref={priceRef}>
-              <button type="button" onClick={() => dispatch(togglePrice())}
-                className="w-full flex items-center justify-between bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm font-medium text-gray-700 outline-none hover:border-gray-400 focus:ring-2 focus:ring-green-500 transition-all">
+              <button 
+                type="button" 
+                onClick={() => dispatch(togglePrice())}
+                className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm"
+              >
                 <span className="truncate">{getPriceLabel()}</span>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -195,110 +244,47 @@ const Home = () => {
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div>
                       <label className="text-gray-400 text-xs mb-1 block font-medium">Minimum</label>
-                      <input 
-                        type="number" 
-                        placeholder="0" 
-                        value={minPrice}
-                        onChange={(e) => dispatch(setMinPrice(e.target.value))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-1 focus:ring-green-500 outline-none" 
+                      <input type="number" placeholder="0" value={minPrice} onChange={(e) => dispatch(setMinPrice(e.target.value))}
+                        className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" 
                       />
                     </div>
                     <div>
                       <label className="text-gray-400 text-xs mb-1 block font-medium">Maximum</label>
-                      <input 
-                        type="number" 
-                        placeholder="Any" 
-                        value={maxPrice}
-                        onChange={(e) => dispatch(setMaxPrice(e.target.value))}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:ring-1 focus:ring-green-500 outline-none" 
+                      <input type="number" placeholder="Any" value={maxPrice} onChange={(e) => dispatch(setMaxPrice(e.target.value))}
+                        className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" 
                       />
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <button type="button" onClick={() => { dispatch(setMinPrice('')); dispatch(setMaxPrice('')); }} className="flex-1 py-2.5 border border-[#006169] text-[#006169] font-bold rounded-lg text-sm">Reset</button>
-                    <button type="button" onClick={() => dispatch(closeDropdowns())} className="flex-1 py-2.5 bg-[#006169] text-white font-bold rounded-lg text-sm">Done</button>
+                    <button type="button" onClick={() => { dispatch(setMinPrice('')); dispatch(setMaxPrice('')); }} className="flex-1 py-2 border border-[#01155E] text-[#01155E] font-bold rounded-lg">Reset</button>
+                    <button type="button" onClick={() => dispatch(closeDropdowns())} className="flex-1 py-2 bg-[#01155E] text-white font-bold rounded-lg">Done</button>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-between border-t border-gray-100">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-green-500" />
-              <p className="text-[15px] text-gray-600 font-medium">Want to find out more about UAE real estate using AI?</p>
-            </div>
-            <button className="text-green-700 text-sm font-bold flex items-center gap-1 hover:underline">
-              Try Property <span className="text-xl">→</span>
-            </button>
+          {/* Row 3: Filters Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {['Emirate', 'Sale Status', 'Handover Year', 'Payment Plan'].map((filter) => (
+              <div key={filter} className="relative">
+                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 outline-none shadow-sm cursor-pointer">
+                  <option>{filter}</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+            ))}
           </div>
         </div>
-
-        
-      
       </div>
 
-      {/* 🔽 CORRECTED CAROUSEL: FLOATING ARROWS & 3 FULL LISTINGS 🔽 */}
-      <div className="w-full max-w-6xl mt-12 px-4 pb-20 relative">
-        {!loading && projects?.length > 0 && (
-          <div className="flex flex-col relative">
-            
-            {/* Header Title */}
-            <div className="mb-6 px-2">
-              <h2 className="text-2xl font-bold text-white drop-shadow-md">
-                Featured Projects
-              </h2>
-            </div>
-
-            {/* Carousel Wrapper for Absolute Positioning */}
-            <div className="relative flex items-center group">
-              <div className='mr-10'></div>
-              {/* Left Floating Arrow (Exactly like image) */}
-         <button 
-  onClick={() => scroll('left')} 
-  className="absolute left-[-15px] z-40 p-1.5 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-all active:scale-90"
->
-  <ChevronLeft className="h-4 w-4 text-gray-700" />
-</button>
-
-              {/* Scroll Container: Shows exactly 3 smaller listings */}
-              <div 
-                ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar py-2 w-full"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {projects.map((item) => (
-                  <div 
-                    key={item._id} 
-                    className="flex-shrink-0 w-[calc((100%/3)-11px)]" 
-                  >
-                    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-white/20 transform transition-transform duration-300 hover:scale-[1.01]">
-                      <ListingCard listing={item} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className='ml-10'></div>
-
-              {/* Right Floating Arrow (Exactly like image) */}
-              <button 
-  onClick={() => scroll('right')} 
-  className="absolute right-[-15px] z-40 p-1.5 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-all active:scale-90"
->
-  <ChevronRight className="h-4 w-4 text-gray-700" />
-</button>
-            </div>
-
-            {/* View All Button */}
-            <div className="flex justify-center mt-10">
-              <Link  to={"/listings"} className="bg-[#eafafa] text-[#00695c] px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-white transition-all shadow-md">
-                View all new projects in Dubai
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+      <FeaturesSection />
     </div>
+    <Services/>
+    <CommunitiesBrief/>
+    <UpcomingProjects/>
+    <BlogSection/>
+    </>
   );
 };
 

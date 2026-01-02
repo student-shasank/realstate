@@ -12,6 +12,7 @@ import ListingDetail from "./Pages/ListingDetail/ListingDetail";
 // import Dashboard from "./Pages/Dashboard";
 // import ListingCreation from "./Pages/ListingCreation";
 import { setFavorites } from "./features/dashboard/favoriteligting/favoriteSlice";
+import Footer from "./Components/Footer";
 
 function App() {
  const dispatch = useDispatch(); //  ADD THIS
@@ -37,6 +38,7 @@ useEffect(() => {
              <Route path="/listing/:id" element={<ListingDetail/>} />
 
       </Routes>
+      <Footer/>
 
       {/* SHOW LOGIN MODAL */}
     

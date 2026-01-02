@@ -23,3 +23,5 @@ export const fetchListingsAPI  = `${BASE_URL}/show/listings`;
 
 export const fetchListingDetailAPI =
   "http://localhost:5000/api/user/listing/detail";
+
+  export const  VITE_MAPBOX_TOKEN = "pk.eyJ1IjoiYWtoaWxiaGFpeWEiLCJhIjoiY21jZGl2dDBoMGh3aTJrczNudHV1NWdsbiJ9.j7yWTW2dw9QSSZCw0Vke2Q"

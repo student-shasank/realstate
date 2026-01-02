@@ -177,6 +177,26 @@ const styles = {
     boxShadow: '0 2px 5px rgba(0, 0, 0, 0.04)',
     outline: 'none',
   },
+  // styles.js (Ensure these are in your object)
+
+  mapSectionWrapper: {
+    marginTop: "32px", 
+    width: "100%",
+  },
+  sectionHeading: {
+    fontSize: "1.25rem",  
+    fontWeight: "600",
+    marginBottom: "16px",
+    color: "#111827",
+  },
+  mapSquareBox: {
+    width: "100%",
+    aspectRatio: "1 / 1", // This is the key for the square shape
+    borderRadius: "12px",
+    overflow: "hidden",
+    border: "1px solid #E5E7EB", 
+    backgroundColor: "#f9f9f9", // Helpful as a placeholder before map loads
+  },
 
   // Add these effects for a "Premium" feel
   hoverEffect: {
