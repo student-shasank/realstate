@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { protect} from "../middleware/authMiddleware.js";
 import { dashboard, getListingById, getListings } from "../controllers/usercontroller.js";
+
 import { sendListingPdf } from "../controllers/pdfcontroller.js"
 import { searchListings } from "../controllers/searchcontroller.js"
 import { toggleFavoriteListing } from "../controllers/togglefavoriteListing.js";
