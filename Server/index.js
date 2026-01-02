@@ -17,18 +17,17 @@ app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", true);
 
 // Database
- await connectDB();
+connectDB();
 
 // Routes
 app.use("/api/user/auth", authRoutes);
 app.use("/api/user/show", userRoutes);
 app.use("/api/user/listing", userRoutes);
 
-// Test route (VERY IMPORTANT)
+// Health check (important)
 app.get("/", (req, res) => {
-  res.send("Server is running on Vercel 🚀");
+  res.send("API is running on Vercel 🚀");
 });
 
-// ❌ DO NOT use app.listen()
-// ✅ EXPORT app
+// ✅ EXPORT APP (NO app.listen)
 export default app;
