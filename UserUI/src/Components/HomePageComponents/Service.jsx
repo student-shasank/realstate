@@ -4,7 +4,7 @@ import React from 'react';
 import serviceImage1 from "../../assets/serviceimage1.jpg";
 import serviceImage2 from "../../assets/serviceimage2.jpg";
 import serviceImage3 from "../../assets/serviceimage3.jpg";
-import serviceImage4 from "../../assets/serviceim,age4.jpg"; // Corrected based on your filename
+import serviceImage4 from "../../assets/serviceim,age4.jpg"; 
 
 const ServicesSection = () => {
   const services = [
@@ -31,10 +31,13 @@ const ServicesSection = () => {
   ];
 
   return (
-    <section className="w-full bg-white flex flex-col items-center ">
+    /* Outer Section: Max width 1440px and centered */
+    <section className="w-full max-w-[1440px] mx-auto bg-white flex flex-col items-center">
       
-      {/* 📏 Content Container - 64px Margin Top */}
-      <div className="w-full max-w-[1550px] px-4 mt-[64px] flex flex-col items-center">
+      {/* Inner Container: Updated to 1400px 
+          - box-content ensures the content area is exactly 1400px
+      */}
+      <div className="w-full max-w-[1400px] box-content px-4 md:px-6 mt-[64px] flex flex-col items-center">
         
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -44,28 +47,38 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        {/* 🃏 Horizontal Cards Row - One line alignment */}
-        <div className="flex flex-row flex-nowrap justify-center gap-[21px] w-full overflow-x-auto pb-10 scrollbar-hide">
+        {/* 🃏 Horizontal Cards Row */}
+        <div className="flex flex-row flex-nowrap justify-start lg:justify-between gap-[21px] w-full overflow-x-auto pb-10 scrollbar-hide">
           {services.map((service, index) => (
             <div 
               key={index} 
               className="flex-shrink-0 flex flex-col rounded-[24px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.12)] bg-white"
               style={{ 
-                width: '359px',   // Fixed Width from your spec
-                height: '482px',  // Fixed Height from your spec
+                width: '327px',   
+                height: '482px',  
               }}
             >
               {/* Top: Navy Text Area (Fixed Height) */}
               <div className="bg-[#01155E] p-8 h-[200px] flex flex-col justify-start">
-                <h3 className="text-white text-[24px] font-bold mb-3 leading-tight">
+                <h3 className="text-white text-[22px] font-bold mb-3 leading-tight">
                   {service.title}
                 </h3>
-                <p className="text-blue-100/80 text-[15px] leading-relaxed">
+               <p 
+  className="text-blue-100/80 text-[18px]"
+  style={{ 
+    fontFamily: '"General Sans", sans-serif', 
+    fontWeight: '500',
+    lineHeight: '1.2', // Changed from 0px to 1.2 for readability
+    letterSpacing: '0%' 
+  }}
+>
+
+
                   {service.description}
                 </p>
               </div>
 
-              {/* Bottom: Image Area with the restored Button */}
+              {/* Bottom: Image Area with Button */}
               <div className="relative h-[282px]">
                 <img
                   src={service.image}
@@ -73,9 +86,8 @@ const ServicesSection = () => {
                   className="w-full h-full object-cover"
                 />
                 
-                {/* 🔘 THE RESTORED BUTTON (Visible Overlay) */}
-                <div className="absolute bottom-6 left-0 right-0 px-8">
-                  <button className="w-full py-3 bg-white text-[#01155E] rounded-xl font-bold text-lg shadow-lg hover:bg-gray-50 transition-all active:scale-95 border-none cursor-pointer">
+                <div className="absolute bottom-6 left-0 right-0 px-6">
+                  <button className="w-full py-3 bg-white text-[#01155E] rounded-xl font-bold text-md shadow-lg hover:bg-gray-50 transition-all active:scale-95 border-none cursor-pointer">
                     View Details
                   </button>
                 </div>

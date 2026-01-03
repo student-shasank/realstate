@@ -89,11 +89,11 @@ const Home = () => {
 
   return (
     <>
-    <div className="min-h-screen w-full flex flex-col items-center overflow-x-hidden relative">
+    {/* Main Page Wrapper: Max width 1440px and centered */}
+    <div className="mx-auto max-w-[1440px] min-h-screen w-full flex flex-col items-center overflow-x-hidden relative">
       
-      {/* 📹 Background Video Container - Set to 926px as requested */}
+      {/* 📹 Background Video Container - Constrained to the 1440px parent */}
       <div className="absolute top-0 left-0 h-[70vh] md:h-[926px] w-full overflow-hidden -z-10">
-
         <video
           autoPlay
           loop
@@ -103,18 +103,24 @@ const Home = () => {
         >
           <source src={backgroundVideo} type="video/mp4" />
         </video>
-        {/* Transparent overlay to protect video visibility */}
         <div className="absolute inset-0 bg-transparent" />
       </div>
 
-      {/* Hero Content Wrapper */}
-     <div className="w-full max-w-[1200px] px-4 md:px-6 pt-[110px] md:pt-[180px]">
-
+      {/* Hero Content Wrapper: Max width 1200px */}
+      <div className="w-full max-w-[1248px] px-4 md:px-6 pt-[110px] md:pt-[180px]">
         
         {/* Headline */}
-        <h1 className="text-white text-5xl md:text-6xl font-extrabold mb-12 drop-shadow-2xl text-center">
-          Finding Your New Home Is Simple
-        </h1>
+      <h1 
+  className="text-white text-[48px] font-bold text-center mb-12 drop-shadow-2xl"
+  style={{ 
+    fontFamily: '"General Sans", sans-serif', 
+    fontWeight: '700',
+    lineHeight: '100%', 
+    letterSpacing: '0%' 
+  }}
+>
+  Finding Your New Home Is Simple
+</h1>
 
         {/* Tabs */}
         <div className="flex justify-center mb-8 gap-2">
@@ -127,7 +133,7 @@ const Home = () => {
           ))}
         </div>
 
-        {/* 🌫️ Frosted Glass Container */}
+        {/* 🌫️ Frosted Glass Container - This is your 1200px Filter Container */}
         <div className="bg-white/30 backdrop-blur-2xl border border-white/40 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
           
           {/* Row 1: Buy, Location, Search */}
@@ -157,7 +163,7 @@ const Home = () => {
             </button>
           </div>
 
-          {/* Row 2: Logic Restored */}
+          {/* Row 2: Dropdowns */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
             <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
               {['All', 'Ready', 'Off-Plan'].map((status) => (
@@ -278,12 +284,17 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Features Section - constrained by the 1440px parent */}
       <FeaturesSection />
     </div>
-    <Services/>
-    <CommunitiesBrief/>
-    <UpcomingProjects/>
-    <BlogSection/>
+
+    {/* Bottom Sections: These will also follow the 1440px constraint if they are wrapped similarly */}
+    <div className="mx-auto max-w-[1440px]">
+      <Services/>
+      <CommunitiesBrief/>
+      <UpcomingProjects/>
+      <BlogSection/>
+    </div>
     </>
   );
 };

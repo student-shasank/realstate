@@ -4,19 +4,27 @@ import iMAGEURL from "../../assets/3b838c3424b9960411ce6e2f801322bd1815fa00.png"
 
 const FeaturesSection = () => {
   return (
-  <section className="w-full pt-16 md:pt-24 bg-white flex flex-col items-center mt-20 md:mt-60">
+    /* Outer Section: Max width 1440px and centered */
+    <section className="w-full max-w-[1440px] mx-auto pt-16 md:pt-24 bg-white flex flex-col items-center mt-20 md:mt-60">
 
-      {/* 1. Content Container (Locked to 1400px) */}
-     <div className="w-full max-w-[1400px] px-4 md:px-10 relative z-10">
+      {/* Inner Content Container: Locked to 1200px */}
+      <div className="w-full max-w-[1248px] px-4 md:px-6 relative z-10">
 
-        <h2 className="text-[#01155E] text-5xl font-bold text-center mb-10">
-          What sets us apart?
-        </h2>
+   <h2 
+  className="text-[#01155E] text-[64px] font-semibold text-center mb-10"
+  style={{ 
+    fontFamily: 'Archivo, sans-serif', 
+    fontWeight: '600',
+    lineHeight: '100%', 
+    letterSpacing: '0%' 
+  }}
+>
+  What sets us apart?
+</h2>
 
-        {/* 2. The Bordered Container (Exactly like the picture) */}
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 md:gap-x-24 gap-y-10 md:gap-y-16 z-10 p-6 md:p-16 bg-white mb-[-60px] md:mb-[-100px]">
+        {/* Grid Container centered within the 1200px */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 md:gap-x-24 gap-y-10 md:gap-y-16 z-10 p-6 md:p-16 bg-white mb-[-60px] md:mb-[-100px]">
 
-          
           {/* Quick Response */}
           <FeatureCard 
             Icon={MessageSquare}
@@ -52,8 +60,8 @@ const FeaturesSection = () => {
         </div>
       </div>
 
-      {/* 3. 🖼️ Full Width Image (Height: 436px) */}
-      <div className="w-[100%] relative z-20"> 
+      {/* Full Width Image (Relative to the 1440px wrapper) */}
+      <div className="w-full relative z-20"> 
         <img
           src={iMAGEURL}
           alt="Real Estate Houses"

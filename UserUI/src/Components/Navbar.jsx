@@ -31,11 +31,10 @@ function Navbar() {
   ];
 
   return (
-   <nav className="fixed top-0 w-full z-50 h-[72px] md:h-[100px] flex justify-center bg-white/20 backdrop-blur-md border-b border-white/10">
+    /* Outer Nav: Max width 1440px and centered */
+    <nav className="fixed top-0 left-0 right-0 mx-auto w-full max-w-[1440px] z-50 h-[72px] md:h-[100px] flex justify-center bg-white/20 backdrop-blur-md border-b border-white/10">
+      <div className="w-full max-w-[1248px] px-4 md:px-6 flex items-center justify-between">
 
-     <div className="w-full max-w-[1200px] px-4 md:px-6 flex items-center justify-between">
-
-        
         {/* Brand Logo */}
         <Link to="/" className="text-[#01155E] text-2xl font-black tracking-tight">
           yupland

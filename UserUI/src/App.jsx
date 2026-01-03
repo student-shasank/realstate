@@ -38,7 +38,10 @@ useEffect(() => {
              <Route path="/listing/:id" element={<ListingDetail/>} />
 
       </Routes>
-      <Footer/>
+   
+  <Footer />
+
+
 
       {/* SHOW LOGIN MODAL */}
     
