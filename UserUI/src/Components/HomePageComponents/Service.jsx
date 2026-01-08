@@ -1,100 +1,60 @@
 import React from 'react';
 
-// Importing assets based on your file structure
-import serviceImage1 from "../../assets/serviceimage1.jpg";
-import serviceImage2 from "../../assets/serviceimage2.jpg";
-import serviceImage3 from "../../assets/serviceimage3.jpg";
-import serviceImage4 from "../../assets/serviceim,age4.jpg"; 
-
 const ServicesSection = () => {
   const services = [
-    {
-      title: "Property Buying Assistance",
-      description: "Having your dedicated property manager, can turn your investment into a lucrative cash flow opportunity.",
-      image: serviceImage1,
-    },
-    {
-      title: "Off-plan Advisory",
-      description: "Having your dedicated property manager, can turn your investment into a lucrative cash flow opportunity.",
-      image: serviceImage2,
-    },
-    {
-      title: "Ready Property Assistance",
-      description: "Having your dedicated property manager, can turn your investment into a lucrative cash flow opportunity.",
-      image: serviceImage3,
-    },
-    {
-      title: "Property Management",
-      description: "Having your dedicated property manager, can turn your investment into a lucrative cash flow opportunity.",
-      image: serviceImage4,
-    },
+    { title: "Project Marketing And Sales Structuring" },
+    { title: "Property Management Structuring" },
+    { title: "Asset Management Structuring" },
+    { title: "Development Advisory And Project Coordination" },
+    { title: "Handover & Snagging Representation" },
+    { title: "Mortgage Coordination" },
+    { title: "Residency & Investor Visa Advisory (UAE)" },
   ];
 
   return (
-    /* Outer Section: Max width 1440px and centered */
-    <section className="w-full max-w-[1440px] mx-auto bg-white flex flex-col items-center">
-      
-      {/* Inner Container: Updated to 1400px 
-          - box-content ensures the content area is exactly 1400px
+    <section className="w-full max-w-[1440px] mx-auto bg-white py-16 md:py-24 flex justify-center">
+      {/* Main Container: 
+          Using flex-wrap and gap to allow the text and cards 
+          to flow exactly like the screenshot.
       */}
-      <div className="w-full max-w-[1400px] box-content px-4 md:px-6 mt-[64px] flex flex-col items-center">
+      <div className="flex flex-wrap gap-[21px] max-w-[1200px] px-4">
         
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-[#01155E] text-6xl font-bold mb-4">Services</h2>
-          <p className="text-[#64748B] text-xl max-w-4xl mx-auto leading-relaxed">
-            Discover the unique characteristics of diverse communities, catering to various preferences from luxury to family-friendly environments
+        {/* HEADER BLOCK: This occupies the first slot in the grid */}
+        <div className="flex flex-col pt-2" style={{ width: '273px' }}>
+          <h2 className="text-[#01155E] text-[48px] font-bold border-b-4 border-[#01155E] inline-block pb-2 mb-6"
+              style={{ fontFamily: 'Archivo, sans-serif', width: 'fit-content' }}>
+            Services
+          </h2>
+          <p className="text-[#64748B] text-[16px] leading-relaxed">
+            Discover the unique characteristics of diverse communities, catering to various preferences from luxury to family-friendly environments.
           </p>
         </div>
 
-        {/* 🃏 Horizontal Cards Row */}
-        <div className="flex flex-row flex-nowrap justify-start lg:justify-between gap-[21px] w-full overflow-x-auto pb-10 scrollbar-hide">
-          {services.map((service, index) => (
-            <div 
-              key={index} 
-              className="flex-shrink-0 flex flex-col rounded-[24px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.12)] bg-white"
-              style={{ 
-                width: '327px',   
-                height: '482px',  
-              }}
-            >
-              {/* Top: Navy Text Area (Fixed Height) */}
-              <div className="bg-[#01155E] p-8 h-[200px] flex flex-col justify-start">
-                <h3 className="text-white text-[22px] font-bold mb-3 leading-tight">
-                  {service.title}
-                </h3>
-               <p 
-  className="text-blue-100/80 text-[18px]"
-  style={{ 
-    fontFamily: '"General Sans", sans-serif', 
-    fontWeight: '500',
-    lineHeight: '1.2', // Changed from 0px to 1.2 for readability
-    letterSpacing: '0%' 
-  }}
->
-
-
-                  {service.description}
-                </p>
-              </div>
-
-              {/* Bottom: Image Area with Button */}
-              <div className="relative h-[282px]">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover"
-                />
-                
-                <div className="absolute bottom-6 left-0 right-0 px-6">
-                  <button className="w-full py-3 bg-white text-[#01155E] rounded-xl font-bold text-md shadow-lg hover:bg-gray-50 transition-all active:scale-95 border-none cursor-pointer">
-                    View Details
-                  </button>
-                </div>
-              </div>
+        {/* SERVICE CARDS */}
+        {services.map((service, index) => (
+          <div 
+            key={index} 
+            className="flex flex-col bg-[#01155E] rounded-[16px] p-7 shadow-lg transition-transform hover:-translate-y-1"
+            style={{ 
+              width: '273px', 
+              height: '366px',
+              flex: '0 0 auto'
+            }}
+          >
+            <div className="flex-grow">
+              <h3 className="text-white text-[20px] font-bold mb-4 leading-tight underline underline-offset-8 decoration-white/20">
+                {service.title}
+              </h3>
+              <p className="text-blue-100/70 text-[14px] leading-relaxed">
+                Having your dedicated property manager, can turn your investment into a lucrative cash flow opportunity.
+              </p>
             </div>
-          ))}
-        </div>
+
+            <button className="w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[15px] hover:bg-gray-100 transition-colors">
+              View Details
+            </button>
+          </div>
+        ))}
       </div>
     </section>
   );

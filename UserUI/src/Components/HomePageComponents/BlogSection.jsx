@@ -24,82 +24,123 @@ const BlogSection = () => {
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.',
       image: blog2,
     },
+    {
+      id: 3,
+      author: 'Architect',
+      date: '11 Jan 2022',
+      readTime: '5 min read',
+      title: 'Benefits of Ocean Breeze Villa',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.',
+      image: blog2,
+    },
+    {
+      id: 4,
+      author: 'Architect',
+      date: '11 Jan 2022',
+      readTime: '5 min read',
+      title: 'Benefits of Ocean Breeze Villa',
+      description:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros.',
+      image: blog2,
+    },
   ];
 
   return (
-    /* BLOG SECTION FLOATING OVER FOOTER */
-    <section className="relative z-20 bg-white flex justify-center pt-[100px] -mb-[320px]">
-
-      {/* MAIN BLOG CONTAINER */}
-      <div className="w-[1200px] h-[869px] flex flex-col items-center  mb-[-197px]">
+    <section className="bg-white flex justify-center py-[120px]">
+      <div className="w-[1200px]">
 
         {/* TITLE */}
-        <h2 
-          className="text-[#01155E] text-[48px] font-semibold mb-[90px] text-center"
-          style={{ 
-            fontFamily: 'Archivo, sans-serif', 
-            lineHeight: '100%', 
-            letterSpacing: '0%' 
-          }}
-        >
+        <h2 className="text-[#01155E] text-[48px] font-semibold mb-[64px]">
           Blogs
         </h2>
 
-        {/* BLOG CARDS */}
-        <div className="w-full h-[617px] flex gap-[20px]">
-          {blogs.map((blog) => (
-            <div
-              key={blog.id}
-              className="flex-1 bg-white rounded-[32px] border border-[#E2E8F0]
-                         overflow-hidden flex flex-col
-                         shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
-            >
-              {/* IMAGE */}
-              <div className="h-[320px] w-full">
+        {/* MAIN GRID */}
+        <div className="flex gap-[24px]">
+
+          {/* LEFT BIG CARD */}
+          <div className="pt-[22px] pb-[22px] pr-[24px] pl-[24px] w-[578px] h-[616px] bg-white rounded-[32px] border border-[#E2E8F0] gap-y-[24px]
+             shadow-[0_20px_60px_rgba(0,0,0,0.12)] overflow-hidden
+             flex flex-col">
+            
+            <img
+              src={blogs[0].image}
+              alt={blogs[0].title}
+              className=" w-[530px] h-[360px] object-cover rounded-[32px]"
+            />
+
+            <div className="p-0">
+              <span className="text-sm font-semibold mb-2 block">
+                {blogs[0].author}
+              </span>
+
+              <h3 className="text-[28px] font-bold mb-2">
+                {blogs[0].title}
+              </h3>
+
+              <p className="text-[16px] mb-6">
+                {blogs[0].description}
+              </p>
+
+              <div className="flex gap-x-[156px] items-center">
+                <div>
+                  {/* <p className="text-sm font-bold">Full name</p> */}
+                  <p className="text-xs text-[#64748B]">
+                    {blogs[0].date} • {blogs[0].readTime}
+                  </p>
+                </div>
+
+                <button className="bg-[#01155E] text-white px-8 py-3 rounded-xl text-sm">
+                  Read More..
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT STACKED CARDS */}
+          <div className="flex flex-col gap-[20px] flex-1">
+            {blogs.slice(1).map((blog) => (
+              <div
+                key={blog.id}
+                className="flex bg-white rounded-[20px] border border-[#E2E8F0]
+                           shadow-[0_10px_40px_rgba(0,0,0,0.08)] p-4 gap-4"
+              >
                 <img
                   src={blog.image}
                   alt={blog.title}
-                  className="w-full h-full object-cover"
+                  className="w-[120px] h-[120px] rounded-xl object-cover"
                 />
-              </div>
 
-              {/* CONTENT */}
-              <div className="p-8 flex flex-col flex-grow">
-                <span className="text-[#000000] text-sm font-semibold mb-2">
-                  {blog.author}
-                </span>
+                <div className="flex flex-col justify-between flex-1">
+                  <div>
+                    <span className="text-xs font-semibold block mb-1">
+                      {blog.author}
+                    </span>
 
-                <h3 className="text-[#000000] text-[24px] font-bold mb-3">
-                  {blog.title}
-                </h3>
+                    <h4 className="text-[18px] font-bold leading-snug mb-1">
+                      {blog.title}
+                    </h4>
 
-                <p className="text-[#000000] text-[16px] mb-6  line-clamp-2">
-                  {blog.description}
-                </p>
-
-                {/* FOOTER */}
-                <div className="mt-auto flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200" />
-                    <div>
-                      <p className="text-sm font-bold text-[#0F172A]">
-                        Full name
-                      </p>
-                      <p className="text-xs text-[#64748B]">
-                        {blog.date} • {blog.readTime}
-                      </p>
-                    </div>
+                    <p className="text-sm text-[#475569] line-clamp-2">
+                      {blog.description}
+                    </p>
                   </div>
 
-                  <button className="bg-black w-[234px]  h-[52px] text-white rounded-xl f text-[24px] hover:opacity-90 active:scale-95 transition">
-                    Read More..
-                  </button>
+                  <div className="flex justify-between items-center mt-3">
+                    <p className="text-xs text-[#64748B]">
+                      {blog.date}
+                    </p>
+
+                    <button className="bg-[#01155E] text-white px-4 py-2 rounded-lg text-xs">
+                      Read More..
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
+        </div>
       </div>
     </section>
   );

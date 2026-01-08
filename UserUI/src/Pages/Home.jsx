@@ -29,6 +29,12 @@ const Home = () => {
   const bedBathRef = useRef(null);
   const priceRef = useRef(null);
 
+  const tickerItems = [
+    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
+    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
+    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
+  ];
+
   const {
     completion,
     propertyType,
@@ -89,11 +95,11 @@ const Home = () => {
 
   return (
     <>
-    {/* Main Page Wrapper: Max width 1440px and centered */}
-    <div className="mx-auto max-w-[1440px] min-h-screen w-full flex flex-col items-center overflow-x-hidden relative">
+    {/* Main Hero Container: Height fixed at 926px */}
+    <div className="mx-auto w-full h-[926px] w-full flex flex-col items-center relative overflow-hidden">
       
-      {/* 📹 Background Video Container - Constrained to the 1440px parent */}
-      <div className="absolute top-0 left-0 h-[70vh] md:h-[926px] w-full overflow-hidden -z-10">
+      {/* 📹 Background Video Container */}
+      <div className="absolute inset-0 -z-10">
         <video
           autoPlay
           loop
@@ -106,34 +112,71 @@ const Home = () => {
         <div className="absolute inset-0 bg-transparent" />
       </div>
 
-      {/* Hero Content Wrapper: Max width 1200px */}
+      {/* Hero Content Wrapper */}
       <div className="w-full max-w-[1248px] px-4 md:px-6 pt-[110px] md:pt-[180px]">
         
         {/* Headline */}
-      <h1 
-  className="text-white text-[48px] font-bold text-center mb-12 drop-shadow-2xl"
-  style={{ 
-    fontFamily: '"General Sans", sans-serif', 
-    fontWeight: '700',
-    lineHeight: '100%', 
-    letterSpacing: '0%' 
-  }}
->
-  Finding Your New Home Is Simple
-</h1>
+        <h1 
+          className="text-white text-[48px] font-bold text-center  drop-shadow-2xl"
+          style={{ 
+            fontFamily: '"General Sans", sans-serif', 
+            fontWeight: '700',
+            lineHeight: '100%', 
+            letterSpacing: '0%' 
+          }}
+        >
+         Dubai Real Estate Investments
+        </h1>
+        <h3 
+          className="text-white text-[24px] font-bold text-center  mb-5 mt-5 drop-shadow-2xl"
+          style={{ 
+            fontFamily: '"General Sans", sans-serif', 
+            fontWeight: '500',
+            letterSpacing: '0%' 
+          }}
+        >
+      Pre-construction and Ready properties tailored to your investment goals
+        </h3>
 
         {/* Tabs */}
-        <div className="flex justify-center mb-8 gap-2">
-          {['Properties', 'New Project', 'Transaction', 'Agents'].map((tab) => (
-            <button key={tab} className={`px-10 py-3 rounded-md font-bold text-lg shadow-xl transition-all ${
-              tab === 'Properties' ? 'bg-[#01155E] text-white scale-105' : 'bg-white text-gray-500 hover:bg-gray-50'
-            }`}>
-              {tab}
-            </button>
-          ))}
-        </div>
+   
+<div 
+  className="flex flex-row items-center bg-transparent mx-auto" 
+  style={{
+    display: 'inline-flex',   /* Hugs the content width */
+    width: '1192px',          /* Fixed target width */
+    height: '70px',           /* Fixed Height */
+    padding: '12px',          /* Padding */
+    gap: '16px',              /* Gap between buttons */
+    justifyContent: 'center',
+    alignItems: 'center'
+  }}
+>
+  {['Properties', 'New Project', 'Transaction', 'Agents'].map((tab) => (
+    <button
+      key={tab}
+      className="transition-all flex items-center justify-center"
+      style={{
+        /* Button Styles to reach the total 1192px width */
+        width: '280px',           /* (280*4) + (16*3) + (12*2) ≈ 1192px */
+        height: '46px',          /* Inner button height */
+        borderRadius: '8px',
+        fontWeight: '700',
+        fontSize: '18px',
+        border: 'none',
+        cursor: 'pointer',
+        /* State Styling */
+        backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF',
+        color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92',
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)'
+      }}
+    >
+      {tab}
+    </button>
+  ))}
+</div>
 
-        {/* 🌫️ Frosted Glass Container - This is your 1200px Filter Container */}
+        {/* 🌫️ Frosted Glass Container */}
         <div className="bg-white/30 backdrop-blur-2xl border border-white/40 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
           
           {/* Row 1: Buy, Location, Search */}
@@ -284,12 +327,47 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Features Section - constrained by the 1440px parent */}
-      <FeaturesSection />
+<div className="absolute bottom-4 left-0 w-full h-[85px]  bg-[#FFFFFFE5]   overflow-hidden flex items-center">
+  <div className="flex whitespace-nowrap animate-marquee">
+    {[...tickerItems, ...tickerItems, ...tickerItems].map((item, index) => (
+      <div key={index} className="flex flex-col justify-center px-14 min-w-[480px]">
+        {/* Looking to Sell Your Property? styling */}
+        <h3 
+          className="text-[#01155E] font-bold"
+          style={{ 
+            fontFamily: '"General Sans", sans-serif', 
+            fontWeight: '700', 
+            fontSize: '20px', 
+            lineHeight: '100%', 
+            letterSpacing: '0%' 
+          }}
+        >
+          {item.title}
+        </h3>
+        
+        {/* Partner with us styling */}
+        <p 
+          className="mt-1"
+          style={{ 
+            color: '#A0A0A0',
+            fontFamily: '"General Sans", sans-serif', 
+            fontWeight: '500', 
+            fontSize: '16px', 
+            lineHeight: '100%', 
+            letterSpacing: '0%' 
+          }}
+        >
+          {item.desc}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
     </div>
 
-    {/* Bottom Sections: These will also follow the 1440px constraint if they are wrapped similarly */}
+    {/* Outside of Hero: Rest of the components */}
     <div className="mx-auto max-w-[1440px]">
+      <FeaturesSection />
       <Services/>
       <CommunitiesBrief/>
       <UpcomingProjects/>

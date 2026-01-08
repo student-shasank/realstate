@@ -1,90 +1,92 @@
 import React from 'react';
-import { MessageSquare, Building2, Users } from 'lucide-react';
-import iMAGEURL from "../../assets/3b838c3424b9960411ce6e2f801322bd1815fa00.png"
+import communityimage from "../../assets/communityimage.jpg";
+import { MessageSquare, Users, Building2 } from "lucide-react";
 
 const FeaturesSection = () => {
+  const features = [
+    {
+      icon: <MessageSquare className="w-10 h-10 text-[#001457]" />,
+      title: "Quick Response",
+      desc: "We guarantee swift responses to client inquiries, ensuring their needs are promptly addressed by dedicated real estate brokers."
+    },
+    {
+      icon: <Users className="w-10 h-10 text-[#001457]" />,
+      title: "Experienced Staff",
+      desc: "Our team comprises diligent individuals with exceptional credentials and comprehensive training, providing top-notch services to clients."
+    },
+    {
+      icon: <Building2 className="w-10 h-10 text-[#001457]" />,
+      title: "First-Class Service",
+      desc: "We simplify the home buying and selling process, managing negotiations and paperwork on behalf of all parties involved."
+    }
+  ];
+
   return (
-    /* Outer Section: Max width 1440px and centered */
-    <section className="w-full max-w-[1440px] mx-auto pt-16 md:pt-24 bg-white flex flex-col items-center mt-20 md:mt-60">
+    <section className="bg-white w-full flex justify-center py-16">
+      {/* Main Container - Adjusted for 1200px width and image alignment */}
+      <div className="w-full max-w-[1240px] flex flex-col md:flex-row gap-16 items-start px-6">
+        
+        {/* LEFT CONTENT */}
+        <div className="flex-1 flex flex-col pt-4">
+          <div className="mb-10">
+            {/* Typography matches image: Blue YupLand, bold leading text */}
+            <h2 className="text-[20px] leading-[1.3] text-[#1e293b] mb-10">
+              <span className="text-[#001457]  text-[40px]">YupLand</span> is a real estate marketing and information platform created to help you research off-plan projects (Pre-construction), ready properties, explore communities, and understand Dubai’s real estate landscape.
+            </h2>
 
-      {/* Inner Content Container: Locked to 1200px */}
-      <div className="w-full max-w-[1248px] px-4 md:px-6 relative z-10">
-
-   <h2 
-  className="text-[#01155E] text-[64px] font-semibold text-center mb-10"
-  style={{ 
-    fontFamily: 'Archivo, sans-serif', 
-    fontWeight: '600',
-    lineHeight: '100%', 
-    letterSpacing: '0%' 
-  }}
->
-  What sets us apart?
-</h2>
-
-        {/* Grid Container centered within the 1200px */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 md:gap-x-24 gap-y-10 md:gap-y-16 z-10 p-6 md:p-16 bg-white mb-[-60px] md:mb-[-100px]">
-
-          {/* Quick Response */}
-          <FeatureCard 
-            Icon={MessageSquare}
-            title="Quick Response"
-            description="We guarantee swift responses to client inquiries, ensuring their needs are promptly addressed by dedicated real estate brokers."
-          />
-
-          {/* First-Class Service */}
-          <div className="flex flex-col">
-            <div className="flex gap-6 mb-4 items-center">
-              <div className="flex items-center justify-center">
-                <Building2 className="text-[#01155E] w-8 h-8" />
-              </div>
-              <h3 className="text-2xl font-bold text-[#01155E]">First-Class Service</h3>
-            </div>
-            <p className="text-gray-500 text-lg leading-relaxed mb-8">
-              We simplify the home buying and selling process, managing negotiations and paperwork on behalf of all parties involved.
-            </p>
-            <button className="bg-[#01155E] text-white px-10 py-3 rounded-md font-semibold w-fit hover:bg-[#0a227e] transition-colors">
-              Discover
+            {/* Button matches image: Dark blue, exact text */}
+            
+            <button className="bg-[#001457] text-white rounded-[8px] px-12 py-3.5 text-[20px] font-medium transition-all hover:bg-[#081d72] w-full max-w-[380px]">
+              Discover Your Neighbourhood
             </button>
+            
           </div>
 
-          {/* Experienced Staff */}
-          <FeatureCard 
-            Icon={Users}
-            title="Experienced Staff"
-            description="Our team comprises diligent individuals with exceptional credentials and comprehensive training, providing top-notch services to clients."
+          {/* Icon Features List - Aligned to left */}
+          <div className="flex flex-col gap-12 mt-4">
+            {features.map((item, index) => (
+              <div key={index} className="flex gap-6 items-start ">
+                <div className="flex-shrink-0 mt-1">{item.icon}</div>
+                <div>
+                  <h4 className="text-[#001457] text-[24px] font-bold mb-2">{item.title}</h4>
+                  <p className="text-[#64748b] text-[18px] leading-[1.5] max-w-[420px]">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT IMAGE SECTION - Precise alignment for badges */}
+        <div className="relative w-full md:w-[650px] h-[791px] flex-shrink-0">
+          {/* Main Image with Rounded Corners as show in image */}
+          <img
+            src={communityimage}
+            alt="Dubai Architecture"
+            className="w-full h-full object-cover rounded-[32px]"
           />
 
-          {/* Empty div to maintain grid balance */}
-          <div className="hidden md:block"></div>
-        </div>
-      </div>
+          {/* TOP RIGHT BADGE: Dark Blue */}
+          <div className="absolute top-10 -right-6 bg-[#001457] text-white rounded-[16px] px-8 py-6 flex items-center gap-4 shadow-2xl z-20">
+             <span className="text-[60px] font-bold leading-none">87+</span>
+             <p className="text-[18px] font-normal leading-tight w-[130px]">
+               Successful Transactions Monthly
+             </p>
+          </div>
 
-      {/* Full Width Image (Relative to the 1440px wrapper) */}
-      <div className="w-full relative z-20"> 
-        <img
-          src={iMAGEURL}
-          alt="Real Estate Houses"
-          className="w-full object-cover block"
-          style={{ height: '436px' }}
-        />
+          {/* BOTTOM LEFT BADGE: White (Floating Over Bottom Edge) */}
+          <div className="absolute bottom-8 -left-12 bg-white text-[#001457] rounded-[24px] px-10 py-8 flex items-center gap-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-20 border border-gray-50">
+             <span className="text-[72px] font-bold leading-none">87+</span>
+             <p className="text-[24px] font-bold leading-tight text-[#001457] w-[150px]">
+               Successful Transactions Monthly
+             </p>
+          </div>
+        </div>
+
       </div>
     </section>
   );
 };
-
-const FeatureCard = ({ Icon, title, description }) => (
-  <div className="flex flex-col">
-    <div className="flex gap-6 mb-4 items-center">
-      <div className="flex items-center justify-center">
-        <Icon className="text-[#01155E] w-8 h-8" />
-      </div>
-      <h3 className="text-2xl font-bold text-[#01155E]">{title}</h3>
-    </div>
-    <p className="text-gray-500 text-lg leading-relaxed">
-      {description}
-    </p>
-  </div>
-);
 
 export default FeaturesSection;
