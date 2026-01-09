@@ -51,18 +51,37 @@ const BlogSection = () => {
       <div className="w-[1200px]">
 
         {/* TITLE */}
-        <h2 className="text-[#01155E] text-[48px] font-semibold mb-[64px]">
+        {/* <h2 className="text-[#01155E] text-[48px] font-semibold mb-[64px]">
           Blogs
-        </h2>
+        </h2> */}
+        
+
+        {/* TITLE */}
+        <div className="mb-[50px]">
+          <h2 className="text-[#01155E] text-[48px] font-semibold mb-[10px]">
+            Blogs
+          </h2>
+
+          {/* UNDERLINE */}
+          <div className="flex w-[291px]">
+            {/* Thick left line */}
+            <div className="w-[135px] h-[6px] bg-[#01155E]" />
+
+            {/* Thin right line */}
+            <div className="flex-1 h-[2px] bg-[#01155E]" />
+          </div>
+        </div>
+
+
 
         {/* MAIN GRID */}
         <div className="flex gap-[24px]">
 
           {/* LEFT BIG CARD */}
-          <div className="pt-[22px] pb-[22px] pr-[24px] pl-[24px] w-[578px] h-[616px] bg-white rounded-[32px] border border-[#E2E8F0] gap-y-[24px]
+          <div className="pt-[21px] pb-[21px] pr-[23px] pl-[23px] w-[578px] h-[616px] bg-white rounded-[32px] border border-[#E2E8F0] gap-y-[24px]
              shadow-[0_20px_60px_rgba(0,0,0,0.12)] overflow-hidden
              flex flex-col">
-            
+
             <img
               src={blogs[0].image}
               alt={blogs[0].title}
@@ -98,26 +117,33 @@ const BlogSection = () => {
           </div>
 
           {/* RIGHT STACKED CARDS */}
-          <div className="flex flex-col gap-[20px] flex-1">
+          <div className="flex flex-col justify-between flex-1">
             {blogs.slice(1).map((blog) => (
               <div
                 key={blog.id}
                 className="flex bg-white rounded-[20px] border border-[#E2E8F0]
-                           shadow-[0_10px_40px_rgba(0,0,0,0.08)] p-4 gap-4"
+                           shadow-[0_10px_40px_rgba(0,0,0,0.08)] p-[15px] gap-4"
               >
                 <img
                   src={blog.image}
                   alt={blog.title}
-                  className="w-[120px] h-[120px] rounded-xl object-cover"
+                  className="w-[149px] h-[148px] rounded-xl object-cover"
                 />
 
-                <div className="flex flex-col justify-between flex-1">
+                <div className="relative flex flex-col flex-1">
                   <div>
-                    <span className="text-xs font-semibold block mb-1">
-                      {blog.author}
-                    </span>
+                    {/* TOP ROW: Architect + Date */}
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-semibold text-[#0F172A]">
+                        {blog.author}
+                      </span>
 
-                    <h4 className="text-[18px] font-bold leading-snug mb-1">
+                      <span className="absolute right-0 text-xs text-[#64748B]">
+                        {blog.date}
+                      </span>
+                    </div>
+
+                    <h4 className="text-[18px] font-bold leading-snug mb-2">
                       {blog.title}
                     </h4>
 
@@ -126,16 +152,13 @@ const BlogSection = () => {
                     </p>
                   </div>
 
-                  <div className="flex justify-between items-center mt-3">
-                    <p className="text-xs text-[#64748B]">
-                      {blog.date}
-                    </p>
-
+                  <div className="flex justify-end mt-3">
                     <button className="bg-[#01155E] text-white px-4 py-2 rounded-lg text-xs">
                       Read More..
                     </button>
                   </div>
                 </div>
+
               </div>
             ))}
           </div>

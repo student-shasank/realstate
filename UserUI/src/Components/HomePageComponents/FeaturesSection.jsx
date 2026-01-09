@@ -1,6 +1,7 @@
 import React from 'react';
 import communityimage from "../../assets/communityimage.jpg";
 import { MessageSquare, Users, Building2 } from "lucide-react";
+import imageurl from '../../assets/underline.png';
 
 const FeaturesSection = () => {
   const features = [
@@ -21,8 +22,34 @@ const FeaturesSection = () => {
     }
   ];
 
-  return (
-    <section className="bg-white w-full flex justify-center py-16">
+  return (<>
+<div className="w-full flex justify-center pt-[80px]  pb-[30px]">
+  <div className="w-[1200px] flex flex-col gap-[10px]">
+    <h2
+      className="text-[#001457] inline-block pb-[7px]"
+      style={{
+        fontFamily: "Archivo, sans-serif",
+        fontWeight: 600,          // SemiBold
+        fontSize: "48px",
+        lineHeight: "100%",       // Exact
+        letterSpacing: "0%",
+        backgroundImage: `url(${imageurl})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left bottom",
+        backgroundSize: "273px 6px",
+      }}
+    >
+      Who are we?
+    </h2>
+  </div>
+</div>
+
+
+
+    <section className="bg-white w-full flex justify-center py-10">
+      
+
+      
       {/* Main Container - Adjusted for 1200px width and image alignment */}
       <div className="w-full max-w-[1240px] flex flex-col md:flex-row gap-16 items-start px-6">
         
@@ -86,6 +113,7 @@ const FeaturesSection = () => {
 
       </div>
     </section>
+    </>
   );
 };
 

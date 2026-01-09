@@ -29,11 +29,7 @@ const Home = () => {
   const bedBathRef = useRef(null);
   const priceRef = useRef(null);
 
-  const tickerItems = [
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-  ];
+
 
   const {
     completion,
@@ -327,46 +323,11 @@ const Home = () => {
         </div>
       </div>
 
-<div className="absolute bottom-4 left-0 w-full h-[85px]  bg-[#FFFFFFE5]   overflow-hidden flex items-center">
-  <div className="flex whitespace-nowrap animate-marquee">
-    {[...tickerItems, ...tickerItems, ...tickerItems].map((item, index) => (
-      <div key={index} className="flex flex-col justify-center px-14 min-w-[480px]">
-        {/* Looking to Sell Your Property? styling */}
-        <h3 
-          className="text-[#01155E] font-bold"
-          style={{ 
-            fontFamily: '"General Sans", sans-serif', 
-            fontWeight: '700', 
-            fontSize: '20px', 
-            lineHeight: '100%', 
-            letterSpacing: '0%' 
-          }}
-        >
-          {item.title}
-        </h3>
-        
-        {/* Partner with us styling */}
-        <p 
-          className="mt-1"
-          style={{ 
-            color: '#A0A0A0',
-            fontFamily: '"General Sans", sans-serif', 
-            fontWeight: '500', 
-            fontSize: '16px', 
-            lineHeight: '100%', 
-            letterSpacing: '0%' 
-          }}
-        >
-          {item.desc}
-        </p>
-      </div>
-    ))}
-  </div>
-</div>
+
     </div>
 
     {/* Outside of Hero: Rest of the components */}
-    <div className="mx-auto max-w-[1440px]">
+    <div className="">
       <FeaturesSection />
       <Services/>
       <CommunitiesBrief/>

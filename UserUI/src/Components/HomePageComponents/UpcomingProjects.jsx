@@ -1,102 +1,118 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
 import upcommingproject1 from '../../assets/upcommingproject1.jpg';
 import upcommingproject2 from '../../assets/upcommingproject2.jpg';
 import upcommingproject3 from '../../assets/upcomming project3.jpg';
-
+import imageurl from '../../assets/underline.png';
 const UpcomingProjects = () => {
   const projects = [
     {
       id: 1,
       title: 'Ocean Breeze Villa',
-      price: '$ 323,324',
+      price: '$ 323324',
       location: '123 any city any where',
+      type: 'Apartment',
       image: upcommingproject1,
     },
     {
       id: 2,
       title: 'Ocean Breeze Villa',
-      price: '$ 323,324',
+      price: '$ 323324',
       location: '123 any city any where',
+      type: 'Apartment',
       image: upcommingproject2,
     },
     {
       id: 3,
       title: 'Ocean Breeze Villa',
-      price: '$ 323,324',
+      price: '$ 323324',
       location: '123 any city any where',
+      type: 'Apartment',
       image: upcommingproject3,
     },
   ];
 
   return (
-    /* Outer Container: Max width 1440px */
-    <section className="w-full max-w-[1440px] mx-auto bg-white py-16 flex justify-center">
-      
-      {/* Inner Container: 1248px content area with box-content fix */}
-      <div className="w-full max-w-[1248px] box-content px-4 md:px-6">
-        
-        {/* Section Title */}
-       <h2 
-  className="text-[#01155E] text-[48px] font-semibold text-center mb-12"
-  style={{ 
-    fontFamily: 'Archivo, sans-serif', 
-    fontWeight: '600',
-    lineHeight: '100%', 
-    letterSpacing: '0%' 
+    <section className="w-full bg-white py-16 flex flex-col items-center">
+      {/* Section Header */}
+      <div className="w-full max-w-[1200px] px-20 mb-10">
+     <h2
+  className="text-[#001A54] text-[48px] font-bold mb-2 inline-block pb-6"
+  style={{
+    backgroundImage: `url(${imageurl})`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "left 90%",
+    backgroundSize: "457px 6px", // 👈 exact width & height
   }}
 >
-  Upcoming projects
+  Upcoming Launches
 </h2>
 
-        {/* Project Grid - Gap calculated to fill 1248px exactly with 381px cards */}
-        <div className="flex flex-wrap justify-between gap-y-8 w-full">
+  
+        <p className="text-[#6C757D] text-[18px] mt-6 max-w-[1200px]">
+        Are you looking for the perfect neighborhood in Dubai? Discover the unique characteristics of diverse communities, catering to various preferences from luxury to family-friendly environments.
+        </p>
+      </div>
+
+      {/* 1200px Content Wrapper */}
+      <div className="relative flex items-center justify-between w-full max-w-[1440px] px-12">
+        
+        {/* Navigation Arrows */}
+        <button className="p-2 rounded-full border border-gray-300 text-[#001A54]"><ChevronLeft size={20} /></button>
+
+        {/* 1200px Grid Container */}
+        <div className="flex gap-[16px] justify-center w-[1200px]">
+        
           {projects.map((project) => (
+            /* Main Card Container: 346.4px x 508px */
             <div
               key={project.id}
-              className="bg-[#F8F9FA] rounded-[32px] p-6 shadow-sm hover:shadow-md transition-shadow flex-shrink-0"
+              className="bg-[#F8F9FA] rounded-[24px] flex flex-col border border-gray-100 shadow-sm overflow-hidden"
               style={{ 
-                width: '381px', 
-                height: '505px',
-                display: 'flex',
-                flexDirection: 'column'
+                width: '346.4px', 
+                height: '508px', 
+                padding: '8px', /* Spec Padding */
+                gap: '16px'     /* Spec Gap */
               }}
             >
-              {/* Project Image - Height adjusted for 505px card */}
-              <div className="w-[328px] h-[365px] rounded-[24px] mb-6 overflow-hidden">
+              {/* Image Container */}
+              <div className="w-full h-[280px] rounded-[20px] overflow-hidden shrink-0">
                 <img
-                  src={project.image}
+                  src={ project.image}
                   alt={project.title}
                   className="w-full h-full object-cover"
                 />
               </div>
 
-              {/* Location and Labels */}
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-[#6C757D] text-[16px]">{project.location}</p>
-                <div className="flex gap-2">
-                  <span className="text-[#01155E] text-[20px] font-medium">Text</span>
-                  <span className="text-[#01155E] text-[20px] font-medium">Text</span>
+              {/* Text Content Area */}
+              <div className="flex flex-col px-3 h-full justify-between pb-2">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1 text-[#9BA1A7] text-[14px]">
+                    <MapPin size={14} />
+                    <span>{project.location}</span>
+                  </div>
+                  <p className="text-[#001A54] text-[16px] font-medium">{project.type}</p>
+                  <h3 className="text-[#001A54] text-[22px] font-bold leading-tight">
+                    {project.title}
+                  </h3>
                 </div>
-              </div>
 
-              {/* Title */}
-              <h3 className="text-[#01155E] text-2xl font-bold mb-auto">
-                {project.title}
-              </h3>
-
-              {/* Footer: Price and Button */}
-              <div className="flex justify-between items-center mt-4">
-                <span className="text-[#01155E] text-[20px] font-semibold">
-                  {project.price}
-                </span>
-                <button className="bg-[#01155E] w-[144] h-[43px] text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-[#0a2380] transition-all active:scale-95">
-                  Discover
-                </button>
+                {/* Footer Section */}
+                <div className="flex justify-between items-center mt-auto">
+                  <span className="text-[#001A54] text-[20px] font-bold">
+                    {project.price}
+                  </span>
+                  <button className="bg-[#001A54] text-white px-6 py-2 rounded-[8px] font-bold text-sm">
+                    Discover
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
+        <button className="p-2 rounded-full border border-gray-300 text-[#001A54]"><ChevronRight size={20} /></button>
       </div>
     </section>
   );

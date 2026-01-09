@@ -1,37 +1,36 @@
 import React from 'react';
 import { Facebook, Instagram, Linkedin, Phone, Mail } from 'lucide-react';
-import footerBg from '../assets/xyz.png';
+import footerBg from '../assets/footer-bg.jpg';
 
 const Footer = () => {
   return (
-    /* FULL FOOTER CONTAINER */
-    <footer className="relative w-[1440px] h-[1297px] mx-auto overflow-hidden m">
+    <footer className="relative w-full h-[687px] overflow-hidden">
 
-      {/* BACKGROUND IMAGE — FULL HEIGHT */}
-      <div className="absolute top-[100px] right-0 left-0 bottom-0 z-0">
-  <img
-  src={footerBg}
-  alt="Footer Background"
-  className="w-full h-full object-cover object-[0_-35px]"
-/>
-</div>
+      {/* BACKGROUND IMAGE */}
+      <img
+        src={footerBg}
+        alt="Footer Background"
+        className="absolute inset-0 w-full h-full object-cover object-bottom"
+      />
 
-      {/* BLUE OVERLAY (TRANSPARENT LIKE FIGMA) */}
-      <div className="absolute bottom-0 left-0 w-full h-[687px] z-10 bg-[#0A1A5E]/85" />
+      {/* BLUE OVERLAY */}
+      <div className="absolute inset-0 bg-[#0A1A5E]/85" />
 
-      {/* OPTIONAL GRADIENT FOR DEPTH (FIGMA FEEL) */}
-      <div className="absolute bottom-0 left-0 w-full h-[687px] z-10 bg-gradient-to-t from-[#0A1A5E]/95 to-transparent" />
+      {/* CONTENT */}
+      <div className="relative z-10 h-full flex items-center">
+        <div className="w-[1200px] mx-auto text-white">
 
-      {/* FOOTER CONTENT */}
-      <div className="absolute bottom-0 left-0 w-full h-[687px] z-20">
-        <div className="w-[1200px] h-full mx-auto py-[90px] flex flex-col justify-between text-white">
-
-          <div className="flex justify-between mt-20">
+          <div className="flex justify-between">
 
             {/* LOGO + ABOUT */}
             <div className="w-[420px]">
-              <h2 className="text-[72px] font-bold mb-8">yupland</h2>
-              <p className="text-gray-300 text-lg  font-semibold text-[20px]">
+              <div className="bg-[#142A63] inline-block px-6 py-3 mb-6">
+                <h2 className="text-[48px] font-bold leading-none">
+                  yupland
+                </h2>
+              </div>
+
+              <p className="text-[#D1D5DB] text-[18px] leading-relaxed">
                 YupLand is a real estate marketing and information platform created
                 to help you research off-plan projects, explore communities, and
                 understand Dubai's real estate landscape.
@@ -39,7 +38,7 @@ const Footer = () => {
             </div>
 
             {/* LINKS */}
-            <div className="flex flex-col gap-4 text-gray-300 text-[20px]">
+            <div className="flex flex-col gap-3 text-[#D1D5DB] text-[18px]">
               {[
                 'About',
                 'Services',
@@ -57,7 +56,7 @@ const Footer = () => {
             </div>
 
             {/* SERVICES */}
-            <div className="flex flex-col gap-4 text-gray-300 text-lg">
+            <div className="flex flex-col gap-3 text-[#D1D5DB] text-[18px]">
               <span>Property Buying Assistance</span>
               <span>Off-plan Advisory</span>
               <span>Ready Property Assistance</span>
@@ -65,35 +64,34 @@ const Footer = () => {
             </div>
 
             {/* CONTACT */}
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6 text-[18px]">
               <div className="flex gap-4">
                 <Phone />
-                <div className="text-gray-300 text-[20px]">
+                <div className="text-[#D1D5DB]">
                   <p>India: +91 99999 95871</p>
                   <p>Canada: +1 437 328 8508</p>
-                  <p>UAE: +971 505773767</p>
+                  <p>Phone (UAE only): +971 505773767</p>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <Mail />
-                <div className="text-gray-300 text-[20px]" >
+                <div className="text-[#D1D5DB]">
                   <p>divyansh@aquaproperties.com</p>
                   <p>chitkaradivyansh@gmail.com</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="text-gray-400">Follow us :</span>
+                <span className="text-[#9CA3AF]">Follow us :</span>
                 <Facebook />
                 <span className="font-bold">𝕏</span>
                 <Instagram />
                 <Linkedin />
               </div>
             </div>
-          </div>
 
-         
+          </div>
 
         </div>
       </div>

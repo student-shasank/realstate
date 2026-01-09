@@ -1,5 +1,5 @@
 import React from 'react';
-
+import imageurl from '../../assets/underline.png';
 const ServicesSection = () => {
   const services = [
     { title: "Project Marketing And Sales Structuring" },
@@ -21,10 +21,20 @@ const ServicesSection = () => {
         
         {/* HEADER BLOCK: This occupies the first slot in the grid */}
         <div className="flex flex-col pt-2" style={{ width: '273px' }}>
-          <h2 className="text-[#01155E] text-[48px] font-bold border-b-4 border-[#01155E] inline-block pb-2 mb-6"
-              style={{ fontFamily: 'Archivo, sans-serif', width: 'fit-content' }}>
-            Services
-          </h2>
+        <h2
+  className="text-[#01155E] text-[48px] font-bold inline-block pb-6 mb-6"
+  style={{
+    fontFamily: "Archivo, sans-serif",
+    width: "fit-content",
+    backgroundImage: `url(${imageurl})`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "left 90%",
+    backgroundSize: "192.5px 6px",
+  }}
+>
+  Services
+</h2>
+
           <p className="text-[#64748B] text-[16px] leading-relaxed">
             Discover the unique characteristics of diverse communities, catering to various preferences from luxury to family-friendly environments.
           </p>
