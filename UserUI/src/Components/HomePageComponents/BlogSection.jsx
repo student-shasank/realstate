@@ -47,7 +47,7 @@ const BlogSection = () => {
   ];
 
   return (
-    <section className="bg-white flex justify-center py-[120px]">
+    <section className="bg-white flex justify-center py-16 pb-[67px] ">
       <div className="w-[1200px]">
 
         {/* TITLE */}
@@ -58,7 +58,11 @@ const BlogSection = () => {
 
         {/* TITLE */}
         <div className="mb-[50px]">
-          <h2 className="text-[#01155E] text-[48px] font-semibold mb-[10px]">
+          <h2 className="text-[#01155E] text-[48px] font-semibold mb-[10px]"
+          style={{
+              fontFamily: "Archivo, sans-serif",
+          }}
+          >
             Blogs
           </h2>
 

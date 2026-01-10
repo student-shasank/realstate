@@ -13,12 +13,12 @@ export default function CommunitiesBrief() {
   return (
     <section className="w-full bg-white">
       {/* --- Header Section --- */}
-      <div className="max-w-[1200px] mx-auto px-6 py-16 h-[544px] ">
+      <div className="max-w-[1200px] mx-auto  py-16 h-[544px] ">
         <div className="max-w-2xl">
           <h2
-            className="text-4xl font-bold text-[#001A54] mb-2 inline-block pb-6"
+            className="text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-6"
             style={{
-              fontFamily: "General Sans, sans-serif",
+               fontFamily: "Archivo, sans-serif",
               backgroundImage: `url(${imageurl})`,
               backgroundRepeat: "no-repeat",
               backgroundPosition: "left 90%",

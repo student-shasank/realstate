@@ -36,10 +36,11 @@ const UpcomingProjects = () => {
   return (
     <section className="w-full bg-white py-16 flex flex-col items-center">
       {/* Section Header */}
-      <div className="w-full max-w-[1200px] px-20 mb-10">
+      <div className="w-full max-w-[1200px]  mb-10">
      <h2
   className="text-[#001A54] text-[48px] font-bold mb-2 inline-block pb-6"
   style={{
+    fontFamily: "Archivo, sans-serif",
     backgroundImage: `url(${imageurl})`,
     backgroundRepeat: "no-repeat",
     backgroundPosition: "left 90%",
