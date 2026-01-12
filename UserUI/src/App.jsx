@@ -13,6 +13,8 @@ import ListingDetail from "./Pages/ListingDetail/ListingDetail";
 // import ListingCreation from "./Pages/ListingCreation";
 import { setFavorites } from "./features/dashboard/favoriteligting/favoriteSlice";
 import Footer from "./Components/Footer";
+import Service from "./Pages/Service";
+import DetailService from "./Pages/DetailService";
 
 function App() {
  const dispatch = useDispatch(); //  ADD THIS
@@ -32,6 +34,8 @@ useEffect(() => {
         <Route path="/contact" element={<Contact />}/>
          <Route path="/login" element={<Login/>}/>
           <Route path="/register" element={<Register />}/>
+           <Route path="/service" element={<Service/>}/>
+              <Route path="/detailservice" element={<DetailService/>}/>
             {/* <Route path="/dashboard" element={<Dashboard/>}/> */}
           {/* <Route path="/listingcreation" element={<ListingCreation/>}/> */}
            <Route path="/listings" element={<Listings />}/>
