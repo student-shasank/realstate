@@ -29,7 +29,7 @@ function Navbar() {
     { name: "Blogs", path: "/blogs" },
     { name: "About us", path: "/about" },
     { name: "Contact us", path: "/contact" },
-    { name: "Communities", path: "/communities" },
+    { name: "Communities", path: "/detailservice" },
   ];
 
   const textStyle = {
@@ -62,27 +62,152 @@ function Navbar() {
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center justify-between flex-1 max-w-[700px] mx-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-             <Link
-  key={item.name}
-  to={item.path}
-  className={`transition-all ${
-    isHomePage ? "" : "hover:font-bold"
-  }`}
-  style={{
-    ...textStyle,
-    fontWeight: isActive ? 700 : 400,
-    color: textColor,
-  }}
->
-  {item.name}
-</Link>
-            );
-          })}
-        </div>
+       <div className="hidden md:flex items-center justify-between flex-1 max-w-[700px] mx-auto">
+
+  <Link
+    to="/"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname === "/" ? 700 : 400,
+      color: textColor,
+    }}
+  >
+    Home
+  </Link>
+
+<div className="relative group">
+  {/* Service Link */}
+  <Link
+    to="/service"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"} flex items-center`}
+    style={{
+      ...textStyle,
+      fontWeight:
+        [
+          "/service",
+          "/marketingandSales",
+          "/assetStructuring",
+          "/propertyStructuring",
+          "/advisoryCoordination",
+          "/handoverSnagging",
+          "/mortgageCoordination",
+          "/investorVisaAdvisory",
+        ].includes(location.pathname)
+          ? 700
+          : 400,
+      color: textColor,
+    }}
+  >
+    Service
+    <span className="ml-1 text-sm">&#9662;</span>
+  </Link>
+
+  {/* Dropdown Menu */}
+  <div className="absolute top-full left-0 mt-2 w-64 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+    <Link
+      to="/marketingandSales"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Marketing & Sales
+    </Link>
+
+    <Link
+      to="/assetStructuring"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Asset Structuring
+    </Link>
+
+    <Link
+      to="/propertyStructuring"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Property Structuring
+    </Link>
+
+    <Link
+      to="/advisoryCoordination"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Advisory Coordination
+    </Link>
+
+    <Link
+      to="/handoverSnagging"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Handover & Snagging
+    </Link>
+
+    <Link
+      to="/mortgageCoordination"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Mortgage Coordination
+    </Link>
+
+    <Link
+      to="/investorVisaAdvisory"
+      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+      Investor Visa Advisory
+    </Link>
+  </div>
+</div>
+
+
+
+  <Link
+    to="/blogs"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname === "/blogs" ? 700 : 400,
+      color: textColor,
+    }}
+  >
+    Blogs
+  </Link>
+
+  <Link
+    to="/about"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname === "/about" ? 700 : 400,
+      color: textColor,
+    }}
+  >
+    About us
+  </Link>
+
+  <Link
+    to="/contact"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname === "/contact" ? 700 : 400,
+      color: textColor,
+    }}
+  >
+    Contact us
+  </Link>
+
+  <Link
+    to="/detailservice"
+    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname === "/detailservice" ? 700 : 400,
+      color: textColor,
+    }}
+  >
+    Communities
+  </Link>
+
+</div>
+
 
         {/* Auth & Language */}
         <div className="flex items-center gap-x-10 shrink-0">

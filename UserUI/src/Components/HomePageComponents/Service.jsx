@@ -1,5 +1,6 @@
 import React from "react";
 import imageurl from '../../assets/underline.png';
+import { Link } from "lucide-react";
 
 const ServicesSection = () => {
   const services = [
@@ -130,7 +131,35 @@ const ServicesSection = () => {
           ))}
         </div>
 
+          <div className="flex justify-end">
+  <div
+    className="
+     
+      font-medium
+      text-[24px]
+      leading-[100%]
+      tracking-[0%]
+      text-center
+      text-[#01155E]
+      underline
+      decoration-solid
+      decoration-auto
+      decoration-0
+      underline-offset-0
+      cursor-pointer
+      transition-colors
+      duration-200
+      hover:text-blue-700
+    "
+  >
+    View All
+  </div>
+</div>
+
+
       </div>
+
+    
     </section>
   );
 };
