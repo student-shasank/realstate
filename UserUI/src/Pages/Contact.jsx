@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchListingDetail } from "../features/dashboard/listingDetailSlice.jsx";
+
 import { 
   FaBed, FaBath, FaChartArea, FaUserTie, FaMoneyCheckAlt, 
   FaTools, FaCalendarAlt, FaBuilding, FaMapMarkerAlt, 
@@ -9,41 +10,48 @@ import {
 
 const Contact = () => {
   const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.favorites || []);
   const [favoriteListings, setFavoriteListings] = useState([]);
   const [selected, setSelected] = useState([null, null]);
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Fetch favorite listings when favorites change
   useEffect(() => {
+    if (favorites.length === 0) {
+      setFavoriteListings([]);
+      setSelected([null, null]);
+      return;
+    }
+
     const fetchFavs = async () => {
-      const userData = JSON.parse(localStorage.getItem("user"));
-      const ids = userData?.favorites || [];
-      if (ids.length > 0) {
-        setLoading(true);
-        try {
-          const results = await Promise.all(ids.map(id => dispatch(fetchListingDetail(id)).unwrap()));
-          setFavoriteListings(results);
-          if (results.length >= 2) setSelected([results[0], results[1]]);
-          else if (results.length === 1) setSelected([results[0], results[0]]);
-        } catch (err) {
-          console.error("Fetch error:", err);
-        } finally {
-          setLoading(false);
-        }
+      setLoading(true);
+      try {
+        const results = await Promise.all(
+          favorites.map((id) => dispatch(fetchListingDetail(id)).unwrap())
+        );
+        setFavoriteListings(results);
+        if (results.length >= 2) setSelected([results[0], results[1]]);
+        else if (results.length === 1) setSelected([results[0], results[0]]);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchFavs();
-  }, [dispatch]);
+  }, [dispatch, favorites]);
 
   const handleSelect = (idx, id) => {
-    const item = favoriteListings.find(p => (p._id?.$oid || p._id) === id);
-    setSelected(prev => {
+    const item = favoriteListings.find(p => p._id === id);
+    setSelected((prev) => {
       const newSel = [...prev];
       newSel[idx] = item;
       return newSel;
     });
   };
 
-  const getID = (item) => item?._id?.$oid || item?._id;
+  const getID = (item) => item?._id;
 
   return (
     <div className="min-h-screen bg-[#EEF0F3] py-16 px-6 flex justify-center items-start">

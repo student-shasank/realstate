@@ -8,6 +8,7 @@ import React from "react";
 import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
 import ListingCreation from "./Pages/ListingCreation";
+import Communities from "./Pages/Communities";
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />}/>
         <Route path="/about" element={<About />}/>
+       <Route path="/communities" element={<Communities />}/>
         <Route path="/contact" element={<Contact />}/>
          <Route path="/login" element={<Login/>}/>
           <Route path="/register" element={<Register />}/>

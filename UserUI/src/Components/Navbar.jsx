@@ -76,83 +76,49 @@ function Navbar() {
     Home
   </Link>
 
-<div className="relative group">
-  {/* Service Link */}
+<div className="relative group flex items-center h-full">
+  {/* 1. Service Link */}
   <Link
     to="/service"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"} flex items-center`}
+    className="flex items-center gap-1 py-4" // py-4 se hover area bada ho jata hai
     style={{
       ...textStyle,
-      fontWeight:
-        [
-          "/service",
-          "/marketingandSales",
-          "/assetStructuring",
-          "/propertyStructuring",
-          "/advisoryCoordination",
-          "/handoverSnagging",
-          "/mortgageCoordination",
-          "/investorVisaAdvisory",
-        ].includes(location.pathname)
-          ? 700
-          : 400,
+      fontWeight: location.pathname.includes("service") ? 700 : 400,
       color: textColor,
     }}
   >
     Service
-    <span className="ml-1 text-sm">&#9662;</span>
+    <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
   </Link>
 
-  {/* Dropdown Menu */}
-  <div className="absolute top-full left-0 mt-2 w-64 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
-    <Link
-      to="/marketingandSales"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Marketing & Sales
-    </Link>
-
-    <Link
-      to="/assetStructuring"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Asset Structuring
-    </Link>
-
-    <Link
-      to="/propertyStructuring"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Property Structuring
-    </Link>
-
-    <Link
-      to="/advisoryCoordination"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Advisory Coordination
-    </Link>
-
-    <Link
-      to="/handoverSnagging"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Handover & Snagging
-    </Link>
-
-    <Link
-      to="/mortgageCoordination"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Mortgage Coordination
-    </Link>
-
-    <Link
-      to="/investorVisaAdvisory"
-      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-    >
-      Investor Visa Advisory
-    </Link>
+  {/* 2. Dropdown Menu */}
+  {/* Yahan 'pt-4' (padding-top) wo invisible bridge hai */}
+  <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+    
+    {/* Inner Container: Isme background aur shadow hoga */}
+    <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+      <Link to="/marketingandSales" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Marketing & Sales
+      </Link>
+      <Link to="/assetStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Asset Structuring
+      </Link>
+      <Link to="/propertyStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Property Structuring
+      </Link>
+      <Link to="/advisoryCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Advisory Coordination
+      </Link>
+      <Link to="/handoverSnagging" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Handover & Snagging
+      </Link>
+      <Link to="/mortgageCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+        Mortgage Coordination
+      </Link>
+      <Link to="/investorVisaAdvisory" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
+        Investor Visa Advisory
+      </Link>
+    </div>
   </div>
 </div>
 
@@ -195,7 +161,7 @@ function Navbar() {
   </Link>
 
   <Link
-    to="/detailservice"
+    to="/communities"
     className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
     style={{
       ...textStyle,

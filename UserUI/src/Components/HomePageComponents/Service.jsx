@@ -1,165 +1,104 @@
 import React from "react";
 import imageurl from '../../assets/underline.png';
-import { Link } from "lucide-react";
+import { Link } from "react-router-dom"; 
 
 const ServicesSection = () => {
   const services = [
-    "Project Marketing And Sales Structuring",
-    "Project Marketing And Sales Structuring",
-    "Property Management Structuring",
-    "Asset Management Structuring",
-    "Development Advisory And Project Coordination",
-    "Handover & Snagging Representation",
-    "Mortgage Coordination",
-    "Residency & Investor Visa Advisory (UAE)",
+    // Row 1
+    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
+    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
+    { title: "Property Management Structuring", path: "/propertyStructuring" },
+    { title: "Asset Management Structuring", path: "/assetStructuring" },
+    // Row 2
+    { title: "Development Advisory And Project Coordination", path: "/advisoryCoordination" },
+    { title: "Handover & Snagging Representation", path: "/handoverSnagging" },
+    { title: "Mortgage Coordination", path: "/mortgageCoordination" },
+    { title: "Residency & Investor Visa Advisory (UAE)", path: "/investorVisaAdvisory" },
   ];
 
   return (
     <section className="w-full bg-white py-[120px]">
       <div className="max-w-[1200px] mx-auto  py-16  ">
-              <div className="max-w-2xl">
-                <h2
-                  className="text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-6"
-                  style={{
-                    fontFamily: "Archivo, sans-serif",
-                    backgroundImage: `url(${imageurl})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "left 90%",
-                    backgroundSize: "257px 6px",
-                  }}
-                >
-                   Services
-                </h2>
-      
-                <p className="text-gray-500 text-lg mb-8 font-medium">
-                   Discover the unique characteristics of diverse communities, catering
-              to various preferences from luxury to family-friendly environments.
-                </p>
-               
-              </div>
-            </div>
+        <div className="max-w-2xl">
+          <h2
+            className="text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-6"
+            style={{
+              fontFamily: "Archivo, sans-serif",
+              backgroundImage: `url(${imageurl})`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "left 90%",
+              backgroundSize: "257px 6px",
+            }}
+          >
+            Services
+          </h2>
 
+          <p className="text-gray-500 text-lg mb-8 font-medium">
+            Discover the unique characteristics of diverse communities, catering
+            to various preferences from luxury to family-friendly environments.
+          </p>
+        </div>
+      </div>
 
       <div className="max-w-[1200px] mx-auto flex flex-col gap-[36px]">
-
         {/* ROW 1 */}
         <div className="flex justify-between gap-[21px]">
-
-          {/* TITLE CARD (same style as community brief) */}
-         
-
-          {/* 4 SERVICE CARDS */}
-          {services.slice(0, 4).map((title, index) => (
-           <div
-  key={index}
-  className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px]
-  pt-[29px] px-[25px] pb-[14px] flex flex-col"
->
-  {/* CONTENT WRAPPER */}
-  <div className="flex flex-col">
-
-    {/* TITLE — FIXED HEIGHT */}
-    <h3
-      className="w-[226px] h-[90px]
-      text-white text-[24px] font-medium leading-[30px]
-      underline underline-offset-4 decoration-white"
-    >
-      {title}
-    </h3>
-
-    {/* TEXT — ALWAYS SAME START POSITION */}
-    <p
-      className="w-[226px] mt-[47px]
-      text-[#D9D9D9] text-[16px] leading-[22px]"
-    >
-      Having your dedicated property manager can turn your investment
-      into a lucrative cash flow opportunity.
-    </p>
-  </div>
-
-  {/* BUTTON — ALWAYS BOTTOM */}
-  <button
-    className="mt-auto w-full py-3 bg-white text-[#01155E]
-    rounded-[8px] font-bold text-[15px]"
-  >
-    View Details
-  </button>
-</div>
-
+          {services.slice(0, 4).map((service, index) => (
+            <div
+              key={index}
+              className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px] pt-[29px] px-[25px] pb-[14px] flex flex-col"
+            >
+              <div className="flex flex-col">
+                <h3 className="w-[226px] h-[90px] text-white text-[24px] font-medium leading-[30px] underline underline-offset-4 decoration-white">
+                  {service.title}
+                </h3>
+                <p className="w-[226px] mt-[47px] text-[#D9D9D9] text-[16px] leading-[22px]">
+                  Having your dedicated property manager can turn your investment
+                  into a lucrative cash flow opportunity.
+                </p>
+              </div>
+              <Link
+                to={service.path}
+                className="mt-auto w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[15px] text-center"
+              >
+                View Details
+              </Link>
+            </div>
           ))}
         </div>
 
         {/* ROW 2 */}
         <div className="flex justify-between gap-[21px]">
-          {services.slice(4).map((title, index) => (
-           <div
-  key={index}
-  className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px]
-  pt-[29px] px-[25px] pb-[14px] flex flex-col"
->
-  {/* CONTENT WRAPPER */}
-  <div className="flex flex-col">
-
-    {/* TITLE — FIXED HEIGHT */}
-    <h3
-      className="w-[226px] h-[90px]
-      text-white text-[24px] font-medium leading-[30px]
-      underline underline-offset-4 decoration-white"
-    >
-      {title}
-    </h3>
-
-    {/* TEXT — ALWAYS SAME START POSITION */}
-    <p
-      className="w-[226px] mt-[47px]
-      text-[#D9D9D9] text-[16px] leading-[22px]"
-    >
-      Having your dedicated property manager can turn your investment
-      into a lucrative cash flow opportunity.
-    </p>
-  </div>
-
-  {/* BUTTON — ALWAYS BOTTOM */}
-  <button
-    className="mt-auto w-full py-3 bg-white text-[#01155E]
-    rounded-[8px] font-bold text-[15px]"
-  >
-    View Details
-  </button>
-</div>
-
+          {services.slice(4).map((service, index) => (
+            <div
+              key={index}
+              className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px] pt-[29px] px-[25px] pb-[14px] flex flex-col"
+            >
+              <div className="flex flex-col">
+                <h3 className="w-[226px] h-[90px] text-white text-[24px] font-medium leading-[30px] underline underline-offset-4 decoration-white">
+                  {service.title}
+                </h3>
+                <p className="w-[226px] mt-[47px] text-[#D9D9D9] text-[16px] leading-[22px]">
+                  Having your dedicated property manager can turn your investment
+                  into a lucrative cash flow opportunity.
+                </p>
+              </div>
+              <Link
+                to={service.path || "/"}
+                className="mt-auto w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[15px] text-center"
+              >
+                View Details
+              </Link>
+            </div>
           ))}
         </div>
 
-          <div className="flex justify-end">
-  <div
-    className="
-     
-      font-medium
-      text-[24px]
-      leading-[100%]
-      tracking-[0%]
-      text-center
-      text-[#01155E]
-      underline
-      decoration-solid
-      decoration-auto
-      decoration-0
-      underline-offset-0
-      cursor-pointer
-      transition-colors
-      duration-200
-      hover:text-blue-700
-    "
-  >
-    View All
-  </div>
-</div>
-
-
+        <div className="flex justify-end">
+          <div className="font-medium text-[24px] leading-[100%] tracking-[0%] text-center text-[#01155E] underline decoration-solid decoration-auto decoration-0 underline-offset-0 cursor-pointer transition-colors duration-200 hover:text-blue-700">
+            View All
+          </div>
+        </div>
       </div>
-
-    
     </section>
   );
 };

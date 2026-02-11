@@ -31,6 +31,7 @@ function Navbar() {
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
+           <Link to="/communities" className="block">Communities</Link>
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">
@@ -101,6 +102,7 @@ function Navbar() {
           <Link to="/" className="block">Home</Link>
           <Link to="/about" className="block">About</Link>
           <Link to="/contact" className="block">Contact</Link>
+          <Link to="/communities" className="block">Communities</Link>
 
           {!user ? (
             <Link

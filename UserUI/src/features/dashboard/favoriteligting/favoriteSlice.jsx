@@ -43,6 +43,21 @@ const favoriteSlice = createSlice({
       );
     },
 
+    // ✅ ADD: instant UI update (optimistic)
+    addFavoriteLocal: (state, action) => {
+      const id = action.payload;
+      if (!state.favorites.includes(id)) {
+        state.favorites.push(id);
+      }
+    },
+
+    // ✅ ADD: instant remove
+    removeFavoriteLocal: (state, action) => {
+      state.favorites = state.favorites.filter(
+        (id) => id !== action.payload
+      );
+    },
+
     clearFavorites: (state) => {
       state.favorites = [];
       state.error = null;
@@ -77,6 +92,9 @@ export const {
   setFavorites,
   clearFavorites,
   clearFavoriteError,
+  // ✅ export new ones
+  addFavoriteLocal,
+  removeFavoriteLocal,
 } = favoriteSlice.actions;
 
 export default favoriteSlice.reducer;
