@@ -1,6 +1,7 @@
 import Listing from "../models/Listing.js";
 import cloudinary from "../config/cloudinary.js";
 import { geocodeAddress } from "../utils/geocode.js";
+import Community from "../models/Community.js";
 
 
 
@@ -192,3 +193,50 @@ export const updateAvailability = async (req, res) => {
 };
 
 
+
+export const createCommunity = async (req, res) => {
+  try {
+    // 1. Frontend se bheja gaya JSON data parse karein
+    const bodyData = JSON.parse(req.body.data);
+    const files = req.files;
+
+    // 2. Hero Images mapping
+    // Hum hero cards array check karenge aur images ki path set karenge
+    if (bodyData.hero && bodyData.hero.cards) {
+      bodyData.hero.cards.forEach((card, idx) => {
+        const fieldName = `heroImage_${idx}`;
+        if (files[fieldName]) {
+          card.image = files[fieldName][0].path; // Ya filename agar aap local save kar rahe hain
+        }
+      });
+    }
+
+    // 3. Overview Image mapping
+    if (files["overviewImage"]) {
+      bodyData.overview.image = files["overviewImage"][0].path;
+    }
+
+    // 4. Market Data Image mapping
+    if (files["marketImage"]) {
+      bodyData.marketSupply.image = files["marketImage"][0].path;
+    }
+
+    // 5. MongoDB mein Save karein
+    const newCommunity = new Community(bodyData);
+    const savedCommunity = await newCommunity.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Community page created successfully!",
+      data: savedCommunity
+    });
+
+  } catch (error) {
+    console.error("Community Creation Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while creating community",
+      error: error.message
+    });
+  }
+};

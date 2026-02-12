@@ -6,6 +6,10 @@ import { sendListingPdf } from "../controllers/pdfcontroller.js"
 import { searchListings } from "../controllers/searchcontroller.js"
 import { toggleFavoriteListing } from "../controllers/togglefavoriteListing.js";
 import { protect2 } from "../middleware/Favmiddleware.js";
+import { 
+  getCommunityNavigation, 
+  getCommunityPublicProfile 
+} from "../controllers/communityController.js";
 
 const router = Router();
 
@@ -19,6 +23,10 @@ router.get("/search", searchListings);
 router.get("/detail/:id", getListingById);
 
 router.post("/favorites", protect2, toggleFavoriteListing);
+
+
+router.get("/navigation", getCommunityNavigation); // Dropdown ke liye
+router.get("/profile/:slug", getCommunityPublicProfile);
 
 
 export default router;

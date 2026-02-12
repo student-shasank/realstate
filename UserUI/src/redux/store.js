@@ -10,6 +10,7 @@ import pdfReducer from "../features/dashboard/listingpdfSlice"
 import searchReducer from "../features/dashboard/searchSlice"
 import listingDetailReducer from "../features/dashboard/listingDetailSlice"
 import favoriteReducer from "../features/dashboard/favoriteligting/favoriteSlice"
+import communityReducer from  "../features/communities/communitySlice"
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ export const store = configureStore({
         search: searchReducer,
         listingDetail: listingDetailReducer,
           favorites: favoriteReducer,
+          community: communityReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

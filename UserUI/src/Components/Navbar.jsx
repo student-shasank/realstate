@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react"; // Added useEffect
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Menu, Languages } from "lucide-react";
 import { logoutUser } from "../features/Authentation/login";
 import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
+import { fetchNavList } from "../features/communities/communitySlice"; // Added this import
 
 function Navbar() {
   const [open, setOpen] = React.useState(false);
@@ -13,6 +14,16 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.loginAuth);
+  
+  // Get navList from Redux store
+  const { navList } = useSelector((state) => state.community);
+
+  // Fetch communities on load
+  useEffect(() => {
+    if (navList.length === 0) {
+      dispatch(fetchNavList());
+    }
+  }, [dispatch, navList.length]);
 
   const isHomePage = location.pathname === "/";
 
@@ -62,118 +73,135 @@ function Navbar() {
         </Link>
 
         {/* Navigation Links */}
-       <div className="hidden md:flex items-center justify-between flex-1 max-w-[700px] mx-auto">
+        <div className="hidden md:flex items-center justify-between flex-1 max-w-[700px] mx-auto">
 
-  <Link
-    to="/"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname === "/" ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    Home
-  </Link>
+          <Link
+            to="/"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/" ? 700 : 400,
+              color: textColor,
+            }}
+          >
+            Home
+          </Link>
 
-<div className="relative group flex items-center h-full">
-  {/* 1. Service Link */}
-  <Link
-    to="/service"
-    className="flex items-center gap-1 py-4" // py-4 se hover area bada ho jata hai
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname.includes("service") ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    Service
-    <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
-  </Link>
+          <div className="relative group flex items-center h-full">
+            {/* 1. Service Link */}
+            <Link
+              to="/service"
+              className="flex items-center gap-1 py-4" 
+              style={{
+                ...textStyle,
+                fontWeight: location.pathname.includes("service") ? 700 : 400,
+                color: textColor,
+              }}
+            >
+              Service
+              <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
+            </Link>
 
-  {/* 2. Dropdown Menu */}
-  {/* Yahan 'pt-4' (padding-top) wo invisible bridge hai */}
-  <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-    
-    {/* Inner Container: Isme background aur shadow hoga */}
-    <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-      <Link to="/marketingandSales" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Marketing & Sales
-      </Link>
-      <Link to="/assetStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Asset Structuring
-      </Link>
-      <Link to="/propertyStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Property Structuring
-      </Link>
-      <Link to="/advisoryCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Advisory Coordination
-      </Link>
-      <Link to="/handoverSnagging" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Handover & Snagging
-      </Link>
-      <Link to="/mortgageCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
-        Mortgage Coordination
-      </Link>
-      <Link to="/investorVisaAdvisory" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
-        Investor Visa Advisory
-      </Link>
-    </div>
-  </div>
-</div>
+            {/* 2. Dropdown Menu */}
+            <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+                <Link to="/marketingandSales" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Marketing & Sales
+                </Link>
+                <Link to="/assetStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Asset Structuring
+                </Link>
+                <Link to="/propertyStructuring" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Property Structuring
+                </Link>
+                <Link to="/advisoryCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Advisory Coordination
+                </Link>
+                <Link to="/handoverSnagging" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Handover & Snagging
+                </Link>
+                <Link to="/mortgageCoordination" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+                  Mortgage Coordination
+                </Link>
+                <Link to="/investorVisaAdvisory" className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100">
+                  Investor Visa Advisory
+                </Link>
+              </div>
+            </div>
+          </div>
 
+          <Link
+            to="/blogs"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/blogs" ? 700 : 400,
+              color: textColor,
+            }}
+          >
+            Blogs
+          </Link>
 
+          <Link
+            to="/about"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/about" ? 700 : 400,
+              color: textColor,
+            }}
+          >
+            About us
+          </Link>
 
-  <Link
-    to="/blogs"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname === "/blogs" ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    Blogs
-  </Link>
+          <Link
+            to="/contact"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/contact" ? 700 : 400,
+              color: textColor,
+            }}
+          >
+            Contact us
+          </Link>
 
-  <Link
-    to="/about"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname === "/about" ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    About us
-  </Link>
+          {/* Communities Dynamic Dropdown */}
+          <div className="relative group flex items-center h-full">
+            <Link
+              to="/communities"
+              className="flex items-center gap-1 py-4 transition-all"
+              style={{
+                ...textStyle,
+                fontWeight: location.pathname.includes("communities") ? 700 : 400,
+                color: textColor,
+              }}
+            >
+              Communities
+              <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
+            </Link>
 
-  <Link
-    to="/contact"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname === "/contact" ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    Contact us
-  </Link>
+            {/* Dynamic Dropdown Menu based on Redux navList */}
+            <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+                {navList && navList.length > 0 ? (
+                  navList.map((item) => (
+                    <Link
+                      key={item._id}
+                      to={`/communities/${item.slug}`}
+                      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
+                    >
+                      {item.title}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-400">Loading...</div>
+                )}
+              </div>
+            </div>
+          </div>
 
-  <Link
-    to="/communities"
-    className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname === "/detailservice" ? 700 : 400,
-      color: textColor,
-    }}
-  >
-    Communities
-  </Link>
-
-</div>
-
+        </div>
 
         {/* Auth & Language */}
         <div className="flex items-center gap-x-10 shrink-0">

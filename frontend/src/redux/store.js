@@ -5,6 +5,7 @@ import registerReducer from "../features/Authentation/RegisterSlice"
 import loginReducer from "../features/Authentation/login";
 import dashboardReducer from "../features/dashboard/dashboardSlice"
 import listingReducer from "../features/dashboard/listingSlice"
+import communityReducer from "../features/communitySlice"
 
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     loginAuth: loginReducer,
      dashboard: dashboardReducer,
        listing: listingReducer,
+       community: communityReducer,
   },
 });
 

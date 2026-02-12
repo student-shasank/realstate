@@ -1,7 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import RichTextEditor from "./RichTextEditor";
+
+// Redux Hooks
+import { useDispatch, useSelector } from "react-redux";
+import { saveCommunity, resetCommunityStatus } from "../features/communitySlice";
 
 // helper
 const slugify = (text) =>
@@ -12,77 +15,85 @@ const slugify = (text) =>
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
+// ✅ small helper for preview url
+const fileToPreview = (file) => (file ? URL.createObjectURL(file) : "");
+
+// ✅ reusable Image Picker
+function ImagePicker({ label, preview, onPick, hint }) {
+  return (
+    <div className="border rounded p-3">
+      <label className="block text-sm font-medium mb-2">{label}</label>
+
+      <div className="flex flex-col gap-3">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => onPick(e.target.files?.[0] || null)}
+          className="w-full border rounded p-2"
+        />
+
+        {hint ? <p className="text-xs text-gray-500">{hint}</p> : null}
+
+        <div className="w-full h-[180px] rounded overflow-hidden bg-gray-50 border flex items-center justify-center">
+          {preview ? (
+            <img src={preview} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-xs text-gray-400">No image selected</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Communities() {
-  // ✅ DEFAULT TEMPLATE (pre-filled)
-  const defaultTemplate = useMemo(
+  const dispatch = useDispatch();
+  const { loading, success, error } = useSelector((state) => state.community);
+
+  // ✅ defaults (NOW includes missing sections)
+  const defaults = useMemo(
     () => ({
       title: "Community 1- Al Waha",
-      slug: "community-1-al-waha",
 
-      // HERO CARDS
       heroCards: [
-        {
-          title: "Developer",
-          subtitle: "Dubai Properties",
-          imageUrl:
-            "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop",
-        },
-        {
-          title: "Master Area",
-          subtitle: "Dubailand",
-          imageUrl:
-            "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?q=80&w=1200&auto=format&fit=crop",
-        },
-        {
-          title: "Property Types",
-          subtitle: "Apartments, Townhouses, Villas",
-          imageUrl:
-            "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
-        },
+        { title: "Developer", subtitle: "Dubai Properties" },
+        { title: "Master Area", subtitle: "Dubailand" },
+        { title: "Property Types", subtitle: "Apartments, Townhouses, Villas" },
       ],
 
-      // ✅ Rich Text: Overview
       overviewHtml: `
         <p>Al Waha is a gated residential community located within Dubailand, developed by Dubai Properties.</p>
         <p>The community is primarily residential in nature and is characterised by low-density development and a quiet neighbourhood setting.</p>
         <p>Al Waha is situated along Emirates Road (E611), offering direct road connectivity across Dubai while remaining removed from high-density urban districts.</p>
       `,
 
-      // LOCATION / CONNECTIVITY (structured)
-      connectivity: [
-        { label: "Nearest Areas:", value: "Arabian Ranches, Mudon, The Sustainable City" },
-        { label: "Primary Road Access:", value: "Emirates Road (E611)" },
-        {
-          label: "Public Transport:",
-          value:
-            "No direct or clearly defined public transport access; residents primarily rely on private vehicles, taxis, and ride-hailing services",
-        },
-        { label: "Mobility:", value: "Private vehicles, taxis, and ride-hailing services" },
-      ],
+      // ✅ NEW: Location & Connectivity (Hero component se copy)
+      locationConnectivityHtml: `
+        <h3>Location & Connectivity</h3>
+        <ul>
+          <li><strong>Nearest Areas:</strong> Arabian Ranches, Mudon, The Sustainable City</li>
+          <li><strong>Primary Road Access:</strong> Emirates Road (E611)</li>
+          <li><strong>Public Transport:</strong> No direct or clearly defined public transport access; residents primarily rely on private vehicles, taxis, and ride-hailing services</li>
+          <li><strong>Mobility:</strong> Private vehicles, taxis, and ride-hailing services</li>
+        </ul>
+      `,
 
-      // ✅ Rich Text: Planning Note
       planningNoteHtml: `
         <p>Al Waha is planned as a low-density, gated residential enclave within the Dubailand corridor, with an emphasis on internal privacy, landscaped open spaces, and controlled vehicular access rather than mixed-use or commercial integration.</p>
       `,
 
-      // SIDE IMAGE + Worship
-      sideImageUrl:
-        "https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=1200&auto=format&fit=crop",
-
       worshipHtml: `
-        <h4>Mosques</h4>
+        <h3>Mosques</h3>
         <p>Mudon Mosque</p>
         <p>Al Madina Al Mustadama Masjid - The Sustainable City</p>
-        <h4>Churches, Temples & Gurudwaras</h4>
+        <h3>Churches, Temples & Gurudwaras</h3>
         <p>Located in established worship districts across Dubai and accessible by car.</p>
       `,
 
-      // READ MORE (toggle content)
       readMoreHtml: `
         <p>Due to limited transaction volume over the past 12 months, statistically meaningful price movement data is not available for this community. This is common in low-density, end-user-driven residential communities.</p>
       `,
 
-      // MARKET SNAPSHOT
       snapshot: [
         { label: "Average Price (AED / sq.ft)", value: "961" },
         { label: "Total Transactions (YTD 2026)", value: "2" },
@@ -90,7 +101,6 @@ export default function Communities() {
         { label: "Under-Construction Units", value: "0" },
       ],
 
-      // FAQs
       faqs: [
         {
           q: "1. Where is Al Waha located in Dubai?",
@@ -102,7 +112,17 @@ export default function Communities() {
         },
       ],
 
-      // ✅ Rich Text: Disclosure
+      // ✅ NEW: Market Data description (Hero component me “Due to limited transaction…”)
+      marketDataDescriptionHtml: `
+        <p>Due to limited transaction volume over the past 12 months, statistically meaningful price movement data is not available for this community. This is common in low-density, end-user-driven residential communities.</p>
+      `,
+
+      // ✅ NEW: Market Activity Note fields (Hero component ke footer block)
+      marketActivityTitle: "Market Activity Note",
+      marketActivityUpdatedText: "Data last updated: 6 January 2026 | GST",
+      marketActivityNoteLine: "Editable line for notes or methodology",
+      marketActivitySource: "Source: Property Monitor",
+
       disclosureHtml: `
         <p>This community guide is intended for general informational and marketing purposes only.</p>
         <p>Information is based on publicly available sources, developer disclosures, and mapping data at the time of preparation.</p>
@@ -112,99 +132,189 @@ export default function Communities() {
     []
   );
 
-  // state
-  const [title, setTitle] = useState(defaultTemplate.title);
-  const [slug, setSlug] = useState(defaultTemplate.slug);
+  const [title, setTitle] = useState(defaults.title);
+  const [slug, setSlug] = useState(slugify(defaults.title));
 
-  const [heroCards, setHeroCards] = useState(defaultTemplate.heroCards);
+  const [heroCards, setHeroCards] = useState(defaults.heroCards);
 
-  const [overviewHtml, setOverviewHtml] = useState(defaultTemplate.overviewHtml);
-  const [planningNoteHtml, setPlanningNoteHtml] = useState(defaultTemplate.planningNoteHtml);
+  const [overviewHtml, setOverviewHtml] = useState(defaults.overviewHtml);
 
-  const [connectivity, setConnectivity] = useState(defaultTemplate.connectivity);
+  // ✅ NEW states
+  const [locationConnectivityHtml, setLocationConnectivityHtml] = useState(
+    defaults.locationConnectivityHtml
+  );
 
-  const [sideImageUrl, setSideImageUrl] = useState(defaultTemplate.sideImageUrl);
-  const [worshipHtml, setWorshipHtml] = useState(defaultTemplate.worshipHtml);
-  const [readMoreHtml, setReadMoreHtml] = useState(defaultTemplate.readMoreHtml);
+  const [planningNoteHtml, setPlanningNoteHtml] = useState(defaults.planningNoteHtml);
+  const [worshipHtml, setWorshipHtml] = useState(defaults.worshipHtml);
+  const [readMoreHtml, setReadMoreHtml] = useState(defaults.readMoreHtml);
 
-  const [snapshot, setSnapshot] = useState(defaultTemplate.snapshot);
+  const [snapshot, setSnapshot] = useState(defaults.snapshot);
+  const [faqs, setFaqs] = useState(defaults.faqs);
 
-  const [faqs, setFaqs] = useState(defaultTemplate.faqs);
+  // ✅ NEW Market data + activity note states
+  const [marketDataDescriptionHtml, setMarketDataDescriptionHtml] = useState(
+    defaults.marketDataDescriptionHtml
+  );
+  const [marketActivityTitle, setMarketActivityTitle] = useState(defaults.marketActivityTitle);
+  const [marketActivityUpdatedText, setMarketActivityUpdatedText] = useState(
+    defaults.marketActivityUpdatedText
+  );
+  const [marketActivityNoteLine, setMarketActivityNoteLine] = useState(
+    defaults.marketActivityNoteLine
+  );
+  const [marketActivitySource, setMarketActivitySource] = useState(defaults.marketActivitySource);
 
-  const [disclosureHtml, setDisclosureHtml] = useState(defaultTemplate.disclosureHtml);
+  const [disclosureHtml, setDisclosureHtml] = useState(defaults.disclosureHtml);
 
-  // auto slug
+  // Images
+  const [heroImages, setHeroImages] = useState([null, null, null]);
+  const [heroPreviews, setHeroPreviews] = useState(["", "", ""]);
+
+  const [overviewImage, setOverviewImage] = useState(null);
+  const [overviewPreview, setOverviewPreview] = useState("");
+
+  const [marketImage, setMarketImage] = useState(null);
+  const [marketPreview, setMarketPreview] = useState("");
+
+  const rteFileRef = useRef(null);
+
+  useEffect(() => setSlug(slugify(title)), [title]);
+
   useEffect(() => {
-    setSlug(slugify(title));
-  }, [title]);
+    return () => {
+      heroPreviews.forEach((p) => p && URL.revokeObjectURL(p));
+      if (overviewPreview) URL.revokeObjectURL(overviewPreview);
+      if (marketPreview) URL.revokeObjectURL(marketPreview);
+    };
+  }, [heroPreviews, overviewPreview, marketPreview]);
 
-  // quill toolbar
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link"],
-      ["clean"],
-    ],
-  };
+  // ✅ Redux Status Handlers
+  useEffect(() => {
+    if (success) {
+      alert("✅ Page saved in MongoDB with images via Redux!");
+      dispatch(resetCommunityStatus());
+    }
+    if (error) {
+      alert(`❌ Error: ${error}`);
+      dispatch(resetCommunityStatus());
+    }
+  }, [success, error, dispatch]);
 
-  // handlers
-  const updateHeroCard = (index, key, value) => {
-    setHeroCards((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: value };
-      return copy;
+  const updateHeroCard = (i, key, val) => {
+    setHeroCards((p) => {
+      const c = [...p];
+      c[i] = { ...c[i], [key]: val };
+      return c;
     });
   };
 
-  const updateConnectivity = (index, key, value) => {
-    setConnectivity((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: value };
-      return copy;
+  const updateSnapshot = (i, key, val) => {
+    setSnapshot((p) => {
+      const c = [...p];
+      c[i] = { ...c[i], [key]: val };
+      return c;
     });
   };
 
-  const updateSnapshot = (index, key, value) => {
-    setSnapshot((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: value };
-      return copy;
-    });
-  };
-
-  const updateFaq = (index, key, value) => {
-    setFaqs((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [key]: value };
-      return copy;
+  const updateFaq = (i, key, val) => {
+    setFaqs((p) => {
+      const c = [...p];
+      c[i] = { ...c[i], [key]: val };
+      return c;
     });
   };
 
   const addFaq = () => setFaqs((p) => [...p, { q: "", a: "" }]);
   const removeFaq = (idx) => setFaqs((p) => p.filter((_, i) => i !== idx));
 
+  const pickHeroImage = (idx, file) => {
+    setHeroImages((prev) => {
+      const next = [...prev];
+      next[idx] = file;
+      return next;
+    });
+
+    setHeroPreviews((prev) => {
+      const next = [...prev];
+      if (next[idx]) URL.revokeObjectURL(next[idx]);
+      next[idx] = file ? fileToPreview(file) : "";
+      return next;
+    });
+  };
+
+  const pickOverviewImage = (file) => {
+    setOverviewImage(file);
+    if (overviewPreview) URL.revokeObjectURL(overviewPreview);
+    setOverviewPreview(file ? fileToPreview(file) : "");
+  };
+
+  const pickMarketImage = (file) => {
+    setMarketImage(file);
+    if (marketPreview) URL.revokeObjectURL(marketPreview);
+    setMarketPreview(file ? fileToPreview(file) : "");
+  };
+
+  const uploadEditorImage = async (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await axios.post("/admin/api/uploads/image", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data?.url;
+  };
+
+  const handlePickEditorImage = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadEditorImage(file);
+      if (!url) return alert("Upload failed");
+      setOverviewHtml((prev) => `${prev}<p><img src="${url}" alt="img" /></p>`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  // ✅ Modified to use Redux Dispatch
   const handleAddPage = async () => {
-    // ✅ payload we will store in MongoDB
+    if (!title?.trim()) return alert("Title required");
+
     const payload = {
       title,
       slug,
 
       hero: { cards: heroCards },
 
-      overview: { html: overviewHtml },
-      connectivity,
+      // Overview section (NOW complete)
+      overview: {
+        html: overviewHtml,
+        locationConnectivityHtml, // ✅ NEW
+        planningNoteHtml, // (you can keep planning in separate also, but for safety we store it too)
+      },
 
       planningNote: { html: planningNoteHtml },
 
       sidebar: {
-        imageUrl: sideImageUrl,
         worshipHtml,
         readMoreHtml,
       },
 
-      snapshot,
+      // Market Data + Activity Note (NOW complete)
+      marketData: {
+        descriptionHtml: marketDataDescriptionHtml, // ✅ NEW
+        activityNote: {
+          title: marketActivityTitle,
+          updatedText: marketActivityUpdatedText,
+          noteLine: marketActivityNoteLine,
+          source: marketActivitySource,
+        },
+      },
+
+      marketSupply: { rows: snapshot },
+
       faqs,
 
       disclosure: { html: disclosureHtml },
@@ -212,17 +322,14 @@ export default function Communities() {
       status: "published",
     };
 
-    // ✅ admin backend endpoint
-    await axios.post("/admin/api/communities", payload);
-
-    alert("✅ Page saved in MongoDB!");
+    dispatch(saveCommunity({ payload, heroImages, overviewImage, marketImage }));
   };
 
   return (
     <div className="p-6 max-w-[1100px] mx-auto">
       <h1 className="text-2xl font-semibold mb-6">Create Community Page</h1>
 
-      {/* Title + Slug */}
+      {/* Title/Slug */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <div>
           <label className="block mb-2 font-medium">Title</label>
@@ -230,7 +337,6 @@ export default function Communities() {
             className="w-full border rounded p-2"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Community title..."
           />
         </div>
 
@@ -240,122 +346,177 @@ export default function Communities() {
             className="w-full border rounded p-2"
             value={slug}
             onChange={(e) => setSlug(slugify(e.target.value))}
-            placeholder="community-slug"
           />
         </div>
       </div>
 
-      {/* Hero Cards */}
-      <h2 className="text-xl font-semibold mb-3">Hero Cards (3)</h2>
+      {/* HERO CARDS SECTION */}
+      <h2 className="text-xl font-semibold mb-3">Hero Cards (3) + Images (Upload)</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         {heroCards.map((c, i) => (
-          <div key={i} className="border rounded p-3">
-            <label className="block text-sm font-medium mb-1">Card Title</label>
-            <input
-              className="w-full border rounded p-2 mb-2"
-              value={c.title}
-              onChange={(e) => updateHeroCard(i, "title", e.target.value)}
-            />
-
-            <label className="block text-sm font-medium mb-1">Subtitle</label>
-            <input
-              className="w-full border rounded p-2 mb-2"
-              value={c.subtitle}
-              onChange={(e) => updateHeroCard(i, "subtitle", e.target.value)}
-            />
-
-            <label className="block text-sm font-medium mb-1">Image URL</label>
-            <input
-              className="w-full border rounded p-2"
-              value={c.imageUrl}
-              onChange={(e) => updateHeroCard(i, "imageUrl", e.target.value)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Overview Rich Text */}
-      <h2 className="text-xl font-semibold mb-3">Community Overview (Rich Text)</h2>
-      <div className="bg-white border rounded mb-10">
-        <ReactQuill value={overviewHtml} onChange={setOverviewHtml} modules={quillModules} />
-      </div>
-
-      {/* Connectivity */}
-      <h2 className="text-xl font-semibold mb-3">Location & Connectivity</h2>
-      <div className="space-y-3 mb-10">
-        {connectivity.map((item, i) => (
-          <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-3 border rounded p-3">
+          <div key={i} className="border rounded p-3 flex flex-col gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">Label</label>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                className="w-full border rounded p-2 mb-2"
+                value={c.title}
+                onChange={(e) => updateHeroCard(i, "title", e.target.value)}
+              />
+
+              <label className="block text-sm font-medium mb-1">Subtitle</label>
               <input
                 className="w-full border rounded p-2"
-                value={item.label}
-                onChange={(e) => updateConnectivity(i, "label", e.target.value)}
+                value={c.subtitle}
+                onChange={(e) => updateHeroCard(i, "subtitle", e.target.value)}
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Value</label>
-              <input
-                className="w-full border rounded p-2"
-                value={item.value}
-                onChange={(e) => updateConnectivity(i, "value", e.target.value)}
-              />
-            </div>
+
+            <ImagePicker
+              label={`Hero Card #${i + 1} Image`}
+              preview={heroPreviews[i]}
+              onPick={(file) => pickHeroImage(i, file)}
+              hint="Upload image from your computer"
+            />
           </div>
         ))}
       </div>
 
-      {/* Planning Note Rich Text */}
-      <h2 className="text-xl font-semibold mb-3">Planning Note (Rich Text)</h2>
-      <div className="bg-white border rounded mb-10">
-        <ReactQuill
-          value={planningNoteHtml}
-          onChange={setPlanningNoteHtml}
-          modules={quillModules}
+      {/* OVERVIEW IMAGE */}
+      <h2 className="text-xl font-semibold mb-3">Community Overview Right Image</h2>
+      <div className="mb-10">
+        <ImagePicker
+          label="Overview Big Image"
+          preview={overviewPreview}
+          onPick={pickOverviewImage}
+          hint="Main overview image"
         />
       </div>
 
-      {/* Sidebar Image + Worship + Read More */}
-      <h2 className="text-xl font-semibold mb-3">Sidebar Section</h2>
+      {/* MARKET IMAGE */}
+      <h2 className="text-xl font-semibold mb-3">Market Data Image</h2>
+      <div className="mb-10">
+        <ImagePicker
+          label="Market Data Image"
+          preview={marketPreview}
+          onPick={pickMarketImage}
+          hint="Inside Market Data section"
+        />
+      </div>
 
-      <label className="block mb-2 font-medium">Sidebar Image URL</label>
+      {/* OVERVIEW RTE */}
+      <h2 className="text-xl font-semibold mb-3">Community Overview (Rich Text)</h2>
       <input
-        className="w-full border rounded p-2 mb-6"
-        value={sideImageUrl}
-        onChange={(e) => setSideImageUrl(e.target.value)}
+        ref={rteFileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handlePickEditorImage}
       />
-
-      <h3 className="font-semibold mb-2">Places of Worship (Rich Text)</h3>
-      <div className="bg-white border rounded mb-8">
-        <ReactQuill value={worshipHtml} onChange={setWorshipHtml} modules={quillModules} />
+      <div className="mb-3 flex gap-2">
+        <button
+          type="button"
+          onClick={() => rteFileRef.current?.click()}
+          className="px-3 py-2 rounded border"
+        >
+          + Insert Image (Upload)
+        </button>
+      </div>
+      <div className="mb-10">
+        <RichTextEditor value={overviewHtml} onChange={setOverviewHtml} />
       </div>
 
-      <h3 className="font-semibold mb-2">Read More Content (Rich Text)</h3>
-      <div className="bg-white border rounded mb-10">
-        <ReactQuill value={readMoreHtml} onChange={setReadMoreHtml} modules={quillModules} />
+      {/* ✅ NEW: Location & Connectivity (Missing part added) */}
+      <h2 className="text-xl font-semibold mb-3">Location & Connectivity (Rich Text)</h2>
+      <div className="mb-10">
+        <RichTextEditor
+          value={locationConnectivityHtml}
+          onChange={setLocationConnectivityHtml}
+        />
       </div>
 
-      {/* Snapshot */}
+      {/* OTHER RTEs */}
+      <h2 className="text-xl font-semibold mb-3">Planning Note</h2>
+      <div className="mb-10">
+        <RichTextEditor value={planningNoteHtml} onChange={setPlanningNoteHtml} />
+      </div>
+
+      <h2 className="text-xl font-semibold mb-3">Places of Worship</h2>
+      <div className="mb-10">
+        <RichTextEditor value={worshipHtml} onChange={setWorshipHtml} />
+      </div>
+
+      <h2 className="text-xl font-semibold mb-3">Read More</h2>
+      <div className="mb-10">
+        <RichTextEditor value={readMoreHtml} onChange={setReadMoreHtml} />
+      </div>
+
+      {/* ✅ NEW: Market Data Description (Missing part added) */}
+      <h2 className="text-xl font-semibold mb-3">Market Data Description (Rich Text)</h2>
+      <div className="mb-10">
+        <RichTextEditor
+          value={marketDataDescriptionHtml}
+          onChange={setMarketDataDescriptionHtml}
+        />
+      </div>
+
+      {/* ✅ NEW: Market Activity Note (Missing part added) */}
+      <h2 className="text-xl font-semibold mb-3">Market Activity Note (Dynamic)</h2>
+      <div className="mb-10 border rounded p-4 space-y-3">
+        <div>
+          <label className="block text-sm font-medium mb-1">Title</label>
+          <input
+            className="w-full border rounded p-2"
+            value={marketActivityTitle}
+            onChange={(e) => setMarketActivityTitle(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Updated Text</label>
+          <input
+            className="w-full border rounded p-2"
+            value={marketActivityUpdatedText}
+            onChange={(e) => setMarketActivityUpdatedText(e.target.value)}
+            placeholder="Data last updated: 6 January 2026 | GST"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Note / Methodology Line</label>
+          <input
+            className="w-full border rounded p-2"
+            value={marketActivityNoteLine}
+            onChange={(e) => setMarketActivityNoteLine(e.target.value)}
+            placeholder="Editable line for notes or methodology"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Source</label>
+          <input
+            className="w-full border rounded p-2"
+            value={marketActivitySource}
+            onChange={(e) => setMarketActivitySource(e.target.value)}
+            placeholder="Source: Property Monitor"
+          />
+        </div>
+      </div>
+
+      {/* SNAPSHOT */}
       <h2 className="text-xl font-semibold mb-3">Market & Supply Snapshot</h2>
       <div className="space-y-3 mb-10">
         {snapshot.map((row, i) => (
           <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-3 border rounded p-3">
-            <div>
-              <label className="block text-sm font-medium mb-1">Label</label>
-              <input
-                className="w-full border rounded p-2"
-                value={row.label}
-                onChange={(e) => updateSnapshot(i, "label", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Value</label>
-              <input
-                className="w-full border rounded p-2"
-                value={row.value}
-                onChange={(e) => updateSnapshot(i, "value", e.target.value)}
-              />
-            </div>
+            <input
+              className="w-full border rounded p-2"
+              value={row.label}
+              onChange={(e) => updateSnapshot(i, "label", e.target.value)}
+            />
+            <input
+              className="w-full border rounded p-2"
+              value={row.value}
+              onChange={(e) => updateSnapshot(i, "value", e.target.value)}
+            />
           </div>
         ))}
       </div>
@@ -363,7 +524,7 @@ export default function Communities() {
       {/* FAQs */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-semibold">FAQs</h2>
-        <button onClick={addFaq} className="px-3 py-1 rounded border">
+        <button type="button" onClick={addFaq} className="px-3 py-1 rounded border">
           + Add FAQ
         </button>
       </div>
@@ -371,43 +532,49 @@ export default function Communities() {
       <div className="space-y-3 mb-10">
         {faqs.map((f, i) => (
           <div key={i} className="border rounded p-3">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center justify-between mb-2">
               <span className="font-medium">FAQ #{i + 1}</span>
-              <button onClick={() => removeFaq(i)} className="text-red-600 text-sm">
+              <button
+                type="button"
+                onClick={() => removeFaq(i)}
+                className="text-red-600 text-sm"
+              >
                 Remove
               </button>
             </div>
 
-            <label className="block text-sm font-medium mb-1">Question</label>
             <input
               className="w-full border rounded p-2 mb-2"
               value={f.q}
               onChange={(e) => updateFaq(i, "q", e.target.value)}
+              placeholder="Question"
             />
-
-            <label className="block text-sm font-medium mb-1">Answer</label>
             <textarea
               className="w-full border rounded p-2"
               rows={3}
               value={f.a}
               onChange={(e) => updateFaq(i, "a", e.target.value)}
+              placeholder="Answer"
             />
           </div>
         ))}
       </div>
 
-      {/* Disclosure Rich Text */}
+      {/* DISCLOSURE */}
       <h2 className="text-xl font-semibold mb-3">Disclosure (Rich Text)</h2>
-      <div className="bg-white border rounded mb-10">
-        <ReactQuill value={disclosureHtml} onChange={setDisclosureHtml} modules={quillModules} />
+      <div className="mb-10">
+        <RichTextEditor value={disclosureHtml} onChange={setDisclosureHtml} />
       </div>
 
-      {/* Save Button */}
+      {/* SUBMIT BUTTON */}
       <button
         onClick={handleAddPage}
-        className="px-6 py-3 rounded bg-[#01155E] text-white font-semibold"
+        disabled={loading}
+        className={`px-6 py-3 rounded text-white font-semibold ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#01155E]"
+        }`}
       >
-        Add Page (Save to MongoDB)
+        {loading ? "Saving Data..." : "Add Page (Save MongoDB + Images)"}
       </button>
     </div>
   );
