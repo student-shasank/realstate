@@ -26,4 +26,4 @@ export const fetchListingDetailAPI =
 
  export const COMMUNITIES_URL= `${BASE_URL}/communities`;
 
-  export const  VITE_MAPBOX_TOKEN = "pk.eyJ1IjoiYWtoaWxiaGFpeWEiLCJhIjoiY21jZGl2dDBoMGh3aTJrczNudHV1NWdsbiJ9.j7yWTW2dw9QSSZCw0Vke2Q"
+export const VITE_MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;

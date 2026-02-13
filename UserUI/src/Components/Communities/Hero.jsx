@@ -126,7 +126,7 @@ function CommunityProfile() {
 
           {/* Location & Connectivity (admin html) */}
           <div
-            className="mb-8 max-w-[374px] mt-16"
+            className="mb-8 max-w-[374px] mt-16 text-[18px] leading-relaxed"
             dangerouslySetInnerHTML={{ __html: currentProfile.overview?.locationConnectivityHtml || "" }}
           />
 
@@ -204,7 +204,7 @@ function CommunityProfile() {
             </h2>
 
             <div
-              className="font-['General_Sans'] font-normal text-[16px] leading-[150%]  space-y-2"
+              className="font-['General_Sans'] font-normal text-[16px] leading-[150%]  "
               dangerouslySetInnerHTML={{ __html: currentProfile.sidebar?.worshipHtml || "" }}
             />
 
@@ -352,3 +352,4 @@ function CommunityProfile() {
 }
 
 export default CommunityProfile;
+
