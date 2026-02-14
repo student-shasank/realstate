@@ -20,6 +20,7 @@ import HandoverSnagging from "./Pages/IndividualServicePages/HandoverSnagging";
 import MortgageCoordination from "./Pages/IndividualServicePages/MortgageCoordination";
 import InvestorVisaAdvisory from "./Pages/IndividualServicePages/InvestorVisaAdvisory";
 import Communities from "./Pages/CommunitiesPage/Communities";
+import AllCommunities from "./Pages/CommunitiesPage/AllCommunities";
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/communities/:slug" element={<Communities/>} />
+        <Route path="/communities" element={<AllCommunities/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/service" element={<Service />} />

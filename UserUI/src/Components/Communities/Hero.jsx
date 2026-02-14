@@ -8,6 +8,10 @@ import {
 import imageurl from "../../assets/communitieshero.jpg";
 import backgroundImage from "../../../src/assets/detailservicebackground.png";
 import Communitiesoverview from "../../../src/assets/detailservicebackground.jpg";
+import  {VITE_MAPBOX_TOKEN} from "../../Constant/constant.js"
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+
 
 function CommunityProfile() {
   const { slug } = useParams();
@@ -21,6 +25,48 @@ function CommunityProfile() {
     return () => dispatch(clearProfile());
   }, [slug, dispatch]);
 
+  // ... existing states
+useEffect(() => {
+  if (!currentProfile?.latitude || !currentProfile?.longitude) return;
+
+  mapboxgl.accessToken = VITE_MAPBOX_TOKEN;
+
+  // 1. Map initialization (Colorful Streets Style)
+  const map = new mapboxgl.Map({
+    container: "community-map",
+    style: "mapbox://styles/mapbox/streets-v12", // ✅ Ye style colorful hai
+    center: [currentProfile.longitude, currentProfile.latitude],
+    zoom: 14,
+  });
+
+  // 2. Zoom Controls (+/-) - Bilkul waisa hi placement
+  map.addControl(new mapboxgl.NavigationControl({
+    showCompass: false
+  }), 'bottom-right');
+
+  // 3. Red Marker (Google style colorful pin)
+  const marker = new mapboxgl.Marker({ color: "#FF0000" }) 
+    .setLngLat([currentProfile.longitude, currentProfile.latitude])
+    .addTo(map);
+
+  // 4. Title Label (Always visible text)
+  const popup = new mapboxgl.Popup({ 
+    closeButton: false, 
+    closeOnClick: false,
+    offset: 25,
+    className: 'always-visible-popup' 
+  })
+    .setLngLat([currentProfile.longitude, currentProfile.latitude])
+    .setHTML(`<b style="color: #01155E; font-family: 'General Sans', sans-serif; font-size: 14px;">${currentProfile.title}</b>`)
+    .addTo(map);
+
+  return () => {
+    marker.remove();
+    popup.remove();
+    map.remove();
+  };
+}, [currentProfile]);
+
   if (loading)
     return (
       <div className="h-screen flex items-center justify-center text-2xl font-bold text-[#01155E]">
@@ -29,17 +75,18 @@ function CommunityProfile() {
     );
 
   if (!currentProfile)
+    
     return (
       <div className="h-screen flex items-center justify-center text-2xl font-bold text-red-600">
         Community Not Found!
       </div>
     );
 
-  // ✅ EXACT DATA MAPPING (aapke JSON ke hisaab se)
+  // ✅ EXACT DATA MAPPING (Sirf image logic update kiya backend ke liye)
   const cardData = (currentProfile.hero?.cards || []).map((c) => ({
     title: c.title,
     subtitle: c.subtitle,
-    image: imageurl, // ✅ bydefault (as you said)
+    image: c.image || imageurl, // Agar backend image hai toh wo, warna default
   }));
 
   const snapshotData = (currentProfile.marketSupply?.rows || []).map((r) => ({
@@ -88,7 +135,7 @@ function CommunityProfile() {
           <div className="flex justify-between items-start -mt-[450px] z-10">
             {cardData.map((card, index) => (
               <div key={index} className="w-[362px] h-[511px] flex flex-col items-center">
-                {/* Card Image */}
+                {/* Card Image - Ab ye backend URL lega */}
                 <img
                   src={card.image}
                   alt={card.title}
@@ -169,7 +216,7 @@ function CommunityProfile() {
         <div className="flex-1 relative">
           <div className="relative w-full max-w-[610px] h-[791px]">
             <img
-              src={Communitiesoverview}
+              src={currentProfile.overview?.image || Communitiesoverview}
               alt="Community View"
               className="w-full h-full object-cover rounded-[24px] overflow-hidden"
             />
@@ -247,7 +294,7 @@ function CommunityProfile() {
 
           <div className="relative w-full h-[250px] md:h-[366px] rounded-[16px] overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)] bg-[#01155E]">
             <img
-              src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop"
+              src={currentProfile.marketSupply?.image || "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop"}
               alt="Modern Villa"
               className="w-full h-full object-cover"
             />
@@ -309,6 +356,23 @@ function CommunityProfile() {
             </div>
           </div>
 
+
+          <div className="map-section mt-10 mb-10">
+        <h2 className="text-2xl font-bold mb-4">Location & Directions</h2>
+        <div 
+          id="community-map" 
+          style={{ 
+            width: "100%", 
+            height: "450px", // Community page ke liye thoda bada height
+            borderRadius: "12px",
+            border: "1px solid #ddd" 
+          }} 
+        />
+        <p className="text-gray-500 mt-2 text-sm">
+          📍 {currentProfile.title} is located at coordinates: {currentProfile.latitude}, {currentProfile.longitude}
+        </p>
+      </div>
+
           {/* --- FAQS SECTION --- */}
           <div className="w-full flex flex-col gap-[16px]">
             <div className="pb-1 w-fit mb-4">
@@ -352,4 +416,3 @@ function CommunityProfile() {
 }
 
 export default CommunityProfile;
-

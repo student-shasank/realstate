@@ -9,7 +9,7 @@ import { COMMUNITIES_URL } from '../../Constant/constant';
 export const fetchNavList = createAsyncThunk('community/fetchNavList', async () => {
   const response = await axios.get(`${COMMUNITIES_URL}/navigation`);
   return response.data.data; // Postman mein humne dekha data.data mein array hai
-});
+});  
 
 // 2. Profile Details Fetch (Slug se)
 export const fetchCommunityProfile = createAsyncThunk('community/fetchProfile', async (slug) => {
@@ -32,10 +32,18 @@ const communitySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+    .addCase(fetchNavList.pending, (state) => {
+      state.loading = true; // Data aane tak loading true rakho
+    })
+    .addCase(fetchNavList.fulfilled, (state, action) => {
+      state.loading = false; // Data aa gaya, loading band
+      state.navList = action.payload;
+    })
+    .addCase(fetchNavList.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message;
+    })
       // Navigation List
-      .addCase(fetchNavList.fulfilled, (state, action) => {
-        state.navList = action.payload;
-      })
       // Profile Data
       .addCase(fetchCommunityProfile.pending, (state) => {
         state.loading = true;

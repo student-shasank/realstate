@@ -14,7 +14,16 @@ const communitySchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true, // ✅ performance
+      index: true, 
+    },
+
+    latitude: { 
+      type: Number, 
+      default: 25.0743 
+    },
+    longitude: { 
+      type: Number, 
+      default: 55.3857 
     },
 
     // Hero Section (3 Cards with Titles, Subtitles, and Images)

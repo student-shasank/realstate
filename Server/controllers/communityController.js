@@ -6,14 +6,23 @@ import Community from "../models/Community.js";
  */
 export const getCommunityNavigation = async (req, res) => {
   try {
-    const communities = await Community.find({ status: "published" }, "title slug");
+    // ✅ Yahan "overview" add kar diya hai taaki image aur connectivity mil sake
+    const communities = await Community.find(
+      { status: "published" }, 
+      "title slug overview" 
+    );
+
     res.status(200).json({
       success: true,
       count: communities.length,
       data: communities
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Resource fetch failed", error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: "Resource fetch failed", 
+      error: error.message 
+    });
   }
 };
 

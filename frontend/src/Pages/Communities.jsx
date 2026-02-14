@@ -135,6 +135,9 @@ export default function Communities() {
   const [title, setTitle] = useState(defaults.title);
   const [slug, setSlug] = useState(slugify(defaults.title));
 
+  const [latitude, setLatitude] = useState(defaults.latitude || 25.0743);
+const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
+
   const [heroCards, setHeroCards] = useState(defaults.heroCards);
 
   const [overviewHtml, setOverviewHtml] = useState(defaults.overviewHtml);
@@ -285,6 +288,8 @@ export default function Communities() {
     const payload = {
       title,
       slug,
+      latitude: Number(latitude),   
+       longitude: Number(longitude),
 
       hero: { cards: heroCards },
 
@@ -559,6 +564,31 @@ export default function Communities() {
           </div>
         ))}
       </div>
+
+       {/* ✅ Map Coordinates Section */}
+<h2 className="text-xl font-semibold mb-3">Map Location (Coordinates)</h2>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 border rounded p-4 bg-gray-50">
+  <div>
+    <label className="block text-sm font-medium mb-1">Latitude</label>
+    <input
+      type="number"
+      step="any"
+      className="w-full border rounded p-2"
+      value={latitude}
+      onChange={(e) => setLatitude(e.target.value)}
+    />
+  </div>
+  <div>
+    <label className="block text-sm font-medium mb-1">Longitude</label>
+    <input
+      type="number"
+      step="any"
+      className="w-full border rounded p-2"
+      value={longitude}
+      onChange={(e) => setLongitude(e.target.value)}
+    />
+  </div>
+</div>
 
       {/* DISCLOSURE */}
       <h2 className="text-xl font-semibold mb-3">Disclosure (Rich Text)</h2>

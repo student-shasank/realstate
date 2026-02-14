@@ -201,12 +201,13 @@ export const createCommunity = async (req, res) => {
     const files = req.files;
 
     // 2. Hero Images mapping
-    // Hum hero cards array check karenge aur images ki path set karenge
+    // Multer-Cloudinary 'path' mein seedha URL deta hai (https://res.cloudinary.com/...)
     if (bodyData.hero && bodyData.hero.cards) {
       bodyData.hero.cards.forEach((card, idx) => {
         const fieldName = `heroImage_${idx}`;
         if (files[fieldName]) {
-          card.image = files[fieldName][0].path; // Ya filename agar aap local save kar rahe hain
+          // Yahan 'path' ka matlab ab Cloudinary URL hai
+          card.image = files[fieldName][0].path; 
         }
       });
     }
