@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchNavList } from "../../features/communities/communitySlice.js";
-const DEFAULT_IMAGE = "https://res.cloudinary.com/dqj4vs1la/image/upload/v1770978083/communities/img-1770978078399-detailservicebackground.jpg";
+const DEFAULT_IMAGE = "https://res.cloudinary.com/dqj4vs1la/image/upload/v1771046752/communities/img-1771046744365-c0bcc33cd3e42269d6dcff16f6d0170e5acdaca9.jpg";
 
 function AllCommunities() {
   const dispatch = useDispatch();
@@ -48,6 +48,7 @@ function AllCommunities() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
+          {console.log(allCommunities)}
           {allCommunities.map((item) => (
             <div 
               key={item._id?.$oid || item._id} 
@@ -55,13 +56,12 @@ function AllCommunities() {
             >
               {/* Image Section - Background Image from overview.image */}
               <div className="relative h-[267px] rounded-lg overflow-hidden bg-gray-100 shadow-sm">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                  style={{ 
-                    // ✅ Pehle overview.image check hoga, nahi toh aapka default bg image aayega
-                    backgroundImage: `url(${item.overview?.image || DEFAULT_IMAGE})` 
-                  }}
-                />
+               <div
+    className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
+ style={{ 
+  backgroundImage: `url(${item.marketSupply?.image || DEFAULT_IMAGE})` 
+}}
+  />
                 
                 {/* Hover Overlay - Smooth Fade In */}
                 <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/75" />

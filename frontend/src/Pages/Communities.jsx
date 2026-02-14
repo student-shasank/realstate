@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import RichTextEditor from "./RichTextEditor";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // Redux Hooks
 import { useDispatch, useSelector } from "react-redux";
 import { saveCommunity, resetCommunityStatus } from "../features/communitySlice";
@@ -194,11 +195,12 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
   // ✅ Redux Status Handlers
   useEffect(() => {
     if (success) {
-      alert("✅ Page saved in MongoDB with images via Redux!");
+      toast.success("New page is created sucessfully");
       dispatch(resetCommunityStatus());
     }
     if (error) {
-      alert(`❌ Error: ${error}`);
+    const errorMessage = typeof error === 'object' ? (error.message || "Something went wrong") : error;
+    toast.error(`Error: ${errorMessage}`);
       dispatch(resetCommunityStatus());
     }
   }, [success, error, dispatch]);
@@ -332,6 +334,7 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
 
   return (
     <div className="p-6 max-w-[1100px] mx-auto">
+      <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="text-2xl font-semibold mb-6">Create Community Page</h1>
 
       {/* Title/Slug */}
@@ -604,7 +607,7 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
           loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#01155E]"
         }`}
       >
-        {loading ? "Saving Data..." : "Add Page (Save MongoDB + Images)"}
+        {loading ? "Saving Data..." : "Add New Page "}
       </button>
     </div>
   );

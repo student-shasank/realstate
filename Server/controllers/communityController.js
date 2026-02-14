@@ -9,7 +9,7 @@ export const getCommunityNavigation = async (req, res) => {
     // ✅ Yahan "overview" add kar diya hai taaki image aur connectivity mil sake
     const communities = await Community.find(
       { status: "published" }, 
-      "title slug overview" 
+      "title slug overview marketSupply" 
     );
 
     res.status(200).json({
