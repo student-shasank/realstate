@@ -6,15 +6,31 @@ import Community from "../models/Community.js";
  */
 export const getCommunityNavigation = async (req, res) => {
   try {
-    // ✅ Yahan "overview" add kar diya hai taaki image aur connectivity mil sake
+    // 1. Params nikaalna (Default: page 1, limit 9)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const skip = (page - 1) * limit;
+
+    // 2. Database query with Skip and Limit
     const communities = await Community.find(
       { status: "published" }, 
       "title slug overview marketSupply" 
-    );
+    )
+    .sort({ createdAt: -1 }) // Nayi communities pehle dikhane ke liye
+    .skip(skip)
+    .limit(limit);
+
+    // 3. Total count nikalna pagination check ke liye
+    const totalPublished = await Community.countDocuments({ status: "published" });
+
+    // 4. Check karna ki kya aur data bacha hai
+    const hasMore = skip + communities.length < totalPublished;
 
     res.status(200).json({
       success: true,
       count: communities.length,
+      total: totalPublished,
+      hasMore: hasMore, // Frontend isi se decide karega scroll karna hai ya nahi
       data: communities
     });
   } catch (error) {

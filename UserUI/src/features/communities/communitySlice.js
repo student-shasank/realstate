@@ -1,50 +1,74 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { COMMUNITIES_URL } from '../../Constant/constant';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import { COMMUNITIES_URL } from "../../Constant/constant";
 
-// Base URL (User Backend ka port)
+// 1. Navigation List Fetch with Pagination
+export const fetchNavList = createAsyncThunk(
+  "community/fetchNavList",
+  async (page = 1) => {
+    const response = await axios.get(
+      `${COMMUNITIES_URL}/navigation?page=${page}&limit=9`
+    );
+    return response.data;
+  }
+);
 
-
-// 1. Navigation List Fetch (Dropdown ke liye)
-export const fetchNavList = createAsyncThunk('community/fetchNavList', async () => {
-  const response = await axios.get(`${COMMUNITIES_URL}/navigation`);
-  return response.data.data; // Postman mein humne dekha data.data mein array hai
-});  
-
-// 2. Profile Details Fetch (Slug se)
-export const fetchCommunityProfile = createAsyncThunk('community/fetchProfile', async (slug) => {
-  const response = await axios.get(`${COMMUNITIES_URL}/profile/${slug}`);
-  return response.data.data;
-});
+// 2. Profile Details Fetch
+export const fetchCommunityProfile = createAsyncThunk(
+  "community/fetchProfile",
+  async (slug) => {
+    const response = await axios.get(`${COMMUNITIES_URL}/profile/${slug}`);
+    return response.data.data;
+  }
+);
 
 const communitySlice = createSlice({
-  name: 'community',
+  name: "community",
   initialState: {
     navList: [],
     currentProfile: null,
     loading: false,
-    error: null
+    hasMore: true,
+    error: null,
   },
   reducers: {
     clearProfile: (state) => {
-      state.currentProfile = null; // Taaki naye page par purana data na dikhe
-    }
+      state.currentProfile = null;
+    },
+    // ✅ Important: List reset karne ke liye
+    resetNavList: (state) => {
+      state.navList = [];
+      state.hasMore = true;
+      state.loading = false;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-    .addCase(fetchNavList.pending, (state) => {
-      state.loading = true; // Data aane tak loading true rakho
-    })
-    .addCase(fetchNavList.fulfilled, (state, action) => {
-      state.loading = false; // Data aa gaya, loading band
-      state.navList = action.payload;
-    })
-    .addCase(fetchNavList.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.error.message;
-    })
-      // Navigation List
-      // Profile Data
+      .addCase(fetchNavList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchNavList.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const newData = action.payload?.data || [];
+
+        // ✅ FIXED DUPLICATE CHECK (handles _id as string or {_id: {$oid}})
+        const getId = (x) => x?._id?.$oid || x?._id;
+
+        const filteredData = newData.filter(
+          (newItem) =>
+            !state.navList.some((oldItem) => getId(oldItem) === getId(newItem))
+        );
+
+        state.navList = [...state.navList, ...filteredData];
+        state.hasMore = action.payload?.hasMore ?? false;
+      })
+      .addCase(fetchNavList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
       .addCase(fetchCommunityProfile.pending, (state) => {
         state.loading = true;
       })
@@ -56,8 +80,8 @@ const communitySlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       });
-  }
+  },
 });
 
-export const { clearProfile } = communitySlice.actions;
+export const { clearProfile, resetNavList } = communitySlice.actions;
 export default communitySlice.reducer;
