@@ -47,49 +47,47 @@ const BlogSection = () => {
   ];
 
   return (
-    <section className="bg-white flex justify-center py-16 pb-[67px] ">
-      <div className="w-[1200px]">
+    <section className="bg-white flex justify-center py-16 pb-[67px]">
+      <div className="w-full max-w-[1200px] px-4 sm:px-6 lg:px-0">
 
         {/* TITLE */}
         {/* <h2 className="text-[#01155E] text-[48px] font-semibold mb-[64px]">
           Blogs
         </h2> */}
-        
 
         {/* TITLE */}
         <div className="mb-[50px]">
-          <h2 className="text-[#01155E] text-[48px] font-semibold mb-[10px]"
-          style={{
+          <h2
+            className="text-[#01155E] text-[32px] sm:text-[40px] lg:text-[48px] font-semibold mb-[10px]"
+            style={{
               fontFamily: "Archivo, sans-serif",
-          }}
+            }}
           >
             Blogs
           </h2>
 
           {/* UNDERLINE */}
-          <div className="flex w-[291px]">
+          <div className="flex w-[220px] sm:w-[260px] lg:w-[291px]">
             {/* Thick left line */}
-            <div className="w-[135px] h-[6px] bg-[#01155E]" />
+            <div className="w-[110px] sm:w-[125px] lg:w-[135px] h-[6px] bg-[#01155E]" />
 
             {/* Thin right line */}
             <div className="flex-1 h-[2px] bg-[#01155E]" />
           </div>
         </div>
 
-
-
         {/* MAIN GRID */}
-        <div className="flex gap-[24px]">
+        <div className="flex flex-col lg:flex-row gap-[24px]">
 
           {/* LEFT BIG CARD */}
-          <div className="pt-[21px] pb-[21px] pr-[23px] pl-[23px] w-[578px] h-[616px] bg-white rounded-[32px] border border-[#E2E8F0] gap-y-[24px]
+          <div className="pt-[21px] pb-[21px] pr-[23px] pl-[23px] w-full lg:w-[578px] h-auto lg:h-[616px] bg-white rounded-[32px] border border-[#E2E8F0] gap-y-[24px]
              shadow-[0_20px_60px_rgba(0,0,0,0.12)] overflow-hidden
              flex flex-col">
 
             <img
               src={blogs[0].image}
               alt={blogs[0].title}
-              className=" w-[530px] h-[360px] object-cover rounded-[32px]"
+              className="w-full lg:w-[530px] h-[220px] sm:h-[280px] lg:h-[360px] object-cover rounded-[32px]"
             />
 
             <div className="p-0">
@@ -97,15 +95,15 @@ const BlogSection = () => {
                 {blogs[0].author}
               </span>
 
-              <h3 className="text-[28px] font-bold mb-2">
+              <h3 className="text-[22px] sm:text-[24px] lg:text-[28px] font-bold mb-2">
                 {blogs[0].title}
               </h3>
 
-              <p className="text-[16px] mb-6">
+              <p className="text-[14px] sm:text-[15px] lg:text-[16px] mb-6">
                 {blogs[0].description}
               </p>
 
-              <div className="flex gap-x-[156px] items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-6 items-start sm:items-center">
                 <div>
                   {/* <p className="text-sm font-bold">Full name</p> */}
                   <p className="text-xs text-[#64748B]">
@@ -113,7 +111,7 @@ const BlogSection = () => {
                   </p>
                 </div>
 
-                <button className="bg-[#01155E] text-white px-8 py-3 rounded-xl text-sm">
+                <button className="bg-[#01155E] text-white px-8 py-3 rounded-xl text-sm w-full sm:w-auto">
                   Read More..
                 </button>
               </div>
@@ -121,28 +119,28 @@ const BlogSection = () => {
           </div>
 
           {/* RIGHT STACKED CARDS */}
-          <div className="flex flex-col justify-between flex-1">
+          <div className="flex flex-col gap-[24px] lg:gap-0 lg:justify-between flex-1">
             {blogs.slice(1).map((blog) => (
               <div
                 key={blog.id}
-                className="flex bg-white rounded-[20px] border border-[#E2E8F0]
+                className="flex flex-col sm:flex-row bg-white rounded-[20px] border border-[#E2E8F0]
                            shadow-[0_10px_40px_rgba(0,0,0,0.08)] p-[15px] gap-4"
               >
                 <img
                   src={blog.image}
                   alt={blog.title}
-                  className="w-[149px] h-[148px] rounded-xl object-cover"
+                  className="w-full sm:w-[149px] h-[180px] sm:h-[148px] rounded-xl object-cover"
                 />
 
                 <div className="relative flex flex-col flex-1">
                   <div>
                     {/* TOP ROW: Architect + Date */}
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-start sm:items-center mb-2">
                       <span className="text-sm font-semibold text-[#0F172A]">
                         {blog.author}
                       </span>
 
-                      <span className="absolute right-0 text-xs text-[#64748B]">
+                      <span className="text-xs text-[#64748B] sm:absolute sm:right-0">
                         {blog.date}
                       </span>
                     </div>
