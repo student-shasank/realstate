@@ -24,84 +24,156 @@ export const dashboard = async (req, res) => {
 };
 
 
-
-// Create Listing with Cloudinary Upload
 export const createListing = async (req, res) => {
   try {
     const imageUrls = [];
 
-    // 1️⃣ Upload images
+    // ✅ Images (multer-storage-cloudinary already uploads)
     if (req.files?.length) {
-      const uploads = req.files.map((file) =>
-        new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "listings" },
-            (err, result) => {
-              if (err) reject(err);
-              else resolve(result.secure_url);
-            }
-          ).end(file.buffer);
-        })
-      );
-
-      imageUrls.push(...(await Promise.all(uploads)));
+      imageUrls.push(...req.files.map((file) => file.path));
     }
 
-    // 2️⃣ Image URLs
-    if (req.body.images) {
-      const urls = Array.isArray(req.body.images)
-        ? req.body.images
-        : [req.body.images];
-      imageUrls.push(...urls);
+    // ✅ Parse features (comma separated string -> array)
+    const featuresArr =
+      typeof req.body.features === "string" && req.body.features.trim()
+        ? req.body.features.split(",").map((x) => x.trim()).filter(Boolean)
+        : [];
+
+    // ✅ Parse installmentPlan (JSON string -> array)
+    let installmentPlanArr = [];
+    if (req.body.installmentPlan) {
+      try {
+        installmentPlanArr = JSON.parse(req.body.installmentPlan);
+      } catch (e) {
+        installmentPlanArr = [];
+      }
     }
 
-    // ✅ 3️⃣ LOCATION (FormData se flat values)
-    const loc = req.body.location || {};
-const locationText = (loc.location || "").toLowerCase();
-const city = (loc.city || "").toLowerCase();
-const country = (loc.country || "").toLowerCase();
-
+    // ✅ Location (flat)
+    const locationText = (req.body.location || "").toLowerCase().trim();
+    const city = (req.body.city || "").toLowerCase().trim();
+    const country = (req.body.country || "").toLowerCase().trim();
 
     if (!locationText || !city || !country) {
-      throw new Error("Location, city and country are required");
+      return res.status(400).json({
+        success: false,
+        error: "Location, city and country are required",
+      });
     }
 
-    // 4️⃣ Geocode
     const { lat, lng } = await geocodeAddress({
       location: locationText,
       city,
       country,
     });
 
-    // 5️⃣ Create Listing
-    const listing = await Listing.create({
-      ...req.body,
+    // ✅ Map flat fields -> schema nested objects
+    const listingPayload = {
+      // Property details
+      title: req.body.title,
+      referenceNo: req.body.referenceNo,
+      price: req.body.price ? Number(req.body.price) : undefined,
+      currency: req.body.currency || "AED",
+      type: req.body.type,
+      purpose: req.body.purpose,
+     completionStatus: req.body.completionStatus || "Pending",
+      addedOn: req.body.addedOn ? new Date(req.body.addedOn) : undefined,
+
+      // Specs
+      bedrooms: req.body.bedrooms ? Number(req.body.bedrooms) : undefined,
+      bathrooms: req.body.bathrooms ? Number(req.body.bathrooms) : undefined,
+      builtUpArea: req.body.builtUpArea ? Number(req.body.builtUpArea) : undefined,
+      plotArea: req.body.plotArea ? Number(req.body.plotArea) : undefined,
+      furnishing: req.body.furnishing,
+
+      // Arrays
+      features: featuresArr,
+      images: imageUrls,
+
+      // ✅ Agent (nested)
+      // agent: req.body.agentName
+      //   ? {
+      //       name: req.body.agentName,
+      //       agency: req.body.agency,
+      //       phone: req.body.phone,
+      //       whatsapp: req.body.whatsapp,
+      //       isResponsiveBroker:
+      //         req.body.isResponsiveBroker === "true" ||
+      //         req.body.isResponsiveBroker === true,
+      //     }
+      //   : undefined,
+
+      // ✅ Internal (nested)
+      internal: req.body.internalListingId
+        ? {
+            internalListingId: req.body.internalListingId,
+            sourceBrokerageName: req.body.sourceBrokerageName,
+            listingAgentName: req.body.listingAgentName,
+            listingAgentPhone: req.body.listingAgentPhone,
+            listingAgentEmail: req.body.listingAgentEmail,
+            listingSourceType: req.body.listingSourceType || "Direct",
+            listingValidUntil: req.body.listingValidUntil
+              ? new Date(req.body.listingValidUntil)
+              : undefined,
+          }
+        : undefined,
+
+      // ✅ Validated info (nested)
+      validatedInfo: {
+        developer: req.body.developer,
+        ownership: req.body.ownership,
+        builtUpArea: req.body.validatedBuiltUpArea
+          ? Number(req.body.validatedBuiltUpArea)
+          : undefined,
+        plotArea: req.body.validatedPlotArea
+          ? Number(req.body.validatedPlotArea)
+          : undefined,
+        usage: req.body.usage,
+      },
+
+      // ✅ Project info (nested)
+      projectInfo: {
+        name: req.body.projectName,
+        status: req.body.projectStatus,
+        completion: req.body.projectCompletion,
+        handoverDate: req.body.handoverDate,
+        developer: req.body.projectDeveloper,
+        lastInspected: req.body.lastInspected,
+      },
+
+      // ✅ Payment plan (nested)
+      paymentPlan: {
+        downPayment: req.body.downPayment ? Number(req.body.downPayment) : undefined,
+        installmentPlan: installmentPlanArr,
+      },
+
+      // ✅ Location (nested)
       location: {
         location: locationText,
         city,
         country,
         coordinates: {
           type: "Point",
-          coordinates: [lng, lat], // MongoDB order
+          coordinates: [lng, lat],
         },
       },
-      images: imageUrls,
-    });
+    };
 
-    res.status(201).json({
+    const listing = await Listing.create(listingPayload);
+
+    return res.status(201).json({
       success: true,
       message: "Listing created successfully",
       listing,
     });
   } catch (error) {
-    console.error("CREATE LISTING ERROR:", error.message);
-    res.status(500).json({
+    console.error("CREATE LISTING ERROR:", error);
+    return res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message || "Server error",
     });
   }
 };
-
 // UPDATE LISTING STATUS
 // -------------------------------------------------------
 export const updateListingStatus = async (req, res) => {

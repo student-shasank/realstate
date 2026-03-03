@@ -15,13 +15,27 @@
 import mongoose from "mongoose";
 
 // Agent Schema
-const agentSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  agency: { type: String },
-  phone: { type: String },
-  whatsapp: { type: String },
-  isResponsiveBroker: { type: Boolean, default: false },
-  profileImage: { type: String } // Cloudinary URL
+// const agentSchema = new mongoose.Schema({
+//   name: { type: String, required: true },
+//   agency: { type: String },
+//   phone: { type: String },
+//   whatsapp: { type: String },
+//   isResponsiveBroker: { type: Boolean, default: false },
+//   profileImage: { type: String } // Cloudinary URL
+// });
+// Internal Listing Metadata (NOT public)
+const internalSchema = new mongoose.Schema({
+  internalListingId: { type: String, required: true }, // ADD THIS
+  sourceBrokerageName: { type: String, required: true },
+  listingAgentName: { type: String, required: true },
+  listingAgentPhone: { type: String },
+  listingAgentEmail: { type: String },
+  listingSourceType: {
+    type: String,
+    enum: ["Direct", "Shared", "API"],
+    default: "Direct",
+  },
+  listingValidUntil: { type: Date },
 });
 
 // Validated Information Schema
@@ -88,7 +102,8 @@ const ListingSchema = new mongoose.Schema(
     features: [{ type: String }],
     images: [{ type: String }],
 
-    agent: agentSchema,
+  
+    internal: internalSchema,
     validatedInfo: validatedInfoSchema,
     projectInfo: projectInfoSchema,
     location: locationSchema,

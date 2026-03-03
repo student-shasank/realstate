@@ -118,6 +118,24 @@ const styles = (isHovered) => ({
     textAlign: 'center',
     boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
   },
+
+  connectBtn: {
+  backgroundColor: 'transparent',
+  color: '#004c7d',
+  border: '1px solid #004c7d',
+  borderRadius: '20px',
+  padding: '6px 14px',
+  fontSize: '0.85em',
+  fontWeight: '600',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  marginLeft: 'auto',
+  // Hover effect handled by CSS or inline:
+  ':hover': {
+    backgroundColor: '#004c7d',
+    color: 'white',
+  }
+},
 });
 
 export default styles;

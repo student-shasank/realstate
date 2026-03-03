@@ -2,7 +2,7 @@ import Listing from "../models/Listing.js";
 
 export const dashboard = async (req, res) => {
   try {
-    const listings = await Listing.find();
+    const listings = await Listing.find().select("-internal");
 
     res.status(200).json({
       success: true,
@@ -36,6 +36,7 @@ export const getListings = async (req, res) => {
     const [listings, total] = await Promise.all([
       Listing.find(matchQuery)
         .sort({ updatedAt: -1 })
+         .select("-internal")           
         .skip(skip)
         .limit(limit),
 
@@ -59,14 +60,11 @@ export const getListings = async (req, res) => {
   }
 };
 
-
-
-
 export const getListingById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).select("-internal");
 
     if (!listing) {
       return res.status(404).json({

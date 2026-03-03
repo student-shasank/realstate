@@ -32,11 +32,11 @@ function ListingCreation() {
     features: "", // comma separated
 
     // --- Agent ---
-    agentName: "",
-    agency: "",
-    phone: "",
-    whatsapp: "",
-    isResponsiveBroker: false,
+    // agentName: "",
+    // agency: "",
+    // phone: "",
+    // whatsapp: "",
+    // isResponsiveBroker: false,
 
     // --- Validated Info ---
     developer: "",
@@ -68,6 +68,15 @@ country: "",
 
     // --- Images ---
     images: [],
+
+    // --- Internal (Admin Only) ---
+internalListingId: "",
+sourceBrokerageName: "",
+listingAgentName: "",
+listingAgentPhone: "",
+listingAgentEmail: "",
+listingSourceType: "Direct",
+listingValidUntil: "",
   });
 
   const [images, setImages] = useState([]);
@@ -261,7 +270,7 @@ country: "",
         </div>
 
         {/* ==== AGENT INFO ==== */}
-        <div className="border-b pb-10">
+        {/* <div className="border-b pb-10">
           <h2 className="text-lg font-semibold">Agent Information</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mt-6">
@@ -275,7 +284,100 @@ country: "",
               <label>Responsive Broker</label>
             </div>
           </div>
-        </div>
+        </div> */}
+        {/* ==== INTERNAL INFO (ADMIN ONLY) ==== */}
+<div className="border-b pb-10">
+  <h2 className="text-lg font-semibold text-red-600">
+    Internal Listing Information
+  </h2>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+
+    {/* Internal Listing ID */}
+    <div>
+      <label className="block text-sm font-medium">Internal Listing ID</label>
+      <input
+        name="internalListingId"
+        placeholder="Internal Listing ID"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Source Brokerage Name */}
+    <div>
+      <label className="block text-sm font-medium">Source Brokerage Name</label>
+      <input
+        name="sourceBrokerageName"
+        placeholder="Source Brokerage Name"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Listing Agent Name */}
+    <div>
+      <label className="block text-sm font-medium">Listing Agent Name</label>
+      <input
+        name="listingAgentName"
+        placeholder="Listing Agent Name"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Listing Agent Phone */}
+    <div>
+      <label className="block text-sm font-medium">Listing Agent Phone</label>
+      <input
+        name="listingAgentPhone"
+        placeholder="Listing Agent Phone"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Listing Agent Email */}
+    <div>
+      <label className="block text-sm font-medium">Listing Agent Email</label>
+      <input
+        name="listingAgentEmail"
+        placeholder="Listing Agent Email"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Listing Source Type */}
+    <div>
+      <label className="block text-sm font-medium">Listing Source Type</label>
+      <select
+        name="listingSourceType"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      >
+        <option value="Direct">Direct</option>
+        <option value="Shared">Shared</option>
+        <option value="API">API</option>
+      </select>
+    </div>
+
+    {/* Listing Valid Until */}
+    <div>
+      <label className="block text-sm font-medium">Listing Valid Until</label>
+      <input
+        type="date"
+        name="listingValidUntil"
+        onChange={handleChange}
+        className="mt-2 block w-full border px-3 py-2 rounded"
+      />
+    </div>
+
+    {/* Internal Notes */}
+   
+
+  </div>
+</div>
 
         {/* ==== LOCATION ==== */}
         <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 mt-6">

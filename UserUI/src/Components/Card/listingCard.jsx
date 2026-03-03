@@ -228,7 +228,17 @@ const ListingCard = ({ listing }) => {
             <div style={{ fontWeight: 'bold', fontSize: '0.95em' }}>{listing.agent?.name}</div>
             <div style={{ fontSize: '0.8em', color: '#888' }}>{listing.agent?.agency}</div>
           </div>
+          <button 
+    style={styles.connectBtn}
+    onClick={(e) => {
+      e.stopPropagation();
+      window.open(`https://wa.me/${listing.agent?.phone || ''}`, '_blank');
+    }}
+  >
+    Connect
+  </button>
         </div>
+        
       </div>
 
       {/* 2. Wrap the popup in a Portal */}
