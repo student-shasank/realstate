@@ -21,6 +21,8 @@ import MortgageCoordination from "./Pages/IndividualServicePages/MortgageCoordin
 import InvestorVisaAdvisory from "./Pages/IndividualServicePages/InvestorVisaAdvisory";
 import Communities from "./Pages/CommunitiesPage/Communities";
 import AllCommunities from "./Pages/CommunitiesPage/AllCommunities";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -74,6 +76,7 @@ function App() {
    
 
       <Footer />
+      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 }

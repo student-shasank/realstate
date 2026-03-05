@@ -1,176 +1,75 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom'; // 1. Import ReactDOM for Portal
+import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
 import { useNavigate } from "react-router-dom";
 import getStyles from './ListingCard.styles';
+import { sendListingEnquiry, resetEnquiryState } from "../../features/Enquiery/enquirySlice.js";
+import { toast } from 'react-toastify';
 
 const ListingCard = ({ listing }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Local loading state jo sirf IS card ko control karegi
+  const [isLocalSending, setIsLocalSending] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Global states from Redux
+  const { success: enquirySuccess, error: enquiryError } = useSelector((state) => state.enquiry);
+  const { loading: pdfLoading, success: pdfSuccess, error: pdfError } = useSelector((state) => state.pdf);
 
-  const { loading, success, error } = useSelector(
-    (state) => state.pdf
-  );
+  // Handle Connect Button Click
+  const handleConnect = async (e) => {
+    e.stopPropagation();
+    setIsLocalSending(true); // Button ko turant "Sending..." kar do
+    
+    try {
+      // Enquiry dispatch karein
+      await dispatch(sendListingEnquiry({ listingId: listing._id })).unwrap();
+      toast.success("Enquiry sent ✅");
+    } catch (err) {
+  toast.error(err || "Something went wrong");
+    } finally {
+      // OK click karne ke baad ya error aane par button normal kar do
+      setIsLocalSending(false);
+      dispatch(resetEnquiryState());
+    }
+  };
 
   const handleSendPdf = () => {
     if (!email) {
-      alert('Please enter email');
+      toast.success('Please enter email');
       return;
     }
     dispatch(sendListingPdf({ listingId: listing._id, email: email }));
   };
 
   useEffect(() => {
-    if (success && isPopupOpen) {
+    if (pdfSuccess && isPopupOpen) {
       const timer = setTimeout(() => {
         setIsPopupOpen(false);
         setEmail('');
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [success, isPopupOpen]);
-
+  }, [pdfSuccess, isPopupOpen]);
 
   const openDetails = () => {
-  navigate(`/listing/${listing._id}`);
-};
+    navigate(`/listing/${listing._id}`);
+  };
 
-
-  // const styles = {
-  //   card: {
-  //     border: '1px solid #e0e0e0',
-  //     borderRadius: '8px',
-  //     display: 'flex',
-  //     flexDirection: 'column',
-  //     overflow: 'hidden',
-  //     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-  //     maxWidth: '350px',
-  //     backgroundColor: '#fff',
-  //     fontFamily: 'Arial, sans-serif',
-  //   },
-  //   imageContainer: {
-  //     height: '220px',
-  //     position: 'relative',
-  //     overflow: 'hidden',
-  //   },
-  //   image: { width: '100%', height: '100%', objectFit: 'cover' },
-  //   badgeContainer: {
-  //     position: 'absolute',
-  //     top: '10px',
-  //     left: '10px',
-  //     display: 'flex',
-  //     gap: '8px',
-  //     zIndex: 10,
-  //   },
-  //   truCheck: {
-  //     backgroundColor: '#007bff',
-  //     color: 'white',
-  //     padding: '4px 8px',
-  //     borderRadius: '4px',
-  //     fontSize: '0.75em',
-  //     fontWeight: '600',
-  //   },
-  //   offPlan: {
-  //     backgroundColor: '#ffc107',
-  //     color: '#333',
-  //     padding: '4px 8px',
-  //     borderRadius: '4px',
-  //     fontSize: '0.75em',
-  //     fontWeight: '600',
-  //   },
-  //   handoverBadge: {
-  //     position: 'absolute',
-  //     bottom: '0',
-  //     left: '0',
-  //     backgroundColor: '#387373',
-  //     color: 'white',
-  //     padding: '8px 12px',
-  //     fontSize: '0.85em',
-  //     fontWeight: '600',
-  //     borderTopRightRadius: '8px',
-  //   },
-  //   details: { padding: '15px' },
-  //   price: { 
-  //     fontSize: '1.6em', 
-  //     fontWeight: '700', 
-  //     color: '#004c7d', 
-  //     marginBottom: '10px' 
-  //   },
-  //   featuresWrapper: {
-  //     display: 'flex',
-  //     alignItems: 'center',
-  //     gap: '15px',
-  //     fontSize: '1em',
-  //     color: '#555',
-  //     marginBottom: '15px',
-  //     paddingBottom: '10px',
-  //     borderBottom: '1px solid #f0f0f0',
-  //   },
-  //   shortDownloadBtn: {
-  //     display: 'flex',
-  //     alignItems: 'center',
-  //     gap: '4px',
-  //     padding: '5px 10px',
-  //     backgroundColor: isHovered ? '#003a61' : '#004c7d',
-  //     color: 'white',
-  //     border: 'none',
-  //     borderRadius: '4px',
-  //     cursor: 'pointer',
-  //     fontSize: '0.8em',
-  //     fontWeight: '600',
-  //     marginLeft: 'auto',
-  //     transition: '0.2s',
-  //   },
-  //   agentSection: {
-  //     display: 'flex',
-  //     alignItems: 'center',
-  //     marginTop: '15px',
-  //     paddingTop: '15px',
-  //     borderTop: '1px solid #eee',
-  //   },
-  //   agentImage: {
-  //     width: '45px',
-  //     height: '45px',
-  //     borderRadius: '50%',
-  //     marginRight: '12px',
-  //     objectFit: 'cover',
-  //   },
-  //   // MODAL STYLES (COVER ENTIRE SCREEN)
-  //   modalOverlay: {
-  //     position: 'fixed',
-  //     top: 0, left: 0, right: 0, bottom: 0,
-  //     backgroundColor: 'rgba(0,0,0,0.5)', // Darken background
-  //     display: 'flex',
-  //     justifyContent: 'center',
-  //     alignItems: 'center',
-  //     zIndex: 9999, // Very high z-index
-  //     backdropFilter: 'blur(8px)', // Blur the whole background
-  //   },
-  //   popup: {
-  //     backgroundColor: 'white',
-  //     padding: '30px',
-  //     borderRadius: '16px',
-  //     width: '350px',
-  //     textAlign: 'center',
-  //     boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-  //   }
-
- // };
- const styles = getStyles(isHovered);
-
+  const styles = getStyles(isHovered);
 
   return (
     <div style={styles.card}>
-    <div
-  style={{ ...styles.imageContainer, cursor: "pointer" }}
-  onClick={openDetails}
->
+      <div
+        style={{ ...styles.imageContainer, cursor: "pointer" }}
+        onClick={openDetails}
+      >
         <img src="https://images.bayut.com/thumbnails/803707122-1066x800.webp" style={styles.image} alt="Property" />
         <div style={styles.badgeContainer}>
           <span style={styles.truCheck}>✓ TruCheck</span>
@@ -191,31 +90,29 @@ const ListingCard = ({ listing }) => {
             style={styles.shortDownloadBtn}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            // onClick={() => setIsPopupOpen(true)}
             onClick={(e) => {
-  e.stopPropagation(); // ⛔ stop navigation
-  setIsPopupOpen(true);
-}}
+              e.stopPropagation();
+              setIsPopupOpen(true);
+            }}
           >
             📩 PDF
           </button>
         </div>
-<h3
-  style={{
-    fontSize: "1.1em",
-    fontWeight: "600",
-    color: "#333",
-    margin: "0 0 5px 0",
-    cursor: "pointer",
-  }}
-  onClick={openDetails}
->
-
-        {/* <h3 style={{fontSize: '1.1em', fontWeight: '600', color: '#333', margin: '0 0 5px 0'}}> */}
+        
+        <h3
+          style={{
+            fontSize: "1.1em",
+            fontWeight: "600",
+            color: "#333",
+            margin: "0 0 5px 0",
+            cursor: "pointer",
+          }}
+          onClick={openDetails}
+        >
           {listing.title}
         </h3>
         <p style={{ fontSize: '0.9em', color: '#888', margin: 0 }}>
-     {listing.location?.community}, {listing.location?.city}
+          {listing.location?.community}, {listing.location?.city}
         </p>
 
         <div style={styles.agentSection}>
@@ -228,24 +125,21 @@ const ListingCard = ({ listing }) => {
             <div style={{ fontWeight: 'bold', fontSize: '0.95em' }}>{listing.agent?.name}</div>
             <div style={{ fontSize: '0.8em', color: '#888' }}>{listing.agent?.agency}</div>
           </div>
-          <button 
-    style={styles.connectBtn}
-    onClick={(e) => {
-      e.stopPropagation();
-      window.open(`https://wa.me/${listing.agent?.phone || ''}`, '_blank');
-    }}
-  >
-    Connect
-  </button>
+          
+          <button
+            style={styles.connectBtn}
+            disabled={isLocalSending}
+            onClick={handleConnect} // Refactored function
+          >
+            {isLocalSending ? "Sending..." : "Connect"}
+          </button>
         </div>
-        
       </div>
 
-      {/* 2. Wrap the popup in a Portal */}
       {isPopupOpen && ReactDOM.createPortal(
         <div style={styles.modalOverlay} onClick={() => setIsPopupOpen(false)}>
           <div style={styles.popup} onClick={(e) => e.stopPropagation()}>
-            {success ? (
+            {pdfSuccess ? (
               <div>
                 <div style={{fontSize: '3em', color: '#387373', marginBottom: '10px'}}>✅</div>
                 <h3 style={{margin: '0 0 5px 0'}}>PDF Sent!</h3>
@@ -269,24 +163,24 @@ const ListingCard = ({ listing }) => {
                   onChange={(e) => setEmail(e.target.value)}
                 />
 
-                {error && <p style={{color: 'red', fontSize: '0.75em'}}>{"Invalid email ID"}</p>}
+                {pdfError && <p style={{color: 'red', fontSize: '0.75em'}}>{"Invalid email ID"}</p>}
 
                 <button
                   onClick={handleSendPdf}
-                  disabled={loading}
+                  disabled={pdfLoading}
                   style={{
                     width: '100%', padding: '12px', background: '#387373', color: 'white',
                     border: 'none', borderRadius: '8px', fontWeight: 'bold',
-                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1
+                    cursor: pdfLoading ? 'not-allowed' : 'pointer', opacity: pdfLoading ? 0.6 : 1
                   }}
                 >
-                  {loading ? 'Sending...' : 'Send PDF Now'}
+                  {pdfLoading ? 'Sending...' : 'Send PDF Now'}
                 </button>
               </>
             )}
           </div>
         </div>,
-        document.body // This renders the popup at the root level
+        document.body
       )}
     </div>
   );

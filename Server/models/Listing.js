@@ -1,13 +1,41 @@
+// import mongoose from "mongoose";
+
+// const ListingSchema = new mongoose.Schema(
+//   {
+//     title: { type: String, required: true },
+//     price: { type: Number, required: true },
+//     location: { type: String, required: true },
+//     description: { type: String },
+    
+//   },
+// );
+
+// export default mongoose.model("Listing", ListingSchema);
+
 import mongoose from "mongoose";
 
 // Agent Schema
-const agentSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  agency: { type: String },
-  phone: { type: String },
-  whatsapp: { type: String },
-  isResponsiveBroker: { type: Boolean, default: false },
-  profileImage: { type: String } // Cloudinary URL
+// const agentSchema = new mongoose.Schema({
+//   name: { type: String, required: true },
+//   agency: { type: String },
+//   phone: { type: String },
+//   whatsapp: { type: String },
+//   isResponsiveBroker: { type: Boolean, default: false },
+//   profileImage: { type: String } // Cloudinary URL
+// });
+// Internal Listing Metadata (NOT public)
+const internalSchema = new mongoose.Schema({
+  internalListingId: { type: String }, // ADD THIS
+  sourceBrokerageName: { type: String},
+  listingAgentName: { type: String},
+  listingAgentPhone: { type: String },
+  listingAgentEmail: { type: String },
+  listingSourceType: {
+    type: String,
+    enum: ["Direct", "Shared", "API"],
+    default: "Direct",
+  },
+  listingValidUntil: { type: Date },
 });
 
 // Validated Information Schema
@@ -31,14 +59,19 @@ const projectInfoSchema = new mongoose.Schema({
 
 // Location Schema
 const locationSchema = new mongoose.Schema({
-  city: String,
-  community: String,
-  subCommunity: String,
+  location: String, // Palm Jumeirah
+  city: String,     // Dubai
+  country: String,  // UAE
   coordinates: {
     type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number], default: [0, 0] } // [lng, lat]
+    coordinates: {
+      type: [Number], // [lng, lat]
+      index: "2dsphere"
+    }
   }
 });
+
+
 locationSchema.index({ coordinates: "2dsphere" });
 
 // ⭐ FINAL LISTING SCHEMA ⭐
@@ -54,7 +87,7 @@ const ListingSchema = new mongoose.Schema(
     purpose: { type: String },
     completionStatus: { type: String },
     addedOn: { type: Date },
-    availability: {
+   availability: {
       type: String,
       enum: ["Available", "Unavailable"],
       default: "Available",
@@ -65,10 +98,12 @@ const ListingSchema = new mongoose.Schema(
     plotArea: { type: Number },
     furnishing: { type: String },
 
+
     features: [{ type: String }],
     images: [{ type: String }],
 
-    agent: agentSchema,
+  
+    internal: internalSchema,
     validatedInfo: validatedInfoSchema,
     projectInfo: projectInfoSchema,
     location: locationSchema,
@@ -81,12 +116,7 @@ const ListingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔹 INDEXES FOR SEARCH OPTIMIZATION
-ListingSchema.index({ "location.city": 1 });      // regex / prefix search
-ListingSchema.index({ bedrooms: 1 });            // >= comparison
-ListingSchema.index({ bathrooms: 1 });           // >= comparison
-ListingSchema.index({ price: 1 });               // price range
-ListingSchema.index({ type: 1 });                // property type
-ListingSchema.index({ completionStatus: 1 });    // completion filter
 
+// Export as Listing (NOT Property)
 export default mongoose.model("Listing", ListingSchema);
+
