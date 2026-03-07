@@ -1,0 +1,84 @@
+.slider-wrapper {
+  width: 100%;
+  background: #fff;
+  padding: 40px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.heading-section {
+  width: 250px;
+  padding-right: 18px;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.slider-content {
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Track movement */
+.logo-track {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 40s linear infinite;
+}
+
+.logo-track:hover {
+  animation-play-state: paused; /* Mouse hover karne par animation ruk jayegi */
+}
+
+.logo-slide {
+  width: 200px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-slide img {
+  max-width: 100%;
+  height: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.logo-slide img:hover {
+  opacity: 1;
+}
+
+/* Keyframes for smooth infinite scroll */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%); /* 50% kyunki humne 2 sets use kiye hain */
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .slider-container {
+    flex-direction: column;
+    text-align: center;
+  }
+  .heading-section {
+    width: 100%;
+    margin-bottom: 20px;
+    padding-right: 0;
+  }
+}

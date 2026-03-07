@@ -22,6 +22,7 @@ import Services from '../Components/HomePageComponents/Service';
 import CommunitiesBrief from '../Components/HomePageComponents/CommunitiesBrief';
 import UpcomingProjects from '../Components/HomePageComponents/UpcomingProjects';
 import BlogSection from '../Components/HomePageComponents/BlogSection';
+import DeveloperSlider from '../Components/HomePageComponents/Developerslider/DeveloperSlider';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -282,6 +283,7 @@ const Home = () => {
       </div>
 
       <div>
+        <DeveloperSlider/>
         <FeaturesSection />
         <Services />
         <CommunitiesBrief />
