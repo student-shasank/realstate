@@ -23,6 +23,8 @@ import CommunitiesBrief from '../Components/HomePageComponents/CommunitiesBrief'
 import UpcomingProjects from '../Components/HomePageComponents/UpcomingProjects';
 import BlogSection from '../Components/HomePageComponents/BlogSection';
 import DeveloperSlider from '../Components/HomePageComponents/Developerslider/DeveloperSlider';
+import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrategy';
+import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -126,7 +128,7 @@ const Home = () => {
 
           <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
             {['Properties', 'New Project', 'Transaction', 'Agents'].map((tab) => (
-              <button key={tab} className="transition-all flex items-center justify-center" style={{ width: '280px', height: '46px', borderRadius: '8px', fontWeight: '700', fontSize: '18px', border: 'none', cursor: 'pointer', backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF', color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)' }}>
+              <button key={tab} className="transition-all flex items-center justify-center" style={{ width: '280px', height: '46px', borderRadius: '8px', fontWeight: '600', fontSize: '20px', border: 'none', cursor: 'pointer', backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF', color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)' }}>
                 {tab}
               </button>
             ))}
@@ -134,27 +136,27 @@ const Home = () => {
 
           <div className="bg-white/30 backdrop-blur-2xl border border-white/40 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">
-              <div className="bg-white rounded-lg px-8 py-2.5 font-bold text-[#01155E] flex items-center justify-center shadow-sm min-w-[120px]">Buy</div>
+              <div className="bg-white rounded-lg px-8 py-2.5 font-['Archivo'] text-[#01155E] flex items-center justify-center shadow-sm min-w-[120px]">Buy</div>
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
                 </div>
                 <input type="text" placeholder="Enter Location" className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium shadow-sm" value={location} onChange={(e) => dispatch(setLocation(e.target.value))} />
               </div>
-              <button onClick={handleSearch} className="bg-[#01155E] text-white px-10 py-2.5 rounded-lg font-bold text-lg shadow-md min-w-[160px]">Search</button>
+              <button onClick={handleSearch} className="bg-[#01155E] text-white px-10 py-2.5 rounded-lg font-['Archivo'] text-lg shadow-md min-w-[160px]">Search</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
               <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
                 {['All', 'Ready', 'Off-Plan'].map((status) => (
-                  <button key={status} onClick={() => dispatch(setCompletion(status))} className={`flex-1 py-1.5 px-3 text-sm font-bold rounded-lg transition-all ${completion === status ? 'bg-[#2B3964] text-white shadow-md' : 'text-[#2B3964]'}`}>
+                  <button key={status} onClick={() => dispatch(setCompletion(status))} className={`flex-1 py-1.5 px-3 text-sm font-['Archivo']  text-[#01155E] rounded-lg transition-all ${completion === status ? 'bg-[#2B3964] text-white shadow-md' : 'text-[#2B3964]'}`}>
                     {status}
                   </button>
                 ))}
               </div>
 
               <div className="relative">
-                <select value={propertyType} onChange={(e) => dispatch(setPropertyType(e.target.value))} className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 outline-none shadow-sm cursor-pointer">
+                <select value={propertyType} onChange={(e) => dispatch(setPropertyType(e.target.value))} className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-gray-500 outline-none shadow-sm cursor-pointer">
                   <option value="Apartment">Residential</option>
                   <option value="Villa">Villa</option>
                 </select>
@@ -166,14 +168,14 @@ const Home = () => {
                   const nextState = !isBedBathOpen;
                   closeAll(); 
                   if (nextState) dispatch(toggleBedBath()); 
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm">
+                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span className="truncate">{beds} Beds / {baths} Baths</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isBedBathOpen && (
                   <div className="absolute top-full -right-5 mt-0 w-full md:w-[320px] bg-white border border-gray-200 rounded-3xl shadow-xl z-50 p-6">
                     <div className="mb-6">
-                      <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-medium text-lg">Beds</h3></div>
+                      <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-['Archivo'] text-lg">Beds</h3></div>
                       <div className="flex flex-wrap gap-2">
                         {['Studio', '1', '2', '3', '4', '5', '6', '7', '8+'].map((opt) => (
                           <button key={opt} type="button" onClick={() => dispatch(setBeds(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all text-sm ${beds === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white text-[#5B6B91] border-gray-300'}`}>{opt}</button>
@@ -201,7 +203,7 @@ const Home = () => {
                   const nextState = !isPriceOpen;
                   closeAll(); 
                   if (nextState) dispatch(togglePrice()); 
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm">
+                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span className="truncate">{getPriceLabel()}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -222,11 +224,11 @@ const Home = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="relative">
-                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 outline-none shadow-sm cursor-pointer"><option>Emirate</option></select>
+                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] outline-none shadow-sm cursor-pointer"><option>Emirate</option></select>
                 <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
               <div className="relative">
-                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 outline-none shadow-sm cursor-pointer"><option>Sale Status</option></select>
+                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] outline-none shadow-sm cursor-pointer"><option>Sale Status</option></select>
                 <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
 
@@ -235,7 +237,7 @@ const Home = () => {
                   const nextState = !handoverOpen;
                   closeAll();
                   setHandoverOpen(nextState);
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm">
+                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span>{handoverYear || 'Handover Year'}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${handoverOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -247,7 +249,7 @@ const Home = () => {
                           <input type="radio" name="handoverYear" value={year} checked={handoverYear === year} onChange={() => { setHandoverYear(year); setHandoverOpen(false); }} className="peer appearance-none w-5 h-5 border-2 border-black rounded-full checked:border-black cursor-pointer" />
                           <div className="absolute w-2.5 h-2.5 bg-black rounded-full opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                         </div>
-                        <span className="text-[16px] font-medium text-[#6b728e]">{year}</span>
+                        <span className="text-[16px] font-medium text-[#67739E]">{year}</span>
                       </label>
                     ))}
                   </div>
@@ -259,7 +261,7 @@ const Home = () => {
                   const nextState = !paymentOpen;
                   closeAll();
                   setPaymentOpen(nextState);
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-bold text-gray-500 shadow-sm">
+                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span>{paymentPlan || 'Payment Plan'}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${paymentOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -281,9 +283,10 @@ const Home = () => {
           </div>
         </div>
       </div>
-
       <div>
         <DeveloperSlider/>
+         <ChooseYourStrategy/> 
+         <DubaiMarketActivity/>
         <FeaturesSection />
         <Services />
         <CommunitiesBrief />
@@ -293,5 +296,4 @@ const Home = () => {
     </>
   );
 };
-
 export default Home;

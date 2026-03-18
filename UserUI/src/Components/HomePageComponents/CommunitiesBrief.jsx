@@ -5,12 +5,7 @@ import firstcard from '../../assets/community.jpg';
 import Secondcard from '../../assets/community.jpg';
 
 export default function CommunitiesBrief() {
-  const tickerItems = [
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-    { title: "Looking to Sell Your Property?", desc: "Partner with us for a smooth, transparent, and profitable sale." },
-  ];
+ 
 
   return (
     <section className="w-full bg-white">
@@ -29,16 +24,19 @@ export default function CommunitiesBrief() {
           >
             Communities brief
           </h2>
+          </div>
 
-          <p className="text-gray-500 text-lg mb-8 font-medium">
-            Are you looking for the perfect neighborhood in Dubai? Discover the unique
-            characteristics of diverse communities, catering to various preferences
-            from luxury to family-friendly environments.
+          <p className=" text-[20px] text-[#01155E99]  mb-8 ">
+       <p>  Dubai is a city of distinct communities, not one uniform market. Prices, supply, rental demand, and lifestyle vary meaningfully from one neighbourhood to the next.</p> 
+
+  <p> Yupland delivers structured, research-driven community intelligence so you can understand each location clearly and assess opportunities with confidence, aligned with your budget, goals, and investment strategy.
+
+</p>
           </p>
-          <button className="bg-[#001A54] text-white px-8 py-3 w-[431px] h-[50px] rounded-md  text-sm transition-colors font-medium text-[20px]">
+          <button className="bg-[#001A54] text-white px-8 py-3 w-[431px] h-[50px] rounded-md  text-sm transition-colors font-semibold text-[20px]">
             Discover Your Neighbourhood
           </button>
-        </div>
+        
       </div>
 
       {/* --- Image Section --- */}
@@ -57,10 +55,9 @@ export default function CommunitiesBrief() {
 
     {/* Text Content */}
     <div className="absolute top-8 left-8 max-w-[380px] border-l-[3px] border-white pl-4">
-      <p className="text-white text-[20px] leading-[1.3] font-medium">
-        We work with developers and landowners to structure and position real estate projects for market
-      </p>
-    </div>
+  <p className='text-[22px] font-semibold text-white underline decoration-white'>Downtown Dubai</p>
+  <p className='text-[20px] text-white font-light'>Prime luxury high-rise living</p>
+</div>
   </div>
 
   {/* CARD 2 - Updated Width: 456px */}
@@ -72,11 +69,10 @@ export default function CommunitiesBrief() {
     <div className="absolute inset-0 bg-[#01155E]/60" />
 
     {/* Text Content */}
-    <div className="absolute top-8 left-8 max-w-[380px] border-l-[3px] border-white pl-4">
-      <p className="text-white text-[20px] leading-[1.3] font-medium">
-        We work with developers and landowners to structure and position real estate projects for market
-      </p>
-    </div>
+     <div className="absolute top-8 left-8 max-w-[380px] border-l-[3px] border-white pl-4">
+  <p className='text-[22px] font-semibold text-white underline decoration-white'>Jumeirah Village </p>
+  <p className='text-[20px] text-white font-light'>Circle Affordable homes with strong rental yields</p>
+</div>
   </div>
 </div>
 
@@ -97,10 +93,10 @@ export default function CommunitiesBrief() {
 
     {/* Text Content */}
     <div className="absolute top-8 left-8 max-w-[380px] border-l-[3px] border-white pl-4">
-      <p className="text-white text-[20px] leading-[1.3] font-medium">
-        We work with developers and landowners to structure and position real estate projects for market
-      </p>
-    </div>
+  <p className='text-[22px] font-semibold text-white underline decoration-white'>Dubai Hills Estate
+</p>
+  <p className='text-[20px] text-white font-light'>Resort-style family living</p>
+</div>
   </div>
 
   {/* CARD 2 - Updated Width: 456px */}
@@ -113,10 +109,10 @@ export default function CommunitiesBrief() {
 
     {/* Text Content */}
     <div className="absolute top-8 left-8 max-w-[380px] border-l-[3px] border-white pl-4">
-      <p className="text-white text-[20px] leading-[1.3] font-medium">
-        We work with developers and landowners to structure and position real estate projects for market
-      </p>
-    </div>
+  <p className='text-[22px] font-semibold text-white underline decoration-white'>Palm Jumeirah
+</p>
+  <p className='text-[20px] text-white font-light'>Ultra-luxury beachfront living</p>
+</div>
   </div>
 </div>
 

@@ -4,6 +4,7 @@ import {
   fetchDashboard,
   updateListingStatus,
   updateListingAvailability,
+  updateListingFeatured,
 } from "../features/dashboard/dashboardSlice";
 import { Link } from "react-router-dom";
 
@@ -34,6 +35,11 @@ function Dashboard() {
   const [newAvailability, setNewAvailability] = useState("");
 
   const [activeTab, setActiveTab] = useState(TABS.ALL);
+
+  const [editFeaturedId, setEditFeaturedId] = useState(null);
+const [newFeatured, setNewFeatured] = useState("");
+
+
 
   useEffect(() => {
     dispatch(fetchDashboard());
@@ -155,8 +161,52 @@ function Dashboard() {
               >
                 Update Availability
               </button>
-            </div>
 
+              
+            </div>
+          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700">
+  {item.isFeatured ? "Featured" : "Not Featured"}
+</span>
+
+<button
+  className="text-pink-600 text-sm pt-5"
+  onClick={() => {
+    setEditFeaturedId(item._id);
+    setNewFeatured(item.isFeatured ? "true" : "false");
+  }}
+>
+  Mark Featured
+</button>
+
+{editFeaturedId === item._id && (
+  <div className="mt-3 flex gap-3">
+    <select
+      className="border px-3 py-2 rounded"
+      value={newFeatured}
+      onChange={(e) => setNewFeatured(e.target.value)}
+    >
+      <option value="true">Featured</option>
+      <option value="false">Not Featured</option>
+    </select>
+
+    <button
+      className="bg-pink-600 text-white px-4 rounded"
+      onClick={() => {
+        dispatch(
+          updateListingFeatured({
+            id: item._id,
+            isFeatured: newFeatured === "true",
+          })
+        );
+        setEditFeaturedId(null);
+      }}
+    >
+      Save
+    </button>
+  </div>
+)}
+            
+               
             {/* Status Update */}
             {editStatusId === item._id && (
               <div className="mt-3 flex gap-3">
@@ -185,6 +235,8 @@ function Dashboard() {
                 </button>
               </div>
             )}
+
+            
 
             {/* Availability Update */}
             {editAvailabilityId === item._id && (
@@ -215,6 +267,7 @@ function Dashboard() {
                 </button>
               </div>
             )}
+           
 
             {/* Rooms */}
             <p className="mt-3 text-gray-600">

@@ -1,9 +1,11 @@
+/* --- Desktop & General Styles --- */
 .slider-wrapper {
   width: 100%;
   background: #fff;
-  padding: 40px 0;
+  padding: 40px 16px; /* Added 16px horizontal padding here */
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
+  box-sizing: border-box;
 }
 
 .slider-container {
@@ -16,12 +18,13 @@
 
 .heading-section {
   width: 250px;
-  padding-right: 18px;
-  font-weight: 500;
-  color: #64748b;
+  padding-right: 20px;
+  font-weight: 400;
+  color: #67739E;
   font-size: 18px;
   line-height: 1.5;
   flex-shrink: 0;
+  text-align: left; /* Ensures desktop is left-aligned */
 }
 
 .slider-content {
@@ -30,7 +33,6 @@
   position: relative;
 }
 
-/* Track movement */
 .logo-track {
   display: flex;
   width: max-content;
@@ -38,7 +40,7 @@
 }
 
 .logo-track:hover {
-  animation-play-state: paused; /* Mouse hover karne par animation ruk jayegi */
+  animation-play-state: paused;
 }
 
 .logo-slide {
@@ -56,29 +58,32 @@
   transition: opacity 0.3s ease;
 }
 
-.logo-slide img:hover {
-  opacity: 1;
-}
-
-/* Keyframes for smooth infinite scroll */
 @keyframes scroll-left {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%); /* 50% kyunki humne 2 sets use kiye hain */
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
-/* Mobile Responsive */
+/* --- Mobile Responsive (768px and below) --- */
 @media (max-width: 768px) {
+  .slider-wrapper {
+    padding: 20px 16px; /* Maintaining 16px padding on mobile */
+  }
+
   .slider-container {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start; /* Aligns the entire content block to the left */
   }
+
   .heading-section {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    margin-top: 20px;
     padding-right: 0;
+    text-align: left; /* Keeps text left-aligned on mobile */
+    font-size: 16px;  /* Slightly smaller font for better mobile fit */
+  }
+
+  .slider-content {
+    width: 100%;
   }
 }

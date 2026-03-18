@@ -4,7 +4,7 @@ import backgroundimage from "../../assets/disclamerbackground.jpg";
 const DisclaimerSection = () => {
   return (
     // Main Wrapper: uses responsive padding
-    <section className="relative w-full flex flex-col items-center overflow-hidden bg-white py-12 md:py-20 px-6">
+    <section className="relative w-full flex flex-col items-center overflow-hidden bg-white py-12 md:py-20 px-4">
       
       {/* Background Image Layer */}
       <div 
@@ -13,11 +13,11 @@ const DisclaimerSection = () => {
       />
 
       {/* Inner Content Container: max-width instead of fixed width */}
-      <div className="relative z-10 w-full max-w-[1238px] flex flex-col gap-8 md:gap-[40px]">
+      <div className="relative z-10 w-full max-w-[1200px] flex flex-col gap-8 md:gap-[40px]">
         
         {/* Heading Section */}
         <div className="w-full">
-          <h2 className="text-[#01155E] text-2xl md:text-[32px] font-semibold font-['Archivo'] leading-none pb-2 inline-block">
+          <h2 className="text-[#01155E] text-[28px] md:text-[32px] font-semibold font-['Archivo'] leading-none pb-2 inline-block">
             Disclaimer
           </h2>
           {/* Responsive underline: shorter on mobile, matches your design on desktop */}

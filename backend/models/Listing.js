@@ -82,6 +82,11 @@ const ListingSchema = new mongoose.Schema(
 
     price: { type: Number, required: true },
     currency: { type: String, default: "AED" },
+    
+      isFeatured: {
+      type: Boolean,
+      default: false
+    },
 
     type: { type: String },
     purpose: { type: String },

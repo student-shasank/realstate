@@ -72,7 +72,9 @@ const ListingCard = ({ listing }) => {
       >
         <img src="https://images.bayut.com/thumbnails/803707122-1066x800.webp" style={styles.image} alt="Property" />
         <div style={styles.badgeContainer}>
-          <span style={styles.truCheck}>✓ TruCheck</span>
+          {listing.isFeatured && (
+    <span style={styles.truCheck}>⭐ Featured</span>
+  )}
           <span style={styles.offPlan}>  {listing.completionStatus}</span>
         </div>
         <div style={styles.handoverBadge}>  Handover {listing.projectInfo?.handoverDate}</div>

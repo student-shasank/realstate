@@ -19,10 +19,15 @@ import AdvisoryCoordination from "./Pages/IndividualServicePages/AdvisoryCoordin
 import HandoverSnagging from "./Pages/IndividualServicePages/HandoverSnagging";
 import MortgageCoordination from "./Pages/IndividualServicePages/MortgageCoordination";
 import InvestorVisaAdvisory from "./Pages/IndividualServicePages/InvestorVisaAdvisory";
+
 import Communities from "./Pages/CommunitiesPage/Communities";
 import AllCommunities from "./Pages/CommunitiesPage/AllCommunities";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import TermsOfUse from "./Pages/TermsOfUse";
+import Disclaimer from "./Pages/Disclamer";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
+import DataSources from "./Pages/DataSources";
 
 
 function App() {
@@ -59,6 +64,10 @@ function App() {
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
         <Route path="/login" element={<Login />} />
+         <Route path="/termsofuse" element={<TermsOfUse />} />
+          <Route path="/disclamer" element={<Disclaimer/>} />
+          <Route path="/privacy" element={<PrivacyPolicy/>} />
+          <Route path="/datascource" element={<DataSources/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/service" element={<Service />} />
         <Route path="/listings" element={<Listings />} />
@@ -82,3 +91,4 @@ function App() {
 }
 
 export default App;
+ 

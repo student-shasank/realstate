@@ -7,3 +7,39 @@
 .animate-fadeIn {
   animation: fadeIn .25s ease-out;
 }
+/* Disable text selection */
+.protected-app {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Blur content when devtools detected */
+.blur-content {
+  filter: blur(8px);
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+/* Overlay when devtools open */
+.devtools-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+/* Message box */
+.devtools-message {
+  background: #fff;
+  color: #111;
+  padding: 18px 28px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}

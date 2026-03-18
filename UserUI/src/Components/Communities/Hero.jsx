@@ -102,163 +102,150 @@ useEffect(() => {
   return (
     <div>
       {/* ========================= 1) HERO SECTION ========================= */}
-      <section className="flex flex-col items-center py-12 bg-white">
-        <div
-          className="absolute top-0 left-0 z-0 h-[452px] w-[990px] bg-no-repeat bg-left-top bg-contain"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
-        />
+   <section className="relative flex flex-col items-center py-14 px-4 bg-white overflow-hidden">
+  {/* Background Decoration - Hidden on small screens or scaled */}
+  <div
+    className="absolute top-0 left-0 z-0  h-[350px]  md:h-[452px] w-[990px] md:w-[990px] bg-no-repeat bg-left-top bg-contain opacity-40 md:opacity-100"
+    style={{ backgroundImage: `url(${backgroundImage})` }}
+  />
 
-        {/* Container for Heading and Content */}
-        <div className="w-[1200px] flex flex-col gap-10">
-          {/* Heading Section */}
-          <div className="relative">
-            <h2 className="text-[#01155E] font-['Archivo'] font-semibold text-[48px] leading-[100%] uppercase">
-              {currentProfile.title}
-            </h2>
+  {/* Main Container */}
+  <div className="relative z-10 w-full max-w-[1200px] flex flex-col gap-8 md:gap-10">
+    
+    {/* Heading Section */}
+    <div className="flex flex-col items-start">
+      <h2 className="text-[#01155E] font-['Archivo'] font-semibold text-3xl md:text-[48px] leading-tight uppercase">
+        {currentProfile.title}
+      </h2>
 
-            {/* Underline Decoration */}
-            <div className="flex w-[574px]">
-              <div className="w-[240px] h-[8px] bg-[#01155E]"></div>
-              <div className="flex-1 h-[2px] bg-[#01155E]"></div>
-            </div>
+      {/* Underline Decoration - Responsive Width */}
+      <div className="flex w-full max-w-[574px] mt-2">
+        <div className="w-1/3 md:w-[240px] h-[6px] md:h-[8px] bg-[#01155E]"></div>
+        <div className="flex-1 h-[2px] bg-[#01155E] self-end"></div>
+      </div>
+    </div>
+
+    {/* Content Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+      {cardData.map((card, index) => (
+        <div key={index} className="w-full max-w-[362px] flex flex-col items-center group">
+          {/* Card Image */}
+          <div className="w-full h-[350px] md:h-[393px] overflow-hidden rounded-[16px]">
+            <img
+              src={card.image}
+              alt={card.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
           </div>
 
-          {/* Background Decorative Container */}
-          <div
-            className="relative w-[976.89px] h-[427.20px] rotate-[-180deg] opacity-100 self-center"
-            style={{ backgroundImage: "url('your-bg-pattern-url')" }}
-          >
-            {/* same as your code */}
-          </div>
-
-          {/* Cards Grid */}
-          <div className="flex justify-between items-start -mt-[450px] z-10">
-            {cardData.map((card, index) => (
-              <div key={index} className="w-[362px] h-[511px] flex flex-col items-center">
-                {/* Card Image - Ab ye backend URL lega */}
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-[362px] h-[393px] rounded-[16px] object-cover"
-                />
-
-                {/* Down Button / Info Section */}
-                <div className="mt-[18px] w-[361px] h-[100px] bg-[#01155E] rounded-[5px] flex flex-col justify-center items-center gap-[10px] p-[10px]">
-                  <h3 className="text-[#FBFBFB] font-['General_Sans'] font-semibold text-[20px] leading-[100%] text-center">
-                    {card.title}
-                  </h3>
-                  <p className="text-[#FBFBFB] font-['General_Sans'] font-normal text-[20px] leading-[100%] text-center">
-                    {card.subtitle}
-                  </p>
-                </div>
-              </div>
-            ))}
+          {/* Info Section */}
+          <div className="mt-4 w-full min-h-[100px] bg-[#01155E] rounded-[5px] flex flex-col justify-center items-center gap-2 p-4 shadow-lg">
+            <h3 className="text-[#FBFBFB] font-['General_Sans'] font-semibold text-lg md:text-[20px] leading-snug text-center">
+              {card.title}
+            </h3>
+            <p className="text-[#FBFBFB]/90 font-['General_Sans'] font-normal text-base md:text-[18px] leading-snug text-center">
+              {card.subtitle}
+            </p>
           </div>
         </div>
-      </section>
-
+      ))}
+    </div>
+  </div>
+</section>
       {/* ========================= 2) COMMUNITIES OVERVIEW SECTION ========================= */}
-      <section className="flex flex-col md:flex-row w-full max-w-[1200px] mx-auto p-8 gap-12 bg-white text-[#01155E]">
-        {/* Left Column: Content */}
-        <div className="flex-1 max-w-[511px]">
-          <h1 className="font-['Archivo'] font-medium text-[48px] leading-[100%] mb-6">
+   
+    <section className="bg-white w-full flex justify-center py-8 sm:py-12 lg:py-16 px-4 sm:px-6">
+      <div className="w-full max-w-[1240px] flex flex-col lg:flex-row gap-10 lg:gap-16 items-start overflow-visible">
+        
+        {/* LEFT COLUMN: Content */}
+        <div className="flex-1 w-full min-w-0">
+          <h1 
+            className="text-[#01155E] mb-6 sm:mb-8"
+            style={{
+              fontFamily: "Archivo, sans-serif",
+              fontWeight: 500,
+              fontSize: "clamp(32px, 5vw, 48px)",
+              lineHeight: "100%",
+            }}
+          >
             Community Overview
           </h1>
 
-          {/* overview.html (same style, just dynamic content) */}
+          {/* Main Overview */}
           <div
-            className="font-['General_Sans'] font-normal text-[20px] leading-[120%]  text-[#67739E]  mb-8 space-y-4"
+            className="font-['General_Sans'] font-normal text-[#67739E] mb-8 space-y-4"
+            style={{ fontSize: "clamp(16px, 2vw, 20px)", lineHeight: "140%" }}
             dangerouslySetInnerHTML={{ __html: currentProfile.overview?.html || "" }}
           />
 
-          {/* Location & Connectivity (admin html) */}
+          {/* Location & Connectivity */}
           <div
-            className="mb-8 max-w-[374px] mt-16 text-[18px] leading-relaxed"
+            className="mb-8 mt-10 lg:mt-16 text-[#01155E] opacity-90"
+            style={{ fontSize: "clamp(15px, 1.8vw, 18px)", lineHeight: "1.6", maxWidth: "450px" }}
             dangerouslySetInnerHTML={{ __html: currentProfile.overview?.locationConnectivityHtml || "" }}
           />
 
           {/* Planning Note */}
-          <div className="mb-8 max-w-[374px]  mt-16">
-            <h2 className="font-['General_Sans'] font-semibold text-[20px] leading-[100%] mb-3">
+          <div className="mb-10 mt-10 lg:mt-16 max-w-[450px]">
+            <h2 className="font-['General_Sans'] font-semibold text-[20px] leading-[100%] mb-3 text-[#01155E]">
               Planning Note
             </h2>
-
             <div
-              className="font-['General_Sans'] font-normal text-[18px] leading-[140%] text-[#67739E]"
+              className="font-['General_Sans'] font-normal text-[#67739E]"
+              style={{ fontSize: "clamp(15px, 1.8vw, 18px)", lineHeight: "140%" }}
               dangerouslySetInnerHTML={{ __html: currentProfile.planningNote?.html || "" }}
             />
           </div>
 
-          <button
-            className="
-              w-[431px] 
-              h-[50px] 
-              flex 
-              items-center 
-              justify-center 
-              bg-[#01155E] 
-              text-[#FBFBFB] 
-              rounded-[8px] 
-              p-[12px] 
-              font-['General_Sans'] 
-              font-semibold 
-              text-[20px] 
-              leading-none 
-              hover:bg-blue-900 
-              transition-colors
-            "
-          >
+          <button className="bg-[#01155E] text-[#FBFBFB] rounded-[8px] px-6 py-4 font-['General_Sans'] font-semibold transition-all hover:bg-blue-900 w-full lg:max-w-[431px]"
+            style={{ fontSize: "clamp(16px, 2vw, 20px)" }}>
             Discover Your Neighbourhood
           </button>
         </div>
 
-        {/* Right Column: Image and Worship Info */}
-        <div className="flex-1 relative">
-          <div className="relative w-full max-w-[610px] h-[791px]">
+        {/* RIGHT COLUMN: Image & Cards */}
+        <div className="flex-1 w-full flex flex-col items-start lg:items-start">
+          <div className="relative w-full lg:max-w-[610px] aspect-[3/4] sm:aspect-square lg:h-[791px]">
             <img
               src={currentProfile.overview?.image || Communitiesoverview}
               alt="Community View"
-              className="w-full h-full object-cover rounded-[24px] overflow-hidden"
+              className="w-full h-full lg:absolute lg:inset-0 object-cover rounded-[20px] sm:rounded-[28px] lg:rounded-[32px]"
             />
 
-            {/* Dark Transaction Card */}
-            <div className="absolute top-[36px] -right-[90px] w-[384px] h-[112px] bg-[#01155E] rounded-[24px] p-2 flex items-center shadow-[0px_0px_100px_0px_rgba(255,255,255,0.5)] z-10">
-              <div className="text-white flex items-center gap-4 ml-6">
-                <span className="text-5xl font-bold">87+</span>
-                <span className="text-[24px] font-medium leading-tight">
-                  Successful <br />
-                  Transactions Monthly
-                </span>
-              </div>
+            {/* Dark Transaction Card (Top Right) */}
+            <div className="absolute top-4 -right-4 sm:top-6 sm:-right-6 lg:top-10 lg:-right-19 bg-[#001457] text-white rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-2 sm:gap-3 lg:gap-4 shadow-2xl z-20">
+              <span className="text-[28px] sm:text-[40px] lg:text-[60px] font-medium leading-none">87+</span>
+              <p className="text-[11px] sm:text-[14px] lg:text-[24px] font-medium leading-tight w-[120px] sm:w-[190px] lg:w-[241px]">
+                Successful Transactions Monthly
+              </p>
             </div>
 
-            {/* White Transaction Card */}
-            <div className="absolute top-[637px] -left-[75px] w-[403px] h-[112px] bg-[#FBFBFB] rounded-[24px] p-[8px] flex items-center shadow-[0px_0px_100px_0px_#FFFFFF] z-10">
-              <div className="flex items-center gap-[10px] ml-[20px]">
-                <span className="text-[#01155E] text-[64px] font-bold leading-none">87+</span>
-                <span className="text-[#01155E] font-['General_Sans'] font-medium text-[24px] leading-[100%]">
-                  Successful <br />
-                  Transactions Monthly
-                </span>
-              </div>
+            {/* White Transaction Card (Bottom Left) */}
+            <div className="absolute bottom-4 -left-4 sm:bottom-6 sm:-left-6 lg:bottom-8 lg:-left-19 bg-white text-[#001457] rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-3 sm:gap-4 lg:gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.12)] z-20 border border-gray-100">
+              <span className="text-[28px] sm:text-[40px] lg:text-[64px] font-medium leading-none">87+</span>
+              <p className="text-[11px] sm:text-[14px] lg:text-[24px] font-medium leading-tight text-[#001457] w-[120px] sm:w-[190px] lg:w-[241px]">
+                Successful Transactions Monthly
+              </p>
             </div>
           </div>
 
-          {/* Places of Worship */}
-          <div className="mt-8 max-w-[467px]">
-            <h2 className="font-['General_Sans'] font-semibold text-[20px] leading-[100%] text-[#01155E] m-0">
+          {/* Places of Worship Section */}
+          <div className="mt-12 sm:mt-16 w-full lg:max-w-[467px] text-left">
+            <h2 className="font-['General_Sans'] font-semibold text-[20px] leading-[100%] text-[#01155E] mb-4">
               Places of Worship
             </h2>
 
             <div
-              className="font-['General_Sans'] font-normal text-[16px] leading-[150%]  "
+              className="font-['General_Sans'] font-normal text-[#67739E]"
+              style={{ fontSize: "clamp(14px, 1.6vw, 16px)", lineHeight: "150%" }}
               dangerouslySetInnerHTML={{ __html: currentProfile.sidebar?.worshipHtml || "" }}
             />
 
             {isExpanded && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg border-l-4 border-[#01155E] animate-in fade-in duration-500">
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg border-l-4 border-[#01155E] animate-in fade-in slide-in-from-top-2 duration-500">
                 <div
-                  className="font-['General_Sans'] font-normal text-[16px] leading-[150%] text-[#67739E]"
+                  className="font-['General_Sans'] font-normal text-[#67739E]"
+                  style={{ fontSize: "15px", lineHeight: "150%" }}
                   dangerouslySetInnerHTML={{ __html: currentProfile.sidebar?.readMoreHtml || "" }}
                 />
               </div>
@@ -266,13 +253,17 @@ useEffect(() => {
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="inline-block mt-6 font-['General_Sans'] font-medium text-[24px] leading-[100%] underline text-[#01155E] cursor-pointer hover:opacity-80"
+              className="inline-block mt-6 font-['General_Sans'] font-medium underline text-[#01155E] cursor-pointer hover:opacity-70 transition-opacity"
+              style={{ fontSize: "clamp(18px, 2.2vw, 24px)" }}
             >
               {isExpanded ? "Show Less" : "Read More..."}
             </button>
           </div>
         </div>
-      </section>
+        
+      </div>
+    </section>
+  
 
       {/* ========================= 3) MARKET DATA SECTION ========================= */}
       <div className="flex justify-center items-center min-h-screen  p-4">

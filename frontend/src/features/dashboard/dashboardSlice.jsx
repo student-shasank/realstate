@@ -4,6 +4,7 @@ import {
   ADMIN_DASHBOARD_URL,
   ADMIN_LISTING_STATUS_URL,
   ADMIN_LISTING_AVAILABILITY_URL,
+   ADMIN_LISTING_FEATURED_URL,
 } from "../../Constant/constant.js";
 
 // -------------------------------------------
@@ -76,6 +77,27 @@ export const updateListingAvailability = createAsyncThunk(
   }
 );
 
+export const updateListingFeatured = createAsyncThunk(
+  "dashboard/updateListingFeatured",
+  async ({ id, isFeatured }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.put(
+        ADMIN_LISTING_FEATURED_URL(id),
+        { isFeatured },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      return response.data; // Updated listing
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to update featured"
+      );
+    }
+  }
+);
+
 // -------------------------------------------
 // SLICE
 // -------------------------------------------
@@ -87,55 +109,73 @@ const dashboardSlice = createSlice({
     error: null,
     statusUpdating: false,
     availabilityUpdating: false,
+    featuredUpdating: false,
   },
   reducers: {},
-  extraReducers: (builder) => {
-    builder
-      // Fetch Dashboard
-      .addCase(fetchDashboard.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchDashboard.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
-      })
-      .addCase(fetchDashboard.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+ extraReducers: (builder) => {
+  builder
+    // Fetch Dashboard
+    .addCase(fetchDashboard.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(fetchDashboard.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload;
+    })
+    .addCase(fetchDashboard.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
 
-      // Update Listing Status
-      .addCase(updateListingStatus.pending, (state) => {
-        state.statusUpdating = true;
-      })
-      .addCase(updateListingStatus.fulfilled, (state, action) => {
-        state.statusUpdating = false;
-        const updated = action.payload;
-        state.data.listings = state.data.listings.map((listing) =>
-          listing._id === updated._id ? updated : listing
-        );
-      })
-      .addCase(updateListingStatus.rejected, (state, action) => {
-        state.statusUpdating = false;
-        state.error = action.payload;
-      })
+    // Update Listing Status
+    .addCase(updateListingStatus.pending, (state) => {
+      state.statusUpdating = true;
+    })
+    .addCase(updateListingStatus.fulfilled, (state, action) => {
+      state.statusUpdating = false;
+      const updated = action.payload;
+      state.data.listings = state.data.listings.map((listing) =>
+        listing._id === updated._id ? updated : listing
+      );
+    })
+    .addCase(updateListingStatus.rejected, (state, action) => {
+      state.statusUpdating = false;
+      state.error = action.payload;
+    })
 
-      // Update Listing Availability
-      .addCase(updateListingAvailability.pending, (state) => {
-        state.availabilityUpdating = true;
-      })
-      .addCase(updateListingAvailability.fulfilled, (state, action) => {
-        state.availabilityUpdating = false;
-        const updated = action.payload;
-        state.data.listings = state.data.listings.map((listing) =>
-          listing._id === updated._id ? updated : listing
-        );
-      })
-      .addCase(updateListingAvailability.rejected, (state, action) => {
-        state.availabilityUpdating = false;
-        state.error = action.payload;
-      });
-  },
+    // Update Listing Availability
+    .addCase(updateListingAvailability.pending, (state) => {
+      state.availabilityUpdating = true;
+    })
+    .addCase(updateListingAvailability.fulfilled, (state, action) => {
+      state.availabilityUpdating = false;
+      const updated = action.payload;
+      state.data.listings = state.data.listings.map((listing) =>
+        listing._id === updated._id ? updated : listing
+      );
+    })
+    .addCase(updateListingAvailability.rejected, (state, action) => {
+      state.availabilityUpdating = false;
+      state.error = action.payload;
+    })
+
+    // ✅ Update Listing Featured (LAST me add karo ya kahin bhi chain me)
+    .addCase(updateListingFeatured.pending, (state) => {
+      state.featuredUpdating = true;
+    })
+    .addCase(updateListingFeatured.fulfilled, (state, action) => {
+      state.featuredUpdating = false;
+      const updated = action.payload;
+
+      state.data.listings = state.data.listings.map((listing) =>
+        listing._id === updated._id ? updated : listing
+      );
+    })
+    .addCase(updateListingFeatured.rejected, (state, action) => {
+      state.featuredUpdating = false;
+      state.error = action.payload;
+    });
+}
 });
 
 export default dashboardSlice.reducer;

@@ -39,14 +39,16 @@ import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/roleMiddleware.js";
 import upload from "../middleware/upload.js";
 
-import { 
+import {
   dashboard,
-  createListing, 
+  createListing,
   deleteListing,
   updateListingStatus,
   updateAvailability,
   // Naya Controller Import karein
-  createCommunity 
+  createCommunity,
+  updateListingFeatured,
+
 } from "../controllers/adminController.js";
 
 const router = Router();
@@ -59,6 +61,12 @@ router.post("/listing", protect, adminOnly, upload.array("images", 10), createLi
 router.delete("/listing/:id", protect, adminOnly, deleteListing);
 router.put("/listings/:id/status", protect, adminOnly, updateListingStatus);
 router.put("/listings/:id/availability", protect, adminOnly, updateAvailability);
+router.put(
+  "/listings/:id/featured",
+  protect,
+  adminOnly,
+  updateListingFeatured
+);
 
 // --- Communities (Naya Route) ---
 // Yahan hum .fields() use karenge kyunki frontend se alag-alag key names aa rahe hain
@@ -71,9 +79,9 @@ const communityUpload = upload.fields([
 ]);
 
 router.post(
-  "/communities", 
+  "/communities",
 
-  communityUpload, 
+  communityUpload,
   createCommunity
 );
 

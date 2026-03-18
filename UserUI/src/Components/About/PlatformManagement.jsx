@@ -10,7 +10,7 @@ const PlatformManagement = () => {
         
         {/* Title Section */}
         <div className="w-full">
-          <h2 className="text-[#01155E] text-2xl md:text-[32px] font-semibold font-['Archivo'] leading-none pb-2 inline-block">
+          <h2 className="text-[#01155E] text-[28px] md:text-[32px] font-semibold font-['Archivo'] leading-none pb-2 inline-block">
             Platform Management
           </h2>
           {/* Custom Underline */}

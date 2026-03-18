@@ -73,7 +73,10 @@ export const createListing = async (req, res) => {
       title: req.body.title,
       referenceNo: req.body.referenceNo,
       price: req.body.price ? Number(req.body.price) : undefined,
+       isFeatured:
+    req.body.isFeatured === "true" || req.body.isFeatured === true,
       currency: req.body.currency || "AED",
+      
       type: req.body.type,
       purpose: req.body.purpose,
      completionStatus: req.body.completionStatus || "Pending",
@@ -206,8 +209,27 @@ export const updateListingStatus = async (req, res) => {
     });
   }
 };
+// update featured listings status
+export const updateListingFeatured = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isFeatured } = req.body;
 
+    const listing = await Listing.findByIdAndUpdate(
+      id,
+      { isFeatured },
+      { new: true }
+    );
 
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.json(listing);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating featured" });
+  }
+};
 
 // export const createListing = async (req, res) => {
 //   try {

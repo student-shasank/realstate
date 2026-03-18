@@ -5,12 +5,12 @@ import DeveloperAccess3 from "../../assets/Devloperaccess3.jpg"
 
 const DeveloperAccess = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 md:p-10 bg-white">
+    <div className="flex items-center justify-center min-h-screen px-4 py-4 md:py-10 bg-white">
       {/* Main Container */}
-      <div className="max-w-7xl w-full p-6 md:p-10 lg:p-12 flex flex-col lg:flex-row gap-10 lg:gap-16 bg-[#F9FAFB] rounded-3xl overflow-hidden shadow-sm">
+      <div className="max-w-7xl w-full p-6 md:py-10 lg:py-12 px-4 flex flex-col lg:grid lg:grid-cols-2 gap-10 lg:gap-16 bg-[#F9FAFB] rounded-3xl overflow-hidden shadow-sm">
         
-        {/* Left Side: Images Section */}
-        <div className="flex flex-col w-full lg:w-1/2 gap-4">
+        {/* Left Side: Images Section - Keeps your original sizes on desktop */}
+        <div className="flex flex-col w-full gap-4">
           {/* Big Image Top */}
           <div className="w-full aspect-square md:aspect-[5/4] bg-gray-200 rounded-2xl overflow-hidden">
              <img 
@@ -40,25 +40,28 @@ const DeveloperAccess = () => {
         </div>
 
         {/* Right Side: Content Section */}
-        <div className="flex flex-col w-full lg:w-1/2 justify-center gap-8 md:gap-10">
+        <div className="flex flex-col w-full justify-center gap-8 md:gap-10">
           {/* Title Section */}
           <div className="relative inline-block">
-            <h2 className="text-[#01155E] text-3xl md:text-4xl lg:text-5xl font-semibold font-['Archivo'] leading-tight mb-4">
+            <h2 className="text-[#01155E] text-[28px] md:text-[32px] font-semibold font-['Archivo'] leading-tight mb-4">
               Access to Developers
             </h2>
-            {/* Custom Responsive Divider */}
-              <div class="flex w-[264px]"><div class="w-[122px] h-[8px] bg-[#01155E]"></div><div class="flex-1 h-[2px] bg-[#01155E]"></div></div>
+            {/* Custom Divider */}
+            <div className="flex w-[264px]">
+              <div className="w-[122px] h-[8px] bg-[#01155E]"></div>
+              <div className="flex-1 h-[2px] bg-[#01155E]"></div>
+            </div>
           </div>
 
           {/* Description Text */}
-          <div className="space-y-4 md:space-y-6 text-[#67739E] text-base md:text-lg font-normal font-['General_Sans'] leading-relaxed text-justify">
+          <div className="space-y-4 md:space-y-6 text-[#67739E] text-base md:text-lg font-normal font-['General_Sans']  md:text-justify">
             <p>
               Yupland is a real estate marketing and information platform designed to provide structured access to property opportunities across the United Arab Emirates. It serves as a centralised gateway where users can explore real estate developments, analyse communities, and access organised property information through a clear and structured interface.
             </p>
             <p>
-              The platform lets users explore both off-plan and ready properties, review developer profiles, evaluate community insights and market data, and stay informed with real estate-focused content and market updates. Yupland consolidates fragmented market information into a single, structured environment, allowing users to research and evaluate opportunities with greater clarity and efficiency.
+              The platform lets users explore both off-plan and ready properties, review developer profiles, evaluate community insights and market data, and stay informed with real estate-focused content and market updates.
             </p>
-            <p className="hidden md:block">
+            <p className="">
               Yupland is currently focused primarily on Dubai and is progressively expanding its database and coverage across the UAE. The platform is designed to improve transparency and accessibility in property discovery while supporting informed real estate decisions.
             </p>
           </div>
@@ -75,16 +78,13 @@ const DeveloperAccess = () => {
   );
 };
 
-// Sub-component for clean code
 const ListItem = ({ text }) => (
-  <div className="flex items-center gap-4">
-    {/* Blue Circle Icon */}
-    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[#F0F4FF] rounded-full">
+  <div className="flex items-center gap-4 group">
+    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[#F0F4FF] rounded-full group-hover:bg-[#01155E] transition-colors duration-300">
       <svg 
-        className="w-3.5 h-3.5"
+        className="w-3.5 h-3.5 stroke-[#01155E] group-hover:stroke-white transition-colors duration-300"
         viewBox="0 0 24 24" 
         fill="none" 
-        stroke="#01155E" 
         strokeWidth="3" 
         strokeLinecap="round" 
         strokeLinejoin="round"

@@ -91,15 +91,15 @@ const BlogSection = () => {
             />
 
             <div className="p-0">
-              <span className="text-sm font-semibold mb-2 block">
+              <span className="text-sm font-semibold mb-2 block text-[#01155E99]">
                 {blogs[0].author}
               </span>
 
-              <h3 className="text-[22px] sm:text-[24px] lg:text-[28px] font-bold mb-2">
+              <h3 className="text-[20px] sm:text-[22px] lg:text-[24px] font-medium mb-2">
                 {blogs[0].title}
               </h3>
 
-              <p className="text-[14px] sm:text-[15px] lg:text-[16px] mb-6">
+              <p className="text-[12px] sm:text-[14px] lg:text-[18px] mb-6 text-[#01155E99]">
                 {blogs[0].description}
               </p>
 
@@ -135,21 +135,21 @@ const BlogSection = () => {
                 <div className="relative flex flex-col flex-1">
                   <div>
                     {/* TOP ROW: Architect + Date */}
-                    <div className="flex justify-between items-start sm:items-center mb-2">
-                      <span className="text-sm font-semibold text-[#0F172A]">
+                    <div className="flex justify-between items-start sm:items-center mb-2 ">
+                      <span className="text-sm font-semibold text-[#01155E99]">
                         {blog.author}
                       </span>
 
-                      <span className="text-xs text-[#64748B] sm:absolute sm:right-0">
+                      <span className="text-xs text-[#01155E99] sm:absolute sm:right-0">
                         {blog.date}
                       </span>
                     </div>
 
-                    <h4 className="text-[18px] font-bold leading-snug mb-2">
+                    <h4 className="text-[18px] font-medium text-[#01155E] leading-snug mb-2">
                       {blog.title}
                     </h4>
 
-                    <p className="text-sm text-[#475569] line-clamp-2">
+                    <p className="text-sm text-[#01155E99] line-clamp-2">
                       {blog.description}
                     </p>
                   </div>

@@ -17,3 +17,5 @@ export const ADMIN_LISTING_AVAILABILITY_URL = (id) =>
   `${BASE_URL}/admin/listings/${id}/availability`;
 
 export const ADMIN_Communities = `${BASE_URL}/admin/communities`;
+export const ADMIN_LISTING_FEATURED_URL = (id) =>
+  `${BASE_URL}/admin/listings/${id}/featured`;

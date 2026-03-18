@@ -2,7 +2,11 @@ import Listing from "../models/Listing.js";
 
 export const dashboard = async (req, res) => {
   try {
-    const listings = await Listing.find().select("-internal");
+    const listings = await Listing.find().select("-internal")
+      .sort({
+        isFeatured: -1,   //  featured first
+        createdAt: -1     // latest after that
+      });
 
     res.status(200).json({
       success: true,
@@ -35,7 +39,7 @@ export const getListings = async (req, res) => {
     // ✅ Fetch + Count using SAME filters
     const [listings, total] = await Promise.all([
       Listing.find(matchQuery)
-        .sort({ updatedAt: -1 })
+        .sort({  isFeatured: -1,updatedAt: -1 })
          .select("-internal")           
         .skip(skip)
         .limit(limit),

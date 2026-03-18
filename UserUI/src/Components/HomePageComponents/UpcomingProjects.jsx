@@ -47,7 +47,7 @@ const UpcomingProjects = () => {
     <section className="w-full bg-white py-16 flex flex-col items-center">
       <div className="w-full max-w-[1200px] mb-10">
         <h2
-          className="text-[#001A54] text-[48px] font-bold mb-2 inline-block pb-6"
+          className="text-[#001A54] text-[48px] font-bold mb-2 inline-block pb-2"
           style={{
             fontFamily: "Archivo, sans-serif",
             backgroundImage: `url(${imageurl})`,
@@ -56,10 +56,10 @@ const UpcomingProjects = () => {
             backgroundSize: "457px 6px",
           }}
         >
-          Upcoming Off-Plan Projects
+        Market Updates
         </h2>
-        <p className="text-[#6C757D] text-[18px] mt-6 max-w-[1200px]">
-          Explore the latest off-plan investment opportunities in Dubai's most sought-after communities.
+        <p className="text-[#67739E] text-[18px]  max-w-[1200px]">
+       Discover Dubai’s newest launches with expert guidance to secure the best prices and the most desirable units.
         </p>
       </div>
 

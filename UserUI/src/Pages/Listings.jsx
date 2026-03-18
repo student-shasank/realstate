@@ -40,7 +40,8 @@ const Listings = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+  <div className="pt-[60px]">
+    <div style={{ padding: "20px" }} className="pt-5" >
       <h2>Available Listings</h2>
 
       {/* Loading */}
@@ -90,6 +91,7 @@ const Listings = () => {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 };

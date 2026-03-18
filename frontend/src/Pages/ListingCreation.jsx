@@ -21,6 +21,7 @@ function ListingCreation() {
     completionStatus: "",
     addedOn: "",
 
+     isFeatured: false,
     // --- Specs ---
     bedrooms: "",
     bathrooms: "",
@@ -217,6 +218,19 @@ listingValidUntil: "",
                 <option>For Rent</option>
               </select>
             </div>
+
+            <div className="sm:col-span-3 flex items-center gap-3">
+  <input
+    type="checkbox"
+    name="isFeatured"
+    checked={formData.isFeatured}
+    onChange={handleChange}
+    className="h-4 w-4 rounded border-gray-300"
+  />
+  <label className="block text-sm font-medium text-gray-900">
+    Mark as Featured
+  </label>
+</div>
 
             {/* Completion Status */}
            <div className="sm:col-span-3">

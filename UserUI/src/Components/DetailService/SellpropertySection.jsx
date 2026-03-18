@@ -31,11 +31,10 @@ const SellProperty = () => {
           className="
             flex flex-col
             absolute
-            gap-[8px]
+            gap-[1px]
             text-[#01155E]
             text-[18px]
             font-normal
-            leading-[1.5]
             font-['General_Sans']
             border-l-[3px] border-[#01155E]
             pl-6
@@ -54,9 +53,11 @@ const SellProperty = () => {
       </div>
 
       {/* HERO SECTION (Maintains its own 1200px container logic) */}
-      <section className="relative flex w-full items-center justify-center overflow-hidden pb-10">
-        <div className="relative flex h-[568px] w-[1200px] items-center justify-between px-4">
-          <div 
+     <section className="relative flex w-full items-center justify-center overflow-hidden pb-8 sm:pb-10 mt-30 sm:10">
+        <div className="relative w-full max-w-[1200px] min-h-[300px] sm:min-h-[400px] lg:min-h-[480px] flex items-center px-4 sm:px-6 lg:px-8">
+
+          {/* BACKGROUND BLUR */}
+          <div
             className="absolute inset-0 z-0 opacity-40 blur-[80px]"
             style={{
               backgroundImage: `url(${backgroundImage})`,
@@ -65,20 +66,30 @@ const SellProperty = () => {
             }}
           />
 
-          <div className="z-20 flex flex-col gap-10">
-            <div className="absolute left-3 top-[200.7px] z-20 h-[165.66px] w-[185.66px] rounded-full bg-[#1C4DFF12]"></div>
-            <h1 className="font-['General_Sans']   h-[225.66px] w-[1200.66px] text-[96px] font-medium leading-[1.2] tracking-normal text-[#01155E]  ">
-              Looking to <br /> Sell Your Property?
+          {/* DECORATIVE CIRCLE — LEFT */}
+          <div className="absolute left-2 sm:left-4 top-[30%] z-10 h-[100px] w-[100px] sm:h-[140px] sm:w-[140px] lg:h-[165px] lg:w-[165px] rounded-full bg-[#1C4DFF12]" />
+
+          {/* DECORATIVE CIRCLES — RIGHT */}
+          <div className="absolute right-[8%] sm:right-[19%] top-[31%] lg:right-[23%] lg:top-[40%] z-10 h-[120px] w-[120px] sm:h-[160px] sm:w-[160px] lg:h-[185px] lg:w-[185px] rounded-full bg-[#1C4DFF12]" />
+          <div className="hidden sm:block absolute right-[-20px] sm:right-[-30px] top-0 z-0 h-[280px] w-[280px] sm:h-[276px] sm:w-[276px] lg:h-[400px] lg:w-[400px] rounded-full bg-[#1C4DFF08] backdrop-blur-[12px]" />
+
+          {/* TEXT + BUTTON */}
+          <div className="relative z-20 flex flex-col gap-6 sm:gap-8 py-10 sm:py-14 lg:py-20">
+            <h1
+              className="text-[36px] sm:text-[48px] lg:text-[64px] font-medium leading-[1.2] tracking-normal text-[#01155E]"
+              style={{ fontFamily: 'General Sans, sans-serif' }}
+            >
+              Looking to 
+<br /> Sell Your Property ? 
             </h1>
-            <button className="flex h-[64px] w-[280px] items-center justify-center rounded-lg bg-[#01155E] font-['General_Sans'] text-[18px] font-medium text-white transition-all hover:bg-opacity-90 active:scale-95">
+            <button
+              className="flex h-[44px] sm:h-[50px] lg:h-[64px] w-full max-w-[220px] sm:max-w-[260px] lg:max-w-[280px] items-center justify-center rounded-lg bg-[#01155E] text-[15px] sm:text-[17px] lg:text-[18px] font-medium text-white transition-all hover:bg-opacity-90 active:scale-95"
+              style={{ fontFamily: 'General Sans, sans-serif' }}
+            >
               Register Now
             </button>
           </div>
 
-          <div className="relative h-full w-1/2">
-            <div className="absolute right-81 top-[290.7px] z-20 h-[185.66px] w-[185.66px] rounded-full bg-[#1C4DFF12]"></div>
-            <div className="absolute -right-10 z-10 -top-0  h-[500px] w-[500px] rounded-full bg-[#1C4DFF08] backdrop-blur-[12px]" />
-          </div>
         </div>
       </section>
     </div>

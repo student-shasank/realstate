@@ -57,10 +57,13 @@ function AllCommunities() {
       <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-[#01155E] font-archivo font-bold text-[32px] md:text-[40px] uppercase">
+          <h1 className="text-[#01155E] font-archivo font-semibold text-[32px] md:text-[48px] uppercase">
             Our Communities
           </h1>
-          <div className="h-1.5 w-20 bg-[#01155E] mt-2"></div>
+         <div className="flex w-full max-w-[400px]">
+              <div className="w-[120px] md:w-[162px] h-[6px] md:h-[8px] bg-[#01155E]" />
+              <div className="flex-1 h-[2px] bg-[#01155E] self-end mb-[2px]" />
+            </div>
         </div>
 
         {/* Cards */}
@@ -97,7 +100,7 @@ function AllCommunities() {
               </div>
 
               <div className="flex flex-col border-l-4 border-[#01155E] pl-5 mt-5 min-h-[90px] justify-center transition-all group-hover:border-l-8">
-                <h3 className="text-[#01155E] font-bold text-[22px] font-archivo uppercase leading-tight">
+                <h3 className="text-[#01155E] font-bold text-[22px] sm:text-[24px] font-archivo uppercase leading-tight">
                   {item.title?.replace(/^Community \d+-\s*/i, "")}
                 </h3>
 

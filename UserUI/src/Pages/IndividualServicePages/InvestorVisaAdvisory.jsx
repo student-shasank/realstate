@@ -7,7 +7,7 @@ function InvestorVisaAdvisory() {
   return (
     <div>
 
- <div className='pt-[100px] pb-10'>
+ <div className='pt-[70px] md:pt-[100px]'>
 
       <HeroSection
         title={
