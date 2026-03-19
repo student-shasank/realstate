@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { MapPin, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import FeaturesSection from '../Components/HomePageComponents/FeaturesSection';
+import { useNavigate } from 'react-router-dom';
 import {
   setCompletion,
   setPropertyType,
@@ -25,6 +26,10 @@ import BlogSection from '../Components/HomePageComponents/BlogSection';
 import DeveloperSlider from '../Components/HomePageComponents/Developerslider/DeveloperSlider';
 import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrategy';
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
+
+
+
+
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -85,20 +90,26 @@ const Home = () => {
     return `${min} - ${max}`;
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    dispatch(
-      fetchProjects({
-        completion,
-        propertyType,
-        location,
-        beds,
-        baths,
-        minPrice: minPrice || 0,
-        maxPrice: maxPrice || Infinity,
-      })
-    );
-  };
+
+  const navigate = useNavigate();
+
+ const handleSearch = (e) => {
+  e.preventDefault();
+
+  const params = new URLSearchParams();
+
+  if (location) params.set('location', location);
+  if (completion) params.set('completion', completion);
+  if (propertyType) params.set('propertyType', propertyType);
+  if (beds) params.set('beds', beds);
+  if (baths) params.set('baths', baths);
+  if (minPrice) params.set('minPrice', minPrice);
+  if (maxPrice) params.set('maxPrice', maxPrice);
+  if (handoverYear) params.set('handoverYear', handoverYear);
+  if (paymentPlan) params.set('paymentPlan', paymentPlan);
+
+  navigate(`/listings?${params.toString()}`);
+};
 
   const scroll = (direction) => {
     if (scrollRef.current) {
