@@ -32,6 +32,8 @@ export const fetchProjects = createAsyncThunk(
           max_price: params.maxPrice,
           property_type: params.propertyType,
           completion: params.completion,
+            sale_status: params.saleStatus, 
+            developer: params.developer,
         },
       });
  console.log(response.data)
@@ -59,6 +61,8 @@ const initialState = {
   baths: "3",
   minPrice: "",
   maxPrice: "",
+  saleStatus: "",
+  developer: "",
 
   isBedBathOpen: false,
   isPriceOpen: false,
@@ -97,6 +101,12 @@ const searchSlice = createSlice({
     },
     setMaxPrice: (state, action) => {
       state.maxPrice = action.payload;
+    },
+    setSaleStatus: (state, action) => {
+      state.saleStatus = action.payload;},
+
+      setDeveloper: (state, action) => {
+      state.developer = action.payload;
     },
     toggleBedBath: (state) => {
       state.isBedBathOpen = !state.isBedBathOpen;
@@ -159,6 +169,8 @@ export const {
   setMinPrice,
   setMaxPrice,
   toggleBedBath,
+   setSaleStatus,
+   setDeveloper,
   togglePrice,
   closeDropdowns,
   resetSearchState,

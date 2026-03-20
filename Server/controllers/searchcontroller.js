@@ -10,6 +10,8 @@ export const searchListings = async (req, res) => {
       max_price,
       property_type,
       completion,
+      developer,
+      sale_status,
       limit = 20,
     } = req.query;
 
@@ -39,6 +41,15 @@ export const searchListings = async (req, res) => {
     // ✅ COMPLETION STATUS
     if (completion && completion !== "All") {
       query.completionStatus = completion;
+    }
+
+     if (developer) {
+      query.devloper = { $regex: developer.trim(), $options: "i" };
+    }
+
+    // SALE STATUS -> PURPOSE
+    if (sale_status) {
+      query.purpose = sale_status.trim().toLowerCase();
     }
 
     // ✅ PRICE RANGE

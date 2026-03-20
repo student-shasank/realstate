@@ -28,9 +28,6 @@ import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrat
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
 
 
-
-
-
 const Home = () => {
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
