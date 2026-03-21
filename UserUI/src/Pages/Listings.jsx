@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import imageurl from "../assets/underline.png";
+
 import {
   fetchProjects,
   setCompletion,
@@ -650,11 +651,19 @@ const developerOptions = [
 
         {!loading && projects?.length > 0 && (
           <div style={listingsGridStyle} >
-            {projects.map((item) => (
-              <ListingCard key={item._id} listing={item} />
-            ))}
+           {projects.map((item) => (
+  <ListingCard
+    key={item._id}
+    listing={item}
+   onRequireLogin={() => {
+  const event = new CustomEvent("openLogin");
+  window.dispatchEvent(event);
+}}
+  />
+))}
           </div>
         )}
+       
       </div>
     </div>
   );

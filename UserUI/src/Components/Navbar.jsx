@@ -1,12 +1,16 @@
-import React, { useEffect } from "react"; // Added useEffect
+import React, { useEffect,useState } from "react"; // Added useEffect
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Menu, Languages } from "lucide-react";
 import { logoutUser } from "../features/Authentation/login";
 import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
 import { fetchNavList } from "../features/communities/communitySlice"; // Added this import
+import LoginPopup from "../Pages/LoginPopup";
+import SignupPopup from "../Pages/SignupPopup";
 
 function Navbar() {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [open, setOpen] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
 
@@ -48,10 +52,20 @@ function Navbar() {
     lineHeight: "100%",
     letterSpacing: "0%",
   };
+useEffect(() => {
+  const handleLoginOpen = () => {
+    setIsLoginOpen(true);
+  };
 
+  window.addEventListener("openLogin", handleLoginOpen);
+
+  return () => {
+    window.removeEventListener("openLogin", handleLoginOpen);
+  };
+}, []);
   const textColor = isHomePage ? "#01155E" : "#FFFFFF";
 
-  return (
+  return (<>
     <nav
       className={`fixed top-0 left-0 right-0 w-full z-50 h-[72px] md:h-[100px] flex justify-center transition-all duration-300
         ${
@@ -206,21 +220,25 @@ function Navbar() {
         {/* Auth & Language */}
         <div className="flex items-center gap-x-10 shrink-0">
           {!user ? (
-            <Link to="/login" className="flex items-center gap-2 group">
-              <span
-                style={{
-                  ...textStyle,
-                  color: textColor,
-                  fontWeight: 400,
-                }}
-              >
-                Login
-              </span>
-              <div className="bg-[#01155E] p-1.5 rounded-full">
-                <User size={18} className="text-white fill-current" />
-              </div>
-            </Link>
-          ) : (
+  <button
+    type="button"
+    onClick={() => setIsLoginOpen(true)}
+    className="flex items-center gap-2 group"
+  >
+    <span
+      style={{
+        ...textStyle,
+        color: textColor,
+        fontWeight: 400,
+      }}
+    >
+      Login
+    </span>
+    <div className="bg-[#01155E] p-1.5 rounded-full">
+      <User size={18} className="text-white fill-current" />
+    </div>
+  </button>
+) : (
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -278,7 +296,25 @@ function Navbar() {
         </div>
       </div>
     </nav>
-  );
+ <LoginPopup
+      isOpen={isLoginOpen}
+      onClose={() => setIsLoginOpen(false)}
+      openSignup={() => {
+        setIsLoginOpen(false);
+        setIsSignupOpen(true);
+      }}
+    />
+
+    <SignupPopup
+      isOpen={isSignupOpen}
+      onClose={() => setIsSignupOpen(false)}
+      openLogin={() => {
+        setIsSignupOpen(false);
+        setIsLoginOpen(true);
+      }}
+    />
+
+  </>);
 }
 
 export default Navbar;

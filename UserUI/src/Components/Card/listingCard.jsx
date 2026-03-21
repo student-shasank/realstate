@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
-import heartIcon from "../../assets/like.png"
-import callIcon from '../../assets/phonecall.png';
+import heartIcon from "../../assets/like.svg"
+import callIcon from '../../assets/phonecall.svg';
 import whatsappIcon from '../../assets/whatsap.png';
-import shareIcon from '../../assets/share.png'
+import shareIcon from '../../assets/linkshare.svg'
 import listingimage from '../../assets/listingcard.jpg'
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'
@@ -16,8 +16,15 @@ import { useNavigate } from "react-router-dom";
 import { sendListingEnquiry, resetEnquiryState } from "../../features/Enquiery/enquirySlice.js";
 import { toast } from 'react-toastify';
 
+import {
+  addFavoriteLocal,
+  removeFavoriteLocal,
+  toggleFavorite,
+} from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
+
+
 // Note: Ensure General Sans font is imported in your global CSS
-const ListingCard = ({ listing }) => {
+const ListingCard = ({ listing,onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isLocalSending, setIsLocalSending] = useState(false);
@@ -37,6 +44,34 @@ const ListingCard = ({ listing }) => {
     { id: 'whatsapp', icon: whatsappIcon, alt: 'WhatsApp' },
     { id: 'share', icon: shareIcon, alt: 'Share' }
   ];
+
+ 
+
+const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+const favorites = useSelector(
+  (state) => state.favorites.favorites || []
+);
+
+const isFavorite = favorites.includes(listing?._id);
+const handleFavorite = (e) => {
+  e.stopPropagation();
+
+  if (!listing?._id) return;
+
+  if (!isLoggedIn) {
+    onRequireLogin?.();
+    return;
+  }
+
+  if (isFavorite) {
+    dispatch(removeFavoriteLocal(listing._id));
+  } else {
+    dispatch(addFavoriteLocal(listing._id));
+  }
+
+  dispatch(toggleFavorite(listing._id));
+};
    
   // NEW: image array with safe fallback
   // const galleryImages =
@@ -189,11 +224,11 @@ const ListingCard = ({ listing }) => {
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
-                className={`h-[8px] rounded-full transition-all duration-300 ${
-                  activeImageIndex === index
-                    ? 'w-[18px] bg-white'
-                    : 'w-[8px] bg-white/45'
-                }`}
+               className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${
+  activeImageIndex === index
+    ? 'bg-white'
+    : 'bg-white/45'
+}`}
                 aria-label={`Go to image ${index + 1}`}
               />
             ))}
@@ -238,18 +273,44 @@ const ListingCard = ({ listing }) => {
           </div>
 
           {/* Social/Action Icons */}
-          <div className="flex gap-3">
-            {socialActions.map((btn) => (
-              <button 
-  key={btn.id}
-  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-    listing?.isFeatured ? "bg-white hover:bg-[#01155E]" : "bg-[#E2E8F0] hover:bg-[#01155E]"
-  }`}
->
-                <img src={btn.icon} alt={btn.alt} className="w-5 h-5 object-contain" />
-              </button>
-            ))}
-          </div>
+         
+        <div className="flex gap-3">
+  {socialActions.map((btn) => {
+    const isLikeBtn = btn.id === "like";
+
+    return (
+      <button
+        key={btn.id}
+        onClick={isLikeBtn ? handleFavorite : (e) => e.stopPropagation()}
+        className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+          listing?.isFeatured
+            ? "bg-white hover:bg-[#01155E]"
+            : "bg-[#E2E8F0] hover:bg-[#01155E]"
+        }`}
+      >
+        <img
+          src={btn.icon}
+          alt={btn.alt}
+          className={`w-5 h-5 object-contain transition-all duration-300 ${
+            isLikeBtn && isFavorite
+              ? "" // no invert
+              : btn.id !== "whatsapp"
+              ? "group-hover:brightness-0 group-hover:invert"
+              : ""
+          }`}
+          style={
+            isLikeBtn && isFavorite
+              ? {
+                  filter:
+                    "invert(19%) sepia(94%) saturate(7481%) hue-rotate(356deg) brightness(98%) contrast(119%)",
+                }
+              : {}
+          }
+        />
+      </button>
+    );
+  })}
+</div>
         </div>
 
         {/* Row 3: Features */}
@@ -293,9 +354,26 @@ const ListingCard = ({ listing }) => {
 
         {/* Bottom Row: Price and View Button */}
         <div className="flex justify-between items-center">
-          <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-            {listing.currency} <span className='text-[24px]'>{listing.price?.toLocaleString() || '10,00,239'}</span> 
-          </div>
+         <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
+  {listing?.completionStatus === "Off-Plan" ? (
+    <>
+      <span className="text-[24px] font-semibold  mr-1">
+        Starting at
+      </span>
+     <span className='text-[24px]'>  {listing.currency}{" "}</span>
+      <span className="text-[32px]">
+        {listing.price?.toLocaleString() || "10,00,239"}
+      </span>
+    </>
+  ) : (
+    <>
+      <span className='text-[24px]'>  {listing.currency}{" "}</span>
+      <span className="text-[32px]">
+        {listing.price?.toLocaleString() || "10,00,239"}
+      </span>
+    </>
+  )}
+</div>
           
           <div className="flex gap-3">
             <button

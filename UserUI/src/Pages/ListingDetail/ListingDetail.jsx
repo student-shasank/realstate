@@ -91,6 +91,7 @@ const ListingDetail = () => {
   if (!listing) return null;
 
   return (
+  <div className="mt-20">
     <div style={styles.pageWrapper}>
       <nav style={styles.breadcrumb}>
         Home {" > "} {listing.location?.city} {" > "}
@@ -239,6 +240,7 @@ const ListingDetail = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -4,9 +4,7 @@ import Navbar from "./Components/Navbar";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
-import Login from "./Pages/Login";
 import React, { useEffect } from "react";
-import Register from "./Pages/Register";
 import Listings from "./Pages/Listings";
 import ListingDetail from "./Pages/ListingDetail/ListingDetail";
 import { setFavorites } from "./features/dashboard/favoriteligting/favoriteSlice";
@@ -28,6 +26,9 @@ import TermsOfUse from "./Pages/TermsOfUse";
 import Disclaimer from "./Pages/Disclamer";
 import PrivacyPolicy from "./Pages/PrivacyPolicy";
 import DataSources from "./Pages/DataSources";
+
+import PropertyDetail from "../src/Pages/PropertyDetai";
+
 
 
 function App() {
@@ -63,15 +64,15 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
-        <Route path="/login" element={<Login />} />
+  
          <Route path="/termsofuse" element={<TermsOfUse />} />
           <Route path="/disclamer" element={<Disclaimer/>} />
           <Route path="/privacy" element={<PrivacyPolicy/>} />
-          <Route path="/datascource" element={<DataSources/>} />
-        <Route path="/register" element={<Register />} />
+          <Route path="/datascource" element={<DataSources/>} />     
         <Route path="/service" element={<Service />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/listing/:id" element={<ListingDetail />} />
+         <Route path="/propertyDetail" element ={<PropertyDetail/>} />
 
         {/* Individual Service Pages */}
         <Route path="/marketingandSales" element={<MarketingandSales />} />

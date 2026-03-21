@@ -26,6 +26,7 @@ import BlogSection from '../Components/HomePageComponents/BlogSection';
 import DeveloperSlider from '../Components/HomePageComponents/Developerslider/DeveloperSlider';
 import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrategy';
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
+import Preconstruction from "../assets/preconstruction.svg"
 
 
 const Home = () => {
@@ -142,9 +143,29 @@ const Home = () => {
             ))}
           </div>
 
-          <div className="bg-white/30 backdrop-blur-2xl border border-white/40 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)]">
+         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">
-              <div className="bg-white rounded-lg px-8 py-2.5 font-['Archivo'] text-[#01155E] flex items-center justify-center shadow-sm min-w-[120px]">Buy</div>
+             {/* Buy / Sell Toggle Container */}
+<div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
+  {['Buy', 'Sell'].map((type) => {
+    // Yahan aap apni state check kar sakte hain, example ke liye 'Buy' active rakha hyy
+    const isActive = type === 'Buy'; 
+
+    return (
+      <button
+        key={type}
+        // onClick={() => dispatch(setTransactionType(type))} // Aapka dispatch function
+        className={`px-13 py-2 text-sm font-semibold font-['Archivo'] transition-all rounded-full min-w-[100px] ${
+          isActive 
+            ? 'bg-[#01155E] text-white shadow-md' // Active state (Dark Blue)
+            : 'bg-[#ffff] text-[#01155E] ' // Inactive state
+        }`}
+      >
+        {type}
+      </button>
+    );
+  })}
+</div>
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
@@ -155,13 +176,54 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-              <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
+              {/* <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
                 {['All', 'Ready', 'Off-Plan'].map((status) => (
                   <button key={status} onClick={() => dispatch(setCompletion(status))} className={`flex-1 py-1.5 px-3 text-sm font-['Archivo']  text-[#01155E] rounded-lg transition-all ${completion === status ? 'bg-[#2B3964] text-white shadow-md' : 'text-[#2B3964]'}`}>
                     {status}
                   </button>
                 ))}
-              </div>
+              </div> */}
+            <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
+  {['Off-Plan', 'Ready', 'Pre-construction'].map((status) => {
+    const isActive = completion === status;
+    
+    // Agar status 'Pre-construction' hai toh Circular Icon render karo
+    if (status === 'Pre-construction') {
+      return (
+        <button
+          key={status}
+          onClick={() => dispatch(setCompletion(status))}
+          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ml-1 ${
+            isActive 
+              ? 'bg-[#01155E] text-white shadow-md' 
+              : 'bg-white text-[#01155E]'
+          }`}
+        >
+          <img 
+            src={Preconstruction} 
+            alt="icon" 
+            className={`w-5 h-5 object-contain ${isActive ? 'brightness-0 invert' : ''}`} 
+          />
+        </button>
+      );
+    }
+
+    // Normal Text Buttons (Off-Plan & Ready)
+    return (
+      <button
+        key={status}
+        onClick={() => dispatch(setCompletion(status))}
+        className={`px-8 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${
+          isActive 
+            ? 'bg-[#01155E] text-white shadow-md' 
+            : 'text-[#01155E] bg-[#ffff]'
+        }`}
+      >
+        {status}
+      </button>
+    );
+  })}
+</div>
 
               <div className="relative">
                 <select value={propertyType} onChange={(e) => dispatch(setPropertyType(e.target.value))} className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-gray-500 outline-none shadow-sm cursor-pointer">
