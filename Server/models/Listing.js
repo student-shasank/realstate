@@ -86,6 +86,7 @@ const ListingSchema = new mongoose.Schema(
     type: { type: String },
     purpose: { type: String },
     completionStatus: { type: String },
+     propertyStatus:{type: String},
     addedOn: { type: Date },
    availability: {
       type: String,

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import imageurl from "../assets/underline.png";
+import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown";
 
 import {
   fetchProjects,
@@ -15,8 +16,8 @@ import {
   toggleBedBath,
   togglePrice,
   closeDropdowns,
-  setSaleStatus ,
-  setDeveloper
+  setDeveloper,
+  setPurpose
 } from "../features/dashboard/searchSlice";
 import ListingCard from "../Components/Card/listingCard";
 import { ChevronDown } from 'lucide-react';
@@ -26,6 +27,33 @@ const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const bedBathRef = useRef(null);
   const priceRef = useRef(null);
+
+  const propertyTypeRef = useRef(null);
+const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
+const [propertyTab, setPropertyTab] = useState("Residential");
+
+const residentialOptions = [
+  "Apartment",
+  "Penthouse",
+  "Townhouse",
+  "Hotel Apartment",
+  "Land",
+  "Floor",
+  "Building",
+  "Villa",
+  "Villa Compound",
+];
+
+const commercialOptions = [
+  "Office",
+  "Shop",
+  "Warehouse",
+  "Labour Camp",
+  "Commercial Villa",
+  "Showroom",
+  "Commercial Floor",
+  "Factory",
+];
 
   const {
     completion,
@@ -38,6 +66,7 @@ const Listings = () => {
     minPrice,
     maxPrice,
     developer,
+    purpose,
     projects,
     loading,
     error,
@@ -52,8 +81,22 @@ const Listings = () => {
     const urlBaths = searchParams.get("baths") || "";
     const urlMinPrice = searchParams.get("minPrice") || "";
     const urlMaxPrice = searchParams.get("maxPrice") || "";
-    const urlSaleStatus = searchParams.get("saleStatus") || "";
     const urlDeveloper = searchParams.get("developer") || "";
+    const urlPurpose = searchParams.get("purpose") || "";
+    const urlEmirates = searchParams.get("emirates") || "";
+    const emiratesArray = urlEmirates
+      ? urlEmirates.split(",").map((item) => item.toLowerCase()).filter(Boolean)
+      : [];
+    setSelectedEmirates(emiratesArray);
+
+    const urlHandoverYear = searchParams.get("handoverYear") || "";
+    const handoverYearArray = urlHandoverYear
+      ? urlHandoverYear.split(",").map((item) => item.toLowerCase()).filter(Boolean)
+      : [];
+
+      const developerArray = urlDeveloper
+  ? urlDeveloper.split(",").map((item) => item.trim()).filter(Boolean)
+  : [];
 
     dispatch(setLocation(urlLocation));
     dispatch(setCompletion(urlCompletion));
@@ -62,11 +105,12 @@ const Listings = () => {
     dispatch(setBaths(urlBaths));
     dispatch(setMinPrice(urlMinPrice));
     dispatch(setMaxPrice(urlMaxPrice));
-    dispatch(setSaleStatus(urlSaleStatus));
-setSelectedSaleStatus(urlSaleStatus);
-dispatch(setDeveloper(urlDeveloper));
-setSelectedDeveloper(urlDeveloper);
+
     
+dispatch(setDeveloper(urlDeveloper));
+setSelectedDevelopers(developerArray);
+    dispatch(setPurpose(urlPurpose));
+    setSelectedHandoverYears(handoverYearArray);
 
     dispatch(
       fetchProjects({
@@ -77,26 +121,35 @@ setSelectedDeveloper(urlDeveloper);
         baths: urlBaths,
         minPrice: urlMinPrice,
         maxPrice: urlMaxPrice,
-         saleStatus: urlSaleStatus,
-         developer: urlDeveloper,
+       developer: developerArray,
+        purpose: urlPurpose,
+        emirates: emiratesArray,
+        handoverYear: handoverYearArray,
       })
     );
   }, [dispatch, searchParams]);
 
   // Handle Outside Click for Dropdown
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        (bedBathRef.current && !bedBathRef.current.contains(event.target)) &&
-        (priceRef.current && !priceRef.current.contains(event.target))
-      ) {
-        dispatch(closeDropdowns());
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dispatch]);
+ useEffect(() => {
+  const handleClickOutside = (event) => {
+    const isOutsideBedBath =
+      bedBathRef.current && !bedBathRef.current.contains(event.target);
 
+    const isOutsidePrice =
+      priceRef.current && !priceRef.current.contains(event.target);
+
+    const isOutsidePropertyType =
+      propertyTypeRef.current && !propertyTypeRef.current.contains(event.target);
+
+    if (isOutsideBedBath && isOutsidePrice && isOutsidePropertyType) {
+      dispatch(closeDropdowns());
+      setPropertyTypeOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [dispatch]);
   const updateParams = (key, value) => {
     const params = new URLSearchParams(searchParams);
     if (value && value !== "") {
@@ -137,6 +190,8 @@ setSelectedDeveloper(urlDeveloper);
     updateParams("maxPrice", value);
   };
 
+
+
   const clearAllFilters = () => {
     dispatch(setLocation(""));
     dispatch(setCompletion(""));
@@ -145,13 +200,13 @@ setSelectedDeveloper(urlDeveloper);
     dispatch(setBaths(""));
     dispatch(setMinPrice(""));
     dispatch(setMaxPrice(""));
-    setSelectedHandover("");
-    setSelectedSaleStatus("");
-    dispatch(setSaleStatus(""));
-updateParams("saleStatus", "");
-setIsSaleStatusOpen(false);
+    setSelectedHandoverYears([]);
     setIsHandoverOpen(false);
     setSearchParams({});
+    dispatch(setPurpose(""));
+    dispatch(setDeveloper(""));
+setSelectedDevelopers([]);
+    setSelectedEmirates([]);
   };
 
   const getPriceLabel = () => {
@@ -178,92 +233,113 @@ setIsSaleStatusOpen(false);
     gap: "30px",
     marginTop: "30px",
     width: "100%",
-      padding: "10px 0",          // 👈 ADD THIS
-  overflow: "visible",
+    padding: "10px 0",
+    overflow: "visible",
   };
+
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("");
+  const [selectedEmirates, setSelectedEmirates] = useState([]);
+
+  const handleEmiratesChange = (emirate) => {
+    const emirateValue = emirate.toLowerCase();
+    const updatedEmirates = selectedEmirates.includes(emirateValue)
+      ? selectedEmirates.filter((item) => item !== emirateValue)
+      : [...selectedEmirates, emirateValue];
+
+    setSelectedEmirates(updatedEmirates);
+    updateParams(
+      "emirates",
+      updatedEmirates.map((item) => item.toLowerCase()).join(",")
+    );
+  };
+
+  const handleHandoverYearChange = (year) => {
+    const yearValue = year.toLowerCase();
+    const updatedYears = selectedHandoverYears.includes(yearValue)
+      ? selectedHandoverYears.filter((item) => item !== yearValue)
+      : [...selectedHandoverYears, yearValue];
+
+    setSelectedHandoverYears(updatedYears);
+    updateParams(
+      "handoverYear",
+      updatedYears.map((item) => item.toLowerCase()).join(",")
+    );
+  };
 
   const emirates = [
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
-    "Ras Al Khaimah", "Fijairah",
+    "Ras Al Khaimah", "Fujairah",
     "Sharjah", "Al Ain"
   ];
 
   const [isHandoverOpen, setIsHandoverOpen] = useState(false);
-const [selectedHandover, setSelectedHandover] = useState("");
+  const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
 
-const handoverYears = ["2026", "2027", "2028", "2029", "Post 2030"];
+  const handoverYears = ["2026", "2027", "2028", "2029", "Post 2030"];
 
-const [isSaleStatusOpen, setIsSaleStatusOpen] = useState(false);
-const [selectedSaleStatus, setSelectedSaleStatus] = useState("");
+ const [selectedDevelopers, setSelectedDevelopers] = useState([]);
 
-const saleStatusOptions = ["Buy", "Sell"];
-
-const [isDeveloperOpen, setIsDeveloperOpen] = useState(false);
-const [selectedDeveloper, setSelectedDeveloper] = useState("");
-
-const developerOptions = [
-  "Zara Builders",
-  "DAMAC",
-  "Sobha",
-  "Nakheel",
-  "Azizi",
-];
+  const developerOptions = [
+    "Zara Builders",
+    "DAMAC",
+    "Sobha",
+    "Nakheel",
+    "Azizi",
+  ];
 
   return (
     <div className="pt-[60px] bg-[#F8FAFF] min-h-screen mt-20">
       <div style={{ padding: "40px 20px", maxWidth: "1340px", margin: "0 auto" }}>
-       {/* NEW HEADER SECTION START */}
-  <div className="w-[1290px] mx-auto flex items-end justify-between mb-8 font-['Archivo']">
-    <div className="relative">
-      <h1 className="inline-block pb-3 mb-2 text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
-       style={{
-                  fontFamily: "Archivo, sans-serif",
-                  backgroundImage: `url(${imageurl})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "left 95%",
-                  backgroundSize: "600px 6px",
-                }}>
-        Properties for sale in UAE
-      </h1>
-      {/* Decorative Blue Underline */}
-    
-    </div>
+        {/* NEW HEADER SECTION START */}
+        <div className="w-[1290px] mx-auto flex items-end justify-between mb-8 font-['Archivo']">
+          <div className="relative">
+            <h1
+              className="inline-block pb-3 mb-2 text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
+              style={{
+                fontFamily: "Archivo, sans-serif",
+                backgroundImage: `url(${imageurl})`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "left 95%",
+                backgroundSize: "600px 6px",
+              }}
+            >
+              Properties for sale in UAE
+            </h1>
+            {/* Decorative Blue Underline */}
+          </div>
 
-    <div className="flex items-center gap-6">
-      {/* Sort Dropdown */}
-      <div className="flex items-center cursor-pointer gap-2">
-        <span className="text-[#01155E] text-[18px]">Most popular</span>
-        <ChevronDown className="h-5 w-5 text-[#01155E]" />
-      </div>
+          <div className="flex items-center gap-6">
+            {/* Sort Dropdown */}
+            <div className="flex items-center cursor-pointer gap-2">
+              <span className="text-[#01155E] text-[18px]">Most popular</span>
+              <ChevronDown className="h-5 w-5 text-[#01155E]" />
+            </div>
 
-      {/* View Switchers */}
-      <div className="flex items-center gap-2">
-        {/* List View Active */}
-        <button className="p-2.5 border border-[#01155E] rounded-xl bg-white shadow-sm">
-          <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
-            <path d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3" stroke="#01155E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+            {/* View Switchers */}
+            <div className="flex items-center gap-2">
+              {/* List View Active */}
+              <button className="p-2.5 border border-[#01155E] rounded-xl bg-white shadow-sm">
+                <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
+                  <path d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3" stroke="#01155E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
 
-        {/* Grid View Inactive */}
-        <button className="p-2.5 opacity-40 hover:opacity-100 transition-opacity">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2"/>
-            <rect x="12" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2"/>
-            <rect x="2" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2"/>
-            <rect x="12" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
+              {/* Grid View Inactive */}
+              <button className="p-2.5 opacity-40 hover:opacity-100 transition-opacity">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
+                  <rect x="12" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
+                  <rect x="2" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
+                  <rect x="12" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="w-[1290px] min-h-[236px] mx-auto bg-[#1C4DFF0A] border border-[#E5E7EB] rounded-[10px] p-[30px] flex flex-col gap-[30px] items-center font-['Archivo']">
-          
           <div className="w-[1230px] flex flex-col gap-[16px]">
-            
             <div className="flex gap-[24px] w-full">
               <div className="relative flex-1 max-w-[1026px]">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#01155E]">
@@ -277,9 +353,25 @@ const developerOptions = [
                   className="w-full h-[48px] pl-12 pr-4 bg-white border border-[#D1D5DB] rounded-[16px] text-[16px] outline-none placeholder:text-gray-400 focus:ring-1 focus:ring-[#01155E]"
                 />
               </div>
-              
-              <button 
-                onClick={() => dispatch(fetchProjects({ location, completion, propertyType, beds, baths, minPrice, maxPrice ,saleStatus: selectedSaleStatus,developer, }))}
+
+              <button
+                onClick={() =>
+                  dispatch(
+                    fetchProjects({
+                      location,
+                      completion,
+                      propertyType,
+                      beds,
+                      baths,
+                      minPrice,
+                      maxPrice,
+                      developer: selectedDevelopers,
+                      purpose,
+                      emirates: selectedEmirates,
+                      handoverYear: selectedHandoverYears,
+                    })
+                  )
+                }
                 className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
               >
                 Search
@@ -287,64 +379,21 @@ const developerOptions = [
             </div>
 
             <div className="grid grid-cols-4 gap-x-[30px] gap-y-[16px] w-full">
-               <div className="relative w-full font-['General_Sans']">
-  <button
-    type="button"
-    onClick={() => setIsDeveloperOpen(!isDeveloperOpen)}
-    className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
-    style={{ borderRadius: isDeveloperOpen ? "16px 16px 0 0" : "16px" }}
-  >
-    <span className="truncate">
-      {selectedDeveloper || "Developer"}
-    </span>
+              <DeveloperDropdown
+  selectedDevelopers={selectedDevelopers}
+  setSelectedDevelopers={(developers) => {
+    setSelectedDevelopers(developers);
 
-    <svg
-      className={`w-5 h-5 text-[#01155E] transition-transform ${
-        isDeveloperOpen ? "rotate-180" : ""
-      }`}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
+    const joined = developers.join(",");
+    dispatch(setDeveloper(joined));
+    updateParams("developer", joined);
+  }}
+/>
 
-  {isDeveloperOpen && (
-    <div className="absolute top-full left-0 z-50 w-full bg-white border-x border-b border-[#9747FF] rounded-b-[16px]">
-      {developerOptions.map((dev, index) => (
-        <button
-          key={dev}
-          type="button"
-          onClick={() => {
-            setSelectedDeveloper(dev);
-            setIsDeveloperOpen(false);
-
-            dispatch(setDeveloper(dev));
-            updateParams("developer", dev);
-          }}
-          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] border-b border-[#D9E1F2] text-[#67739E] hover:bg-[#F8FAFF] ${
-            index === developerOptions.length - 1 ? "rounded-b-[16px] border-b-0" : ""
-          }`}
-        >
-          <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-            {selectedDeveloper === dev && (
-              <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-            )}
-          </div>
-
-          <span>{dev}</span>
-        </button>
-      ))}
-    </div>
-  )}
-</div>
-             
-
-       {/* BEDS & BATHS DROPDOWN START */}
+              {/* BEDS & BATHS DROPDOWN START */}
               <div className="relative" ref={bedBathRef}>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => dispatch(toggleBedBath())}
                   className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[16px] text-[#6B7280] outline-none cursor-pointer"
                 >
@@ -448,194 +497,218 @@ const developerOptions = [
               </div>
               {/* PRICE DROPDOWN END */}
 
-              <select value={propertyType} onChange={handlePropertyTypeChange} className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
-                <option value="">Residential</option>
-                <option value="Apartment">Apartment</option>
-                <option value="Villa">Villa</option>
-              </select>
+              <div className="relative w-full" ref={propertyTypeRef}>
+  <button
+    type="button"
+    onClick={() => setPropertyTypeOpen((prev) => !prev)}
+    className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] text-[#67739E] text-[16px]"
+  >
+    <span className="truncate">{propertyType || "Residential"}</span>
 
+    <ChevronDown
+      className={`h-4 w-4 text-[#67739E] transition-transform ${
+        propertyTypeOpen ? "rotate-180" : ""
+      }`}
+    />
+  </button>
+
+  {propertyTypeOpen && (
+    <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-[12px] shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
+      
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
+        <span className="text-[14px] font-medium text-[#67739E]">
+          {propertyTab}
+        </span>
+        <ChevronDown className="h-4 w-4 text-[#67739E] rotate-180" />
+      </div>
+
+      {/* TABS */}
+      <div className="grid grid-cols-2 px-3 pt-2">
+        <button
+          type="button"
+          onClick={() => setPropertyTab("Residential")}
+          className={`text-left text-[15px] h-[32px] border-b-2 ${
+            propertyTab === "Residential"
+              ? "text-[#67739E] border-[#01155E]"
+              : "text-[#8B95B7] border-transparent"
+          }`}
+        >
+          Residential
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setPropertyTab("Commercial")}
+          className={`text-left text-[15px] h-[32px] pl-3 border-b-2 ${
+            propertyTab === "Commercial"
+              ? "text-[#67739E] border-[#01155E]"
+              : "text-[#8B95B7] border-transparent"
+          }`}
+        >
+          Commercial
+        </button>
+      </div>
+
+      {/* OPTIONS */}
+      <div className="grid grid-cols-2 gap-x-2 gap-y-2 p-3 pt-2">
+        {(propertyTab === "Residential"
+          ? residentialOptions
+          : commercialOptions
+        ).map((option) => {
+          const isActive = propertyType === option;
+
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                dispatch(setPropertyType(option));
+                updateParams("propertyType", option);
+                setPropertyTypeOpen(false);
+              }}
+              className={`h-[30px] rounded-full border px-3 flex items-center gap-2 text-left transition-all ${
+                isActive
+                  ? "bg-[#01155E] border-[#01155E] text-white"
+                  : "bg-white border-[#D9E1F2] text-[#67739E]"
+              }`}
+            >
+              <div
+                className={`w-[16px] h-[16px] rounded-full border flex items-center justify-center flex-shrink-0 ${
+                  isActive ? "border-white" : "border-black"
+                }`}
+              >
+                {isActive && (
+                  <div className="w-[7px] h-[7px] rounded-full bg-white" />
+                )}
+              </div>
+
+              <span className="text-[13px] leading-none truncate">
+                {option}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  )}
+</div>
               <div className="relative w-full font-['General_Sans']">
-  <button
-    type="button"
-    onClick={() => setIsSaleStatusOpen(!isSaleStatusOpen)}
-    className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
-    style={{ borderRadius: isSaleStatusOpen ? "16px 16px 0 0" : "16px" }}
-  >
-    <span className="truncate">
-      {selectedSaleStatus || "Sale Status"}
-    </span>
+                <button
+                  type="button"
+                  onClick={() => setIsHandoverOpen(!isHandoverOpen)}
+                  className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
+                  style={{ borderRadius: isHandoverOpen ? "16px 16px 0 0" : "16px" }}
+                >
+                  <span className="truncate">
+                    {selectedHandoverYears.length > 0
+                      ? `${selectedHandoverYears.length} Year${selectedHandoverYears.length > 1 ? "s" : ""} Selected`
+                      : "Handover year"}
+                  </span>
 
-    <svg
-      className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${
-        isSaleStatusOpen ? "rotate-180" : ""
-      }`}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M19 9l-7 7-7-7"
-      />
-    </svg>
-  </button>
+                  <svg
+                    className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${
+                      isHandoverOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-  {isSaleStatusOpen && (
-    <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white border-x border-b border-[#9747FF] rounded-b-[16px]">
-      <div className="p-0">
-        {saleStatusOptions.map((option, index) => (
-          <button
-            key={option}
-            type="button"
-           onClick={() => {
-  setSelectedSaleStatus(option);
-  setIsSaleStatusOpen(false);
+                {isHandoverOpen && (
+                  <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
+                    <div className="p-0">
+                      {handoverYears.map((year, index) => (
+                        <button
+                          key={year}
+                          type="button"
+                          onClick={() => handleHandoverYearChange(year)}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${
+                            index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""
+                          }`}
+                        >
+                          <div className="w-[24px] flex justify-center flex-shrink-0">
+                            <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                              {selectedHandoverYears.includes(year.toLowerCase()) && (
+                                <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
+                              )}
+                            </div>
+                          </div>
 
-  dispatch(setSaleStatus(option));      // ✅ Redux
-  updateParams("saleStatus", option);   // ✅ URL
-}}
-            className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${
-              index === saleStatusOptions.length - 1 ? "rounded-b-[16px] border-b-0" : ""
-            }`}
-          >
-            <div className="w-[24px] flex justify-center flex-shrink-0">
-              <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-                {selectedSaleStatus === option && (
-                  <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
+                          <span className="truncate">{year}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
 
-            <span className="truncate">{option}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
-
-             <div className="relative w-full font-['General_Sans']">
-  <button
-    type="button"
-    onClick={() => setIsHandoverOpen(!isHandoverOpen)}
-    className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
-    style={{ borderRadius: isHandoverOpen ? "16px 16px 0 0" : "16px" }}
-  >
-    <span className="truncate">
-      {selectedHandover || "Handover year"}
-    </span>
-
-    <svg
-      className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${
-        isHandoverOpen ? "rotate-180" : ""
-      }`}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M19 9l-7 7-7-7"
-      />
-    </svg>
-  </button>
-
-  {isHandoverOpen && (
-    <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white  rounded-b-[16px]">
-      <div className="p-0">
-        {handoverYears.map((year, index) => (
-          <button
-            key={year}
-            type="button"
-            onClick={() => {
-              setSelectedHandover(year);
-              setIsHandoverOpen(false);
-              dispatch(setCompletion(year));
-              updateParams("completion", year);
-            }}
-            className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${
-              index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""
-            }`}
-          >
-            <div className="w-[24px] flex justify-center flex-shrink-0">
-              <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-                {selectedHandover === year && (
-                  <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
-                )}
-              </div>
-            </div>
-
-            <span className="truncate">{year}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
               <select className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
                 <option value="">Payment Plan</option>
               </select>
 
-             <div className="relative w-full font-['General_Sans']">
-  <button
-    type="button"
-    onClick={() => setIsOpen(!isOpen)}
-    className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D9E1F2] text-[16px] transition-all"
-    style={{ borderRadius: isOpen ? '16px 16px 0 0' : '16px' }}
-  >
-    <span className="text-[#67739E] text-[16px] truncate">
-      {selected || "Emirates"}
-    </span>
+              <div className="relative w-full font-['General_Sans']">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D9E1F2] text-[16px] transition-all"
+                  style={{ borderRadius: isOpen ? '16px 16px 0 0' : '16px' }}
+                >
+                  <span className="text-[#67739E] text-[16px] truncate">
+                    {selectedEmirates.length > 0
+                      ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? "s" : ""} Selected`
+                      : "Emirates"}
+                  </span>
 
-  <svg 
-  className={`w-5 h-5 text-[#01155E] transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-  fill="none" 
-  stroke="currentColor" 
-  viewBox="0 0 24 24"
->
-  <path 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    strokeWidth="2" 
-    d="M19 9l-7 7-7-7" 
-  />
-</svg>
-  </button>
+                  <svg
+                    className={`w-5 h-5 text-[#01155E] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-  {isOpen && (
-    <div className="absolute top-full left-0 mt-0 z-50 w-full bg-[#E9EEF6] border-x border-b border-[#9747FF] rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[8px] shadow-lg">
-      {emirates.map((emirate) => (
-        <div
-          key={emirate}
-          onClick={() => {
-            setSelected(emirate);
-            setIsOpen(false);
-          }}
-          className="flex items-center gap-[8px] w-full h-[36px] bg-white border border-[#D9E1F2] rounded-[16px] px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
-        >
-          <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center flex-shrink-0">
-            {selected === emirate && (
-              <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-            )}
-          </div>
+                {isOpen && (
+                  <div className="absolute top-full left-0 mt-0 z-50 w-full bg-[#E9EEF6] border-x border-b border-[#9747FF] rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[8px] shadow-lg">
+                    {emirates.map((emirate) => (
+                      <div
+                        key={emirate}
+                        onClick={() => handleEmiratesChange(emirate)}
+                        className="flex items-center gap-[8px] w-full h-[36px] bg-white border border-[#D9E1F2] rounded-[16px] px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
+                      >
+                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center flex-shrink-0">
+                          {selectedEmirates.includes(emirate.toLowerCase()) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
+                        </div>
 
-          <span className="text-[#67739E] text-[14px] truncate">
-            {emirate}
-          </span>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
+                        <span className="text-[#67739E] text-[14px] truncate">
+                          {emirate}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <button 
+          <button
             onClick={clearAllFilters}
             className="text-[#01155E] font-semibold text-sm hover:underline transition-all"
           >
@@ -650,20 +723,19 @@ const developerOptions = [
         )}
 
         {!loading && projects?.length > 0 && (
-          <div style={listingsGridStyle} >
-           {projects.map((item) => (
-  <ListingCard
-    key={item._id}
-    listing={item}
-   onRequireLogin={() => {
-  const event = new CustomEvent("openLogin");
-  window.dispatchEvent(event);
-}}
-  />
-))}
+          <div style={listingsGridStyle}>
+            {projects.map((item) => (
+              <ListingCard
+                key={item._id}
+                listing={item}
+                onRequireLogin={() => {
+                  const event = new CustomEvent("openLogin");
+                  window.dispatchEvent(event);
+                }}
+              />
+            ))}
           </div>
         )}
-       
       </div>
     </div>
   );

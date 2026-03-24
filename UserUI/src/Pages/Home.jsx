@@ -13,6 +13,7 @@ import {
   togglePrice,
   setMinPrice,
   setMaxPrice,
+  setPurpose,
   closeDropdowns,
   fetchProjects
 } from '../features/dashboard/searchSlice';
@@ -27,6 +28,7 @@ import DeveloperSlider from '../Components/HomePageComponents/Developerslider/De
 import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrategy';
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
 import Preconstruction from "../assets/preconstruction.svg"
+import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown"
 
 
 const Home = () => {
@@ -36,13 +38,38 @@ const Home = () => {
   const priceRef = useRef(null);
 
   const [handoverOpen, setHandoverOpen] = React.useState(false);
-  const [handoverYear, setHandoverYear] = React.useState('');
+  const [selectedHandoverYears, setSelectedHandoverYears] = React.useState([]);
   const handoverRef = useRef(null);
 
   const [paymentOpen, setPaymentOpen] = React.useState(false);
   const [paymentPlan, setPaymentPlan] = React.useState('');
   const paymentRef = useRef(null);
+  const [propertyTypeOpen, setPropertyTypeOpen] = React.useState(false);
+  const [propertyTab, setPropertyTab] = React.useState("Residential");
+  const propertyTypeRef = useRef(null);
+  const [selectedDevelopers, setSelectedDevelopers] = React.useState([]);
+  const residentialOptions = [
+    "Apartment",
+    "Penthouse",
+    "Townhouse",
+    "Hotel Apartment",
+    "Land",
+    "Floor",
+    "Building",
+    "Villa",
+    "Villa Compound",
+  ];
 
+  const commercialOptions = [
+    "Office",
+    "Shop",
+    "Warehouse",
+    "Labour Camp",
+    "Commercial Villa",
+    "Showroom",
+    "Commercial Floor",
+    "Factory",
+  ];
   const {
     completion,
     propertyType,
@@ -53,6 +80,7 @@ const Home = () => {
     isPriceOpen,
     minPrice,
     maxPrice,
+    purpose,
     projects,
     loading,
     error
@@ -63,6 +91,9 @@ const Home = () => {
     dispatch(closeDropdowns());
     setHandoverOpen(false);
     setPaymentOpen(false);
+    setIsEmirateOpen(false);
+    setPropertyTypeOpen(false);
+
   };
 
   useEffect(() => {
@@ -71,8 +102,11 @@ const Home = () => {
       const isOutsidePrice = priceRef.current && !priceRef.current.contains(event.target);
       const isOutsideHandover = handoverRef.current && !handoverRef.current.contains(event.target);
       const isOutsidePayment = paymentRef.current && !paymentRef.current.contains(event.target);
+      const isOutsideEmirate = emirateRef.current && !emirateRef.current.contains(event.target);
+      const isOutsidePropertyType =
+        propertyTypeRef.current && !propertyTypeRef.current.contains(event.target);
 
-      if (isOutsideBedBath && isOutsidePrice && isOutsideHandover && isOutsidePayment) {
+      if (isOutsideBedBath && isOutsidePrice && isOutsideHandover && isOutsidePayment && isOutsideEmirate && isOutsidePropertyType) {
         closeAll();
       }
     };
@@ -91,23 +125,35 @@ const Home = () => {
 
   const navigate = useNavigate();
 
- const handleSearch = (e) => {
-  e.preventDefault();
+  const handleSearch = (e) => {
+    e.preventDefault();
 
-  const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-  if (location) params.set('location', location);
-  if (completion) params.set('completion', completion);
-  if (propertyType) params.set('propertyType', propertyType);
-  if (beds) params.set('beds', beds);
-  if (baths) params.set('baths', baths);
-  if (minPrice) params.set('minPrice', minPrice);
-  if (maxPrice) params.set('maxPrice', maxPrice);
-  if (handoverYear) params.set('handoverYear', handoverYear);
-  if (paymentPlan) params.set('paymentPlan', paymentPlan);
+    if (location) params.set('location', location);
+    if (selectedEmirates.length > 0) {
+      params.set('emirates', selectedEmirates.join(','));
+    }
+    if (completion) params.set('completion', completion);
+    if (propertyType) params.set('propertyType', propertyType);
+    if (beds) params.set('beds', beds);
+    if (baths) params.set('baths', baths);
+    if (minPrice) params.set('minPrice', minPrice);
+    if (maxPrice) params.set('maxPrice', maxPrice);
+    if (purpose) params.set('purpose', purpose);
+    if (selectedHandoverYears.length > 0) {
+      params.set('handoverYear', selectedHandoverYears.join(','));
+    }
+    if (paymentPlan) params.set('paymentPlan', paymentPlan);
+    if (selectedDevelopers.length > 0) {
+  const normalizedDevelopers = selectedDevelopers.map((dev) =>
+    dev.toLowerCase().trim()
+  );
 
-  navigate(`/listings?${params.toString()}`);
-};
+  params.set("developer", normalizedDevelopers.join(","));
+}
+    navigate(`/listings?${params.toString()}`);
+  };
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -116,6 +162,18 @@ const Home = () => {
       scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
     }
   };
+  const [isEmirateOpen, setIsEmirateOpen] = React.useState(false);
+  const [selectedEmirates, setSelectedEmirates] = React.useState([]);
+
+  const handoverYears = ['2026', '2027', '2028', '2029', 'Post 2030'];
+  const emirates = [
+    "Dubai", "Umm AL Quwain",
+    "Abu Dhabi", "Ajman",
+    "Ras Al Khaimah", "Fujairah",
+    "Sharjah",
+  ];
+
+  const emirateRef = useRef(null);
 
   return (
     <>
@@ -143,29 +201,29 @@ const Home = () => {
             ))}
           </div>
 
-         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">
-             {/* Buy / Sell Toggle Container */}
-<div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
-  {['Buy', 'Sell'].map((type) => {
-    // Yahan aap apni state check kar sakte hain, example ke liye 'Buy' active rakha hyy
-    const isActive = type === 'Buy'; 
+              {/* Buy / Sell Toggle Container */}
+              <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
+                {["Buy", "Sell"].map((type) => {
+                  const value = type.toLowerCase();
+                  const isActive = purpose === value;
 
-    return (
-      <button
-        key={type}
-        // onClick={() => dispatch(setTransactionType(type))} // Aapka dispatch function
-        className={`px-13 py-2 text-sm font-semibold font-['Archivo'] transition-all rounded-full min-w-[100px] ${
-          isActive 
-            ? 'bg-[#01155E] text-white shadow-md' // Active state (Dark Blue)
-            : 'bg-[#ffff] text-[#01155E] ' // Inactive state
-        }`}
-      >
-        {type}
-      </button>
-    );
-  })}
-</div>
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => dispatch(setPurpose(value))}
+                      className={`px-13 py-2 text-sm font-semibold font-['Archivo'] transition-all rounded-full min-w-[100px] ${isActive
+                        ? "bg-[#01155E] text-white shadow-md"
+                        : "bg-white text-[#01155E]"
+                        }`}
+                    >
+                      {type}
+                    </button>
+                  );
+                })}
+              </div>
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
@@ -183,61 +241,52 @@ const Home = () => {
                   </button>
                 ))}
               </div> */}
-            <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
-  {['Off-Plan', 'Ready', 'Pre-construction'].map((status) => {
-    const isActive = completion === status;
-    
-    // Agar status 'Pre-construction' hai toh Circular Icon render karo
-    if (status === 'Pre-construction') {
-      return (
-        <button
-          key={status}
-          onClick={() => dispatch(setCompletion(status))}
-          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ml-1 ${
-            isActive 
-              ? 'bg-[#01155E] text-white shadow-md' 
-              : 'bg-white text-[#01155E]'
-          }`}
-        >
-          <img 
-            src={Preconstruction} 
-            alt="icon" 
-            className={`w-5 h-5 object-contain ${isActive ? 'brightness-0 invert' : ''}`} 
-          />
-        </button>
-      );
-    }
+              <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
+                {['Off-Plan', 'Ready', 'preconstruction'].map((status) => {
+                  const isActive = completion === status;
 
-    // Normal Text Buttons (Off-Plan & Ready)
-    return (
-      <button
-        key={status}
-        onClick={() => dispatch(setCompletion(status))}
-        className={`px-8 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${
-          isActive 
-            ? 'bg-[#01155E] text-white shadow-md' 
-            : 'text-[#01155E] bg-[#ffff]'
-        }`}
-      >
-        {status}
-      </button>
-    );
-  })}
-</div>
+                  // Agar status 'Pre-construction' hai toh Circular Icon render karo
+                  if (status === 'preconstruction') {
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => dispatch(setCompletion(status))}
+                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ml-1 ${isActive
+                          ? 'bg-[#01155E] text-white shadow-md'
+                          : 'bg-white text-[#01155E]'
+                          }`}
+                      >
+                        <img
+                          src={Preconstruction}
+                          alt="icon"
+                          className={`w-5 h-5 object-contain ${isActive ? 'brightness-0 invert' : ''}`}
+                        />
+                      </button>
+                    );
+                  }
 
-              <div className="relative">
-                <select value={propertyType} onChange={(e) => dispatch(setPropertyType(e.target.value))} className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-gray-500 outline-none shadow-sm cursor-pointer">
-                  <option value="Apartment">Residential</option>
-                  <option value="Villa">Villa</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+                  // Normal Text Buttons (Off-Plan & Ready)
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => dispatch(setCompletion(status))}
+                      className={`px-8 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${isActive
+                        ? 'bg-[#01155E] text-white shadow-md'
+                        : 'text-[#01155E] bg-[#ffff]'
+                        }`}
+                    >
+                      {status}
+                    </button>
+                  );
+                })}
               </div>
 
+
               <div className="relative" ref={bedBathRef}>
-                <button type="button" onClick={() => { 
+                <button type="button" onClick={() => {
                   const nextState = !isBedBathOpen;
-                  closeAll(); 
-                  if (nextState) dispatch(toggleBedBath()); 
+                  closeAll();
+                  if (nextState) dispatch(toggleBedBath());
                 }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span className="truncate">{beds} Beds / {baths} Baths</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
@@ -269,10 +318,10 @@ const Home = () => {
               </div>
 
               <div className="relative" ref={priceRef}>
-                <button type="button" onClick={() => { 
+                <button type="button" onClick={() => {
                   const nextState = !isPriceOpen;
-                  closeAll(); 
-                  if (nextState) dispatch(togglePrice()); 
+                  closeAll();
+                  if (nextState) dispatch(togglePrice());
                 }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
                   <span className="truncate">{getPriceLabel()}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
@@ -290,41 +339,161 @@ const Home = () => {
                   </div>
                 )}
               </div>
+
+
+              <div className="relative" ref={propertyTypeRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextState = !propertyTypeOpen;
+                    closeAll();
+                    setPropertyTypeOpen(nextState);
+                  }}
+                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[15px] font-medium text-[#67739E] shadow-sm"
+                >
+                  <span className="truncate">{propertyType || "Residential"}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-[#67739E] transition-transform ${propertyTypeOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+
+                {propertyTypeOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-xl shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
+                    {/* Top heading row */}
+                    <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
+                      <span className="text-[14px] font-medium text-[#67739E]">
+                        {propertyTab}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-[#67739E] rotate-180" />
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="grid grid-cols-2 px-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setPropertyTab("Residential")}
+                        className={`text-left text-[15px] h-[32px] border-b-2 ${propertyTab === "Residential"
+                          ? "text-[#67739E] border-[#01155E]"
+                          : "text-[#8B95B7] border-transparent"
+                          }`}
+                      >
+                        Residential
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setPropertyTab("Commercial")}
+                        className={`text-left text-[15px] h-[32px] pl-3 border-b-2 ${propertyTab === "Commercial"
+                          ? "text-[#67739E] border-[#01155E]"
+                          : "text-[#8B95B7] border-transparent"
+                          }`}
+                      >
+                        Commercial
+                      </button>
+                    </div>
+
+                    {/* Options */}
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-2 p-3 pt-2">
+                      {(propertyTab === "Residential"
+                        ? residentialOptions
+                        : commercialOptions
+                      ).map((option) => {
+                        const isActive = propertyType === option;
+
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => {
+                              dispatch(setPropertyType(option));
+                              setPropertyTypeOpen(false);
+                            }}
+                            className={`h-[30px] rounded-full border px-3 flex items-center gap-2 text-left transition-all ${isActive
+                              ? "bg-[#01155E] border-[#01155E] text-white"
+                              : "bg-white border-[#D9E1F2] text-[#67739E]"
+                              }`}
+                          >
+                            <div
+                              className={`w-[16px] h-[16px] rounded-full border flex items-center justify-center flex-shrink-0 ${isActive ? "border-white" : "border-black"
+                                }`}
+                            >
+                              {isActive && (
+                                <div className="w-[7px] h-[7px] rounded-full bg-white" />
+                              )}
+                            </div>
+
+                            <span className="text-[13px] leading-none truncate">
+                              {option}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="relative">
-                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] outline-none shadow-sm cursor-pointer"><option>Emirate</option></select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
-              </div>
+
+
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 w-full">
+
               <div className="relative">
                 <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] outline-none shadow-sm cursor-pointer"><option>Sale Status</option></select>
                 <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>
 
               <div className="relative" ref={handoverRef}>
-                <button type="button" onClick={() => {
-                  const nextState = !handoverOpen;
-                  closeAll();
-                  setHandoverOpen(nextState);
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
-                  <span>{handoverYear || 'Handover Year'}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextState = !handoverOpen;
+                    closeAll();
+                    setHandoverOpen(nextState);
+                  }}
+                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm"
+                >
+                  <span className="truncate">
+                    {selectedHandoverYears.length > 0
+                      ? `${selectedHandoverYears.length} Year${selectedHandoverYears.length > 1 ? 's' : ''} Selected`
+                      : 'Handover Year'}
+                  </span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${handoverOpen ? 'rotate-180' : ''}`} />
                 </button>
+
                 {handoverOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full z-50 flex flex-col gap-0.5">
-                    {['2026', '2027', '2028', '2029', 'Post 2030'].map((year) => (
-                      <label key={year} className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200">
-                        <div className="relative flex items-center justify-center">
-                          <input type="radio" name="handoverYear" value={year} checked={handoverYear === year} onChange={() => { setHandoverYear(year); setHandoverOpen(false); }} className="peer appearance-none w-5 h-5 border-2 border-black rounded-full checked:border-black cursor-pointer" />
-                          <div className="absolute w-2.5 h-2.5 bg-black rounded-full opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                    {handoverYears.map((year) => (
+                      <div
+                        key={year}
+                        onClick={() => {
+                          setSelectedHandoverYears((prev) =>
+                            prev.includes(year)
+                              ? prev.filter((item) => item !== year)
+                              : [...prev, year]
+                          );
+                        }}
+                        className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
+                      >
+                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                          {selectedHandoverYears.includes(year) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
                         </div>
+
                         <span className="text-[16px] font-medium text-[#67739E]">{year}</span>
-                      </label>
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              <DeveloperDropdown
+                selectedDevelopers={selectedDevelopers}
+                setSelectedDevelopers={setSelectedDevelopers}
+              />
 
               <div className="relative" ref={paymentRef}>
                 <button type="button" onClick={() => {
@@ -337,7 +506,7 @@ const Home = () => {
                 </button>
                 {paymentOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-3xl shadow-2xl z-50 p-3 flex flex-col gap-2">
-                    {['Completion', 'Post Handover'].map((plan) => (
+                    {['During Construction', 'Post Handover'].map((plan) => (
                       <label key={plan} className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50 border border-gray-100 rounded-2xl transition-all">
                         <div className="relative flex items-center justify-center">
                           <input type="radio" name="paymentPlan" value={plan} checked={paymentPlan === plan} onChange={() => { setPaymentPlan(plan); setPaymentOpen(false); }} className="peer appearance-none w-6 h-6 border-2 border-black rounded-full checked:border-black cursor-pointer" />
@@ -349,14 +518,65 @@ const Home = () => {
                   </div>
                 )}
               </div>
+              <div className="relative w-full font-['Archivo']" ref={emirateRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !isEmirateOpen;
+                    closeAll();
+                    setIsEmirateOpen(next);
+                  }}
+                  className="w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl text-sm text-[#67739E] shadow-sm"
+                  style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
+                >
+                  <span className="truncate">
+                    {selectedEmirates.length > 0
+                      ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? 's' : ''} Selected`
+                      : "Emirates"}
+                  </span>
+
+                  <ChevronDown
+                    className={`h-4 w-4 text-gray-400 transition-transform ${isEmirateOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+
+                {isEmirateOpen && (
+                  <div className="absolute top-full left-0 z-50 w-full  rounded-xl  grid grid-cols-2 ">
+                    {emirates.map((emirate) => (
+                      <div
+                        key={emirate}
+                        onClick={() => {
+                          setSelectedEmirates((prev) =>
+                            prev.includes(emirate)
+                              ? prev.filter((item) => item !== emirate)
+                              : [...prev, emirate]
+                          );
+                        }}
+                        className="flex items-center gap-[8px] w-full h-[36px] bg-white border border-[#D9E1F2] rounded-xl px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
+                      >
+                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                          {selectedEmirates.includes(emirate) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
+                        </div>
+
+                        <span className="text-[#67739E] text-[14px] truncate">
+                          {emirate}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <DeveloperSlider/>
-         <ChooseYourStrategy/> 
-         <DubaiMarketActivity/>
+        <DeveloperSlider />
+        <ChooseYourStrategy />
+        <DubaiMarketActivity />
         <FeaturesSection />
         <Services />
         <CommunitiesBrief />

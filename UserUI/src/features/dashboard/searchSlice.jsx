@@ -3,6 +3,18 @@ import axios from "axios";
 import { PROJECTS_API } from "../../Constant/constant.js";
 
 // ----------------------
+// Status Mapping
+// frontend value -> backend value
+// ----------------------
+const statusMap = {
+  All: "",
+  Ready: "ready",
+  "Off-Plan": "offplan",
+  Preconstruction: "preconstruction",
+  "Pre-Construction": "preconstruction",
+};
+
+// ----------------------
 // Async Thunk (GET + params)
 // ----------------------
 export const fetchProjects = createAsyncThunk(
@@ -11,32 +23,27 @@ export const fetchProjects = createAsyncThunk(
     try {
       const response = await axios.get(PROJECTS_API, {
         params: {
-          // limit: params.limit || 20,
-          // full_description: true,
-          // job_details: true,
-          // local_details: true,
-          // location_details: true,
-          // upgrade_details: true,
-          // owner_info: true,
-          // sort_field: "submitdate",
-          // webapp: 1,
-          // compact: true,
-          // new_errors: true,
-          // new_pools: true,
-
-          // 🔽 dynamic params (optional)
-          location: params.location,
-          beds: params.beds,
-          baths: params.baths,
-          min_price: params.minPrice,
-          max_price: params.maxPrice,
-          property_type: params.propertyType,
-          completion: params.completion,
-            sale_status: params.saleStatus, 
-            developer: params.developer,
+          location: params.location || "",
+          beds: params.beds || "",
+          baths: params.baths || "",
+          min_price: params.minPrice || "",
+          max_price: params.maxPrice || "",
+          property_type: params.propertyType || "",
+          propertyStatus: statusMap[params.completion] ?? params.completion ?? "",
+          developer: Array.isArray(params.developer)
+            ? params.developer.map((item) => item.toLowerCase().trim()).join(",")
+            : params.developer || "",
+          purpose: params.purpose || "",
+          emirates: Array.isArray(params.emirates)
+            ? params.emirates.map((item) => item.toLowerCase().trim()).join(",")
+            : params.emirates || "",
+          handoverYear: Array.isArray(params.handoverYear)
+            ? params.handoverYear.map((item) => item.trim()).join(",")
+            : params.handoverYear || "",
         },
       });
- console.log(response.data)
+
+      console.log("PROJECTS RESPONSE:", response.data);
       return response.data;
     } catch (error) {
       console.error("FETCH PROJECTS ERROR:", error);
@@ -54,15 +61,17 @@ export const fetchProjects = createAsyncThunk(
 // Initial State
 // ----------------------
 const initialState = {
-  completion: "All",
+  completion: "Off-Plan",
   propertyType: "Apartment",
   location: "",
   beds: "2",
   baths: "3",
   minPrice: "",
   maxPrice: "",
-  saleStatus: "",
-  developer: "",
+  developer: [],
+  purpose: "buy",
+  emirates: [],
+  handoverYear: [],
 
   isBedBathOpen: false,
   isPriceOpen: false,
@@ -102,11 +111,17 @@ const searchSlice = createSlice({
     setMaxPrice: (state, action) => {
       state.maxPrice = action.payload;
     },
-    setSaleStatus: (state, action) => {
-      state.saleStatus = action.payload;},
-
-      setDeveloper: (state, action) => {
+    setDeveloper: (state, action) => {
       state.developer = action.payload;
+    },
+    setPurpose: (state, action) => {
+      state.purpose = action.payload;
+    },
+    setEmirates: (state, action) => {
+      state.emirates = action.payload;
+    },
+    setHandoverYear: (state, action) => {
+      state.handoverYear = action.payload;
     },
     toggleBedBath: (state) => {
       state.isBedBathOpen = !state.isBedBathOpen;
@@ -128,30 +143,18 @@ const searchSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      // ----------------------
-      // Pending
-      // ----------------------
       .addCase(fetchProjects.pending, (state) => {
         state.loading = true;
         state.success = false;
         state.error = null;
       })
 
-      // ----------------------
-      // Fulfilled
-      // ----------------------
-    // searchSlice.js mein update karein
-.addCase(fetchProjects.fulfilled, (state, action) => {
-  state.loading = false;
-  state.success = true;
-  // action.payload pura object hai { success: true, data: [...] }
-  // Humein sirf data array store karna hai
-  state.projects = action.payload.data; 
-})
+      .addCase(fetchProjects.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.projects = action.payload?.data || [];
+      })
 
-      // ----------------------
-      // Rejected
-      // ----------------------
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
@@ -168,9 +171,11 @@ export const {
   setBaths,
   setMinPrice,
   setMaxPrice,
+  setDeveloper,
+  setPurpose,
+  setEmirates,
+  setHandoverYear,
   toggleBedBath,
-   setSaleStatus,
-   setDeveloper,
   togglePrice,
   closeDropdowns,
   resetSearchState,
