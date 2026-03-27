@@ -165,7 +165,13 @@ const Home = () => {
   const [isEmirateOpen, setIsEmirateOpen] = React.useState(false);
   const [selectedEmirates, setSelectedEmirates] = React.useState([]);
 
-  const handoverYears = ['2026', '2027', '2028', '2029', 'Post 2030'];
+  const handoverYears = [
+  { label: "2026", value: "2026" },
+  { label: "2027", value: "2027" },
+  { label: "2028", value: "2028" },
+  { label: "2029", value: "2029" },
+  { label: "Post 2030", value: "post 2030" },
+];
   const emirates = [
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
@@ -466,26 +472,28 @@ const Home = () => {
                 {handoverOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full z-50 flex flex-col gap-0.5">
                     {handoverYears.map((year) => (
-                      <div
-                        key={year}
-                        onClick={() => {
-                          setSelectedHandoverYears((prev) =>
-                            prev.includes(year)
-                              ? prev.filter((item) => item !== year)
-                              : [...prev, year]
-                          );
-                        }}
-                        className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
-                      >
-                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-                          {selectedHandoverYears.includes(year) && (
-                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-                          )}
-                        </div>
+  <div
+    key={year.value}
+    onClick={() => {
+      setSelectedHandoverYears((prev) =>
+        prev.includes(year.value)
+          ? prev.filter((item) => item !== year.value)
+          : [...prev, year.value]
+      );
+    }}
+    className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
+  >
+    <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+      {selectedHandoverYears.includes(year.value) && (
+        <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+      )}
+    </div>
 
-                        <span className="text-[16px] font-medium text-[#67739E]">{year}</span>
-                      </div>
-                    ))}
+    <span className="text-[16px] font-medium text-[#67739E]">
+      {year.label}
+    </span>
+  </div>
+))}
                   </div>
                 )}
               </div>
@@ -507,12 +515,12 @@ const Home = () => {
                 {paymentOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-3xl shadow-2xl z-50 p-3 flex flex-col gap-2">
                     {['During Construction', 'Post Handover'].map((plan) => (
-                      <label key={plan} className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50 border border-gray-100 rounded-2xl transition-all">
+                      <label key={plan} className="flex items-center gap-2 px-3 py-4 cursor-pointer hover:bg-gray-50 border border-gray-100 rounded-2xl transition-all">
                         <div className="relative flex items-center justify-center">
                           <input type="radio" name="paymentPlan" value={plan} checked={paymentPlan === plan} onChange={() => { setPaymentPlan(plan); setPaymentOpen(false); }} className="peer appearance-none w-6 h-6 border-2 border-black rounded-full checked:border-black cursor-pointer" />
                           <div className="absolute w-3 h-3 bg-black rounded-full opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                         </div>
-                        <span className="text-base font-medium text-[#6b728e]">{plan}</span>
+                        <span className=" text-[14px] font-medium text-[#6b728e]">{plan}</span>
                       </label>
                     ))}
                   </div>

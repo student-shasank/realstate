@@ -66,42 +66,48 @@ if (developer) {
     }
 
     // ✅ HANDOVER YEAR MULTI-SELECT + POST 2030
-    if (handoverYear) {
-      const handoverArray = handoverYear
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean);
+   if (handoverYear) {
+  const handoverArray = handoverYear
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
 
-      const exactYears = handoverArray.filter(
-        (item) => item.toLowerCase() !== "post 2030"
-      );
+  const exactYears = handoverArray.filter(
+    (item) => item !== "post 2030"
+  );
 
-      const hasPost2030 = handoverArray.some(
-        (item) => item.toLowerCase() === "post 2030"
-      );
+  const hasPost2030 = handoverArray.includes("post 2030");
 
-      const handoverConditions = [];
+  const handoverConditions = [];
 
-      if (exactYears.length > 0) {
-        handoverConditions.push({
-          "projectInfo.handoverDate": { $in: exactYears },
-        });
-      }
+  // exact year match: 2027 -> 2027 / Q1 2027 / Q4 2027
+  if (exactYears.length > 0) {
+    handoverConditions.push({
+      $or: exactYears.map((year) => ({
+        "projectInfo.handoverDate": { $regex: year, $options: "i" },
+      })),
+    });
+  }
 
-      if (hasPost2030) {
-        handoverConditions.push({
-          $expr: {
-            $gt: [{ $toInt: "$projectInfo.handoverDate" }, 2030],
-          },
-        });
-      }
+  // post 2030 match: 2031 and above
+  if (hasPost2030) {
+    handoverConditions.push({
+      "projectInfo.handoverDate": {
+        $regex: /(203[1-9]|20[4-9][0-9]|21[0-9][0-9])/i,
+      },
+    });
+  }
 
-      if (handoverConditions.length === 1) {
-        Object.assign(query, handoverConditions[0]);
-      } else if (handoverConditions.length > 1) {
-        query.$or = handoverConditions;
-      }
-    }
+  if (handoverConditions.length === 1) {
+    query.$and = query.$and || [];
+    query.$and.push(handoverConditions[0]);
+  }
+
+  if (handoverConditions.length > 1) {
+    query.$and = query.$and || [];
+    query.$and.push({ $or: handoverConditions });
+  }
+}
 
     console.log("REQ QUERY:", req.query);
     console.log("MONGO QUERY:", JSON.stringify(query, null, 2));

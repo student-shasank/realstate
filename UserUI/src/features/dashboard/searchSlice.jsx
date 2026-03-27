@@ -38,8 +38,8 @@ export const fetchProjects = createAsyncThunk(
             ? params.emirates.map((item) => item.toLowerCase().trim()).join(",")
             : params.emirates || "",
           handoverYear: Array.isArray(params.handoverYear)
-            ? params.handoverYear.map((item) => item.trim()).join(",")
-            : params.handoverYear || "",
+  ? params.handoverYear.map((item) => item.toLowerCase().trim()).join(",")
+  : params.handoverYear?.toLowerCase().trim() || "",
         },
       });
 

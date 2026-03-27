@@ -12,6 +12,7 @@ import listingDetailReducer from "../features/dashboard/listingDetailSlice"
 import favoriteReducer from "../features/dashboard/favoriteligting/favoriteSlice"
 import communityReducer from  "../features/communities/communitySlice"
 import enquiryReducer from "../features/Enquiery/enquirySlice.js";
+import developerReducer from "../features/dashboard/developerSlice.jsx";
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ export const store = configureStore({
           favorites: favoriteReducer,
           community: communityReducer,
               enquiry: enquiryReducer,
+              developer: developerReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

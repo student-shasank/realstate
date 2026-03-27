@@ -24,7 +24,7 @@ import {
 
 
 // Note: Ensure General Sans font is imported in your global CSS
-const ListingCard = ({ listing,onRequireLogin }) => {
+const ListingCard = ({ listing, onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [isLocalSending, setIsLocalSending] = useState(false);
@@ -45,34 +45,34 @@ const ListingCard = ({ listing,onRequireLogin }) => {
     { id: 'share', icon: shareIcon, alt: 'Share' }
   ];
 
- 
 
-const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-const favorites = useSelector(
-  (state) => state.favorites.favorites || []
-);
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-const isFavorite = favorites.includes(listing?._id);
-const handleFavorite = (e) => {
-  e.stopPropagation();
+  const favorites = useSelector(
+    (state) => state.favorites.favorites || []
+  );
 
-  if (!listing?._id) return;
+  const isFavorite = favorites.includes(listing?._id);
+  const handleFavorite = (e) => {
+    e.stopPropagation();
 
-  if (!isLoggedIn) {
-    onRequireLogin?.();
-    return;
-  }
+    if (!listing?._id) return;
 
-  if (isFavorite) {
-    dispatch(removeFavoriteLocal(listing._id));
-  } else {
-    dispatch(addFavoriteLocal(listing._id));
-  }
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
 
-  dispatch(toggleFavorite(listing._id));
-};
-   
+    if (isFavorite) {
+      dispatch(removeFavoriteLocal(listing._id));
+    } else {
+      dispatch(addFavoriteLocal(listing._id));
+    }
+
+    dispatch(toggleFavorite(listing._id));
+  };
+
   // NEW: image array with safe fallback
   // const galleryImages =
   //   listing?.images?.length > 0
@@ -145,31 +145,33 @@ const handleFavorite = (e) => {
 
   return (
     <div className="w-[1290px] h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
-      
+
       {/* LEFT: IMAGE SECTION */}
-      <div 
+      <div
         className="relative w-[450px] h-full cursor-pointer flex-shrink-0 overflow-hidden"
         onClick={openDetails}
         onMouseEnter={() => setIsImageHovered(true)}
         onMouseLeave={() => setIsImageHovered(false)}
       >
-        <img 
-          src={galleryImages[activeImageIndex]} 
-          alt={listing.title} 
+        <img
+          src={galleryImages[activeImageIndex]}
+          alt={listing.title}
           className="w-full h-full object-cover transition-all duration-300"
         />
-        
+
         {/* Status Badge */}
-        <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
-          <span className="font-semibold">{listing.completionStatus}</span>
-          <span className="mx-1 text-gray-300">|</span>
-          <span className="font-normal">Resale</span>
-        </div>
+       <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
+  <span className="font-semibold">
+    {listing?.propertyStatus?.toLowerCase() === "offplan" ? "Off-plan" : listing?.propertyStatus}
+  </span>
+  <span className="mx-1 text-gray-300">|</span>
+  <span className="font-normal">Resale</span>
+</div>
         {listing?.isFeatured && (
-  <div className="absolute top-4 right-4 bg-[#FFC107] text-[#01155E] px-3 py-1 rounded-[6px] text-[14px] font-semibold z-20 shadow-sm">
-    Featured Project
-  </div>
-)}
+          <div className="absolute top-4 right-4 bg-[#FFC107] text-[#01155E] px-3 py-1 rounded-[6px] text-[14px] font-semibold z-20 shadow-sm">
+            Featured Project
+          </div>
+        )}
 
         {/* Carousel Arrows on Hover */}
         {isImageHovered && galleryImages.length > 1 && (
@@ -224,11 +226,10 @@ const handleFavorite = (e) => {
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
-               className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${
-  activeImageIndex === index
-    ? 'bg-white'
-    : 'bg-white/45'
-}`}
+                className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${activeImageIndex === index
+                    ? 'bg-white'
+                    : 'bg-white/45'
+                  }`}
                 aria-label={`Go to image ${index + 1}`}
               />
             ))}
@@ -237,23 +238,22 @@ const handleFavorite = (e) => {
       </div>
 
       {/* RIGHT: CONTENT SECTION */}
-     <div
-  className={`flex-1 p-[30px] flex flex-col justify-between ${
-    listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
-  }`}
->
-  
-        
+      <div
+        className={`flex-1 p-[30px] flex flex-col justify-between ${listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
+          }`}
+      >
+
+
         {/* Row 1: Title and Icon Buttons */}
         <div className="flex justify-between items-start">
           <div>
-            <h2 
+            <h2
               className="text-[#01155E] text-[24px] font-semibold leading-[125%] capitalize cursor-pointer"
               onClick={openDetails}
             >
               {listing.title || 'High-Rise Townhouse'}
             </h2>
-            
+
             {/* Row 2: Location and Builder */}
             <div className="flex items-center gap-6 mt-2">
               {/* Location Section */}
@@ -267,50 +267,48 @@ const handleFavorite = (e) => {
               {/* Builder Section */}
               <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
                 <img src={Icon4} alt="Builder" className="w-5 h-5 object-contain" />
-                <span>{listing.developer || 'Zara Builders'}</span>
+                <span>{listing.developer }</span>
               </div>
             </div>
           </div>
 
           {/* Social/Action Icons */}
-         
-        <div className="flex gap-3">
-  {socialActions.map((btn) => {
-    const isLikeBtn = btn.id === "like";
 
-    return (
-      <button
-        key={btn.id}
-        onClick={isLikeBtn ? handleFavorite : (e) => e.stopPropagation()}
-        className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          listing?.isFeatured
-            ? "bg-white hover:bg-[#01155E]"
-            : "bg-[#E2E8F0] hover:bg-[#01155E]"
-        }`}
-      >
-        <img
-          src={btn.icon}
-          alt={btn.alt}
-          className={`w-5 h-5 object-contain transition-all duration-300 ${
-            isLikeBtn && isFavorite
-              ? "" // no invert
-              : btn.id !== "whatsapp"
-              ? "group-hover:brightness-0 group-hover:invert"
-              : ""
-          }`}
-          style={
-            isLikeBtn && isFavorite
-              ? {
-                  filter:
-                    "invert(19%) sepia(94%) saturate(7481%) hue-rotate(356deg) brightness(98%) contrast(119%)",
-                }
-              : {}
-          }
-        />
-      </button>
-    );
-  })}
-</div>
+          <div className="flex gap-3">
+            {socialActions.map((btn) => {
+              const isLikeBtn = btn.id === "like";
+
+              return (
+                <button
+                  key={btn.id}
+                  onClick={isLikeBtn ? handleFavorite : (e) => e.stopPropagation()}
+                  className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${listing?.isFeatured
+                      ? "bg-white hover:bg-[#01155E]"
+                      : "bg-[#E2E8F0] hover:bg-[#01155E]"
+                    }`}
+                >
+                  <img
+                    src={btn.icon}
+                    alt={btn.alt}
+                    className={`w-5 h-5 object-contain transition-all duration-300 ${isLikeBtn && isFavorite
+                        ? "" // no invert
+                        : btn.id !== "whatsapp"
+                          ? "group-hover:brightness-0 group-hover:invert"
+                          : ""
+                      }`}
+                    style={
+                      isLikeBtn && isFavorite
+                        ? {
+                          filter:
+                            "invert(19%) sepia(94%) saturate(7481%) hue-rotate(356deg) brightness(98%) contrast(119%)",
+                        }
+                        : {}
+                    }
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Row 3: Features */}
@@ -339,9 +337,16 @@ const handleFavorite = (e) => {
               {listing.builtUpArea?.toLocaleString() || "122,280"} sqft
             </span>
           </div>
-          
+       <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
+          <div className="flex items-center gap-2 text-[#67739E]">
+  <img src={Icon4} alt="handover" className="w-5 h-5" />
+  <span className="text-[18px] font-medium">
+    {listing?.projectInfo?.handoverDate || "Q4 2027"}
+  </span>
+</div>
+
           {/* Internal Logic: PDF Trigger */}
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); setIsPopupOpen(true); }}
             className="ml-auto text-[14px] text-[#01155E] font-semibold underline underline-offset-4"
           >
@@ -354,27 +359,27 @@ const handleFavorite = (e) => {
 
         {/* Bottom Row: Price and View Button */}
         <div className="flex justify-between items-center">
-         <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-  {listing?.completionStatus === "Off-Plan" ? (
+          <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
+  {listing?.propertyStatus?.toLowerCase() === "offplan" ? (
     <>
-      <span className="text-[24px] font-semibold  mr-1">
+      <span className="text-[24px] font-semibold mr-1">
         Starting at
       </span>
-     <span className='text-[24px]'>  {listing.currency}{" "}</span>
+      <span className='text-[24px]'> {listing.currency} </span>
       <span className="text-[32px]">
         {listing.price?.toLocaleString() || "10,00,239"}
       </span>
     </>
   ) : (
     <>
-      <span className='text-[24px]'>  {listing.currency}{" "}</span>
+      <span className='text-[24px]'> {listing.currency} </span>
       <span className="text-[32px]">
         {listing.price?.toLocaleString() || "10,00,239"}
       </span>
     </>
   )}
 </div>
-          
+
           <div className="flex gap-3">
             <button
               onClick={handleConnect}
@@ -383,7 +388,7 @@ const handleFavorite = (e) => {
             >
               {isLocalSending ? "Connecting..." : "Connect"}
             </button>
-            <button 
+            <button
               onClick={openDetails}
               className="w-[135px] h-[48px] bg-white border border-[#01155E] rounded-[10px] text-[#01155E] text-[16px] font-semibold leading-[150%] hover:bg-[#01155E] hover:text-[#ffff] transition-colors"
             >
@@ -395,12 +400,12 @@ const handleFavorite = (e) => {
 
       {/* MODAL PORTAL (Kept original logic) */}
       {isPopupOpen && ReactDOM.createPortal(
-        <div 
-          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm" 
+        <div
+          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={() => setIsPopupOpen(false)}
         >
-          <div 
-            className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl" 
+          <div
+            className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {pdfSuccess ? (

@@ -10,6 +10,7 @@ import {
   getCommunityNavigation, 
   getCommunityPublicProfile 
 } from "../controllers/communityController.js";
+import { getDevelopers }  from "../controllers/getDevlopers.js"
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.post("/favorites", protect2, toggleFavoriteListing);
 
 router.get("/navigation", getCommunityNavigation); // Dropdown ke liye
 router.get("/profile/:slug", getCommunityPublicProfile);
+router.get("/developers", getDevelopers);
 
 
 export default router;

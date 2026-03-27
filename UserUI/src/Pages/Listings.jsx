@@ -21,6 +21,7 @@ import {
 } from "../features/dashboard/searchSlice";
 import ListingCard from "../Components/Card/listingCard";
 import { ChevronDown } from 'lucide-react';
+import Breadcrumbs from "../Components/Card/Breadcrumbs";
 
 const Listings = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,8 @@ const Listings = () => {
   const priceRef = useRef(null);
 
   const propertyTypeRef = useRef(null);
+  const handoverRef = useRef(null);
+  const emiratesRef = useRef(null);
 const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
 const [propertyTab, setPropertyTab] = useState("Residential");
 
@@ -129,6 +132,13 @@ setSelectedDevelopers(developerArray);
     );
   }, [dispatch, searchParams]);
 
+  const closeAllDropdowns = () => {
+    dispatch(closeDropdowns());
+    setPropertyTypeOpen(false);
+    setIsHandoverOpen(false);
+    setIsOpen(false);
+  };
+
   // Handle Outside Click for Dropdown
  useEffect(() => {
   const handleClickOutside = (event) => {
@@ -141,9 +151,20 @@ setSelectedDevelopers(developerArray);
     const isOutsidePropertyType =
       propertyTypeRef.current && !propertyTypeRef.current.contains(event.target);
 
-    if (isOutsideBedBath && isOutsidePrice && isOutsidePropertyType) {
-      dispatch(closeDropdowns());
-      setPropertyTypeOpen(false);
+    const isOutsideHandover =
+      handoverRef.current && !handoverRef.current.contains(event.target);
+
+    const isOutsideEmirates =
+      emiratesRef.current && !emiratesRef.current.contains(event.target);
+
+    if (
+      isOutsideBedBath &&
+      isOutsidePrice &&
+      isOutsidePropertyType &&
+      isOutsideHandover &&
+      isOutsideEmirates
+    ) {
+      closeAllDropdowns();
     }
   };
 
@@ -253,18 +274,14 @@ setSelectedDevelopers([]);
     );
   };
 
-  const handleHandoverYearChange = (year) => {
-    const yearValue = year.toLowerCase();
-    const updatedYears = selectedHandoverYears.includes(yearValue)
-      ? selectedHandoverYears.filter((item) => item !== yearValue)
-      : [...selectedHandoverYears, yearValue];
+ const handleHandoverYearChange = (value) => {
+  const updatedYears = selectedHandoverYears.includes(value)
+    ? selectedHandoverYears.filter((item) => item !== value)
+    : [...selectedHandoverYears, value];
 
-    setSelectedHandoverYears(updatedYears);
-    updateParams(
-      "handoverYear",
-      updatedYears.map((item) => item.toLowerCase()).join(",")
-    );
-  };
+  setSelectedHandoverYears(updatedYears);
+  updateParams("handoverYear", updatedYears.join(","));
+};
 
   const emirates = [
     "Dubai", "Umm AL Quwain",
@@ -276,7 +293,13 @@ setSelectedDevelopers([]);
   const [isHandoverOpen, setIsHandoverOpen] = useState(false);
   const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
 
-  const handoverYears = ["2026", "2027", "2028", "2029", "Post 2030"];
+const handoverYears = [
+  { label: "2026", value: "2026" },
+  { label: "2027", value: "2027" },
+  { label: "2028", value: "2028" },
+  { label: "2029", value: "2029" },
+  { label: "Post 2030", value: "post 2030" },
+];
 
  const [selectedDevelopers, setSelectedDevelopers] = useState([]);
 
@@ -289,7 +312,8 @@ setSelectedDevelopers([]);
   ];
 
   return (
-    <div className="pt-[60px] bg-[#F8FAFF] min-h-screen mt-20">
+    <div className="pt-5 bg-white min-h-screen mt-20">
+      <Breadcrumbs/>
       <div style={{ padding: "40px 20px", maxWidth: "1340px", margin: "0 auto" }}>
         {/* NEW HEADER SECTION START */}
         <div className="w-[1290px] mx-auto flex items-end justify-between mb-8 font-['Archivo']">
@@ -394,7 +418,11 @@ setSelectedDevelopers([]);
               <div className="relative" ref={bedBathRef}>
                 <button
                   type="button"
-                  onClick={() => dispatch(toggleBedBath())}
+                  onClick={() => {
+                    const wasOpen = isBedBathOpen;
+                    closeAllDropdowns();
+                    if (!wasOpen) dispatch(toggleBedBath());
+                  }}
                   className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[16px] text-[#6B7280] outline-none cursor-pointer"
                 >
                   <span className="truncate">{beds || '0'} Beds / {baths || '0'} Baths</span>
@@ -438,7 +466,11 @@ setSelectedDevelopers([]);
               <div className="relative" ref={priceRef}>
                 <button
                   type="button"
-                  onClick={() => dispatch(togglePrice())}
+                  onClick={() => {
+                    const wasOpen = isPriceOpen;
+                    closeAllDropdowns();
+                    if (!wasOpen) dispatch(togglePrice());
+                  }}
                   className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[16px] text-[#6B7280] outline-none cursor-pointer"
                 >
                   <span className="truncate">{getPriceLabel()}</span>
@@ -500,7 +532,11 @@ setSelectedDevelopers([]);
               <div className="relative w-full" ref={propertyTypeRef}>
   <button
     type="button"
-    onClick={() => setPropertyTypeOpen((prev) => !prev)}
+    onClick={() => {
+      const wasOpen = propertyTypeOpen;
+      closeAllDropdowns();
+      setPropertyTypeOpen(!wasOpen);
+    }}
     className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] text-[#67739E] text-[16px]"
   >
     <span className="truncate">{propertyType || "Residential"}</span>
@@ -593,10 +629,18 @@ setSelectedDevelopers([]);
     </div>
   )}
 </div>
-              <div className="relative w-full font-['General_Sans']">
+ <select className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
+                <option value="">Sale status</option>
+              </select>
+
+              <div className="relative w-full font-['General_Sans']" ref={handoverRef}>
                 <button
                   type="button"
-                  onClick={() => setIsHandoverOpen(!isHandoverOpen)}
+                  onClick={() => {
+                    const wasOpen = isHandoverOpen;
+                    closeAllDropdowns();
+                    setIsHandoverOpen(!wasOpen);
+                  }}
                   className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
                   style={{ borderRadius: isHandoverOpen ? "16px 16px 0 0" : "16px" }}
                 >
@@ -626,26 +670,26 @@ setSelectedDevelopers([]);
                 {isHandoverOpen && (
                   <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
                     <div className="p-0">
-                      {handoverYears.map((year, index) => (
-                        <button
-                          key={year}
-                          type="button"
-                          onClick={() => handleHandoverYearChange(year)}
-                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${
-                            index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""
-                          }`}
-                        >
-                          <div className="w-[24px] flex justify-center flex-shrink-0">
-                            <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-                              {selectedHandoverYears.includes(year.toLowerCase()) && (
-                                <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
-                              )}
-                            </div>
-                          </div>
+                     {handoverYears.map((year, index) => (
+  <button
+    key={year.value}
+    type="button"
+    onClick={() => handleHandoverYearChange(year.value)}
+    className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${
+      index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""
+    }`}
+  >
+    <div className="w-[24px] flex justify-center flex-shrink-0">
+      <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+        {selectedHandoverYears.includes(year.value) && (
+          <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
+        )}
+      </div>
+    </div>
 
-                          <span className="truncate">{year}</span>
-                        </button>
-                      ))}
+    <span className="truncate">{year.label}</span>
+  </button>
+))}
                     </div>
                   </div>
                 )}
@@ -655,10 +699,14 @@ setSelectedDevelopers([]);
                 <option value="">Payment Plan</option>
               </select>
 
-              <div className="relative w-full font-['General_Sans']">
+              <div className="relative w-full font-['General_Sans']" ref={emiratesRef}>
                 <button
                   type="button"
-                  onClick={() => setIsOpen(!isOpen)}
+                  onClick={() => {
+                    const wasOpen = isOpen;
+                    closeAllDropdowns();
+                    setIsOpen(!wasOpen);
+                  }}
                   className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D9E1F2] text-[16px] transition-all"
                   style={{ borderRadius: isOpen ? '16px 16px 0 0' : '16px' }}
                 >
@@ -684,12 +732,12 @@ setSelectedDevelopers([]);
                 </button>
 
                 {isOpen && (
-                  <div className="absolute top-full left-0 mt-0 z-50 w-full bg-[#E9EEF6] border-x border-b border-[#9747FF] rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[8px] shadow-lg">
+                  <div className="absolute top-full left-0 mt-0 z-50 w-full  rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[2px] ">
                     {emirates.map((emirate) => (
                       <div
                         key={emirate}
                         onClick={() => handleEmiratesChange(emirate)}
-                        className="flex items-center gap-[8px] w-full h-[36px] bg-white border border-[#D9E1F2] rounded-[16px] px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
+                        className="flex items-center gap-2 w-full h-[36px] bg-white border border-[#D9E1F2] rounded-[16px] px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
                       >
                         <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center flex-shrink-0">
                           {selectedEmirates.includes(emirate.toLowerCase()) && (

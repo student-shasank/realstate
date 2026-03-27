@@ -25,5 +25,6 @@ export const fetchListingDetailAPI =
   "http://localhost:5000/api/user/listing/detail";
 
  export const COMMUNITIES_URL= `${BASE_URL}/communities`;
+ export const DEVELOPERS_API = `${BASE_URL}/listing/developers`;
 
 export const VITE_MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
