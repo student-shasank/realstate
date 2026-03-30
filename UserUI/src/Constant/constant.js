@@ -28,3 +28,6 @@ export const fetchListingDetailAPI =
  export const DEVELOPERS_API = `${BASE_URL}/listing/developers`;
 
 export const VITE_MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+
+export const FAVORITS_LISTINGS_API = `${BASE_URL}/listing/favorites`; 
+export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;

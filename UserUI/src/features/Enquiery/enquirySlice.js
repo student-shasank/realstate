@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { ENQUIRY_API } from "../../Constant/constant";
 
 export const sendListingEnquiry = createAsyncThunk(
   "enquiry/sendListingEnquiry",
   async ({ listingId }, { rejectWithValue }) => {
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/user/enquiry/listing",
+       ENQUIRY_API,
         { listingId },
         { withCredentials: true } // agar cookies/session use kar rahe ho
       );
