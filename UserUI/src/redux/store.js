@@ -13,6 +13,7 @@ import favoriteReducer from "../features/dashboard/favoriteligting/favoriteSlice
 import communityReducer from  "../features/communities/communitySlice"
 import enquiryReducer from "../features/Enquiery/enquirySlice.js";
 import developerReducer from "../features/dashboard/developerSlice.jsx";
+import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
 
 export const store = configureStore({
   reducer: {
@@ -27,6 +28,7 @@ export const store = configureStore({
           community: communityReducer,
               enquiry: enquiryReducer,
               developer: developerReducer,
+                 sellerLead: sellerLeadReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

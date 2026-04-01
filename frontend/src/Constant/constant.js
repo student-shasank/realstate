@@ -19,3 +19,12 @@ export const ADMIN_LISTING_AVAILABILITY_URL = (id) =>
 export const ADMIN_Communities = `${BASE_URL}/admin/communities`;
 export const ADMIN_LISTING_FEATURED_URL = (id) =>
   `${BASE_URL}/admin/listings/${id}/featured`;
+
+export const SELLER_LEADS_API = `${BASE_URL}/admin/seller-leads`;
+
+export const APPROVE_SELLER_LEAD_API = (id) =>
+  `${BASE_URL}/admin/seller-leads/${id}/approve`;
+
+export const REJECT_SELLER_LEAD_API = (id) =>
+  `${BASE_URL}/admin/seller-leads/${id}/reject`;
+

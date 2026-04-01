@@ -6,6 +6,8 @@ import loginReducer from "../features/Authentation/login";
 import dashboardReducer from "../features/dashboard/dashboardSlice"
 import listingReducer from "../features/dashboard/listingSlice"
 import communityReducer from "../features/communitySlice"
+import sellerLeadsReducer from "../features/sellerLeads/sellerLeadsSlice";
+
 
 
 export const store = configureStore({
@@ -16,6 +18,7 @@ export const store = configureStore({
      dashboard: dashboardReducer,
        listing: listingReducer,
        community: communityReducer,
+         sellerLeads: sellerLeadsReducer,
   },
 });
 

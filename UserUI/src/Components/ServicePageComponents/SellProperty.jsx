@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 
 const SellProperty = () => {
   return (
@@ -12,14 +13,15 @@ const SellProperty = () => {
           <h1 className="font-['General_Sans'] text-[32px] sm:text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] font-medium leading-[130%] lg:leading-[140%] tracking-normal text-[#01155E]">
             Looking to <br /> Sell Your Property?
           </h1>
-
-          <button className="flex items-center justify-center
-            h-[48px] sm:h-[54px] md:h-[60px] lg:h-[69px]
-            w-full sm:w-[360px] md:w-[440px] lg:w-[548px]
-            font-['General_Sans'] text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px]
-            font-medium rounded-lg bg-[#01155E] px-4 text-white transition-opacity hover:opacity-90">
-            Register Now
-          </button>
+<Link to="/sell-property">
+  <button className="flex items-center justify-center
+    h-[48px] sm:h-[54px] md:h-[60px] lg:h-[69px]
+    w-full sm:w-[360px] md:w-[440px] lg:w-[548px]
+    font-['General_Sans'] text-[16px] sm:text-[18px] md:text-[20px] lg:text-[24px]
+    font-medium rounded-lg bg-[#01155E] px-4 text-white transition-opacity hover:opacity-90">
+    Register Now
+  </button>
+</Link>
         </div>
 
         {/* Right Side: Decorative Circles — hidden on mobile */}

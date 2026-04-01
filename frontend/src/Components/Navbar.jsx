@@ -28,10 +28,11 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden sm:flex items-center gap-8">
-          <Link to="/">Home</Link>
+         
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
            <Link to="/communities" className="block">Communities</Link>
+               <Link to="/dashboard" className="block">Dashboard</Link>
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">

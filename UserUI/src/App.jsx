@@ -29,6 +29,8 @@ import DataSources from "./Pages/DataSources";
 
 import PropertyDetail from "../src/Pages/PropertyDetai";
 
+import SellPropertyPage from "./Pages/SellPropertyPage";
+
 
 
 function App() {
@@ -64,6 +66,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
+          <Route path="/sell-property" element={<SellPropertyPage/>} />
   
          <Route path="/termsofuse" element={<TermsOfUse />} />
           <Route path="/disclamer" element={<Disclaimer/>} />

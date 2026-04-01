@@ -31,3 +31,5 @@ export const VITE_MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export const FAVORITS_LISTINGS_API = `${BASE_URL}/listing/favorites`; 
 export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;
+export const SELLER_LEAD_API = `${BASE_URL}/seller-leads`;
+export const SELLER_LEAD_UPDATE_API = `${BASE_URL}/seller-leads`;

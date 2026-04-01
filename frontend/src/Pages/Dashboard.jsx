@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+ import { Links, NavLink } from "react-router-dom";
+ import { Link } from "react-router-dom";
 import {
   fetchDashboard,
   updateListingStatus,
   updateListingAvailability,
   updateListingFeatured,
 } from "../features/dashboard/dashboardSlice";
-import { Link } from "react-router-dom";
+
 
 // Filter tabs
 const TABS = {
@@ -74,14 +76,24 @@ const [newFeatured, setNewFeatured] = useState("");
     <div className="p-6 bg-gray-100 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Admin Dashboard</h2>
-        <Link
-          to="/listingcreation"
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg"
-        >
-          + Create Listing
-        </Link>
-      </div>
+  <h2 className="text-3xl font-bold">Admin Dashboard</h2>
+
+  <div className="flex items-center gap-3">
+    <Link
+      to="/seller-leads"
+      className="bg-[#01155E] text-white px-6 py-3 rounded-lg hover:opacity-90 transition"
+    >
+      View Seller Leads
+    </Link>
+
+    <Link
+      to="/listingcreation"
+      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 transition"
+    >
+      + Create Listing
+    </Link>
+  </div>
+</div>
 
       {/* Tabs */}
       <div className="flex space-x-4 mb-8 border-b">
@@ -236,7 +248,8 @@ const [newFeatured, setNewFeatured] = useState("");
               </div>
             )}
 
-            
+
+
 
             {/* Availability Update */}
             {editAvailabilityId === item._id && (
