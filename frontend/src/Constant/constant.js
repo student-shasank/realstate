@@ -28,3 +28,8 @@ export const APPROVE_SELLER_LEAD_API = (id) =>
 export const REJECT_SELLER_LEAD_API = (id) =>
   `${BASE_URL}/admin/seller-leads/${id}/reject`;
 
+export const UPDATE_SELLER_LEAD_NOTE_API = (id) =>
+  `${BASE_URL}/admin/seller-leads/${id}/internal-note `;
+export const DELETE_SELLER_LEAD_API = (id) =>
+  `${BASE_URL}/admin/seller-leads/${id}/permanent`;
+

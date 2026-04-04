@@ -23,6 +23,11 @@ const sellerLeadSchema = new mongoose.Schema(
     reasonForSelling: String,
     reasonForSellingOther: String,
     hasAgent: String,
+    internalNote: {
+  type: String,
+  trim: true,
+  default: "",
+},
 
     additionalNotes: String,
 

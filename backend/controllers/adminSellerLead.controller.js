@@ -120,3 +120,39 @@ export const rejectSellerLead = async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to reject lead" });
   }
 };
+
+export const updateInternalNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { internalNote } = req.body;
+
+    const lead = await SellerLead.findByIdAndUpdate(
+      id,
+      { internalNote: internalNote || "" },
+      { new: true }
+    );
+
+    return res.status(200).json({ success: true, lead });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update note" });
+  }
+};
+
+export const permanentDeleteLead = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await SellerLead.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Lead permanently deleted"
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Delete failed"
+    });
+  }
+};

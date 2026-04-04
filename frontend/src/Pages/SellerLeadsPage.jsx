@@ -6,6 +6,8 @@ import {
   fetchSellerLeads,
   rejectSellerLead,
   setSelectedLead,
+  updateLeadNote,
+    deleteSellerLead ,
 } from "../features/sellerLeads/sellerLeadsSlice";
 
 function SellerLeadsPage() {
@@ -17,11 +19,17 @@ function SellerLeadsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [approvingId, setApprovingId] = useState(null);
   const [showApprovePopup, setShowApprovePopup] = useState(false);
+  const [internalNote, setInternalNote] = useState("");
 
   // Sirf ek baar fetch — no auto refresh
   useEffect(() => {
     dispatch(fetchSellerLeads());
   }, [dispatch]);
+  useEffect(() => {
+  if (selectedLead) {
+    setInternalNote(selectedLead.internalNote || "");
+  }
+}, [selectedLead]);
 
   const filteredLeads = useMemo(() => {
     if (activeTab === "all") return leads;
@@ -65,6 +73,17 @@ function SellerLeadsPage() {
     dispatch(fetchSellerLeads()); // Re-fetch data
     dispatch(clearSelectedLead());
   }
+};
+const handleSaveNote = async (id) => {
+   console.log("Saving note:", id, internalNote);
+  await dispatch(updateLeadNote({ id, note: internalNote }));
+  dispatch(fetchSellerLeads());
+};
+const handleDelete = async (id) => {
+  if (!window.confirm("Delete this lead permanently?")) return;
+
+  await dispatch(deleteSellerLead(id));
+  dispatch(clearSelectedLead());
 };
   const formatDate = (date) => {
     if (!date) return "-";
@@ -295,13 +314,33 @@ function SellerLeadsPage() {
                 </div>
 
                 <div className="rounded-xl bg-[#F7F9FC] p-4 md:col-span-2">
-                  <h3 className="mb-3 text-lg font-semibold text-[#01155E]">
-                    Additional Notes
-                  </h3>
-                  <p className="text-sm text-[#01155E]">
-                    {selectedLead.additionalNotes || "-"}
-                  </p>
-                </div>
+  <h3 className="mb-3 text-lg font-semibold text-[#01155E]">
+    Additional Notes
+  </h3>
+  <p className="text-sm text-[#01155E]">
+    {selectedLead.additionalNotes || "-"}
+  </p>
+</div>
+
+<div className="rounded-xl bg-[#F7F9FC] p-4 md:col-span-2">
+  <h3 className="mb-3 text-lg font-semibold text-[#01155E]">
+    Internal Note (Admin)
+  </h3>
+
+  <textarea
+    value={internalNote}
+    onChange={(e) => setInternalNote(e.target.value)}
+    className="w-full border rounded-xl p-3 text-sm"
+    placeholder="Write internal note..."
+  />
+
+  <button
+    onClick={() => handleSaveNote(selectedLead._id)}
+    className="mt-2 bg-[#01155E] text-white px-4 py-2 rounded-xl"
+  >
+    Save Note
+  </button>
+</div>
 
                 <div className="rounded-xl bg-[#F7F9FC] p-4 md:col-span-2">
                   <h3 className="mb-3 text-lg font-semibold text-[#01155E]">
@@ -362,6 +401,16 @@ function SellerLeadsPage() {
                   </button>
                 </div>
               )}
+              {selectedLead.approvalStatus === "rejected" && (
+  <div className="mt-6 flex justify-end">
+    <button
+      onClick={() => handleDelete(selectedLead._id)}
+      className="rounded-xl bg-red-700 px-5 py-2.5 text-sm font-medium text-white"
+    >
+      Hard Delete
+    </button>
+  </div>
+)}
             </div>
           </div>
         )}
