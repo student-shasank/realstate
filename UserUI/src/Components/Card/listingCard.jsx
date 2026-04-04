@@ -160,13 +160,13 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         />
 
         {/* Status Badge */}
-       <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
-  <span className="font-semibold">
-    {listing?.propertyStatus?.toLowerCase() === "offplan" ? "Off-plan" : listing?.propertyStatus}
-  </span>
-  <span className="mx-1 text-gray-300">|</span>
-  <span className="font-normal">Resale</span>
-</div>
+        <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
+          <span className="font-semibold">
+            {listing?.completionStatus?.toLowerCase() === "offplan" ? "Off-plan" : listing?.completionStatus}
+          </span>
+          <span className="mx-1 text-gray-300">|</span>
+          <span className="font-normal">Resale</span>
+        </div>
         {listing?.isFeatured && (
           <div className="absolute top-4 right-4 bg-[#FFC107] text-[#01155E] px-3 py-1 rounded-[6px] text-[14px] font-semibold z-20 shadow-sm">
             Featured Project
@@ -227,8 +227,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
                 className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${activeImageIndex === index
-                    ? 'bg-white'
-                    : 'bg-white/45'
+                  ? 'bg-white'
+                  : 'bg-white/45'
                   }`}
                 aria-label={`Go to image ${index + 1}`}
               />
@@ -267,7 +267,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               {/* Builder Section */}
               <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
                 <img src={Icon4} alt="Builder" className="w-5 h-5 object-contain" />
-                <span>{listing.developer }</span>
+                <span>{listing.developer}</span>
               </div>
             </div>
           </div>
@@ -283,18 +283,18 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   key={btn.id}
                   onClick={isLikeBtn ? handleFavorite : (e) => e.stopPropagation()}
                   className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${listing?.isFeatured
-                      ? "bg-white hover:bg-[#01155E]"
-                      : "bg-[#E2E8F0] hover:bg-[#01155E]"
+                    ? "bg-white hover:bg-[#01155E]"
+                    : "bg-[#E2E8F0] hover:bg-[#01155E]"
                     }`}
                 >
                   <img
                     src={btn.icon}
                     alt={btn.alt}
                     className={`w-5 h-5 object-contain transition-all duration-300 ${isLikeBtn && isFavorite
-                        ? "" // no invert
-                        : btn.id !== "whatsapp"
-                          ? "group-hover:brightness-0 group-hover:invert"
-                          : ""
+                      ? "" // no invert
+                      : btn.id !== "whatsapp"
+                        ? "group-hover:brightness-0 group-hover:invert"
+                        : ""
                       }`}
                     style={
                       isLikeBtn && isFavorite
@@ -337,13 +337,13 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               {listing.builtUpArea?.toLocaleString() || "122,280"} sqft
             </span>
           </div>
-       <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
+          <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
           <div className="flex items-center gap-2 text-[#67739E]">
-  <img src={Icon4} alt="handover" className="w-5 h-5" />
-  <span className="text-[18px] font-medium">
-    {listing?.projectInfo?.handoverDate || "Q4 2027"}
-  </span>
-</div>
+            <img src={Icon4} alt="handover" className="w-5 h-5" />
+            <span className="text-[18px] font-medium">
+              {listing?.projectInfo?.handoverDate || "Q4 2027"}
+            </span>
+          </div>
 
           {/* Internal Logic: PDF Trigger */}
           <button
@@ -365,15 +365,19 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       <span className="text-[24px] font-semibold mr-1">
         Starting at
       </span>
-      <span className='text-[24px]'> {listing.currency} </span>
-      <span className="text-[32px]">
+      <span className='text-[24px] mr-2'>
+        {listing.currency?.toUpperCase()}
+      </span>
+      <span className="text-[32px] ">
         {listing.price?.toLocaleString() || "10,00,239"}
       </span>
     </>
   ) : (
     <>
-      <span className='text-[24px]'> {listing.currency} </span>
-      <span className="text-[32px]">
+      <span className='text-[24px] mr-2'>
+        {listing.currency?.toUpperCase()}
+      </span>
+      <span className="text-[32px] ">
         {listing.price?.toLocaleString() || "10,00,239"}
       </span>
     </>

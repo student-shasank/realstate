@@ -20,8 +20,8 @@ const TABS = {
 
 // Availability options
 const AVAILABILITY = {
-  AVAILABLE: "Available",
-  NOT_AVAILABLE: "Unavailable",
+  AVAILABLE: "available",
+  NOT_AVAILABLE: "unavailable",
 };
 
 function Dashboard() {
@@ -51,16 +51,15 @@ const [newFeatured, setNewFeatured] = useState("");
     if (!data || !Array.isArray(data.listings)) return [];
     if (activeTab === TABS.ALL) return data.listings;
     return data.listings.filter(
-      (item) => item.completionStatus === activeTab
+      (item) => item.propertyStatus === activeTab.toLowerCase()
     );
   }, [data, activeTab]);
 
   const getStatusColor = (status) => {
-    if (status === TABS.APPROVED) return "bg-green-100 text-green-700";
-    if (status === TABS.REJECTED) return "bg-red-100 text-red-700";
-    return "bg-yellow-100 text-yellow-700";
-  };
-
+  if (status === "active") return "bg-green-100 text-green-700";
+  if (status === "rejected") return "bg-red-100 text-red-700";
+  return "bg-yellow-100 text-yellow-700"; // pending
+};
   const getAvailabilityColor = (availability) => {
     if (availability === AVAILABILITY.AVAILABLE)
       return "bg-blue-100 text-blue-700";
@@ -140,10 +139,10 @@ const [newFeatured, setNewFeatured] = useState("");
             <div className="flex flex-wrap items-center gap-3 mt-2">
               <span
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                  item.completionStatus
+                  item.propertyStatus
                 )}`}
               >
-                {item.completionStatus}
+              {item.propertyStatus.charAt(0).toUpperCase() + item.propertyStatus.slice(1)}
               </span>
 
               <span
@@ -158,7 +157,7 @@ const [newFeatured, setNewFeatured] = useState("");
                 className="text-blue-600 text-sm"
                 onClick={() => {
                   setEditStatusId(item._id);
-                  setNewStatus(item.completionStatus);
+                  setNewStatus(item.propertyStatus);
                 }}
               >
                 Update Status
@@ -203,15 +202,15 @@ const [newFeatured, setNewFeatured] = useState("");
 
     <button
       className="bg-pink-600 text-white px-4 rounded"
-      onClick={() => {
-        dispatch(
-          updateListingFeatured({
-            id: item._id,
-            isFeatured: newFeatured === "true",
-          })
-        );
-        setEditFeaturedId(null);
-      }}
+     onClick={() => {
+  dispatch(
+    updateListingFeatured({
+      id: item._id,
+      isFeatured: newFeatured === "true",
+    })
+  ).then(() => dispatch(fetchDashboard()));
+  setEditFeaturedId(null);
+}}
     >
       Save
     </button>
@@ -222,26 +221,26 @@ const [newFeatured, setNewFeatured] = useState("");
             {/* Status Update */}
             {editStatusId === item._id && (
               <div className="mt-3 flex gap-3">
-                <select
-                  className="border px-3 py-2 rounded"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                >
-                  <option value={TABS.PENDING}>Pending</option>
-                  <option value={TABS.APPROVED}>Approved</option>
-                  <option value={TABS.REJECTED}>Rejected</option>
-                </select>
+               <select
+  className="border px-3 py-2 rounded"
+  value={newStatus}
+  onChange={(e) => setNewStatus(e.target.value)}
+>
+  <option value="pending">Pending</option>
+  <option value="active">Approved</option>
+  <option value="rejected">Rejected</option>
+</select>
                 <button
                   className="bg-blue-600 text-white px-4 rounded"
-                  onClick={() => {
-                    dispatch(
-                      updateListingStatus({
-                        id: item._id,
-                        status: newStatus,
-                      })
-                    );
-                    setEditStatusId(null);
-                  }}
+                 onClick={() => {
+  dispatch(
+    updateListingStatus({
+      id: item._id,
+      status: newStatus,
+    })
+  ).then(() => dispatch(fetchDashboard()));
+  setEditStatusId(null);
+}}
                 >
                   Save
                 </button>
@@ -266,15 +265,15 @@ const [newFeatured, setNewFeatured] = useState("");
                 </select>
                 <button
                   className="bg-purple-600 text-white px-4 rounded"
-                  onClick={() => {
-                    dispatch(
-                      updateListingAvailability({
-                        id: item._id,
-                        availability: newAvailability,
-                      })
-                    );
-                    setEditAvailabilityId(null);
-                  }}
+                 onClick={() => {
+  dispatch(
+    updateListingAvailability({
+      id: item._id,
+      availability: newAvailability,
+    })
+  ).then(() => dispatch(fetchDashboard()));
+  setEditAvailabilityId(null);
+}}
                 >
                   Save
                 </button>

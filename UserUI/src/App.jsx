@@ -74,7 +74,7 @@ function App() {
           <Route path="/datascource" element={<DataSources/>} />     
         <Route path="/service" element={<Service />} />
         <Route path="/listings" element={<Listings />} />
-        <Route path="/listing/:id" element={<ListingDetail />} />
+        <Route path="/listing/:id" element={< PropertyDetail/>} />
          <Route path="/propertyDetail" element ={<PropertyDetail/>} />
 
         {/* Individual Service Pages */}

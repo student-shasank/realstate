@@ -18,17 +18,9 @@ function SellerLeadsPage() {
   const [approvingId, setApprovingId] = useState(null);
   const [showApprovePopup, setShowApprovePopup] = useState(false);
 
+  // Sirf ek baar fetch — no auto refresh
   useEffect(() => {
     dispatch(fetchSellerLeads());
-  }, [dispatch]);
-
-  // AUTO REFRESH
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(fetchSellerLeads());
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, [dispatch]);
 
   const filteredLeads = useMemo(() => {
@@ -38,8 +30,7 @@ function SellerLeadsPage() {
     if (activeTab === "complete")
       return leads.filter(
         (lead) =>
-          lead.leadStatus === "complete" &&
-          lead.approvalStatus === "pending"
+          lead.leadStatus === "complete" && lead.approvalStatus === "pending"
       );
     if (activeTab === "approved")
       return leads.filter((lead) => lead.approvalStatus === "approved");
@@ -48,28 +39,33 @@ function SellerLeadsPage() {
     return leads;
   }, [activeTab, leads]);
 
-  const handleApprove = async (id) => {
+ const handleApprove = async (id) => {
     if (approvingId === id) return;
-
     setApprovingId(id);
-
+    
     const result = await dispatch(approveSellerLead(id));
-
+    
     if (approveSellerLead.fulfilled.match(result)) {
-      dispatch(fetchSellerLeads());
+      // ✅ Success hone par popup dikhao
       setShowApprovePopup(true);
-    }
+      
+      // ✅ Refresh data: Server se dubara leads mangwa lo
+      dispatch(fetchSellerLeads());
 
+      // Agar detail modal open hai, toh usey bhi band kar sakte hain
+      dispatch(clearSelectedLead());
+    }
+    
     setApprovingId(null);
   };
 
-  const handleReject = async (id) => {
-    const result = await dispatch(rejectSellerLead(id));
-    if (rejectSellerLead.fulfilled.match(result)) {
-      dispatch(fetchSellerLeads());
-    }
-  };
-
+ const handleReject = async (id) => {
+  const result = await dispatch(rejectSellerLead(id));
+  if (rejectSellerLead.fulfilled.match(result)) {
+    dispatch(fetchSellerLeads()); // Re-fetch data
+    dispatch(clearSelectedLead());
+  }
+};
   const formatDate = (date) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString();
@@ -77,15 +73,9 @@ function SellerLeadsPage() {
 
   const statusBadge = (value) => {
     const base = "px-3 py-1 rounded-full text-xs font-medium";
-    if (value === "approved") {
-      return `${base} bg-green-100 text-green-700`;
-    }
-    if (value === "rejected") {
-      return `${base} bg-red-100 text-red-700`;
-    }
-    if (value === "complete") {
-      return `${base} bg-blue-100 text-blue-700`;
-    }
+    if (value === "approved") return `${base} bg-green-100 text-green-700`;
+    if (value === "rejected") return `${base} bg-red-100 text-red-700`;
+    if (value === "complete") return `${base} bg-blue-100 text-blue-700`;
     return `${base} bg-yellow-100 text-yellow-700`;
   };
 
@@ -155,7 +145,6 @@ function SellerLeadsPage() {
                       {lead.propertyLocation || "-"}
                     </p>
                   </div>
-
                   <div className="text-right">
                     <p className="text-sm text-[#67739E]">
                       {formatDate(lead.createdAt)}
@@ -178,7 +167,8 @@ function SellerLeadsPage() {
                     {lead.contactNumber || "-"}
                   </p>
                   <p>
-                    <span className="font-medium">Email:</span> {lead.email || "-"}
+                    <span className="font-medium">Email:</span>{" "}
+                    {lead.email || "-"}
                   </p>
                   <p>
                     <span className="font-medium">Property Type:</span>{" "}
@@ -235,7 +225,6 @@ function SellerLeadsPage() {
               <p className="text-sm text-[#67739E] mt-2">
                 Listing created successfully.
               </p>
-
               <button
                 onClick={() => setShowApprovePopup(false)}
                 className="mt-4 bg-green-600 text-white px-4 py-2 rounded-xl"
@@ -245,8 +234,6 @@ function SellerLeadsPage() {
             </div>
           </div>
         )}
-
-       
 
         {selectedLead && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

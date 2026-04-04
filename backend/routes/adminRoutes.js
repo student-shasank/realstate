@@ -45,6 +45,8 @@ import {
   deleteListing,
   updateListingStatus,
   updateAvailability,
+    getAllListings,     // ← add
+  getListingById, 
   // Naya Controller Import karein
   createCommunity,
   updateListingFeatured,
@@ -54,26 +56,31 @@ import {
 const router = Router();
 
 // --- Dashboard ---
-router.get("/dashboard", protect, adminOnly, dashboard);
+// adminRoutes.js — final clean version
+router.get("/dashboard",  protect, adminOnly, dashboard);
+const listingUpload = upload.fields([
+  { name: "images", maxCount: 15 },           // Property Photos
+  { name: "agentProfile", maxCount: 1 },      // Agent Photo
+  { name: "communityImage", maxCount: 1 },    // Community Photo
+  { name: "floorPlanImage", maxCount: 5 },    // Floor Plans
+  { name: "videos", maxCount: 2 }             // Videos (MP4)
+]);
+// Listings
+// Dono handle karo — singular + plural
+router.post("/listing", protect, adminOnly, listingUpload, createListing);
+router.post("/listing", protect, adminOnly, listingUpload, createListing);
+router.get("/listings/:id",                 protect, adminOnly, getListingById);
+router.delete("/listings/:id",              protect, adminOnly, deleteListing);
+router.patch("/listings/:id/status",        protect, adminOnly, updateListingStatus);
+router.patch("/listings/:id/availability",  protect, adminOnly, updateAvailability);
+router.patch("/listings/:id/featured",      protect, adminOnly, updateListingFeatured);
 
-// --- Listings ---
-router.post("/listing", protect, adminOnly, upload.array("images", 10), createListing);
-router.delete("/listing/:id", protect, adminOnly, deleteListing);
-router.put("/listings/:id/status", protect, adminOnly, updateListingStatus);
-router.put("/listings/:id/availability", protect, adminOnly, updateAvailability);
-router.put(
-  "/listings/:id/featured",
-  protect,
-  adminOnly,
-  updateListingFeatured
-);
+
 
 // --- Communities (Naya Route) ---
 // Yahan hum .fields() use karenge kyunki frontend se alag-alag key names aa rahe hain
 const communityUpload = upload.fields([
-  { name: "heroImage_0", maxCount: 1 },
-  { name: "heroImage_1", maxCount: 1 },
-  { name: "heroImage_2", maxCount: 1 },
+  { name: "heroImages", maxCount: 3 }, // indexing ki jagah array
   { name: "overviewImage", maxCount: 1 },
   { name: "marketImage", maxCount: 1 }
 ]);

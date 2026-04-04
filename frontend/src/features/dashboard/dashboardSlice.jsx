@@ -38,7 +38,7 @@ export const updateListingStatus = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.put(
+      const response = await axios.patch(
         ADMIN_LISTING_STATUS_URL(id),
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -62,7 +62,7 @@ export const updateListingAvailability = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.put(
+      const response = await axios.patch(
         ADMIN_LISTING_AVAILABILITY_URL(id),
         { availability },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -83,7 +83,7 @@ export const updateListingFeatured = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.put(
+      const response = await axios.patch(
         ADMIN_LISTING_FEATURED_URL(id),
         { isFeatured },
         { headers: { Authorization: `Bearer ${token}` } }
