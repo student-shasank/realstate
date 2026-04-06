@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import PropertyMap from '../Components/Card/PropertyMap.jsx';
+import { useNavigate } from "react-router-dom";
 
 
 import {
@@ -10,16 +11,16 @@ import {
   resetListingDetailState,
 } from "../features/dashboard/listingDetailSlice.jsx";
 import {
-  MapPin, Bed, Bath, Square, Calendar, Hash, CheckCircle,Utensils,Baby,Camera,Thermometer,GlassWater,Store,Scissors,
+  MapPin, Bed, Bath, Square, Calendar, Hash, CheckCircle, Utensils, Baby, Camera, Thermometer, GlassWater, Store, Scissors,
   Shirt,
 
-  
-  
-  
-  Map, 
- 
-  
-  
+
+
+
+  Map,
+
+
+
 
   ChevronDown, ChevronUp, Play, Star, Phone, Mail, Heart,
   Share2, Maximize, Download, Wifi, Dumbbell, Car,
@@ -48,7 +49,7 @@ const AMENITY_MAP = {
   swimmingpool: { label: "Pool", icon: "pool" },
   gym: { label: "Gym", icon: "gym" },
   fitnesscenter: { label: "Gym", icon: "gym" },
- pet: { label: "Pet-friendly", icon: "pet" },     // 'petfriendly' ki jagah sirf 'pet'
+  pet: { label: "Pet-friendly", icon: "pet" },     // 'petfriendly' ki jagah sirf 'pet'
   kids: { label: "Kids' Area", icon: "kids" },     // 'kidsarea' ki jagah sirf 'kids'
   club: { label: "Clubhouse", icon: "club" },
   security: { label: "Security cameras", icon: "camera" },
@@ -114,8 +115,8 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
           <button
             onClick={() => setActiveTab("photos")}
             className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "photos"
-                ? "border-[#01155E] text-[#01155E]"
-                : "border-transparent text-[#67739E] hover:text-[#01155E]"
+              ? "border-[#01155E] text-[#01155E]"
+              : "border-transparent text-[#67739E] hover:text-[#01155E]"
               }`}
           >
             <Image size={18} />
@@ -124,8 +125,8 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
           <button
             onClick={() => setActiveTab("map")}
             className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "map"
-                ? "border-[#01155E] text-[#01155E]"
-                : "border-transparent text-[#67739E] hover:text-[#01155E]"
+              ? "border-[#01155E] text-[#01155E]"
+              : "border-transparent text-[#67739E] hover:text-[#01155E]"
               }`}
           >
             <MapPin size={18} />
@@ -201,6 +202,7 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function PropertyDetail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   console.log("ID:", id);
 
@@ -209,18 +211,18 @@ export default function PropertyDetail() {
   const dispatch = useDispatch();
 
   const { listing, loading } = useSelector(
-  (state) => state.listingDetail
-);
+    (state) => state.listingDetail
+  );
 
- useEffect(() => {
-  if (id) {
-    dispatch(fetchListingDetail(id));
-  }
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchListingDetail(id));
+    }
 
-  return () => {
-    dispatch(resetListingDetailState());
-  };
-}, [dispatch, id]);
+    return () => {
+      dispatch(resetListingDetailState());
+    };
+  }, [dispatch, id]);
 
   const PROPERTY = listing || {};
 
@@ -278,8 +280,9 @@ export default function PropertyDetail() {
     status,
     pricePerSqFt,
     regulatoryInfo = {},
+    community = {},
   } = PROPERTY;
-   console.log(PROPERTY)
+  console.log(PROPERTY)
 
   if (loading) {
     return (
@@ -288,12 +291,12 @@ export default function PropertyDetail() {
       </div>
     );
   }
-  const { 
-    permitNumber = "N/A", 
-    zoneName = "N/A", 
-    rera = "Approved", 
-    brn = "Approved", 
-    registeredAgency = "RTO" 
+  const {
+    permitNumber = "N/A",
+    zoneName = "N/A",
+    rera = "Approved",
+    brn = "Approved",
+    registeredAgency = "RTO"
   } = regulatoryInfo;
 
   // ── Helper formatters ──
@@ -305,29 +308,29 @@ export default function PropertyDetail() {
     paymentPlan?.steps?.length > 0
       ? paymentPlan.steps.map((s) => ({ label: s.label, value: `${s.percent}%` }))
       : [
-          { label: "On Booking", value: "20%" },
-          { label: "During Construction", value: "40%" },
-          { label: "Upon Handover", value: "40%" },
-        ];
+        { label: "On Booking", value: "20%" },
+        { label: "During Construction", value: "40%" },
+        { label: "Upon Handover", value: "40%" },
+      ];
 
   // Property info rows — use API `info` array OR build from flat fields
   const propertyInfoRows =
-  info?.length > 0
-    ? info
-    : [
+    info?.length > 0
+      ? info
+      : [
         { label: "Built-Up Area", value: builtUpArea ? `${builtUpArea} Sq Ft` : "—" },
         { label: "Total Building Area", value: totalBuildingArea ? `${totalBuildingArea} Sq Ft` : "—" },
-         { label: "ReferenceNo", value: referenceNo || "—" },
+        { label: "ReferenceNo", value: referenceNo || "—" },
         { label: "Year Built", value: yearBuilt || "—" },
         { label: "Ownership", value: ownership || "—" },
         { label: "Rooms", value: rooms ?? "—" },
         { label: "Handover", value: handoverDate || "—" },
-      {
-  label: "Listing Date",
-  value: listingDate
-    ? new Date(listingDate).toLocaleDateString()
-    : "—"
-},
+        {
+          label: "Listing Date",
+          value: listingDate
+            ? new Date(listingDate).toLocaleDateString()
+            : "—"
+        },
         { label: "Furnishing", value: furnishing || "—" },
         { label: "Property Status", value: propertyStatus || "—" },
         { label: "Service Charges", value: serviceCharges || "—" },
@@ -347,30 +350,30 @@ export default function PropertyDetail() {
   const unitTypesList =
     unitTypes?.length > 0
       ? unitTypes.map((u) => ({
-          type: u.bedrooms || u.type || "—",
-          sqft: u.sqFt ? `${u.sqFt} Sq Ft` : u.sqft || "—",
-          price: formatPrice(u.startingPrice || u.price),
-        }))
+        type: u.bedrooms || u.type || "—",
+        sqft: u.sqFt ? `${u.sqFt} Sq Ft` : u.sqft || "—",
+        price: formatPrice(u.startingPrice || u.price),
+      }))
       : [];
 
   // Floor plans
   const floorPlansList = floorPlans?.length > 0 ? floorPlans : [];
 
   // Amenities — support array of strings or array of objects
- const rawData = amenities?.length > 0 ? amenities : (features || []);
+  const rawData = amenities?.length > 0 ? amenities : (features || []);
 
-const amenitiesList = rawData.map((item) => {
-  // String ko normalize karein (lowercase aur spaces hatayein)
-  const key = typeof item === "string" 
-    ? item.toLowerCase().replace(/\s+/g, "") 
-    : "";
+  const amenitiesList = rawData.map((item) => {
+    // String ko normalize karein (lowercase aur spaces hatayein)
+    const key = typeof item === "string"
+      ? item.toLowerCase().replace(/\s+/g, "")
+      : "";
 
-  // Agar mapping milti hai toh wo use karein, warna original dikhayein
-  return AMENITY_MAP[key] || { 
-    label: item, 
-    icon: "default" 
-  };
-});
+    // Agar mapping milti hai toh wo use karein, warna original dikhayein
+    return AMENITY_MAP[key] || {
+      label: item,
+      icon: "default"
+    };
+  });
   // Building info rows
   const buildingInfoRow1 = [
     { label: "Building Name", value: buildingInfo?.buildingName || projectInfo?.name || "—" },
@@ -414,10 +417,10 @@ const amenitiesList = rawData.map((item) => {
             <div className="flex items-center gap-4 mb-4">
               {/* Status Badge */}
               <span className="bg-[#01155E] text-white text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
-  {[completionStatus, listingStatus]
-    .filter(Boolean)
-    .join(" | ") || "—"}
-</span>
+                {[completionStatus, listingStatus]
+                  .filter(Boolean)
+                  .join(" | ") || "—"}
+              </span>
 
               {/* Property Type */}
               <div className="flex items-center gap-2 text-[#67739E] text-[16px] font-medium capitalize">
@@ -431,16 +434,16 @@ const amenitiesList = rawData.map((item) => {
             </div>
 
             <div className="flex items-center gap-5 text-[#67739E] text-[18px] flex-wrap">
-             <div className="flex items-center gap-2">
-  <MapPin size={18} className="text-[#01155E]" />
-  <span>
-    {[
-      location?.address,
-      location?.country
-    ].filter(Boolean).join(", ") || "—"}
-  </span>
-</div>
-{ console.log(location)}
+              <div className="flex items-center gap-2">
+                <MapPin size={18} className="text-[#01155E]" />
+                <span>
+                  {[
+                    location?.address,
+                    location?.country
+                  ].filter(Boolean).join(", ") || "—"}
+                </span>
+              </div>
+              {console.log(location)}
 
               <div className="border-l border-[#D9E1F2] h-5" />
 
@@ -482,23 +485,23 @@ const amenitiesList = rawData.map((item) => {
         {/* ── Image Gallery ── */}
         <div className="grid grid-cols-12 gap-[10px] h-[520px] mb-12">
           <div className="col-span-7 relative h-full">
-  <img
-    src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"}
-    className="w-full h-full object-cover rounded-[6px]"
-    alt="Main"
-  />
+            <img
+              src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"}
+              className="w-full h-full object-cover rounded-[6px]"
+              alt="Main"
+            />
 
-  {/* Badge */}
-  <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm capitalize">
-    {completionStatus}
-  </span>
+            {/* Badge */}
+            <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm capitalize">
+              {completionStatus}
+            </span>
 
-  <div className="absolute inset-0 flex items-center justify-center">
-    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer">
-      <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
-    </div>
-  </div>
-</div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer">
+                <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
+              </div>
+            </div>
+          </div>
           <div className="col-span-5 grid grid-cols-2 gap-[10px] h-full">
             <img src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"} className="w-full h-[255px] object-cover rounded-[6px]" alt="s1" />
             <div className="relative h-[255px]">
@@ -606,52 +609,52 @@ const amenitiesList = rawData.map((item) => {
 
             {/* Regulatory Information */}
             <div className="mb-8">
-  <h3 className="text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
-  <div className="flex gap-6">
-    <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-6">
-      <div className="grid grid-cols-2 gap-4 pb-5 border-b border-[#D9E1F2]">
-        <div>
-          <p className="text-[#67739E] text-[18px] mb-1">Permit Number</p>
-          <p className="text-[#01155E] font-semibold text-[18px]">{permitNumber}</p>
-        </div>
-        <div>
-          <p className="text-[#67739E] text-[18px] mb-1">Zone Name</p>
-          <p className="text-[#01155E] font-semibold text-[18px]">{zoneName}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4 py-5 border-b border-[#D9E1F2]">
-        <div>
-          <p className="text-[#67739E] text-[18px] mb-1">RERA</p>
-          <p className="text-[#01155E] font-semibold text-[18px]">{rera}</p>
-        </div>
-        <div>
-          <p className="text-[#67739E] text-[18px] mb-1">BRN</p>
-          <p className="text-[#01155E] font-semibold text-[18px]">{brn}</p>
-        </div>
-      </div>
-      <div className="pt-5">
-        <p className="text-[#67739E] text-[18px] mb-1">Registered Agency</p>
-        <p className="text-[#01155E] font-semibold text-[18px]">{registeredAgency}</p>
-      </div>
-    </div>
+              <h3 className="text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
+              <div className="flex gap-6">
+                <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-6">
+                  <div className="grid grid-cols-2 gap-4 pb-5 border-b border-[#D9E1F2]">
+                    <div>
+                      <p className="text-[#67739E] text-[18px] mb-1">Permit Number</p>
+                      <p className="text-[#01155E] font-semibold text-[18px]">{permitNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-[#67739E] text-[18px] mb-1">Zone Name</p>
+                      <p className="text-[#01155E] font-semibold text-[18px]">{zoneName}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 py-5 border-b border-[#D9E1F2]">
+                    <div>
+                      <p className="text-[#67739E] text-[18px] mb-1">RERA</p>
+                      <p className="text-[#01155E] font-semibold text-[18px]">{rera}</p>
+                    </div>
+                    <div>
+                      <p className="text-[#67739E] text-[18px] mb-1">BRN</p>
+                      <p className="text-[#01155E] font-semibold text-[18px]">{brn}</p>
+                    </div>
+                  </div>
+                  <div className="pt-5">
+                    <p className="text-[#67739E] text-[18px] mb-1">Registered Agency</p>
+                    <p className="text-[#01155E] font-semibold text-[18px]">{registeredAgency}</p>
+                  </div>
+                </div>
 
-    {/* QR Code Section */}
-    <div className="w-[280px] border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6">
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#01155E] rounded-tl-[4px]" />
-        <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#01155E] rounded-tr-[4px]" />
-        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#01155E] rounded-bl-[4px]" />
-        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#01155E] rounded-br-[4px]" />
-        
-        <img
-          src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PERMIT-${permitNumber}-ZONE-${zoneName}-RERA-${rera}&color=01155E&bgcolor=ffffff`}
-          alt="QR Code"
-          className="w-[180px] h-[180px]"
-        />
-      </div>
-    </div>
-  </div>
-</div>
+                {/* QR Code Section */}
+                <div className="w-[280px] border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6">
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#01155E] rounded-tl-[4px]" />
+                    <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#01155E] rounded-tr-[4px]" />
+                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-[#01155E] rounded-bl-[4px]" />
+                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-[#01155E] rounded-br-[4px]" />
+
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PERMIT-${permitNumber}-ZONE-${zoneName}-RERA-${rera}&color=01155E&bgcolor=ffffff`}
+                      alt="QR Code"
+                      className="w-[180px] h-[180px]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Payment Plan */}
             <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Payment Plan</h2>
@@ -665,26 +668,26 @@ const amenitiesList = rawData.map((item) => {
                 </div>
                 <ChevronDown size={20} className="text-[#67739E]" />
               </div>
-             <div className="flex h-2 rounded-full overflow-hidden mb-3 gap-0.5">
-  {paymentSteps.map((step, i) => (
-    <div
-      key={i}
-      style={{ width: step.value }}
-      className={`
+              <div className="flex h-2 rounded-full overflow-hidden mb-3 gap-0.5">
+                {paymentSteps.map((step, i) => (
+                  <div
+                    key={i}
+                    style={{ width: step.value }}
+                    className={`
         ${i === 0 ? "rounded-l-full" : ""}
         ${i === paymentSteps.length - 1 ? "rounded-r-full" : ""}
         bg-[#4A6CF7]
       `}
-    />
-  ))}
-</div>
-          <div className="flex text-[18px] font-medium text-[#01155E] mb-6">
-  {paymentPlan?.steps?.map((step, i) => (
-    <span key={i} style={{ width: `${step.percent}%` }}>
-      {step.percent}%
-    </span>
-  ))}
-</div>
+                  />
+                ))}
+              </div>
+              <div className="flex text-[18px] font-medium text-[#01155E] mb-6">
+                {paymentPlan?.steps?.map((step, i) => (
+                  <span key={i} style={{ width: `${step.percent}%` }}>
+                    {step.percent}%
+                  </span>
+                ))}
+              </div>
               <div className="space-y-4">
                 {paymentSteps.map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-4 border-b border-[#D9E1F2] last:border-0">
@@ -742,27 +745,27 @@ const amenitiesList = rawData.map((item) => {
             </div>
 
             {/* Amenities */}
-          <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenities</h2>
-<div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
-    {amenitiesList.map((item, i) => (
-      <div key={i} className="flex items-center gap-4 group">
-        <div className="flex-shrink-0 transition-transform group-hover:scale-110">
-          <AmenityIcon type={item.icon} />
-        </div>
-        <span className="text-[#01155E] font-medium text-[17px] leading-tight">
-          {item.label}
-        </span>
-      </div>
-    ))}
-  </div>
+            <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenities</h2>
+            <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
+                {amenitiesList.map((item, i) => (
+                  <div key={i} className="flex items-center gap-4 group">
+                    <div className="flex-shrink-0 transition-transform group-hover:scale-110">
+                      <AmenityIcon type={item.icon} />
+                    </div>
+                    <span className="text-[#01155E] font-medium text-[17px] leading-tight">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-  <div className="flex justify-center pt-4 border-t border-gray-50">
-    <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-10 py-3.5 rounded-xl uppercase text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">
-      View All Amenities
-    </button>
-  </div>
-</div>
+              <div className="flex justify-center pt-4 border-t border-gray-50">
+                <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-10 py-3.5 rounded-xl uppercase text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">
+                  View All Amenities
+                </button>
+              </div>
+            </div>
 
             {/* Floor Plans */}
             <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Floor Plans</h2>
@@ -824,18 +827,29 @@ const amenitiesList = rawData.map((item) => {
             <div className="flex justify-between items-center mb-7.5">
               <div>
                 <h2 className="text-[28px] font-semibold text-[#01155E]">Community</h2>
-                <p className="text-[#67739E] font-semibold text-[24px]">
-                  {location?.community || "—"}
-                </p>
+               <p className="text-[#67739E] font-semibold text-[24px]">
+  {community?.title || location?.community || "—"}
+</p>
               </div>
-              <button className="bg-[#01155E] text-white px-6 py-2.5 rounded-lg text-[18px] font-semibold">
-                Explore Community
-              </button>
+              <button
+  onClick={() => {
+    if (community?.slug) {
+      navigate(`/communities/${community.slug}`);
+    }
+  }}
+  className="bg-[#01155E] text-white px-6 py-2.5 rounded-lg text-[18px] font-semibold"
+>
+  Explore Community
+</button>
             </div>
 
             <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
               <img
-                src={location?.communityImage || propertycommunity}
+                src={
+                  community?.marketSupply?.image ||
+                  location?.communityImage ||
+                  propertycommunity
+                }
                 className="w-full h-full object-cover"
                 alt="Community"
               />
@@ -869,13 +883,13 @@ const amenitiesList = rawData.map((item) => {
               </div>
             </div>
 
-           <div className="mt-10">
-      <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
-      <PropertyMap 
-        coordinates={location?.coordinates} 
-        title={title} 
-      />
-    </div>
+            <div className="mt-10">
+              <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
+              <PropertyMap
+                coordinates={location?.coordinates}
+                title={title}
+              />
+            </div>
 
 
             {/* Project Video */}
@@ -914,11 +928,11 @@ const amenitiesList = rawData.map((item) => {
                 <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
                   <MapPin size={14} />
                   <span>
-    {[
-      location?.address,
-      location?.country
-    ].filter(Boolean).join(", ") || "—"}
-  </span>
+                    {[
+                      location?.address,
+                      location?.country
+                    ].filter(Boolean).join(", ") || "—"}
+                  </span>
                 </div>
 
                 <hr className="border-[#D9E1F2] mb-4" />

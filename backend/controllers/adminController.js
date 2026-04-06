@@ -92,7 +92,28 @@ const communityImageUrl = files['communityImage']
 
     // Slug
     const uniqueSlug = generateSlug(b.title);
+    // ✅ validate community
+// community required
+if (!b.community) {
+  return res.status(400).json({
+    success: false,
+    message: "Community is required",
+  });
+}
 
+// validate community
+let communityId;
+
+const communityExists = await Community.findById(b.community);
+
+if (!communityExists) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid community selected",
+  });
+}
+
+communityId = communityExists._id;
     // Parse arrays safely
     const parseJSONSafe = (val) => {
       if (!val) return [];
@@ -117,6 +138,7 @@ const communityImageUrl = files['communityImage']
       type: b.type,
       purpose: b.purpose || "sell",
       completionStatus: b.completionStatus,
+       community: communityId,
       propertyStatus: b.propertyStatus || "pending",
       listingStatus: b.listingStatus,
       availability: b.availability || "available",
@@ -377,6 +399,7 @@ export const getAllListings = async (req, res) => {
     const skip  = (Number(page) - 1) * Number(limit);
     const total = await Listing.countDocuments(filter);
     const listings = await Listing.find(filter)
+       .populate("community") 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit));
@@ -396,7 +419,8 @@ export const getAllListings = async (req, res) => {
 // ── GET SINGLE LISTING ────────────────────────────────────────
 export const getListingById = async (req, res) => {
   try {
-    const listing = await Listing.findById(req.params.id);
+    const listing = await Listing.findById(req.params.id)
+                                   .populate("community");
     if (!listing) {
       return res.status(404).json({ success: false, message: "Listing not found" });
     }
@@ -442,6 +466,24 @@ export const createCommunity = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error while creating community",
+      error: error.message,
+    });
+  }
+};
+
+// ── GET COMMUNITIES (for dropdown) ──────────────────────────
+export const getCommunities = async (req, res) => {
+  try {
+    const communities = await Community
+      .find()
+      .select("_id name slug")
+      .sort({ name: 1 });
+
+    return res.status(200).json(communities);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch communities",
       error: error.message,
     });
   }

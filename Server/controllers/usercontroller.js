@@ -1,8 +1,11 @@
 import Listing from "../models/Listing.js";
+import Community from "../models/Community.js";
 
 export const dashboard = async (req, res) => {
   try {
-    const listings = await Listing.find().select("-internal")
+    const listings = await Listing.find()
+      .populate("community")
+      .select("-internal")
       .sort({
         isFeatured: -1,   //  featured first
         createdAt: -1     // latest after that
@@ -39,6 +42,7 @@ export const getListings = async (req, res) => {
     // ✅ Fetch + Count using SAME filters
     const [listings, total] = await Promise.all([
       Listing.find(matchQuery)
+        .populate("community")
         .sort({  isFeatured: -1,updatedAt: -1 })
          .select("-internal")           
         .skip(skip)
@@ -68,8 +72,9 @@ export const getListingById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const listing = await Listing.findById(id).select("-internal");
-
+    const listing = await Listing.findById(id)
+     .populate("community") 
+    .select("-internal");
     if (!listing) {
       return res.status(404).json({
         success: false,

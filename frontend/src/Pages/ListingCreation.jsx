@@ -4,29 +4,25 @@ import { PhotoIcon } from "@heroicons/react/24/solid";
 import { useDispatch, useSelector } from "react-redux";
 import { createListing, resetListingState } from "../features/dashboard/listingSlice";
 import { useNavigate } from "react-router-dom";
+import { fetchCommunities } from "../features/communitySlice";
 
 const initialForm = {
-  // Core
   title: "",
   referenceNo: "",
-  slug: "",
-
-  // Pricing
   price: "",
   currency: "AED",
   serviceCharges: "",
+  community: "",
 
-  // Classification
   type: "",
   purpose: "",
-  completionStatus: "",   // "off-plan" | "ready"
-  propertyStatus: "pending", // "pending"|"active"|"rejected"|"sold"
-  listingStatus: "",      // "resale"|"new launch"|"secondary"
-  availability: "available",
+  completionStatus: "",
+  propertyStatus: "",
+  listingStatus: "",
+  availability: "",
   isFeatured: false,
   furnishing: "",
 
-  // Specs
   bedrooms: "",
   bathrooms: "",
   garage: "",
@@ -35,25 +31,20 @@ const initialForm = {
   totalBuildingArea: "",
   plotArea: "",
 
-  // Developer / Ownership
   developer: "",
   ownership: "",
 
-  // Dates
   yearBuilt: "",
   handoverDate: "",
   listingDate: "",
   addedOn: "",
 
-  // Content
   description: "",
   features: "",
 
-  // Media
   youtubeVideoId: "",
   brochureUrl: "",
 
-  // Agent
   agentName: "",
   agency: "",
   agentPhone: "",
@@ -61,27 +52,30 @@ const initialForm = {
   agentEmail: "",
   isResponsiveBroker: false,
 
-  // Validated Info
+  internalListingId: "",
+  sourceBrokerageName: "",
+  listingAgentName: "",
+  listingAgentPhone: "",
+  listingAgentEmail: "",
+  listingSourceType: "",
+  listingValidUntil: "",
+
   validatedBuiltUpArea: "",
   validatedPlotArea: "",
   usage: "",
 
-  // Project Info
   projectName: "",
   projectStatus: "",
   projectCompletion: "",
   projectDeveloper: "",
   lastInspected: "",
 
-  // Location
   location: "",
-  community: "",
   subCommunity: "",
   city: "",
   country: "",
   emirates: "",
 
-  // Building Info (only Apartment)
   buildingName: "",
   yearOfCompletion: "",
   totalFloors: "",
@@ -89,31 +83,30 @@ const initialForm = {
   totalParkingSpaces: "",
   elevators: "",
 
-  // Unit Types (JSON array)
-  unitTypes: [{ bedrooms: "", sqFt: "", startingPrice: "", availability: "available" }],
-
-  // Floor Plans (JSON array)
-  floorPlans: [{ bedrooms: "", sqFt: "", startingPrice: "", description: "" }],
-
-  // Payment Plan
   paymentPlanName: "",
   downPayment: "",
-  installmentPlan: [{ month: "", percent: "" }],
-  paymentPlanSteps: [{ label: "", percent: "" }],
 
-  // Investment Insights
   rentalYield: "",
   priceTrend: "",
   pricePerSqFt: "",
 
-  // Internal
-  internalListingId: "",
-  sourceBrokerageName: "",
-  listingAgentName: "",
-  listingAgentPhone: "",
-  listingAgentEmail: "",
-  listingSourceType: "direct",
-  listingValidUntil: "",
+  unitTypes: [
+    { bedrooms: "", sqFt: "", startingPrice: "", availability: "available" }
+  ],
+
+  floorPlans: [
+    { bedrooms: "", sqFt: "", startingPrice: "", description: "" }
+  ],
+
+  installmentPlan: [
+    { month: "", percent: "" }
+  ],
+
+  paymentPlanSteps: [
+    { label: "", percent: "" }
+  ],
+
+  images: []
 };
 
 // ── Reusable Input & Select ───────────────────────────────────
@@ -165,6 +158,12 @@ function ListingCreation() {
 
   const [formData, setFormData] = useState(initialForm);
   const [images, setImages] = useState([]);
+const { communities } = useSelector((state) => state.community);
+console.log("communities", communities);
+
+useEffect(() => {
+  dispatch(fetchCommunities());
+}, [dispatch]);
 
   useEffect(() => {
     if (success) {
@@ -240,22 +239,127 @@ function ListingCreation() {
     setFormData((prev) => ({ ...prev, floorPlans: prev.floorPlans.filter((_, idx) => idx !== i) }));
 
   // ── Submit ────────────────────────────────────────────────────
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const fd = new FormData();
+const handleSubmit = (e) => {
+  e.preventDefault();
+  const fd = new FormData();
 
-    Object.keys(formData).forEach((key) => {
-      if (key === "images") {
-        (formData.images || []).forEach((file) => fd.append("images", file));
-      } else if (["installmentPlan", "paymentPlanSteps", "unitTypes", "floorPlans"].includes(key)) {
-        fd.append(key, JSON.stringify(formData[key]));
-      } else {
-        fd.append(key, formData[key]);
-      }
-    });
+  const payload = {
+    title: formData.title,
+    referenceNo: formData.referenceNo,
+    price: formData.price,
+    currency: formData.currency,
+    serviceCharges: formData.serviceCharges,
+    community: formData.community,
 
-    dispatch(createListing(fd));
+    type: formData.type,
+    purpose: formData.purpose,
+    completionStatus: formData.completionStatus,
+    propertyStatus: formData.propertyStatus,
+    listingStatus: formData.listingStatus,
+    availability: formData.availability,
+    isFeatured: formData.isFeatured,
+    furnishing: formData.furnishing,
+
+    bedrooms: formData.bedrooms,
+    bathrooms: formData.bathrooms,
+    garage: formData.garage,
+    rooms: formData.rooms,
+    builtUpArea: formData.builtUpArea,
+    totalBuildingArea: formData.totalBuildingArea,
+    plotArea: formData.plotArea,
+
+    developer: formData.developer,
+    ownership: formData.ownership,
+
+    yearBuilt: formData.yearBuilt,
+    handoverDate: formData.handoverDate,
+    listingDate: formData.listingDate,
+    addedOn: formData.addedOn,
+
+    description: formData.description,
+    features: formData.features?.split(","),
+
+    youtubeVideoId: formData.youtubeVideoId,
+    brochureUrl: formData.brochureUrl,
+
+    agent: {
+      name: formData.agentName,
+      agency: formData.agency,
+      phone: formData.agentPhone,
+      whatsapp: formData.agentWhatsapp,
+      email: formData.agentEmail,
+      isResponsiveBroker: formData.isResponsiveBroker,
+    },
+
+    internal: {
+      internalListingId: formData.internalListingId,
+      sourceBrokerageName: formData.sourceBrokerageName,
+      listingAgentName: formData.listingAgentName,
+      listingAgentPhone: formData.listingAgentPhone,
+      listingAgentEmail: formData.listingAgentEmail,
+      listingSourceType: formData.listingSourceType,
+      listingValidUntil: formData.listingValidUntil,
+    },
+
+    validatedInfo: {
+      ownership: formData.ownership,
+      builtUpArea: formData.validatedBuiltUpArea,
+      plotArea: formData.validatedPlotArea,
+      usage: formData.usage,
+      developer: formData.developer,
+    },
+
+    projectInfo: {
+      name: formData.projectName,
+      status: formData.projectStatus,
+      completion: formData.projectCompletion,
+      developer: formData.projectDeveloper,
+      lastInspected: formData.lastInspected,
+    },
+
+    location: {
+      address: formData.location,
+      subCommunity: formData.subCommunity,
+      city: formData.city,
+      country: formData.country,
+      emirates: formData.emirates,
+    },
+
+    buildingInfo: {
+      buildingName: formData.buildingName,
+      yearOfCompletion: formData.yearOfCompletion,
+      totalFloors: formData.totalFloors,
+      swimmingPools: formData.swimmingPools,
+      totalParkingSpaces: formData.totalParkingSpaces,
+      totalBuildingArea: formData.totalBuildingArea,
+      elevators: formData.elevators,
+    },
+
+    unitTypes: formData.unitTypes,
+    floorPlans: formData.floorPlans,
+
+    paymentPlan: {
+      planName: formData.paymentPlanName,
+      downPayment: formData.downPayment,
+      installmentPlan: formData.installmentPlan,
+      steps: formData.paymentPlanSteps,
+    },
+
+    investmentInsights: {
+      rentalYield: formData.rentalYield,
+      priceTrend: formData.priceTrend,
+      pricePerSqFt: formData.pricePerSqFt,
+    },
   };
+
+  fd.append("data", JSON.stringify(payload));
+
+  (formData.images || []).forEach((file) => {
+    fd.append("images", file);
+  });
+
+  dispatch(createListing(fd));
+};
 
   const isApartment = formData.type.toLowerCase() === "apartment";
 
@@ -352,7 +456,20 @@ function ListingCreation() {
           <SectionTitle title="Location" />
           <div className="grid grid-cols-1 sm:grid-cols-6 gap-5">
             <Input label="Address / Area"  name="location"     value={formData.location}     onChange={handleChange} placeholder="Palm Jumeirah" className="sm:col-span-6" />
-            <Input label="Community"       name="community"    value={formData.community}    onChange={handleChange} placeholder="Downtown" className="sm:col-span-3" />
+      <select
+  name="community"
+  value={formData.community}
+  onChange={handleChange}
+  className="border p-2 w-full sm:col-span-3"
+>
+  <option value="">Select Community</option>
+
+  {communities?.map((c) => (
+    <option key={c._id} value={c._id}>
+      {c.slug}
+    </option>
+  ))}
+</select>
             <Input label="Sub Community"   name="subCommunity" value={formData.subCommunity} onChange={handleChange} placeholder="West Crescent" className="sm:col-span-3" />
             <Input label="City"            name="city"         value={formData.city}         onChange={handleChange} placeholder="Dubai" className="sm:col-span-2" />
             <Input label="Country"         name="country"      value={formData.country}      onChange={handleChange} placeholder="UAE" className="sm:col-span-2" />

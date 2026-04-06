@@ -50,6 +50,7 @@ import {
   // Naya Controller Import karein
   createCommunity,
   updateListingFeatured,
+  getCommunities,
 
 } from "../controllers/adminController.js";
 
@@ -67,14 +68,13 @@ const listingUpload = upload.fields([
 ]);
 // Listings
 // Dono handle karo — singular + plural
-router.post("/listing", protect, adminOnly, listingUpload, createListing);
-router.post("/listing", protect, adminOnly, listingUpload, createListing);
+router.post("/listings", protect, adminOnly, listingUpload, createListing);
+router.post("/listings", protect, adminOnly, listingUpload, createListing);
 router.get("/listings/:id",                 protect, adminOnly, getListingById);
 router.delete("/listings/:id",              protect, adminOnly, deleteListing);
 router.patch("/listings/:id/status",        protect, adminOnly, updateListingStatus);
 router.patch("/listings/:id/availability",  protect, adminOnly, updateAvailability);
 router.patch("/listings/:id/featured",      protect, adminOnly, updateListingFeatured);
-
 
 
 // --- Communities (Naya Route) ---
@@ -91,6 +91,7 @@ router.post(
   communityUpload,
   createCommunity
 );
+router.get("/communities", getCommunities);
 
 export default router;
 

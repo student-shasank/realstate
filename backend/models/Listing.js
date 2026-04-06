@@ -1,6 +1,7 @@
 // listingModel.js
 import mongoose from "mongoose";
 
+
 const agentSchema = new mongoose.Schema({
   name: { type: String },
   agency: { type: String },
@@ -44,10 +45,10 @@ const projectInfoSchema = new mongoose.Schema({
 
 const locationSchema = new mongoose.Schema({
   address: { type: String },
-  community: { type: String },
   subCommunity: { type: String },
   city: { type: String },
   country: { type: String },
+  community: { type: String },
   emirates: { type: String },
   communityImage: { type: String },
   coordinates: {
@@ -134,6 +135,11 @@ const ListingSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     currency: { type: String, default: "AED" },
     serviceCharges: { type: Number },
+
+    community: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Community",
+},
 
     type: { type: String },
     purpose: {
