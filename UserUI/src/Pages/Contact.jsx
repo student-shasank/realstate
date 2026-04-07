@@ -63,9 +63,9 @@ const Contact = () => {
 
   const InfoRow = ({ label, value, accent }) => (
     <div className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{label}</span>
       <span
-        className="text-sm font-black text-right max-w-[55%] leading-snug"
+        className="text-[18px] font-black text-right max-w-[55%] leading-snug"
         style={{ color: accent ? NAVY : "#111827" }}
       >
         {value || "—"}
@@ -171,7 +171,7 @@ const Contact = () => {
                 {data?.type || "Property"}
               </span>
               <span
-                className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
+                className="text-[16px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
                 style={{
                   background: "rgba(29,158,117,0.15)",
                   borderColor: "rgba(29,158,117,0.5)",
@@ -183,9 +183,9 @@ const Contact = () => {
             </div>
             {/* Price + title bottom */}
             <div>
-              <p className="text-white text-sm font-bold mb-1 line-clamp-1 opacity-80">{data?.title}</p>
+              <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80">{data?.title}</p>
               <p className="font-black leading-none mb-4" style={{ color: GOLD, fontSize: 28 }}>
-                <span className="text-xs font-bold mr-1">{data?.currency}</span>
+                <span className="text-[18px] font-bold mr-1">{data?.currency}</span>
                 {data?.price?.toLocaleString()}
               </p>
               <div className="flex gap-3">
@@ -346,12 +346,12 @@ const Contact = () => {
         {/* ── Page Title ── */}
         <div className="text-center mb-12">
           <h1
-            className="text-4xl md:text-5xl font-black tracking-tight mb-2"
-            style={{ color: NAVY }}
+            className="text-4xl md:text-5xl text-[#01155E] font-['Archivo'] font-bold tracking-tight mb-2"
+            
           >
             Compare Properties
           </h1>
-          <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">
+          <p className="text-sm text-[#67739E] font-bold uppercase tracking-widest">
             Select two listings from your favorites to compare side by side
           </p>
         </div>
@@ -361,8 +361,8 @@ const Contact = () => {
           {[0, 1].map((i) => (
             <div key={i} className="relative w-full max-w-sm mx-auto">
               <select
-                className="w-full appearance-none bg-white px-8 py-5 rounded-2xl shadow-md text-gray-800 font-black text-sm outline-none uppercase tracking-widest cursor-pointer text-center border border-gray-100 transition-all hover:shadow-lg"
-                style={{ focusRing: NAVY }}
+                className="w-full appearance-none bg-white px-8 py-5 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none uppercase tracking-widest cursor-pointer text-center border border-gray-100 transition-all hover:shadow-lg"
+               
                 value={getID(selected[i]) || ""}
                 onChange={(e) => handleSelect(i, e.target.value)}
               >
