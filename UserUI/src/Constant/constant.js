@@ -1,5 +1,5 @@
 // Base API URL
-export const BASE_URL = "http://localhost:5000/api/user";
+export const BASE_URL = "https://realstate-3-5b7d.onrender.com/api/user";
 
 // -----------------------
 // Auth Endpoints
