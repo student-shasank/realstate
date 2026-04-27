@@ -2,22 +2,61 @@ import React from "react";
 import imageurl from "../../assets/underline.png";
 import { Link } from "react-router-dom";
 
+// 👉 Add images (same like reference)
+import Service1 from "../../assets/servicecard1.jpg";
+import Service2 from "../../assets/servicecard2.jpg";
+import Service3 from "../../assets/servicecard3.jpg";
+
 const ServicesSection = () => {
   const services = [
-    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
-    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
-    { title: "Property Management Structuring", path: "/propertyStructuring" },
-    { title: "Asset Management Structuring", path: "/assetStructuring" },
-    { title: "Development Advisory And Project Coordination", path: "/advisoryCoordination" },
-    { title: "Handover & Snagging Representation", path: "/handoverSnagging" },
-    { title: "Mortgage Coordination", path: "/mortgageCoordination" },
-    { title: "Residency & Investor Visa Advisory (UAE)", path: "/investorVisaAdvisory" },
+    {
+      title: "Project Marketing And Sales Structuring",
+      description: "We work with developers and landowners to structure and position real estate projects for market",
+      image: Service1,
+      path: "/marketingandSales",
+    },
+    {
+      title: "Property Management Structuring",
+      description: "We help manage properties efficiently for better ROI and operations",
+      image: Service2,
+      path: "/propertyStructuring",
+    },
+    {
+      title: "Asset Management Structuring",
+      description: "Optimize your real estate portfolio with expert asset management",
+      image: Service3,
+      path: "/assetStructuring",
+    },
+    {
+      title: "Development Advisory And Project Coordination",
+      description: "End-to-end support for project development and execution",
+      image: Service1,
+      path: "/advisoryCoordination",
+    },
+    {
+      title: "Handover & Snagging Representation",
+      description: "Ensure quality and compliance during handover process",
+      image: Service2,
+      path: "/handoverSnagging",
+    },
+    {
+      title: "Mortgage Coordination",
+      description: "Seamless mortgage assistance for buyers and investors",
+      image: Service3,
+      path: "/mortgageCoordination",
+    },
+    // {
+    //   title: "Residency & Investor Visa Advisory (UAE)",
+    //   description: "Guidance for UAE residency and investor visa process",
+    //   image: Service1,
+    //   path: "/investorVisaAdvisory",
+    // },
   ];
 
   return (
     <section className="w-full bg-white px-4 sm:px-6 lg:px-8 py-12 lg:py-[120px]">
-      
-      {/* Heading */}
+
+      {/* Heading (same as before) */}
       <div className="max-w-[1200px] mx-auto mb-10">
         <h2
           className="inline-block pb-6 mb-4 text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
@@ -34,70 +73,60 @@ const ServicesSection = () => {
 
         <div className="text-[#01155E99] text-[15px] sm:text-[17px] lg:text-[20px] leading-[1.7] max-w-[1000px] space-y-4">
           <p>
-            Yupland functions as a marketing and information platform designed to
-            support buyers, investors, and property owners across a wide range of
-            real estate-related services in Dubai.
+            Yupland functions as a marketing and information platform designed to support buyers, investors, and property owners.
           </p>
           <p>
-            All service enquiries are submitted through the platform and facilitated
-            by Yupland through curated introductions to trusted independent service
-            partners.
-          </p>
-          <p>
-            While services are delivered directly by third-party providers, Yupland
-            supports clients throughout the process by assisting with communication
-            and coordination.
+            All service enquiries are submitted through the platform and facilitated via trusted partners.
           </p>
         </div>
       </div>
 
-      {/* Cards */}
+      {/* 🔥 New Card Layout */}
       <div className="max-w-[1200px] mx-auto">
-        <div
-          className="
-            grid 
-            grid-cols-1 
-            md:grid-cols-3 
-            xl:grid-cols-4 
-            gap-6
-            justify-items-center
-          "
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+
           {services.map((service, index) => (
-            <div
+            <Link
+              to={service.path}
               key={index}
-              className="
-                w-full 
-                md:w-[240px] 
-                xl:w-[273px] 
-                h-[366px] 
-                bg-[#01155E] 
-                rounded-[16px] 
-                pt-7 px-6 pb-4 
-                flex flex-col
-              "
+              className="w-full flex justify-center"
             >
-              <h3 className="text-white text-[22px] xl:text-[24px] font-medium leading-[1.3] underline underline-offset-4 decoration-white min-h-[90px]">
-                {service.title}
-              </h3>
+              <div className="flex flex-col max-w-[390px] w-full group cursor-pointer">
 
-              <p className="mt-[40px] xl:mt-[47px] text-[#D9D9D9] text-[15px] xl:text-[16px] leading-[1.6]">
-                Having your dedicated property manager can turn your investment
-                into a lucrative cash flow opportunity.
-              </p>
+                {/* Image */}
+                <div className="relative h-[267px] rounded-lg overflow-hidden">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                    style={{ backgroundImage: `url(${service.image})` }}
+                  />
 
-              <Link
-                to={service.path || "/"}
-                className="mt-auto w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[14px] text-center"
-              >
-                View Details
-              </Link>
-            </div>
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/40" />
+
+                  {/* Hover Description */}
+                  <div className="absolute top-6 left-6 right-6 flex opacity-0 -translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                    <div className="w-1.5 bg-white rounded-full mr-4" />
+                    <p className="font-semibold text-[18px] text-white leading-relaxed">
+                      {service.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="flex items-center border-l-4 border-[#01155E] pl-4 mt-4 h-[62px]">
+                  <h3 className="text-[#01155E99] font-semibold text-lg">
+                    {service.title}
+                  </h3>
+                </div>
+
+              </div>
+            </Link>
           ))}
+
         </div>
 
         {/* View All */}
-        <div className="flex justify-center md:justify-end mt-8">
+        <div className="flex justify-center md:justify-end mt-10">
           <div className="font-medium text-[20px] lg:text-[24px] text-[#01155E] underline cursor-pointer hover:text-blue-700 transition">
             View All
           </div>

@@ -13,7 +13,6 @@ import {
   togglePrice,
   setMinPrice,
   setMaxPrice,
-  setPurpose,
   closeDropdowns,
   fetchProjects
 } from '../features/dashboard/searchSlice';
@@ -80,7 +79,6 @@ const Home = () => {
     isPriceOpen,
     minPrice,
     maxPrice,
-    purpose,
     projects,
     loading,
     error
@@ -140,7 +138,7 @@ const Home = () => {
     if (baths) params.set('baths', baths);
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
-    if (purpose) params.set('purpose', purpose);
+    // if (purpose) params.set('purpose', purpose);
     if (selectedHandoverYears.length > 0) {
       params.set('handoverYear', selectedHandoverYears.join(','));
     }
@@ -210,7 +208,7 @@ const Home = () => {
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">
               {/* Buy / Sell Toggle Container */}
-              <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
+              {/* <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
                 {["Buy", "Sell"].map((type) => {
                   const value = type.toLowerCase();
                   const isActive = purpose === value;
@@ -229,7 +227,7 @@ const Home = () => {
                     </button>
                   );
                 })}
-              </div>
+              </div> */}
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
@@ -239,7 +237,7 @@ const Home = () => {
               <button onClick={handleSearch} className="bg-[#01155E] text-white px-10 py-2.5 rounded-lg font-['Archivo'] text-lg shadow-md min-w-[160px]">Search</button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 ">
               {/* <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
                 {['All', 'Ready', 'Off-Plan'].map((status) => (
                   <button key={status} onClick={() => dispatch(setCompletion(status))} className={`flex-1 py-1.5 px-3 text-sm font-['Archivo']  text-[#01155E] rounded-lg transition-all ${completion === status ? 'bg-[#2B3964] text-white shadow-md' : 'text-[#2B3964]'}`}>
@@ -247,36 +245,19 @@ const Home = () => {
                   </button>
                 ))}
               </div> */}
-              <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
-                {['Off-Plan', 'Ready', 'preconstruction'].map((status) => {
+              <div className="flex bg-white/40 py-1 px-2 rounded-full border border-white/30 shadow-inner w-fit -mt-1">
+                {['Off-Plan', 'Ready', ].map((status) => {
                   const isActive = completion === status;
 
                   // Agar status 'Pre-construction' hai toh Circular Icon render karo
-                  if (status === 'preconstruction') {
-                    return (
-                      <button
-                        key={status}
-                        onClick={() => dispatch(setCompletion(status))}
-                        className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ml-1 ${isActive
-                          ? 'bg-[#01155E] text-white shadow-md'
-                          : 'bg-white text-[#01155E]'
-                          }`}
-                      >
-                        <img
-                          src={Preconstruction}
-                          alt="icon"
-                          className={`w-5 h-5 object-contain ${isActive ? 'brightness-0 invert' : ''}`}
-                        />
-                      </button>
-                    );
-                  }
+                 
 
                   // Normal Text Buttons (Off-Plan & Ready)
                   return (
                     <button
                       key={status}
                       onClick={() => dispatch(setCompletion(status))}
-                      className={`px-8 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${isActive
+                      className={`px-10 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${isActive
                         ? 'bg-[#01155E] text-white shadow-md'
                         : 'text-[#01155E] bg-[#ffff]'
                         }`}

@@ -410,14 +410,14 @@ export default function PropertyDetail() {
         {/* ── Header ── */}
         <div className="flex justify-between items-start mb-8">
           <div className="flex-1 pr-8">
-            <h1 className="text-[48px] font-[Archivo] font-semibold text-[#01155E] leading-tight mb-3">
+            <h1 className="text-[48px] font-[Archivo] font-semibold text-[#01155E] leading-tight mb-3 capitalize">
               {title || "—"}
             </h1>
 
             <div className="flex items-center gap-4 mb-4">
               {/* Status Badge */}
               <span className="bg-[#01155E] text-white text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
-                {[completionStatus, listingStatus]
+                {[completionStatus, "initial sale"]
                   .filter(Boolean)
                   .join(" | ") || "—"}
               </span>
@@ -916,7 +916,7 @@ export default function PropertyDetail() {
 
                 <div className="flex items-center gap-3 mb-4">
                   <Star size={18} fill="#0e0d0d" />
-                  <span className="text-[#01155E] font-semibold text-[22px]">{title || "—"}</span>
+                  <span className="text-[#01155E] font-semibold text-[22px] capitalize">{title || "—"}</span>
                 </div>
 
                 <div className="flex items-center gap-2 mb-4">

@@ -1,6 +1,6 @@
 // Base API URL
-export const BASE_URL = "https://realstate-3-5b7d.onrender.com/api/user";
-
+// export const BASE_URL = "https://realstate-3-5b7d.onrender.com/api/user";
+export const BASE_URL = "http://localhost:5000/api/user";
 // -----------------------
 // Auth Endpoints
 // -----------------------
@@ -33,3 +33,4 @@ export const FAVORITS_LISTINGS_API = `${BASE_URL}/listing/favorites`;
 export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;
 export const SELLER_LEAD_API = `${BASE_URL}/seller-leads`;
 export const SELLER_LEAD_UPDATE_API = `${BASE_URL}/seller-leads`;
+export const UPDATE_USER_API = `${BASE_URL}/update`;

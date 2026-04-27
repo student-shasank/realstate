@@ -20,6 +20,8 @@ const internalSchema = new mongoose.Schema({
   listingAgentEmail: { type: String },
   listingSourceType: {
     type: String,
+
+    
     enum: ["direct", "shared", "api"],
     default: "direct",
   },
@@ -154,7 +156,7 @@ const ListingSchema = new mongoose.Schema(
     propertyStatus: {
       type: String,
       enum: ["pending", "active", "rejected", "sold"],
-      default: "pending",             // admin approval status
+      default: "pending",             // admin approval status--
     },
     listingStatus: {
       type: String,

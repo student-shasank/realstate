@@ -14,7 +14,7 @@ export const searchListings = async (req, res) => {
       completion,
       propertyStatus, // frontend se aata hai
       developer,
-      purpose,
+    
       emirates,
       handoverYear,
       location,
@@ -92,9 +92,7 @@ export const searchListings = async (req, res) => {
     }
 
     // ───── Purpose ─────
-    if (purpose) {
-      query.purpose = purpose.toLowerCase();
-    }
+   
 
     // ───── Price ─────
     const finalMinPrice = minPrice || min_price;

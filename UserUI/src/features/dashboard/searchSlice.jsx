@@ -33,7 +33,7 @@ export const fetchProjects = createAsyncThunk(
           developer: Array.isArray(params.developer)
             ? params.developer.map((item) => item.toLowerCase().trim()).join(",")
             : params.developer || "",
-          purpose: params.purpose || "",
+      
           emirates: Array.isArray(params.emirates)
             ? params.emirates.map((item) => item.toLowerCase().trim()).join(",")
             : params.emirates || "",
@@ -69,7 +69,6 @@ const initialState = {
   minPrice: "",
   maxPrice: "",
   developer: [],
-  purpose: "buy",
   emirates: [],
   handoverYear: [],
 
@@ -114,9 +113,7 @@ const searchSlice = createSlice({
     setDeveloper: (state, action) => {
       state.developer = action.payload;
     },
-    setPurpose: (state, action) => {
-      state.purpose = action.payload;
-    },
+    
     setEmirates: (state, action) => {
       state.emirates = action.payload;
     },
@@ -172,7 +169,6 @@ export const {
   setMinPrice,
   setMaxPrice,
   setDeveloper,
-  setPurpose,
   setEmirates,
   setHandoverYear,
   toggleBedBath,

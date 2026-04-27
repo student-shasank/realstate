@@ -219,7 +219,7 @@ useEffect(() => {
 
         {/* Auth & Language */}
         <div className="flex items-center gap-x-10 shrink-0">
-          {!user ? (
+          {!user || !user?.name ?  (
   <button
     type="button"
     onClick={() => setIsLoginOpen(true)}
@@ -258,16 +258,29 @@ useEffect(() => {
                 </div>
               </button>
 
-              {profileOpen && (
-                <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+             {profileOpen && (
+  <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden">
+
+    {/* MY PROFILE */}
+    <button
+      onClick={() => {
+        navigate("/profile");
+        setProfileOpen(false);
+      }}
+      className="w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+    >
+    👤 My Profile
+    </button>
+
+    {/* LOGOUT */}
+    <button
+      onClick={handleLogout}
+      className="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50"
+    >
+      Logout
+    </button>
+  </div>
+)}
             </div>
           )}
 

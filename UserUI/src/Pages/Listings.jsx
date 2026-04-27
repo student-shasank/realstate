@@ -25,7 +25,7 @@ import {
   togglePrice,
   closeDropdowns,
   setDeveloper,
-  setPurpose
+  
 } from "../features/dashboard/searchSlice";
 import ListingCard from "../Components/Card/listingCard";
 import { ChevronDown } from 'lucide-react';
@@ -89,7 +89,7 @@ const [viewport, setViewport] = useState({
     minPrice,
     maxPrice,
     developer,
-    purpose,
+    
     projects,
     loading,
     error,
@@ -105,7 +105,7 @@ const [viewport, setViewport] = useState({
     const urlMinPrice = searchParams.get("minPrice") || "";
     const urlMaxPrice = searchParams.get("maxPrice") || "";
     const urlDeveloper = searchParams.get("developer") || "";
-    const urlPurpose = searchParams.get("purpose") || "";
+    
     const urlEmirates = searchParams.get("emirates") || "";
     const emiratesArray = urlEmirates
       ? urlEmirates.split(",").map((item) => item.toLowerCase()).filter(Boolean)
@@ -132,7 +132,7 @@ const [viewport, setViewport] = useState({
 
     dispatch(setDeveloper(urlDeveloper));
     setSelectedDevelopers(developerArray);
-    dispatch(setPurpose(urlPurpose));
+   
     setSelectedHandoverYears(handoverYearArray);
 
     dispatch(
@@ -145,7 +145,7 @@ const [viewport, setViewport] = useState({
         minPrice: urlMinPrice,
         maxPrice: urlMaxPrice,
         developer: developerArray,
-        purpose: urlPurpose,
+        
         emirates: emiratesArray,
         handoverYear: handoverYearArray,
       })
@@ -244,7 +244,7 @@ const [viewport, setViewport] = useState({
     setSelectedHandoverYears([]);
     setIsHandoverOpen(false);
     setSearchParams({});
-    dispatch(setPurpose(""));
+   
     dispatch(setDeveloper(""));
     setSelectedDevelopers([]);
     setSelectedEmirates([]);
@@ -307,7 +307,7 @@ const [viewport, setViewport] = useState({
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
     "Ras Al Khaimah", "Fujairah",
-    "Sharjah", "Al Ain"
+    "Sharjah", 
   ];
 
   const [isHandoverOpen, setIsHandoverOpen] = useState(false);
@@ -423,7 +423,7 @@ const [viewport, setViewport] = useState({
                       minPrice,
                       maxPrice,
                       developer: selectedDevelopers,
-                      purpose,
+                      
                       emirates: selectedEmirates,
                       handoverYear: selectedHandoverYears,
                     })

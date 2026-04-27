@@ -30,6 +30,8 @@ import DataSources from "./Pages/DataSources";
 import PropertyDetail from "../src/Pages/PropertyDetai";
 
 import SellPropertyPage from "./Pages/SellPropertyPage";
+import Profile from "./Pages/Profile";
+import Compare from "./Pages/Compare";
 
 
 
@@ -64,8 +66,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+          <Route path="/compare" element={<Compare />} />
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
+        <Route path="/profile" element={<Profile/>} />
           <Route path="/sell-property" element={<SellPropertyPage/>} />
   
          <Route path="/termsofuse" element={<TermsOfUse />} />

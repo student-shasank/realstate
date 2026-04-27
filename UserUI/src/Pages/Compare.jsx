@@ -18,7 +18,7 @@ const NAVY = "#01155E";
 const GOLD = "#C9A84C";
 const GREEN = "#1D9E75";
 
-const Contact = () => {
+const Compare = () => {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.favorites || []);
   const [favoriteListings, setFavoriteListings] = useState([]);
@@ -451,4 +451,4 @@ const PropertyCard = ({ data, onViewDetails }) => {
   );
 };
 
-export default Contact;
+export default Compare;

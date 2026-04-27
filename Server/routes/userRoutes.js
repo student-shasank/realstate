@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { protect} from "../middleware/authMiddleware.js";
-import { dashboard, getListingById, getListings } from "../controllers/usercontroller.js";
+import { dashboard, getListingById, getListings,updateUser } from "../controllers/usercontroller.js";
 
 import { sendListingPdf } from "../controllers/pdfcontroller.js"
 import { searchListings } from "../controllers/searchcontroller.js"
@@ -16,6 +16,7 @@ const router = Router();
 
 router.get("/dashboard", protect, dashboard);
 
+router.put("/update/:id",  updateUser);
 router.get("/listings", getListings);
  
 router.post("/send-pdf", sendListingPdf);

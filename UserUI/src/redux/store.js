@@ -14,6 +14,7 @@ import communityReducer from  "../features/communities/communitySlice"
 import enquiryReducer from "../features/Enquiery/enquirySlice.js";
 import developerReducer from "../features/dashboard/developerSlice.jsx";
 import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
+import updateUserReducer from "../features/Authentation/updateUserSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
               enquiry: enquiryReducer,
               developer: developerReducer,
                  sellerLead: sellerLeadReducer,
+                 updateUser: updateUserReducer,
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,
