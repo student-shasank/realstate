@@ -80,9 +80,9 @@ const DeveloperAccess = () => {
 
 const ListItem = ({ text }) => (
   <div className="flex items-center gap-4 group">
-    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[#F0F4FF] rounded-full group-hover:bg-[#01155E] transition-colors duration-300">
+    <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[#F0F4FF] rounded-full   duration-300">
       <svg 
-        className="w-3.5 h-3.5 stroke-[#01155E] group-hover:stroke-white transition-colors duration-300"
+        className="w-3.5 h-3.5 stroke-[#01155E]  transition-colors duration-300"
         viewBox="0 0 24 24" 
         fill="none" 
         strokeWidth="3" 

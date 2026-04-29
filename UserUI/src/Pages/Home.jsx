@@ -28,6 +28,7 @@ import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrat
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
 import Preconstruction from "../assets/preconstruction.svg"
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown"
+import AwardsSection from '../Components/HomePageComponents/AwardsSection';
 
 
 const Home = () => {
@@ -566,6 +567,7 @@ const Home = () => {
         <DeveloperSlider />
         <ChooseYourStrategy />
         <DubaiMarketActivity />
+        <AwardsSection/>
         <FeaturesSection />
         <Services />
         <CommunitiesBrief />

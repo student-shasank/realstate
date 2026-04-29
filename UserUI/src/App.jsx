@@ -32,6 +32,7 @@ import PropertyDetail from "../src/Pages/PropertyDetai";
 import SellPropertyPage from "./Pages/SellPropertyPage";
 import Profile from "./Pages/Profile";
 import Compare from "./Pages/Compare";
+import ScrollToTop from "./Components/Scroll/ScrollTop";
 
 
 
@@ -62,6 +63,7 @@ function App() {
   return (
     <>
       <Navbar />
+      <ScrollToTop/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

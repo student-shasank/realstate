@@ -5,7 +5,7 @@ const DataSources = () => {
     <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 pt-20">
       
       {/* --- Header Section --- */}
-      <section className="w-full flex justify-center pt-[100px] pb-[60px] px-4">
+      <section className="w-full flex justify-center pt-[100px] pb-[30px] px-4">
         <div className="w-[1213px] text-left">
           <h1 className="font-['Archivo'] font-semibold text-[56px] leading-[100%] text-[#01155E]   inline-block">
             Data Sources
@@ -20,7 +20,7 @@ const DataSources = () => {
       {/* --- Main Background Content Area --- */}
       <section className="w-full flex justify-center pb-20 px-4">
         {/* Figma Dimensions: 1452px Width & Gradient Background */}
-        <div className="w-[1452px] min-h-[1082px] pt-[80px] pb-20 px-[120px] rounded-[24px] bg-gradient-to-b from-[rgba(28,77,255,0.07)] to-[rgba(28,77,255,0.27)]">
+        <div className="w-[1452px] min-h-[1082px] pt-[10px] pb-20 px-[120px] rounded-[24px] ">
           
           <div className="max-w-[1213px] mx-auto text-[#67739E] text-[18px] leading-[170%] space-y-10">
             
