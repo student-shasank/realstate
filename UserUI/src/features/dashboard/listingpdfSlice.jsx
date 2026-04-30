@@ -8,11 +8,12 @@ import { sendListingPdfAPI } from "../../Constant/constant.js";
 // --------------------
 export const sendListingPdf = createAsyncThunk( 
   "pdf/sendListingPdf",
-  async ({ listingId, email }, thunkAPI) => {
+  async ({ listingId, email,phone }, thunkAPI) => {
     try {
       const response = await axios.post(sendListingPdfAPI, {
         listingId,
         email,
+         phone
       });
 
       return response.data;

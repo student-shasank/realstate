@@ -463,7 +463,7 @@ export default function PropertyDetail() {
 
           <div className="flex flex-col items-end">
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-[22px] font-semibold text-[#01155E]">
+              <span className="text-[18px] font-semibold text-[#01155E]">
                 Starting at
               </span>
               <span className="text-[28px] font-semibold text-[#01155E] uppercase">
@@ -710,7 +710,7 @@ export default function PropertyDetail() {
                       {unit.sqft}
                     </span>
                     <span className="flex items-center gap-2">
-                      <Banknote size={20} className="text-[#01155E]" />
+                      <Banknote size={10} className="text-[#01155E]" />
                       Starting at {unit.price}
                     </span>
                   </div>
@@ -796,7 +796,7 @@ export default function PropertyDetail() {
                         {plan.sqFt} Sq Ft
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Banknote size={18} className="text-[#01155E]" />
+                        <Banknote size={12} className="text-[#01155E]" />
                         Starting at {currency} {Number(plan.startingPrice).toLocaleString()}
                       </span>
                     </div>
@@ -951,8 +951,8 @@ export default function PropertyDetail() {
 
                 <hr className="border-[#D9E1F2] mb-6" />
 
-                <div className="text-[25px] font-semibold text-[#01155E] mb-4">
-                  Starting at {currency}
+                <div className="text-[20px] font-semibold text-[#01155E] mb-4">
+                  Starting at  {currency}
                   <span className="text-[36px] ml-2">
                     {price ? Number(price).toLocaleString() : "—"}
                   </span>
@@ -993,27 +993,7 @@ export default function PropertyDetail() {
               </div>
 
               {/* Promo Card */}
-              <div className="relative rounded-[10px] overflow-hidden bg-gradient-to-b from-[#01155E] to-[#1e3a8a] p-8 text-center text-white">
-                <div className="mb-6">
-                  <h2 className="text-[28px] font-semibold mb-3">New Template</h2>
-                  <p className="text-blue-200 text-[15px] leading-relaxed mb-6">
-                    Advertise your real estate to a wider audience with our landing page.
-                  </p>
-                  <button className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-semibold text-[18px] shadow-lg">
-                    Try It Now
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-6">
-                  {images?.slice(0, 3).map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      className="rounded-lg h-36 object-cover border-2 border-white/20"
-                      alt="promo"
-                    />
-                  ))}
-                </div>
-              </div>
+              
 
             </div>
           </div>

@@ -27,6 +27,7 @@ import {
 const ListingCard = ({ listing, onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isLocalSending, setIsLocalSending] = useState(false);
 
   // NEW: hover carousel states
@@ -117,11 +118,11 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   };
 
   const handleSendPdf = () => {
-    if (!email) {
+    if (!email || !phone) {
       toast.error('Please enter email');
       return;
     }
-    dispatch(sendListingPdf({ listingId: listing._id, email: email }));
+    dispatch(sendListingPdf({ listingId: listing._id, email: email ,phone: phone}));
   };
 
   useEffect(() => {
@@ -129,6 +130,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       const timer = setTimeout(() => {
         setIsPopupOpen(false);
         setEmail('');
+        setPhone('');
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -428,6 +430,13 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
+                <input
+  type="tel"
+  placeholder="Enter your phone number"
+  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+/>
                 {pdfError && <p className="text-red-500 text-xs mb-4">Invalid email ID</p>}
                 <button
                   onClick={handleSendPdf}
