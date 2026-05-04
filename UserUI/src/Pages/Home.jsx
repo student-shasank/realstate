@@ -16,7 +16,7 @@ import {
   closeDropdowns,
   fetchProjects
 } from '../features/dashboard/searchSlice';
-import ListingCard from "../Components/Card/listingCard";
+import ListingCard from "../Components/Card/ListingCard";
 import { Link } from 'react-router-dom';
 import backgroundVideo from '../assets/Untitled design (14).mp4';
 import Services from '../Components/HomePageComponents/Service';
@@ -549,7 +549,7 @@ const Home = () => {
                           {selectedEmirates.includes(emirate) && (
                             <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
                           )}
-                        </div>
+                        </div>b  
 
                         <span className="text-[#67739E] text-[14px] truncate">
                           {emirate}

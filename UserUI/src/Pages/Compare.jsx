@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchListingDetail } from "../features/dashboard/listingDetailSlice.jsx";
+import {fetchListingByIdThunk  } from "../features/dashboard/fetchListingById";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -39,7 +39,7 @@ const Compare = () => {
       setLoading(true);
       try {
         const results = await Promise.all(
-          favorites.map((id) => dispatch(fetchListingDetail(id)).unwrap())
+         favorites.map((id) => dispatch(fetchListingByIdThunk(id)).unwrap())
         );
         setFavoriteListings(results);
         if (results.length >= 2) setSelected([results[0], results[1]]);

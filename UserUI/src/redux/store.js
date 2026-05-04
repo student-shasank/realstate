@@ -15,6 +15,7 @@ import enquiryReducer from "../features/Enquiery/enquirySlice.js";
 import developerReducer from "../features/dashboard/developerSlice.jsx";
 import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
 import updateUserReducer from "../features/Authentation/updateUserSlice.js";
+import listingByIdReducer from "../features/dashboard/fetchListingById.jsx";
 
 export const store = configureStore({
   reducer: {
@@ -31,6 +32,7 @@ export const store = configureStore({
               developer: developerReducer,
                  sellerLead: sellerLeadReducer,
                  updateUser: updateUserReducer,
+                 listingById: listingByIdReducer, 
 
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,

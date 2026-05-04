@@ -22,7 +22,9 @@ export const PROJECTS_API = `${BASE_URL}/listing/search`
 export const fetchListingsAPI  = `${BASE_URL}/show/listings`;
 
 export const fetchListingDetailAPI =
- `${BASE_URL}/listing/detail`;
+ "https://my.remapp.ae/api/public/websites_project_detail";
+
+ export const fetchListingById = `${BASE_URL}/listing/detail`
 
  export const COMMUNITIES_URL= `${BASE_URL}/communities`;
  export const DEVELOPERS_API = `${BASE_URL}/listing/developers`;
@@ -34,3 +36,5 @@ export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;
 export const SELLER_LEAD_API = `${BASE_URL}/seller-leads`;
 export const SELLER_LEAD_UPDATE_API = `${BASE_URL}/seller-leads`;
 export const UPDATE_USER_API = `${BASE_URL}/update`;
+
+export const Token = "c137153e7594e1388278ce6fb5ed80b88b86bb09f8fdf8ee2e834dea59383dd1" 

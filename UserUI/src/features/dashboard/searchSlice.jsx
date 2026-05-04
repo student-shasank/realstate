@@ -61,11 +61,11 @@ export const fetchProjects = createAsyncThunk(
 // Initial State
 // ----------------------
 const initialState = {
-  completion: "Ready",
+  completion: "Off-Plan",
   propertyType: "Apartment",
   location: "",
-  beds: "2",
-  baths: "3",
+  beds: "1",
+  baths: "",
   minPrice: "",
   maxPrice: "",
   developer: [],

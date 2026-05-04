@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import PropertyMap from '../Components/Card/PropertyMap.jsx';
 import { useNavigate } from "react-router-dom";
-
+import { extractAllImages, getSafeImageUrl, getImageByIndex } from '../Components/utils/imageExtractor.jsx';
+import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
 
 import {
   fetchListingDetail,
@@ -13,15 +14,7 @@ import {
 import {
   MapPin, Bed, Bath, Square, Calendar, Hash, CheckCircle, Utensils, Baby, Camera, Thermometer, GlassWater, Store, Scissors,
   Shirt,
-
-
-
-
   Map,
-
-
-
-
   ChevronDown, ChevronUp, Play, Star, Phone, Mail, Heart,
   Share2, Maximize, Download, Wifi, Dumbbell, Car,
   ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image
@@ -41,7 +34,7 @@ const SIMILAR = [1, 2, 3].map((i) => ({
   baths: 32,
   image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800",
 }));
-// 1. Pehle AMENITY_MAP define karein (Component ke bahar)
+
 const AMENITY_MAP = {
   bbq: { label: "BBQ Area", icon: "bbq" },
   bbqarea: { label: "BBQ Area", icon: "bbq" },
@@ -49,8 +42,8 @@ const AMENITY_MAP = {
   swimmingpool: { label: "Pool", icon: "pool" },
   gym: { label: "Gym", icon: "gym" },
   fitnesscenter: { label: "Gym", icon: "gym" },
-  pet: { label: "Pet-friendly", icon: "pet" },     // 'petfriendly' ki jagah sirf 'pet'
-  kids: { label: "Kids' Area", icon: "kids" },     // 'kidsarea' ki jagah sirf 'kids'
+  pet: { label: "Pet-friendly", icon: "pet" },
+  kids: { label: "Kids' Area", icon: "kids" },
   club: { label: "Clubhouse", icon: "club" },
   security: { label: "Security cameras", icon: "camera" },
   track: { label: "Track", icon: "track" },
@@ -59,6 +52,9 @@ const AMENITY_MAP = {
   laundry: { label: "Laundry", icon: "laundry" },
   salon: { label: "Salon", icon: "salon" },
 };
+
+
+
 const AmenityIcon = ({ type }) => {
   switch (type) {
     case "bbq": return <Utensils size={22} className="text-slate-400" />;
@@ -102,7 +98,6 @@ function ReviewCard({ agentAvatar }) {
   );
 }
 
-// ── Photo Gallery Modal ────────────────────────────────────────────────────────
 function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
   const [activeTab, setActiveTab] = useState("photos");
 
@@ -110,7 +105,6 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl w-full max-w-[1100px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
 
-        {/* Modal Header Tabs */}
         <div className="flex items-center border-b border-[#D9E1F2] px-6 py-0 relative">
           <button
             onClick={() => setActiveTab("photos")}
@@ -120,7 +114,7 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
               }`}
           >
             <Image size={18} />
-            Photos ({images?.length})
+            Photos ({images?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab("map")}
@@ -133,7 +127,6 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
             Map
           </button>
 
-          {/* Close Button */}
           <button
             onClick={onClose}
             className="absolute right-4 top-3 w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-[#67739E] hover:text-[#01155E]"
@@ -142,14 +135,13 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === "photos" ? (
             <div className="p-4 grid grid-cols-2 gap-3">
               {images?.map((src, i) => (
                 <div key={i} className="overflow-hidden rounded-[10px] h-[260px]">
                   <img
-                    src={src}
+                    src={getSafeImageUrl(src)}
                     alt={`Property ${i + 1}`}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                   />
@@ -170,10 +162,9 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
           )}
         </div>
 
-        {/* Modal Footer - Agent */}
         <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <img src={agentAvatar} alt="Agent" className="w-12 h-12 rounded-full object-cover" />
+            <img src={getSafeImageUrl(agentAvatar)} alt="Agent" className="w-12 h-12 rounded-full object-cover" />
             <div>
               <p className="text-[13px] text-[#67739E]">Listing by</p>
               <p className="text-[#01155E] font-semibold text-[15px]">{agentName}</p>
@@ -200,14 +191,9 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone }) {
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────────────────────
 export default function PropertyDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  console.log("ID:", id);
-
-
-
   const dispatch = useDispatch();
 
   const { listing, loading } = useSelector(
@@ -216,7 +202,7 @@ export default function PropertyDetail() {
 
   useEffect(() => {
     if (id) {
-      dispatch(fetchListingDetail(id));
+      dispatch(fetchListingDetail(Number(id)));
     }
 
     return () => {
@@ -224,13 +210,19 @@ export default function PropertyDetail() {
     };
   }, [dispatch, id]);
 
-  const PROPERTY = listing || {};
+  const rawListing = listing || {};
+  const PROPERTY = mapPropertyDetailData(rawListing);
+
+  const imageData = extractAllImages(rawListing);
+  const images = imageData.allImages;
+  const featureImage = imageData.featureImage;
+  const totalImages = imageData.totalImages;
 
   const [floorPlan1Open, setFloorPlan1Open] = useState(true);
   const [floorPlan2Open, setFloorPlan2Open] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+      
 
-  // ── Destructure all fields from API JSON ──
   const {
     title,
     referenceNo,
@@ -258,7 +250,6 @@ export default function PropertyDetail() {
     listingDate,
     description,
     features = [],
-    images = [],
     videos = [],
     youtubeVideoId,
     brochureUrl,
@@ -282,8 +273,24 @@ export default function PropertyDetail() {
     regulatoryInfo = {},
     community = {},
   } = PROPERTY;
-  console.log(PROPERTY)
+const OFFPLAN_STATUSES = [
+  "announced",
+  "eoi",
+  "startofsales",
+  "onsale",
+  "outofstock",
+];
+  const getDisplayStatus = (status) => {
+  if (!status) return "—";
 
+  const key = status.toLowerCase().replace(/\s+/g, "");
+
+  return OFFPLAN_STATUSES.includes(key) ? "Off Plan" : status;
+};
+const developerImage =
+  PROPERTY?.developer_image || rawListing?.developer_image;
+const [showFullDesc, setShowFullDesc] = useState(false);
+    const shortDescription = description?.slice(0, 300);
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -291,6 +298,7 @@ export default function PropertyDetail() {
       </div>
     );
   }
+
   const {
     permitNumber = "N/A",
     zoneName = "N/A",
@@ -299,11 +307,9 @@ export default function PropertyDetail() {
     registeredAgency = "RTO"
   } = regulatoryInfo;
 
-  // ── Helper formatters ──
   const formatPrice = (val, cur = currency) =>
     val ? `${cur} ${Number(val).toLocaleString()}` : "—";
 
-  // Payment plan steps — support both old and new shape
   const paymentSteps =
     paymentPlan?.steps?.length > 0
       ? paymentPlan.steps.map((s) => ({ label: s.label, value: `${s.percent}%` }))
@@ -313,7 +319,6 @@ export default function PropertyDetail() {
         { label: "Upon Handover", value: "40%" },
       ];
 
-  // Property info rows — use API `info` array OR build from flat fields
   const propertyInfoRows =
     info?.length > 0
       ? info
@@ -337,16 +342,14 @@ export default function PropertyDetail() {
         { label: "Completion Status", value: completionStatus || "—" },
       ];
 
-  // Overview stats — use API `overview` or flat fields
   const overviewStats = [
     { icon: <Bed size={24} className="text-[#67739E]" />, val: overview?.bedrooms ?? bedrooms ?? "—", label: "Bedrooms" },
     { icon: <Bath size={24} className="text-[#67739E]" />, val: overview?.bathrooms ?? bathrooms ?? "—", label: "Bathrooms" },
-    { icon: <Car size={24} className="text-[#67739E]" />, val: overview?.garage ?? garage ?? "—", label: "Garage" },
+    { icon: <Car size={24} className="text-[#67739E]" />, val: overview?.garage ?? garage ?? "—", label: "Parking" },
     { icon: <Calendar size={24} className="text-[#67739E]" />, val: overview?.yearBuilt ?? yearBuilt ?? "—", label: "Year Built" },
     { icon: <Square size={24} className="text-[#67739E]" />, val: overview?.areaSize ?? (builtUpArea ? `${builtUpArea} Sq Ft` : "—"), label: "Area Size" },
   ];
 
-  // Unit types — map API shape { bedrooms, sqFt, startingPrice } to display shape { type, sqft, price }
   const unitTypesList =
     unitTypes?.length > 0
       ? unitTypes.map((u) => ({
@@ -356,25 +359,21 @@ export default function PropertyDetail() {
       }))
       : [];
 
-  // Floor plans
   const floorPlansList = floorPlans?.length > 0 ? floorPlans : [];
 
-  // Amenities — support array of strings or array of objects
   const rawData = amenities?.length > 0 ? amenities : (features || []);
 
   const amenitiesList = rawData.map((item) => {
-    // String ko normalize karein (lowercase aur spaces hatayein)
     const key = typeof item === "string"
       ? item.toLowerCase().replace(/\s+/g, "")
       : "";
 
-    // Agar mapping milti hai toh wo use karein, warna original dikhayein
     return AMENITY_MAP[key] || {
       label: item,
       icon: "default"
     };
   });
-  // Building info rows
+
   const buildingInfoRow1 = [
     { label: "Building Name", value: buildingInfo?.buildingName || projectInfo?.name || "—" },
     { label: "Year of Completion", value: buildingInfo?.yearOfCompletion || projectInfo?.completion || yearBuilt || "—" },
@@ -387,10 +386,11 @@ export default function PropertyDetail() {
     { label: "Elevators", value: buildingInfo?.elevators || "—" },
   ];
 
-  // YouTube embed
   const youtubeEmbed = youtubeVideoId
     ? `https://www.youtube.com/embed/${youtubeVideoId}`
     : "https://www.youtube.com/embed/dQw4w9WgXcQ";
+
+
 
   return (
     <div className="bg-white min-h-screen mt-25">
@@ -407,29 +407,26 @@ export default function PropertyDetail() {
       <Breadcrumbs />
       <div className="max-w-[1290px] mx-auto pt-10 pb-20">
 
-        {/* ── Header ── */}
         <div className="flex justify-between items-start mb-8">
-          <div className="flex-1 pr-8">
+          <div className="flex-1 pr-0">
             <h1 className="text-[48px] font-[Archivo] font-semibold text-[#01155E] leading-tight mb-3 capitalize">
               {title || "—"}
             </h1>
 
             <div className="flex items-center gap-4 mb-4">
-              {/* Status Badge */}
-              <span className="bg-[#01155E] text-white text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
-                {[completionStatus, "initial sale"]
-                  .filter(Boolean)
-                  .join(" | ") || "—"}
-              </span>
+             <span className="bg-[#01155E] text-white text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
+  {[getDisplayStatus(completionStatus), "initial sale"]
+    .filter(Boolean)
+    .join(" | ") || "—"}
+</span>
 
-              {/* Property Type */}
               <div className="flex items-center gap-2 text-[#67739E] text-[16px] font-medium capitalize">
                 <img
                   src={Appartmentimage}
                   alt="type"
                   className="w-5 h-5 object-contain capitalize"
                 />
-                <span>{type}</span>
+                <span>{PROPERTY?.types || "—"}</span>
               </div>
             </div>
 
@@ -443,14 +440,24 @@ export default function PropertyDetail() {
                   ].filter(Boolean).join(", ") || "—"}
                 </span>
               </div>
-              {console.log(location)}
 
               <div className="border-l border-[#D9E1F2] h-5" />
 
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-600 to-yellow-400" />
-                <span>{developer || builder || projectInfo?.developer || "—"}</span>
-              </div>
+             <div className="flex items-center gap-2">
+  {developerImage ? (
+    <img
+      src={getSafeImageUrl(developerImage)}
+      alt="developer"
+      className="w-6 h-6 object-contain rounded-full border border-gray-200"
+    />
+  ) : (
+    <div className="w-6 h-6 rounded-full bg-gray-200" />
+  )}
+
+  <span>
+    {developer || builder || projectInfo?.developer || "—"}
+  </span>
+</div>
 
               <div className="border-l border-[#D9E1F2] h-5" />
 
@@ -467,7 +474,7 @@ export default function PropertyDetail() {
                 Starting at
               </span>
               <span className="text-[28px] font-semibold text-[#01155E] uppercase">
-                {formatPrice(price)}
+                AED {PROPERTY?.price_start ? Number(PROPERTY.price_start).toLocaleString() : "—"}
               </span>
             </div>
 
@@ -482,18 +489,16 @@ export default function PropertyDetail() {
           </div>
         </div>
 
-        {/* ── Image Gallery ── */}
         <div className="grid grid-cols-12 gap-[10px] h-[520px] mb-12">
           <div className="col-span-7 relative h-full">
             <img
-              src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"}
-              className="w-full h-full object-cover rounded-[6px]"
+              src={getSafeImageUrl(featureImage)}
+              className="w-full h-[521px]  rounded-[6px]"
               alt="Main"
             />
 
-            {/* Badge */}
-            <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm capitalize">
-              {completionStatus}
+            <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm uppercase">
+              {getDisplayStatus(completionStatus)}
             </span>
 
             <div className="absolute inset-0 flex items-center justify-center">
@@ -503,23 +508,22 @@ export default function PropertyDetail() {
             </div>
           </div>
           <div className="col-span-5 grid grid-cols-2 gap-[10px] h-full">
-            <img src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"} className="w-full h-[255px] object-cover rounded-[6px]" alt="s1" />
+            <img src={getSafeImageUrl(getImageByIndex(images, 1))} className="w-full h-[255px] object-cover rounded-[6px]" alt="s1" />
             <div className="relative h-[255px]">
-              <img src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"} className="w-full h-full object-cover rounded-[6px]" alt="s2" />
+              <img src={getSafeImageUrl(getImageByIndex(images, 2))} className="w-full h-full object-cover rounded-[6px]" alt="s2" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <button className="w-[170px] h-[52px] bg-[#254B86]/50 backdrop-blur-[30px] border border-white/20 rounded-[10px] text-white font-semibold text-[18px] hover:bg-[#254B86]/70 transition-all">
                   View On Map
                 </button>
               </div>
             </div>
-            <img src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"} className="w-full h-[255px] object-cover rounded-[6px]" alt="s3" />
+            <img src={getSafeImageUrl(getImageByIndex(images, 3))} className="w-full h-[255px] object-cover rounded-[6px]" alt="s3" />
 
-            {/* +N button — opens gallery */}
             <div
               className="relative h-[255px] overflow-hidden rounded-[6px] cursor-pointer"
               onClick={() => setShowGallery(true)}
             >
-              <img src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"} className="w-full h-full object-cover" alt="s4" />
+              <img src={getSafeImageUrl(getImageByIndex(images, 4))} className="w-full h-full object-cover" alt="s4" />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center hover:bg-black/50 transition-colors">
                 <div className="flex flex-col items-center gap-1 text-white">
                   <div className="flex items-center gap-1.5">
@@ -527,7 +531,7 @@ export default function PropertyDetail() {
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                       <circle cx="12" cy="13" r="4" />
                     </svg>
-                    <span className="text-[22px] font-semibold">{images.length}</span>
+                    <span className="text-[22px] font-semibold">{totalImages}</span>
                   </div>
                   <span className="text-[13px] font-medium opacity-90">View All Photos</span>
                 </div>
@@ -536,12 +540,9 @@ export default function PropertyDetail() {
           </div>
         </div>
 
-        {/* ── Body: Left + Right sidebar ── */}
         <div className="flex gap-[30px]">
-          {/* LEFT COLUMN */}
           <div className="flex-1 min-w-0">
 
-            {/* Overview */}
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-[26px] font-semibold text-[#01155E]">Overview</h2>
               <a
@@ -562,12 +563,11 @@ export default function PropertyDetail() {
                       {item.icon}
                       <span className="text-[24px] font-semibold text-[#01155E]">{item.val}</span>
                     </div>
-                    <span className="text-[#67739E] text-[15px]   ">{item.label}</span>
+                    <span className="text-[#67739E] text-[15px]">{item.label}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Property Information */}
               <h3 className="text-[28px] font-[600] text-[#01155E] mb-6">Property Information</h3>
               <div className="border border-[#D9E1F2] rounded-[10px] mb-6">
                 <div className="grid grid-cols-4 gap-y-6 p-6 border-b border-[#D9E1F2]">
@@ -598,16 +598,26 @@ export default function PropertyDetail() {
                 )}
               </div>
 
-              {/* Description */}
-              <div className="border border-[#D9E1F2] rounded-[10px] p-6">
-                <p className="text-[#67739E] text-[18px] leading-relaxed">
-                  {description || "—"}
-                  <span className="text-[#01155E] font-semibold cursor-pointer ml-1">...Read More</span>
-                </p>
-              </div>
+            <p className="text-[#67739E] text-[18px] leading-relaxed">
+  <span
+    dangerouslySetInnerHTML={{
+      __html: showFullDesc
+        ? description
+        : description?.slice(0, 300),
+    }}
+  />
+
+  {description?.length > 300 && (
+    <span
+      onClick={() => setShowFullDesc(!showFullDesc)}
+      className="text-[#01155E] font-semibold cursor-pointer ml-1"
+    >
+      {showFullDesc ? " Read Less" : "... Read More"}
+    </span>
+  )}
+</p>
             </div>
 
-            {/* Regulatory Information */}
             <div className="mb-8">
               <h3 className="text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
               <div className="flex gap-6">
@@ -638,7 +648,6 @@ export default function PropertyDetail() {
                   </div>
                 </div>
 
-                {/* QR Code Section */}
                 <div className="w-[280px] border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6">
                   <div className="relative w-full h-full flex items-center justify-center">
                     <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#01155E] rounded-tl-[4px]" />
@@ -656,7 +665,6 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            {/* Payment Plan */}
             <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Payment Plan</h2>
             <div className="bg-[#1C4DFF0A] border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
               <div className="flex justify-between items-center border border-[#D9E1F2] rounded-lg px-4 py-3 mb-6 cursor-pointer bg-white">
@@ -698,7 +706,6 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            {/* Unit Types */}
             <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               {unitTypesList.map((unit, i) => (
@@ -721,7 +728,6 @@ export default function PropertyDetail() {
               ))}
             </div>
 
-            {/* Building Information */}
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-[#01155E] mb-6">Building Information</h2>
               <div className="border border-[#D9E1F2] rounded-[10px] p-6">
@@ -744,7 +750,6 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            {/* Amenities */}
             <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenities</h2>
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
@@ -767,7 +772,6 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            {/* Floor Plans */}
             <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Floor Plans</h2>
             <div className="mb-8">
               {floorPlansList.map((plan, index) => (
@@ -823,39 +827,37 @@ export default function PropertyDetail() {
               ))}
             </div>
 
-            {/* Community */}
             <div className="flex justify-between items-center mb-7.5">
               <div>
                 <h2 className="text-[28px] font-semibold text-[#01155E]">Community</h2>
-               <p className="text-[#67739E] font-semibold text-[24px]">
-  {community?.title || location?.community || "—"}
-</p>
+                <p className="text-[#67739E] font-semibold text-[24px]">
+                  {community?.title || location?.community || "—"}
+                </p>
               </div>
               <button
-  onClick={() => {
-    if (community?.slug) {
-      navigate(`/communities/${community.slug}`);
-    }
-  }}
-  className="bg-[#01155E] text-white px-6 py-2.5 rounded-lg text-[18px] font-semibold"
->
-  Explore Community
-</button>
+                onClick={() => {
+                  if (community?.slug) {
+                    navigate(`/communities/${community.slug}`);
+                  }
+                }}
+                className="bg-[#01155E] text-white px-6 py-2.5 rounded-lg text-[18px] font-semibold"
+              >
+                Explore Community
+              </button>
             </div>
 
             <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
               <img
-                src={
+                src={getSafeImageUrl(
                   community?.marketSupply?.image ||
                   location?.communityImage ||
                   propertycommunity
-                }
+                )}
                 className="w-full h-full object-cover"
                 alt="Community"
               />
             </div>
 
-            {/* Investment Insights */}
             <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
               <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
                 <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
@@ -891,8 +893,6 @@ export default function PropertyDetail() {
               />
             </div>
 
-
-            {/* Project Video */}
             <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Project Video</h2>
             <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
               <iframe
@@ -909,7 +909,6 @@ export default function PropertyDetail() {
 
           </div>
 
-          {/* RIGHT SIDEBAR */}
           <div className="w-[410px] flex-shrink-0">
             <div className="sticky top-8 space-y-6">
               <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-6">
@@ -921,7 +920,7 @@ export default function PropertyDetail() {
 
                 <div className="flex items-center gap-2 mb-4">
                   <span className="bg-[#01155E] text-white text-[12px] px-2.5 py-1.5 rounded-[4px] font-medium uppercase">
-                    {listingStatus || status || "—"}
+                    {getDisplayStatus(completionStatus)}
                   </span>
                 </div>
 
@@ -937,10 +936,23 @@ export default function PropertyDetail() {
 
                 <hr className="border-[#D9E1F2] mb-4" />
 
-                <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-purple-500 to-yellow-400" />
-                  <span>{developer || builder || projectInfo?.developer || "—"}</span>
-                </div>
+              <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
+  {(PROPERTY?.developer_image || rawListing?.developer_image) ? (
+    <img
+      src={getSafeImageUrl(
+        PROPERTY?.developer_image || rawListing?.developer_image
+      )}
+      alt="developer"
+      className="w-5 h-5 object-contain rounded-full border border-gray-200"
+    />
+  ) : (
+    <div className="w-5 h-5 rounded-full bg-gray-200" />
+  )}
+
+  <span>
+    {developer || builder || projectInfo?.developer || "—"}
+  </span>
+</div>
 
                 <hr className="border-[#D9E1F2] mb-4" />
 
@@ -965,7 +977,7 @@ export default function PropertyDetail() {
                 <div className="rounded-xl bg-[#F5F8FF] p-4 w-full max-w-[350px]">
                   <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={agent?.profileImage}
+                      src={getSafeImageUrl(agent?.profileImage)}
                       className="w-[56px] h-[56px] rounded-full object-cover"
                       alt="Agent"
                     />
@@ -991,15 +1003,10 @@ export default function PropertyDetail() {
                 </div>
 
               </div>
-
-              {/* Promo Card */}
-              
-
             </div>
           </div>
         </div>
 
-        {/* Similar Properties */}
         <div className="mt-16">
           <h2 className="text-[30px] font-semibold text-[#01155E] text-center mb-10">
             Similar Properties In {location?.community || "Expo City"}

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProjects } from "../features/dashboard/searchSlice";
-import ListingCard from "../Components/listingCard";
+import ListingCard from "../Components/ListingCard";
 
 const FeaturedListings = () => {
   const dispatch = useDispatch();

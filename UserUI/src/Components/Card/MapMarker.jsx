@@ -1,5 +1,5 @@
 import { useState } from "react";
-import listingimage from "../../assets/listingcard.jpg";
+import listingimage from "../../assets/ListingCard.jpg";
 
 const MapMarker = ({ item, isActive = false }) => {
   const [hovered, setHovered] = useState(false);

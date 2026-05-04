@@ -6,7 +6,7 @@ import heartIcon from "../../assets/like.svg"
 import callIcon from '../../assets/phonecall.svg';
 import whatsappIcon from '../../assets/whatsap.png';
 import shareIcon from '../../assets/linkshare.svg'
-import listingimage from '../../assets/listingcard.jpg'
+
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'
 import Icon3 from '../../assets/icon3.png'
@@ -46,6 +46,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     { id: 'share', icon: shareIcon, alt: 'Share' }
   ];
 
+  const currentId = listing?._id || listing?.id;
+
 
 
   const isLoggedIn = Boolean(localStorage.getItem("token"));
@@ -53,27 +55,26 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const favorites = useSelector(
     (state) => state.favorites.favorites || []
   );
+const isFavorite = favorites.includes(currentId);
 
-  const isFavorite = favorites.includes(listing?._id);
-  const handleFavorite = (e) => {
-    e.stopPropagation();
+const handleFavorite = (e) => {
+  e.stopPropagation();
 
-    if (!listing?._id) return;
+  if (!currentId) return;
 
-    if (!isLoggedIn) {
-      onRequireLogin?.();
-      return;
-    }
+  if (!isLoggedIn) {
+    onRequireLogin?.();
+    return;
+  }
 
-    if (isFavorite) {
-      dispatch(removeFavoriteLocal(listing._id));
-    } else {
-      dispatch(addFavoriteLocal(listing._id));
-    }
+  if (isFavorite) {
+    dispatch(removeFavoriteLocal(currentId));
+  } else {
+    dispatch(addFavoriteLocal(currentId));
+  }
 
-    dispatch(toggleFavorite(listing._id));
-  };
-
+  dispatch(toggleFavorite(currentId));
+};
   // NEW: image array with safe fallback
   // const galleryImages =
   //   listing?.images?.length > 0
@@ -82,7 +83,10 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   //         return img?.url || img?.secure_url || img?.imageUrl || img?.src || listingimage;
   //       })
   //     : [listingimage];
-  const galleryImages = [listingimage, listingimage, listingimage];
+const galleryImages =
+  listing?.feature_image
+    ? [listing.feature_image, listing.feature_image, listing.feature_image]
+    : [listingimage, listingimage, listingimage];
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
@@ -103,28 +107,28 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     setActiveImageIndex(index);
   };
 
-  const handleConnect = async (e) => {
-    e.stopPropagation();
-    setIsLocalSending(true);
-    try {
-      await dispatch(sendListingEnquiry({ listingId: listing._id })).unwrap();
-      toast.success("Enquiry sent ✅");
-    } catch (err) {
-      toast.error(err || "Something went wrong");
-    } finally {
-      setIsLocalSending(false);
-      dispatch(resetEnquiryState());
-    }
-  };
+ const handleConnect = async (e) => {
+  e.stopPropagation();
+  setIsLocalSending(true);
 
+  try {
+    await dispatch(sendListingEnquiry({ listingId: currentId })).unwrap();
+    toast.success("Enquiry sent ✅");
+  } catch (err) {
+    toast.error(err || "Something went wrong");
+  } finally {
+    setIsLocalSending(false);
+    dispatch(resetEnquiryState());
+  }
+};
   const handleSendPdf = () => {
-    if (!email || !phone) {
-      toast.error('Please enter email');
-      return;
-    }
-    dispatch(sendListingPdf({ listingId: listing._id, email: email ,phone: phone}));
-  };
+  if (!email || !phone) {
+    toast.error('Please enter email');
+    return;
+  }
 
+  dispatch(sendListingPdf({ listingId: currentId, email, phone }));
+};
   useEffect(() => {
     if (pdfSuccess && isPopupOpen) {
       const timer = setTimeout(() => {
@@ -139,11 +143,27 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   // NEW: reset image index when listing changes
   useEffect(() => {
     setActiveImageIndex(0);
-  }, [listing?._id]);
+  }, [currentId]);
 
   const openDetails = () => {
-    navigate(`/listing/${listing._id}`);
+    navigate(`/listing/${listing.id}`);
   };
+  const getHandover = (dateString) => {
+  if (!dateString) return "N/A";
+
+  const date = new Date(dateString);
+  const month = date.getMonth() + 1; // 1–12
+  const year = date.getFullYear();
+
+  let quarter = "";
+
+  if (month <= 3) quarter = "Q1";
+  else if (month <= 6) quarter = "Q2";
+  else if (month <= 9) quarter = "Q3";
+  else quarter = "Q4";
+
+  return `${quarter} ${year}`;
+};
 
   return (
     <div className="w-[1290px] h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
@@ -164,7 +184,10 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Status Badge */}
         <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
           <span className="font-semibold">
-            {listing?.completionStatus?.toLowerCase() === "offplan" ? "Off-plan" : listing?.completionStatus}
+          {["announced","eoi","start of sales","on sale","out of stock"]
+  .includes(listing?.status?.toLowerCase())
+  ? "Off-plan"
+  : listing?.status}
           </span>
           <span className="mx-1 text-gray-300">|</span>
           <span className="font-normal">Resale</span>
@@ -261,15 +284,29 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               {/* Location Section */}
               <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
                 <img src={Icon5} alt="Location" className="w-5 h-5 object-contain" />
-                <span>
-                  {listing.location?.community}, {listing.location?.city || 'Ontario, Canada'}
-                </span>
+                {/* <span>
+  {typeof listing.location === "string"
+    ? listing.location
+    : [
+        listing?.location?.subCommunity,
+        listing?.location?.community,
+        listing?.location?.city
+      ]
+        .filter(Boolean)
+        .join(", ") || "N/A"}
+</span> */}
+<span>
+  {[
+    listing?.district_name,
+    listing?.city_name
+  ].filter(Boolean).join(", ") || "N/A"}
+</span>
               </div>
 
               {/* Builder Section */}
               <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
                 <img src={Icon4} alt="Builder" className="w-5 h-5 object-contain" />
-                <span>{listing.developer}</span>
+                <span>{listing.developer_name || "N/A"}</span>
               </div>
             </div>
           </div>
@@ -317,7 +354,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon3} alt="bed" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-              {listing.bedrooms || 41}
+             {listing.beds || "N/A"}
             </span>
           </div>
 
@@ -326,7 +363,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon2} alt="bath" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-              {listing.bathrooms || 32}
+            {listing.baths || "N/A"}
             </span>
           </div>
 
@@ -335,14 +372,14 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon1} alt="area" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-              {listing.builtUpArea?.toLocaleString() || "122,280"} sqft
+              {listing.max_area?.toLocaleString()} sqft
             </span>
           </div>
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon4} alt="handover" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-              {listing?.projectInfo?.handoverDate || "Q4 2027"}
+            {getHandover(listing?.expected_delivery_date)}
             </span>
           </div>
 
@@ -370,7 +407,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {listing.currency?.toUpperCase()}
       </span>
       <span className="text-[32px] ">
-        {listing.price?.toLocaleString() || "10,00,239"}
+        {listing.min_price?.toLocaleString() || "10,00,239"}
       </span>
     </>
   ) : (
@@ -379,7 +416,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {listing.currency?.toUpperCase()}
       </span>
       <span className="text-[32px] ">
-        {listing.price?.toLocaleString() || "10,00,239"}
+        {listing.min_price?.toLocaleString() || "10,00,239"}
       </span>
     </>
   )}

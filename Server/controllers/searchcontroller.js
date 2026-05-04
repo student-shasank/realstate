@@ -1,5 +1,63 @@
 import Listing from "../models/Listing.js";
 
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+
+/**
+ * Safely push conditions into query.$and
+ */
+const addAndCondition = (query, condition) => {
+  if (!query.$and) query.$and = [];
+  query.$and.push(condition);
+};
+
+/**
+ * Normalize beds string "0,1,1.5,2,2.5" → check if requested bed count exists
+ * DB stores beds as comma-separated string e.g. "0,1,1.5,2,2.5"
+ * We match if the requested bed value exists anywhere in that string
+ */
+const buildBedsCondition = (beds) => {
+  if (!beds) return null;
+
+  if (beds === "Studio" || beds === "0") {
+    return {
+      beds: { $regex: /(^|,)\s*0\s*(,|$)/ },
+    };
+  }
+
+  const bedNum = parseFloat(beds);
+  if (isNaN(bedNum)) return null;
+
+  return {
+    beds: { $regex: `(^|,)\\s*${bedNum}\\s*(,|$)` },
+  };
+};
+
+/**
+ * Completion status normalization
+ */
+const COMPLETION_MAP = {
+  "off-plan": "On Sale",
+  offplan: "On Sale",
+  "off plan": "On Sale",
+  onsale: "On Sale",
+  "on sale": "On Sale",
+  ready: "Ready",
+  completed: "Ready",
+  preconstruction: "Pre-Construction",
+  "pre-construction": "Pre-Construction",
+};
+
+const normalizeCompletion = (value) => {
+  if (!value) return null;
+  return COMPLETION_MAP[value.toLowerCase().trim()] || null;
+};
+
+// ─────────────────────────────────────────────
+// CONTROLLER
+// ─────────────────────────────────────────────
+
 export const searchListings = async (req, res) => {
   try {
     const {
@@ -12,9 +70,8 @@ export const searchListings = async (req, res) => {
       propertyType,
       property_type,
       completion,
-      propertyStatus, // frontend se aata hai
+      propertyStatus,
       developer,
-    
       emirates,
       handoverYear,
       location,
@@ -24,140 +81,161 @@ export const searchListings = async (req, res) => {
 
     const query = {};
 
-    // active + available
-    query.propertyStatus = "active";
-    query.availability = "available";
-
-    // ───── Location ─────
+    // ───── Location Search ─────
     const loc = location?.trim();
     if (loc) {
-      query.$or = [
-        { "location.address": { $regex: loc, $options: "i" } },
-        { "location.community": { $regex: loc, $options: "i" } },
-        { "location.city": { $regex: loc, $options: "i" } },
-        { title: { $regex: loc, $options: "i" } },
-      ];
+      addAndCondition(query, {
+        $or: [
+          { title: { $regex: loc, $options: "i" } },
+          { location: { $regex: loc, $options: "i" } },
+          { district_name: { $regex: loc, $options: "i" } },
+          { city_name: { $regex: loc, $options: "i" } },
+        ],
+      });
     }
 
     // ───── Emirates ─────
-   if (emirates) {
-  const emiratesArray = emirates
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+    if (emirates) {
+      const emiratesArray = emirates
+        .split(",")
+        .map((e) => e.trim())
+        .filter(Boolean);
 
-  query.$and = [
-    ...(query.$and || []),
-    {
-      $or: emiratesArray.map((em) => ({
-        "location.emirates": { $regex: `^${em}$`, $options: "i" }
-      }))
+      if (emiratesArray.length > 0) {
+        addAndCondition(query, {
+          $or: emiratesArray.map((em) => ({
+            city_name: { $regex: `^${em}$`, $options: "i" },
+          })),
+        });
+      }
     }
-  ];
+
+    // ───── Completion Status ─────
+   const completionRaw = completion || propertyStatus;
+
+if (completionRaw?.toLowerCase() === "offplan") {
+  query.status = {
+    $in: [
+      "Announced",
+      "EOI",
+      "Start of Sales",
+      "On Sale",
+    
+    ]
+  };
+} else {
+  const mappedStatus = normalizeCompletion(completionRaw);
+  if (mappedStatus) {
+    query.status = mappedStatus;
+  }
 }
-    // ───── Completion Status ────
-    const completionValue = completion || propertyStatus;
-
-    if (completionValue) {
-      const completionMap = {
-        "off-plan": "off-plan",
-        "offplan": "off-plan",
-        "off plan": "off-plan",
-        "ready": "ready",
-        "preconstruction": "preconstruction",
-      };
-
-      const mapped =
-        completionMap[completionValue.toLowerCase().trim()];
-
-      if (mapped) query.completionStatus = mapped;
-    }
-
     // ───── Property Type ─────
-    const pType = propertyType || property_type;
-    if (pType && pType !== "All") {
-      query.type = pType.toLowerCase();
+    const pType = (propertyType || property_type)?.trim();
+    if (pType && pType.toLowerCase() !== "all") {
+      const escapedType = pType.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      addAndCondition(query, {
+        property_category: {
+          $elemMatch: { $regex: escapedType, $options: "i" },
+        },
+      });
     }
 
     // ───── Bedrooms ─────
-    if (beds && beds !== "Studio") {
-      query.bedrooms = { $gte: Number(beds) };
-    } else if (beds === "Studio") {
-      query.bedrooms = 0;
+    if (beds) {
+      const bedsCondition = buildBedsCondition(beds);
+
+      if (bedsCondition) {
+        addAndCondition(query, {
+          $or: [
+            bedsCondition,
+           
+          ],
+        });
+      }
     }
 
     // ───── Bathrooms ─────
     if (baths) {
-      query.bathrooms = { $gte: Number(baths) };
+      const bathNum = parseFloat(baths);
+
+      if (!isNaN(bathNum)) {
+        addAndCondition(query, {
+          $or: [
+            { baths: { $gte: bathNum } },
+            { baths: { $gte: String(bathNum) } },
+            { baths: null },
+          ],
+        });
+      }
     }
 
-    // ───── Purpose ─────
-   
+    // ───── Price Range ─────
+    const reqMin = Number(minPrice || min_price || 0) || null;
+    const reqMax = Number(maxPrice || max_price || 0) || null;
 
-    // ───── Price ─────
-    const finalMinPrice = minPrice || min_price;
-    const finalMaxPrice = maxPrice || max_price;
-
-    if (finalMinPrice || finalMaxPrice) {
-      query.price = {};
-      if (finalMinPrice) query.price.$gte = Number(finalMinPrice);
-      if (finalMaxPrice) query.price.$lte = Number(finalMaxPrice);
+    if (reqMin || reqMax) {
+      const priceConditions = {};
+      if (reqMin) priceConditions.max_price = { $gte: reqMin };
+      if (reqMax) priceConditions.min_price = { $lte: reqMax };
+      addAndCondition(query, priceConditions);
     }
 
     // ───── Developer ─────
     if (developer) {
       const developersArray = developer
         .split(",")
-        .map((item) => item.trim().toLowerCase())
+        .map((d) => d.trim())
         .filter(Boolean);
 
       if (developersArray.length > 0) {
-        query.developer = { $in: developersArray };
+        addAndCondition(query, {
+          $or: developersArray.map((dev) => ({
+            developer_name: { $regex: dev, $options: "i" },
+          })),
+        });
       }
     }
 
     // ───── Handover Year ─────
-    // ── Handover Year (ignore Q1,Q2,Q3,Q4) ──
-if (handoverYear) {
-  const handoverArray = handoverYear
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+    if (handoverYear) {
+      const yearsArray = handoverYear
+        .split(",")
+        .map((y) => y.trim().replace(/^Q[1-4]\s*/i, ""))
+        .filter((y) => /^\d{4}$/.test(y));
 
-  const yearConditions = handoverArray.map((year) => ({
-    "projectInfo.handoverDate": {
-      $regex: year, // sirf year search karega
-      $options: "i",
-    },
-  }));
+      if (yearsArray.length > 0) {
+        addAndCondition(query, {
+          $or: yearsArray.map((year) => ({
+            expected_delivery_date: { $regex: `^${year}-` },
+          })),
+        });
+      }
+    }
 
-  if (yearConditions.length > 0) {
-    query.$and = [...(query.$and || []), { $or: yearConditions }];
-  }
-}
-
-    // debug
     console.log("REQ QUERY:", req.query);
     console.log("MONGO QUERY:", JSON.stringify(query, null, 2));
 
-    // pagination
-    const skip = (Number(page) - 1) * Number(limit);
-    const total = await Listing.countDocuments(query);
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit)));
+    const skip = (pageNum - 1) * limitNum;
 
-    const listings = await Listing.find(query)
-      .sort({ isFeatured: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit));
+    const [total, listings] = await Promise.all([
+      Listing.countDocuments(query),
+      Listing.find(query)
+        .sort({ isFeatured: -1, created_date: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+    ]);
 
     return res.status(200).json({
       success: true,
       total,
-      page: Number(page),
-      totalPages: Math.ceil(total / Number(limit)),
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
       count: listings.length,
       data: listings,
     });
-
   } catch (error) {
     console.error("SEARCH ERROR:", error);
     return res.status(500).json({

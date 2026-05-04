@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import listingimage from '../../assets/listingcard.jpg'
+import listingimage from '../../assets/ListingCard.jpg'
 import { BedDouble, Bath, Square } from "lucide-react";
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'
@@ -73,7 +73,7 @@ const MapCard = ({ item }) => {
       <div className="pt-3 pb-2">
         {/* Price */}
         <h3 className="text-[18px] font-bold text-[#222222]">
-          AED {Number(item?.price || 550000).toLocaleString()}
+          AED {item.min_price?.toLocaleString() || "10,00,239"}
         </h3>
 
         {/* Specs (Beds, Baths, Area) */}
@@ -85,20 +85,20 @@ const MapCard = ({ item }) => {
   ) : (
     <div className="flex items-center gap-1.5">
       <img src={Icon3} alt="bedroom icon" className="w-4 h-4 object-contain" />
-      <span>{item?.bedrooms || 1}</span>
+      <span>   {item.beds || "N/A"}</span>
     </div>
   )}
 
   {/* Bathrooms */}
   <div className="flex items-center gap-1.5">
     <img src={Icon2} alt="bathroom icon" className="w-4 h-4 object-contain" />
-    <span>{item?.bathrooms || 1}</span>
+    <span> {item.baths || "N/A"}</span>
   </div>
 
   {/* Area (sqft) */}
   <div className="flex items-center gap-1.5">
     <img src={Icon1} alt="area icon" className="w-4 h-4 object-contain" />
-    <span>{Number(item?.plotArea || 430).toLocaleString()} sqft</span>
+    <span>{item.max_area?.toLocaleString()} sqft</span>
   </div>
 
 </div>
@@ -109,7 +109,12 @@ const MapCard = ({ item }) => {
 
         {/* Agency Name */}
         <p className="text-[16px] text-[#67739E] mt-1  tracking-tight">
-          {item?.developer || "The Optimus Properties"}
+          <span>
+  {[
+    item?.district_name,
+    item?.city_name
+  ].filter(Boolean).join(", ") || "N/A"}
+</span>
         </p>
       </div>
     </div>

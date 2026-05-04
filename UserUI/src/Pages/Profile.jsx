@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchListingDetail } from "../features/dashboard/listingDetailSlice.jsx";
+import { fetchListingByIdThunk } from "../features/dashboard/fetchListingById.jsx";
 import { updateUser, resetUpdateUser } from "../features/Authentation/updateUserSlice.js";
 import { useNavigate } from "react-router-dom";
-import ListingCard from "../Components/Card/listingCard.jsx";
+import ListingCard from "../Components/Card/ListingCard.jsx";
 
 const getStoredUser = () => {
   try {
@@ -135,6 +135,7 @@ export default function Profile() {
 
   // ── Favorites
   const favoriteIds = useSelector((state) => state.favorites.favorites || []);
+  console.log("FAVORITE IDS:", favoriteIds);
   const [favoriteListings, setFavoriteListings] = useState([]);
   const [favLoading, setFavLoading] = useState(false);
 
@@ -148,9 +149,11 @@ export default function Profile() {
       setFavLoading(true);
       try {
         const results = await Promise.all(
-          favoriteIds.map((id) => dispatch(fetchListingDetail(id)).unwrap())
+          favoriteIds.map((id) => dispatch(fetchListingByIdThunk(id)).unwrap())
         );
+
         setFavoriteListings(results);
+        console.log("API RESULTS:", results);
       } catch (err) {
         console.error("Failed to fetch favorite listings:", err);
       } finally {
@@ -159,6 +162,7 @@ export default function Profile() {
     };
     fetchAll();
   }, [dispatch, favoriteIds]);
+  
 
   // ── updateUser success handler
   useEffect(() => {
@@ -182,6 +186,7 @@ export default function Profile() {
   const handleSaveEdit = () => {
     const stored = getStoredUser();
     const userId = stored._id || stored.id;
+    console.log(userId)
 
     if (!userId) {
       console.error("User ID nahi mila localStorage mein");
@@ -380,7 +385,7 @@ export default function Profile() {
             {/* ListingCard */}
             {!favLoading && favoriteListings.map((listing) => (
               <ListingCard
-                key={listing._id}
+                key={listing.id}
                 listing={listing}
                 onRequireLogin={() => setShowLoginPrompt(true)}
               />

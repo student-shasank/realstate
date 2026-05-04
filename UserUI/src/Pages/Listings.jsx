@@ -27,7 +27,7 @@ import {
   setDeveloper,
   
 } from "../features/dashboard/searchSlice";
-import ListingCard from "../Components/Card/listingCard";
+import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
 import MapCard from "../Components/Card/MapCard"
@@ -898,10 +898,9 @@ const [viewport, setViewport] = useState({
     <NavigationControl position="bottom-right" />
 
     {projects.map((item) => {
-  const coords = item?.location?.coordinates?.coordinates;
-  if (!coords || coords.length < 2) return null;
+  if (!item?.lat_long) return null;
 
-  const [lng, lat] = coords;
+const [lat, lng] = item.lat_long.split(",").map(Number);
   const itemId = item._id?.$oid || item._id;
 
   return (
