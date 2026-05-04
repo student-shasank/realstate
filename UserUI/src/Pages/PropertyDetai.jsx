@@ -390,7 +390,18 @@ const [showFullDesc, setShowFullDesc] = useState(false);
     ? `https://www.youtube.com/embed/${youtubeVideoId}`
     : "https://www.youtube.com/embed/dQw4w9WgXcQ";
 
+const parseLatLong = (latlong) => {
+  if (!latlong) return null;
 
+  const [lat, lng] = latlong.split(",").map(Number);
+
+  if (isNaN(lat) || isNaN(lng)) return null;
+
+  return {
+    type: "Point",
+    coordinates: [lng, lat], // correct order
+  };
+};
 
   return (
     <div className="bg-white min-h-screen mt-25">
@@ -887,10 +898,11 @@ const [showFullDesc, setShowFullDesc] = useState(false);
 
             <div className="mt-10">
               <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
-              <PropertyMap
-                coordinates={location?.coordinates}
-                title={title}
-              />
+             <PropertyMap
+  latlong={rawListing?.latlong}
+  coordinates={location?.coordinates}
+  title={title}
+/>
             </div>
 
             <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Project Video</h2>

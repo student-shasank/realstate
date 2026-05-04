@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {fetchListingByIdThunk  } from "../features/dashboard/fetchListingById";
 import { useNavigate } from "react-router-dom";
+import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
+import { extractAllImages, getSafeImageUrl } from '../Components/utils/imageExtractor.jsx';
 
 import {
   FaBed, FaBath, FaChartArea, FaUserTie, FaMoneyCheckAlt,
@@ -11,8 +13,7 @@ import {
 } from "react-icons/fa";
 
 /* ─────────────────────────────────────────────
-   Inline styles as JS object (no Tailwind needed
-   for the new design tokens — we blend both) 
+   Inline styles as JS object
 ───────────────────────────────────────────── */
 const NAVY = "#01155E";
 const GOLD = "#C9A84C";
@@ -25,9 +26,10 @@ const Compare = () => {
   const [selected, setSelected] = useState([null, null]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const openDetails = (id) => {
-  navigate(`/listing/${id}`);
-};
+    navigate(`/listing/${id}`);
+  };
 
   useEffect(() => {
     if (favorites.length === 0) {
@@ -35,11 +37,19 @@ const Compare = () => {
       setSelected([null, null]);
       return;
     }
+
     const fetchFavs = async () => {
       setLoading(true);
       try {
         const results = await Promise.all(
-         favorites.map((id) => dispatch(fetchListingByIdThunk(id)).unwrap())
+          favorites.map((id) => 
+            dispatch(fetchListingByIdThunk(id))
+              .unwrap()
+              .then(rawListing => ({
+                raw: rawListing,
+                mapped: mapPropertyDetailData(rawListing)
+              }))
+          )
         );
         setFavoriteListings(results);
         if (results.length >= 2) setSelected([results[0], results[1]]);
@@ -50,11 +60,12 @@ const Compare = () => {
         setLoading(false);
       }
     };
+
     fetchFavs();
   }, [dispatch, favorites]);
 
   const handleSelect = (idx, id) => {
-    const item = favoriteListings.find((p) => p._id === id);
+    const item = favoriteListings.find((p) => p.raw._id === id);
     setSelected((prev) => {
       const newSel = [...prev];
       newSel[idx] = item;
@@ -62,7 +73,7 @@ const Compare = () => {
     });
   };
 
-  const getID = (item) => item?._id;
+  const getID = (item) => item?.raw?._id;
 
   /* ── Small reusable sub-components ── */
 
@@ -71,7 +82,6 @@ const Compare = () => {
       <span className="text-xs font-bold uppercase tracking-widest text-[#67739E]">{label}</span>
       <span
         className="text-[18px] font-black text-right max-w-[55%] leading-snug text-[#01155E] capitalize"
- 
       >
         {value || "—"}
       </span>
@@ -122,7 +132,6 @@ const Compare = () => {
   const AmenityPill = ({ label }) => (
     <div
       className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100 bg-white text-gray-600 hover:text-white transition-all duration-200 cursor-default"
-      style={{ "--hover-bg": NAVY }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = NAVY;
         e.currentTarget.style.color = "#fff";
@@ -139,12 +148,49 @@ const Compare = () => {
   );
 
   /* ── Per-property card ── */
-const PropertyCard = ({ data, onViewDetails }) => {
-    const paySteps = data?.paymentPlan?.steps?.length
-      ? data.paymentPlan.steps
+  const PropertyCard = ({ data, rawData, onViewDetails }) => {
+    if (!data || !rawData) {
+      return <div className="text-center py-12 text-gray-400">No data available</div>;
+    }
+
+    const {
+      title,
+      price,
+      currency = "AED",
+      bedrooms,
+      bathrooms,
+      builtUpArea,
+      garage,
+      type,
+      purpose,
+      furnishing,
+      developer,
+      listingStatus,
+      completionStatus,
+      yearBuilt,
+      handoverDate,
+      ownership,
+      plotArea,
+      totalBuildingArea,
+      serviceCharges,
+      paymentPlan = {},
+      investmentInsights = {},
+      buildingInfo = {},
+      regulatoryInfo = {},
+      location = {},
+      features = [],
+      agent = {},
+      projectInfo = {}
+    } = data;
+
+    const imageData = extractAllImages(rawData);
+    const featureImage = imageData.featureImage || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800";
+
+    const paySteps = paymentPlan?.steps?.length
+      ? paymentPlan.steps
       : [
-          { label: "Booking", percent: data?.paymentPlan?.downPayment || 10 },
-          { label: "Handover", percent: 100 - (data?.paymentPlan?.downPayment || 10) },
+          { label: "Booking", percent: paymentPlan?.downPayment || 10 },
+          { label: "Handover", percent: 100 - (paymentPlan?.downPayment || 10) },
         ];
 
     return (
@@ -152,7 +198,7 @@ const PropertyCard = ({ data, onViewDetails }) => {
         {/* ── Hero Image ── */}
         <div className="relative rounded-[2.5rem] overflow-hidden shadow-xl group mb-5" style={{ height: 340 }}>
           <img
-            src={"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800"}
+            src={getSafeImageUrl(featureImage)}
             alt="property"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -173,7 +219,7 @@ const PropertyCard = ({ data, onViewDetails }) => {
                   color: GOLD,
                 }}
               >
-                {data?.type || "Property"}
+                {type || "Property"}
               </span>
               <span
                 className="text-[16px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
@@ -183,15 +229,15 @@ const PropertyCard = ({ data, onViewDetails }) => {
                   color: GREEN,
                 }}
               >
-                {data?.completionStatus || "Ready"}
+                {completionStatus || "Ready"}
               </span>
             </div>
             {/* Price + title bottom */}
             <div>
-              <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{data?.title}</p>
+              <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
               <p className="font-black leading-none mb-4" style={{ color: GOLD, fontSize: 28 }}>
-                <span className="text-[18px] font-bold mr-1">{data?.currency}</span>
-                {data?.price?.toLocaleString()}
+                <span className="text-[18px] font-bold mr-1">{currency}</span>
+                {price ? Number(price).toLocaleString() : "—"}
               </p>
               <div className="flex gap-3">
                 <button
@@ -199,7 +245,7 @@ const PropertyCard = ({ data, onViewDetails }) => {
                   style={{ background: "rgba(255,255,255,0.1)" }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = NAVY; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
-                   onClick={() => onViewDetails(data?._id)}
+                  onClick={() => onViewDetails(rawData?._id)}
                 >
                   View Details
                 </button>
@@ -216,39 +262,38 @@ const PropertyCard = ({ data, onViewDetails }) => {
 
         {/* ── Quick Stats ── */}
         <div className="flex gap-3 mb-1">
-          <StatBox icon={<FaBed />} value={data?.bedrooms} label="Beds" />
-          <StatBox icon={<FaBath />} value={data?.bathrooms} label="Baths" />
-          <StatBox icon={<FaChartArea />} value={data?.builtUpArea ? `${data.builtUpArea}` : null} label="SqFt" />
-          <StatBox icon={<FaCar />} value={data?.garage} label="Garage" />
+          <StatBox icon={<FaBed />} value={bedrooms} label="Beds" />
+          <StatBox icon={<FaBath />} value={bathrooms} label="Baths" />
+          <StatBox icon={<FaChartArea />} value={builtUpArea ? `${builtUpArea}` : null} label="SqFt" />
+          <StatBox icon={<FaCar />} value={garage} label="Garage" />
         </div>
 
         {/* ── Core Specifications ── */}
         <SectionCard title="Core Specifications">
-          <InfoRow label="Type / Purpose" value={`${data?.type || "—"} · ${data?.purpose || "—"}`} />
-          <InfoRow label="Furnishing" value={data?.furnishing} />
-          <InfoRow label="Developer" value={data?.developer || data?.projectInfo?.developer} />
-          <InfoRow label="Listing Type" value={data?.listingStatus} />
-          <InfoRow label="Completion Status" value={data?.completionStatus} />
-          <InfoRow label="Year Built" value={data?.yearBuilt} />
-          <InfoRow label="Handover Date" value={data?.projectInfo?.handoverDate || data?.handoverDate} accent />
+          <InfoRow label="Type / Purpose" value={`${type || "—"} · ${purpose || "—"}`} />
+          <InfoRow label="Furnishing" value={furnishing} />
+          <InfoRow label="Developer" value={developer || projectInfo?.developer} />
+          <InfoRow label="Listing Type" value={listingStatus} />
+          <InfoRow label="Completion Status" value={completionStatus} />
+          <InfoRow label="Year Built" value={yearBuilt} />
+          <InfoRow label="Handover Date" value={handoverDate || projectInfo?.handoverDate} accent />
         </SectionCard>
 
         {/* ── Ownership & Area ── */}
         <SectionCard title="Ownership & Area">
-          <InfoRow label="Ownership" value={data?.validatedInfo?.ownership || data?.ownership} accent />
-          <InfoRow label="Built-up Area" value={data?.builtUpArea ? `${data.builtUpArea} SqFt` : null} />
-          <InfoRow label="Total Building Area" value={data?.totalBuildingArea ? `${data.totalBuildingArea?.toLocaleString()} SqFt` : null} />
-          <InfoRow label="Plot Area" value={data?.plotArea} />
-          <InfoRow label="Usage" value={data?.validatedInfo?.usage} />
+          <InfoRow label="Ownership" value={ownership} accent />
+          <InfoRow label="Built-up Area" value={builtUpArea ? `${builtUpArea} SqFt` : null} />
+          <InfoRow label="Total Building Area" value={totalBuildingArea ? `${Number(totalBuildingArea).toLocaleString()} SqFt` : null} />
+          <InfoRow label="Plot Area" value={plotArea} />
         </SectionCard>
 
         {/* ── Financials ── */}
         <SectionCard title="Financial Details">
-          <InfoRow label="Price" value={data?.price ? `${data.currency} ${data.price?.toLocaleString()}` : null} accent />
-          <InfoRow label="Price / SqFt" value={data?.investmentInsights?.pricePerSqFt ? `${data.currency} ${data.investmentInsights.pricePerSqFt?.toLocaleString()}` : null} />
-          <InfoRow label="Service Charges" value={data?.serviceCharges ? `${data.currency} ${data?.serviceCharges?.toLocaleString()}/yr` : null} />
-          <InfoRow label="Down Payment" value={data?.paymentPlan?.downPayment ? `${data.paymentPlan.downPayment}%` : null} accent />
-          <InfoRow label="Installment Phases" value={data?.paymentPlan?.installmentPlan?.length || data?.paymentPlan?.steps?.length || "—"} />
+          <InfoRow label="Price" value={price ? `${currency} ${Number(price).toLocaleString()}` : null} accent />
+          <InfoRow label="Price / SqFt" value={investmentInsights?.pricePerSqFt ? `${currency} ${Number(investmentInsights.pricePerSqFt).toLocaleString()}` : null} />
+          <InfoRow label="Service Charges" value={serviceCharges ? `${currency} ${Number(serviceCharges).toLocaleString()}/yr` : null} />
+          <InfoRow label="Down Payment" value={paymentPlan?.downPayment ? `${paymentPlan.downPayment}%` : null} accent />
+          <InfoRow label="Installment Phases" value={paymentPlan?.installmentPlan?.length || paymentPlan?.steps?.length || "—"} />
           <div className="mt-4">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Payment Structure</p>
             <PayBar steps={paySteps} />
@@ -257,28 +302,28 @@ const PropertyCard = ({ data, onViewDetails }) => {
 
         {/* ── Investment Insights ── */}
         <SectionCard title="Investment Insights">
-          <InfoRow label="Rental Yield" value={data?.investmentInsights?.rentalYield} accent />
-          <InfoRow label="Price Trend" value={data?.investmentInsights?.priceTrend} accent />
-          <InfoRow label="Rental Yield %" value={data?.investmentInsights?.rentalYieldPercent ? `${data.investmentInsights.rentalYieldPercent}%` : null} />
+          <InfoRow label="Rental Yield" value={investmentInsights?.rentalYield} accent />
+          <InfoRow label="Price Trend" value={investmentInsights?.priceTrend} accent />
+          <InfoRow label="Rental Yield %" value={investmentInsights?.rentalYieldPercent ? `${investmentInsights.rentalYieldPercent}%` : null} />
         </SectionCard>
 
         {/* ── Building Info ── */}
         <SectionCard title="Building Info">
-          <InfoRow label="Building Name" value={data?.buildingInfo?.buildingName} />
-          <InfoRow label="Total Floors" value={data?.buildingInfo?.totalFloors} />
-          <InfoRow label="Total Parking" value={data?.buildingInfo?.totalParkingSpaces} />
-          <InfoRow label="Swimming Pools" value={data?.buildingInfo?.swimmingPools} accent />
-          <InfoRow label="Elevators" value={data?.buildingInfo?.elevators} />
-          <InfoRow label="Year of Completion" value={data?.buildingInfo?.yearOfCompletion} />
+          <InfoRow label="Building Name" value={buildingInfo?.buildingName} />
+          <InfoRow label="Total Floors" value={buildingInfo?.totalFloors} />
+          <InfoRow label="Total Parking" value={buildingInfo?.totalParkingSpaces} />
+          <InfoRow label="Swimming Pools" value={buildingInfo?.swimmingPools} accent />
+          <InfoRow label="Elevators" value={buildingInfo?.elevators} />
+          <InfoRow label="Year of Completion" value={buildingInfo?.yearOfCompletion} />
         </SectionCard>
 
         {/* ── Regulatory ── */}
         <SectionCard title="Regulatory">
-          <InfoRow label="Permit No." value={data?.regulatoryInfo?.permitNumber} />
-          <InfoRow label="Zone" value={data?.regulatoryInfo?.zoneName} />
-          <InfoRow label="RERA" value={data?.regulatoryInfo?.rera} accent />
-          <InfoRow label="BRN" value={data?.regulatoryInfo?.brn} />
-          <InfoRow label="Registered Agency" value={data?.regulatoryInfo?.registeredAgency} />
+          <InfoRow label="Permit No." value={regulatoryInfo?.permitNumber} />
+          <InfoRow label="Zone" value={regulatoryInfo?.zoneName} />
+          <InfoRow label="RERA" value={regulatoryInfo?.rera} accent />
+          <InfoRow label="BRN" value={regulatoryInfo?.brn} />
+          <InfoRow label="Registered Agency" value={regulatoryInfo?.registeredAgency} />
         </SectionCard>
 
         {/* ── Location ── */}
@@ -291,12 +336,10 @@ const PropertyCard = ({ data, onViewDetails }) => {
               <FaMapMarkerAlt className="text-white text-sm" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-sm">{data?.location?.city}, {data?.location?.country}</p>
+              <p className="font-black text-gray-900 text-sm">{location?.city}, {location?.country}</p>
               <p className="text-xs  font-bold uppercase tracking-wide mt-0.5 text-[#67739E]">
-                {data?.location?.community}
-              
+                {location?.community}
               </p>
-           
             </div>
           </div>
         </SectionCard>
@@ -304,8 +347,8 @@ const PropertyCard = ({ data, onViewDetails }) => {
         {/* ── Amenities ── */}
         <SectionCard title="Luxury Amenities">
           <div className="flex flex-wrap gap-2 mt-1">
-            {data?.features?.length
-              ? data.features.map((f, idx) => <AmenityPill key={idx} label={f} />)
+            {features?.length
+              ? features.map((f, idx) => <AmenityPill key={idx} label={f} />)
               : <p className="text-xs text-gray-400">No amenities listed</p>
             }
           </div>
@@ -320,13 +363,13 @@ const PropertyCard = ({ data, onViewDetails }) => {
             className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-white text-lg flex-shrink-0"
             style={{ background: NAVY }}
           >
-            {data?.agent?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "AG"}
+            {agent?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "AG"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-black text-gray-900 text-sm truncate">{data?.agent?.name || "—"}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">{data?.agent?.agency || "—"}</p>
-            {data?.agent?.phone && (
-              <p className="text-xs text-gray-500 mt-1">{data.agent.phone}</p>
+            <p className="font-black text-gray-900 text-sm truncate">{agent?.name || "—"}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">{agent?.agency || "—"}</p>
+            {agent?.phone && (
+              <p className="text-xs text-gray-500 mt-1">{agent.phone}</p>
             )}
           </div>
           <div className="bg-white p-3 rounded-2xl border border-gray-100">
@@ -353,7 +396,6 @@ const PropertyCard = ({ data, onViewDetails }) => {
         <div className="text-center mb-12">
           <h1
             className="text-4xl md:text-5xl text-[#01155E] font-['Archivo'] font-bold tracking-tight mb-2"
-            
           >
             Compare Properties
           </h1>
@@ -368,7 +410,6 @@ const PropertyCard = ({ data, onViewDetails }) => {
             <div key={i} className="relative w-full max-w-sm mx-auto">
               <select
                 className="w-full appearance-none bg-white px-8 py-5 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none  uppercase tracking-widest cursor-pointer text-left border border-gray-100 transition-all hover:shadow-lg"
-               
                 value={getID(selected[i]) || ""}
                 onChange={(e) => handleSelect(i, e.target.value)}
               >
@@ -380,7 +421,7 @@ const PropertyCard = ({ data, onViewDetails }) => {
                   })
                   .map((item) => (
                     <option key={getID(item)} value={getID(item)}>
-                      {item.title}
+                      {item.mapped?.title || "Listing"}
                     </option>
                   ))}
               </select>
@@ -426,10 +467,11 @@ const PropertyCard = ({ data, onViewDetails }) => {
             {[0, 1].map((i) => (
               <div key={i}>
                 {selected[i] ? (
-                <PropertyCard 
-  data={selected[i]} 
-  onViewDetails={openDetails}
-/>
+                  <PropertyCard 
+                    data={selected[i].mapped}
+                    rawData={selected[i].raw}
+                    onViewDetails={openDetails}
+                  />
                 ) : (
                   <div
                     className="flex items-center justify-center rounded-[2.5rem] border-2 border-dashed border-gray-200"

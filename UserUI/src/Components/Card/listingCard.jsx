@@ -6,7 +6,7 @@ import heartIcon from "../../assets/like.svg"
 import callIcon from '../../assets/phonecall.svg';
 import whatsappIcon from '../../assets/whatsap.png';
 import shareIcon from '../../assets/linkshare.svg'
-
+import listingimage from '../../assets/ListingCard.jpg'
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'
 import Icon3 from '../../assets/icon3.png'
@@ -15,6 +15,8 @@ import Icon5 from '../../assets/icon5.png'
 import { useNavigate } from "react-router-dom";
 import { sendListingEnquiry, resetEnquiryState } from "../../features/Enquiery/enquirySlice.js";
 import { toast } from 'react-toastify';
+import { fetchListingDetail } from '../../features/dashboard/listingDetailSlice';
+import { extractAllImages } from '../../Components/utils/imageExtractor';
 
 import {
   addFavoriteLocal,
@@ -33,11 +35,14 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   // NEW: hover carousel states
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [carouselImages, setCarouselImages] = useState([]);
+  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { success: pdfSuccess, loading: pdfLoading, error: pdfError } = useSelector((state) => state.pdf);
+  const { listing: detailedListing } = useSelector((state) => state.listingDetail);
 
   const socialActions = [
     { id: 'like', icon: heartIcon, alt: 'Like' },
@@ -47,58 +52,103 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   ];
 
   const currentId = listing?._id || listing?.id;
-
-
+  const cardId = listing.id;
 
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   const favorites = useSelector(
     (state) => state.favorites.favorites || []
   );
-const isFavorite = favorites.includes(currentId);
+  const isFavorite = favorites.includes(currentId);
 
-const handleFavorite = (e) => {
-  e.stopPropagation();
+  const handleFavorite = (e) => {
+    e.stopPropagation();
 
-  if (!currentId) return;
+    if (!currentId) return;
 
-  if (!isLoggedIn) {
-    onRequireLogin?.();
-    return;
-  }
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
 
-  if (isFavorite) {
-    dispatch(removeFavoriteLocal(currentId));
-  } else {
-    dispatch(addFavoriteLocal(currentId));
-  }
+    if (isFavorite) {
+      dispatch(removeFavoriteLocal(currentId));
+    } else {
+      dispatch(addFavoriteLocal(currentId));
+    }
 
-  dispatch(toggleFavorite(currentId));
-};
-  // NEW: image array with safe fallback
-  // const galleryImages =
-  //   listing?.images?.length > 0
-  //     ? listing.images.map((img) => {
-  //         if (typeof img === "string") return img;
-  //         return img?.url || img?.secure_url || img?.imageUrl || img?.src || listingimage;
-  //       })
-  //     : [listingimage];
-const galleryImages =
-  listing?.feature_image
-    ? [listing.feature_image, listing.feature_image, listing.feature_image]
-    : [listingimage, listingimage, listingimage];
+    dispatch(toggleFavorite(currentId));
+  };
+
+  // Fallback gallery images
+  const fallbackGalleryImages = listing?.feature_image
+    ? [listing.feature_image]
+    : [listingimage];
+
+  // Display logic: Use carousel images if available, else fallback
+  const displayImages = carouselImages.length > 0 ? carouselImages : fallbackGalleryImages;
+
+  /**
+   * Safe image URL handler (supports various image formats)
+   */
+  const getSafeImageUrl = (url) => {
+    if (!url) return listingimage;
+    if (typeof url !== 'string') {
+      if (url?.url) return url.url;
+      if (url?.secure_url) return url.secure_url;
+      if (url?.imageUrl) return url.imageUrl;
+      return listingimage;
+    }
+    return url;
+  };
+
+  /**
+   * Fetch all images when card is hovered using cardId
+   * Only fetches once per card (caches result)
+   */
+  const handleImageMouseEnter = async () => {
+    setIsImageHovered(true);
+
+    // Only fetch if we don't already have carousel images
+    if (carouselImages.length === 0 && !isLoadingImages) {
+      setIsLoadingImages(true);
+      try {
+        const result = await dispatch(fetchListingDetail(Number(cardId))).unwrap();
+
+        if (result) {
+          const imageData = extractAllImages(result);
+          setCarouselImages(imageData.allImages);
+          console.log(`Loaded ${imageData.allImages.length} images for listing ${cardId}`);
+        }
+      } catch (error) {
+        console.error('Error fetching listing images:', error);
+        setCarouselImages(fallbackGalleryImages);
+        toast.error('Failed to load images');
+      } finally {
+        setIsLoadingImages(false);
+      }
+    }
+  };
+
+  /**
+   * Reset carousel when mouse leaves
+   */
+  const handleImageMouseLeave = () => {
+    setIsImageHovered(false);
+    setActiveImageIndex(0);
+  };
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
     setActiveImageIndex((prev) =>
-      prev === 0 ? galleryImages.length - 1 : prev - 1
+      prev === 0 ? displayImages.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
     setActiveImageIndex((prev) =>
-      prev === galleryImages.length - 1 ? 0 : prev + 1
+      prev === displayImages.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -107,28 +157,30 @@ const galleryImages =
     setActiveImageIndex(index);
   };
 
- const handleConnect = async (e) => {
-  e.stopPropagation();
-  setIsLocalSending(true);
+  const handleConnect = async (e) => {
+    e.stopPropagation();
+    setIsLocalSending(true);
 
-  try {
-    await dispatch(sendListingEnquiry({ listingId: currentId })).unwrap();
-    toast.success("Enquiry sent ✅");
-  } catch (err) {
-    toast.error(err || "Something went wrong");
-  } finally {
-    setIsLocalSending(false);
-    dispatch(resetEnquiryState());
-  }
-};
+    try {
+      await dispatch(sendListingEnquiry({ listingId: currentId })).unwrap();
+      toast.success("Enquiry sent ✅");
+    } catch (err) {
+      toast.error(err || "Something went wrong");
+    } finally {
+      setIsLocalSending(false);
+      dispatch(resetEnquiryState());
+    }
+  };
+
   const handleSendPdf = () => {
-  if (!email || !phone) {
-    toast.error('Please enter email');
-    return;
-  }
+    if (!email || !phone) {
+      toast.error('Please enter email');
+      return;
+    }
 
-  dispatch(sendListingPdf({ listingId: currentId, email, phone }));
-};
+    dispatch(sendListingPdf({ listingId: currentId, email, phone }));
+  };
+
   useEffect(() => {
     if (pdfSuccess && isPopupOpen) {
       const timer = setTimeout(() => {
@@ -140,30 +192,33 @@ const galleryImages =
     }
   }, [pdfSuccess, isPopupOpen]);
 
-  // NEW: reset image index when listing changes
+  // Reset carousel when listing changes
   useEffect(() => {
     setActiveImageIndex(0);
+    setCarouselImages([]);
+    setIsImageHovered(false);
   }, [currentId]);
 
   const openDetails = () => {
     navigate(`/listing/${listing.id}`);
   };
+
   const getHandover = (dateString) => {
-  if (!dateString) return "N/A";
+    if (!dateString) return "N/A";
 
-  const date = new Date(dateString);
-  const month = date.getMonth() + 1; // 1–12
-  const year = date.getFullYear();
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1; // 1–12
+    const year = date.getFullYear();
 
-  let quarter = "";
+    let quarter = "";
 
-  if (month <= 3) quarter = "Q1";
-  else if (month <= 6) quarter = "Q2";
-  else if (month <= 9) quarter = "Q3";
-  else quarter = "Q4";
+    if (month <= 3) quarter = "Q1";
+    else if (month <= 6) quarter = "Q2";
+    else if (month <= 9) quarter = "Q3";
+    else quarter = "Q4";
 
-  return `${quarter} ${year}`;
-};
+    return `${quarter} ${year}`;
+  };
 
   return (
     <div className="w-[1290px] h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
@@ -172,11 +227,11 @@ const galleryImages =
       <div
         className="relative w-[450px] h-full cursor-pointer flex-shrink-0 overflow-hidden"
         onClick={openDetails}
-        onMouseEnter={() => setIsImageHovered(true)}
-        onMouseLeave={() => setIsImageHovered(false)}
+        onMouseEnter={handleImageMouseEnter}
+        onMouseLeave={handleImageMouseLeave}
       >
         <img
-          src={galleryImages[activeImageIndex]}
+          src={getSafeImageUrl(displayImages[activeImageIndex])}
           alt={listing.title}
           className="w-full h-full object-cover transition-all duration-300"
         />
@@ -184,10 +239,10 @@ const galleryImages =
         {/* Status Badge */}
         <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
           <span className="font-semibold">
-          {["announced","eoi","start of sales","on sale","out of stock"]
-  .includes(listing?.status?.toLowerCase())
-  ? "Off-plan"
-  : listing?.status}
+            {["announced","eoi","start of sales","on sale","out of stock"]
+              .includes(listing?.status?.toLowerCase())
+              ? "Off-plan"
+              : listing?.status}
           </span>
           <span className="mx-1 text-gray-300">|</span>
           <span className="font-normal">Resale</span>
@@ -198,8 +253,15 @@ const galleryImages =
           </div>
         )}
 
+        {/* Loading Spinner */}
+        {isLoadingImages && (
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-30">
+            <div className="w-8 h-8 border-3 border-white border-t-[#01155E] rounded-full animate-spin"></div>
+          </div>
+        )}
+
         {/* Carousel Arrows on Hover */}
-        {isImageHovered && galleryImages.length > 1 && (
+        {isImageHovered && displayImages.length > 1 && !isLoadingImages && (
           <>
             <button
               onClick={handlePrevImage}
@@ -241,13 +303,13 @@ const galleryImages =
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <span>{galleryImages.length || 10}</span>
+          <span>{displayImages.length || 1}</span>
         </div>
 
         {/* Bottom Dots */}
-        {galleryImages.length > 1 && (
+        {displayImages.length > 1 && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
-            {galleryImages.slice(0, 5).map((_, index) => (
+            {displayImages.slice(0, 5).map((_, index) => (
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
@@ -284,23 +346,12 @@ const galleryImages =
               {/* Location Section */}
               <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
                 <img src={Icon5} alt="Location" className="w-5 h-5 object-contain" />
-                {/* <span>
-  {typeof listing.location === "string"
-    ? listing.location
-    : [
-        listing?.location?.subCommunity,
-        listing?.location?.community,
-        listing?.location?.city
-      ]
-        .filter(Boolean)
-        .join(", ") || "N/A"}
-</span> */}
-<span>
-  {[
-    listing?.district_name,
-    listing?.city_name
-  ].filter(Boolean).join(", ") || "N/A"}
-</span>
+                <span>
+                  {[
+                    listing?.district_name,
+                    listing?.city_name
+                  ].filter(Boolean).join(", ") || "N/A"}
+                </span>
               </div>
 
               {/* Builder Section */}

@@ -32,10 +32,10 @@ const MapMarker = ({ item, isActive = false }) => {
           }}
         >
           {/* Property Image */}
-          <div className="w-full h-[110px] bg-gray-200 relative overflow-hidden">
-            {item?.images?.[0] ? (
+          <div className="w-full h-[110px] bg-gray-200 relative overflow-hidden ">
+            {item?.feature_image?.[0] ? (
               <img
-                src={listingimage}
+                src={item.feature_image}
                 alt={item.title}
                 className="w-full h-full object-cover"
               />

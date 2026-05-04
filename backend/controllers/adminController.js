@@ -38,7 +38,7 @@ export const dashboard = async (req, res) => {
       Listing.countDocuments({ propertyStatus: "active" }),
       Listing.countDocuments({ propertyStatus: "pending" }),
       Listing.countDocuments({ isFeatured: true }),
-      Listing.find().sort({ createdAt: -1 }).limit(10),
+      Listing.find().sort({ createdAt: -1 }).limit(2000),
     ]);
 
     return res.json({
