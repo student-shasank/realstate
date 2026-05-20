@@ -16,7 +16,7 @@ import {
   closeDropdowns,
   fetchProjects
 } from '../features/dashboard/searchSlice';
-import ListingCard from "../Components/Card/ListingCard";
+import ListingCard from '../Components/Card/ListingCard';
 import { Link } from 'react-router-dom';
 import backgroundVideo from '../assets/Untitled design (14).mp4';
 import Services from '../Components/HomePageComponents/Service';
