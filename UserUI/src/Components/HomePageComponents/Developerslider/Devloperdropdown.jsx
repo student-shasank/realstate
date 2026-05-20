@@ -123,8 +123,12 @@ export default function DeveloperDropdown({
                       onChange={() => toggleDeveloper(devName)}
                       className="w-[14px] h-[14px]"
                     />
-
-                    <div className="w-5 h-5 rounded-[4px] bg-[#111827] shrink-0" />
+<img
+  src={dev?.image}
+  alt={devName}
+  className="w-8 h-8 rounded-full object-cover border border-[#E5E7EB] shrink-0"
+/>
+                    
 
                     <span className="text-[14px] text-[#67739E] leading-tight">
                       {devName}

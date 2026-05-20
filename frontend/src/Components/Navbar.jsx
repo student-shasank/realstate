@@ -23,7 +23,7 @@ function Navbar() {
 
         {/* Logo */}
         <Link to="/">
-          <h3>Xyz</h3>
+          <h3>Yupland</h3>
         </Link>
 
         {/* Desktop Menu */}
@@ -71,7 +71,7 @@ function Navbar() {
 
               {/* Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md border p-2">
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md border p-2 z-100">
                   <p className="text-sm px-2 py-1">{user.name}</p>
                   <p className="text-xs px-2 pb-2 text-gray-500">{user.email}</p>
 

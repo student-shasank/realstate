@@ -44,7 +44,7 @@ const DeveloperAccess = () => {
           {/* Title Section */}
           <div className="relative inline-block">
             <h2 className="text-[#01155E] text-[28px] md:text-[32px] font-semibold font-['Archivo'] leading-tight mb-4">
-              Access to Developers
+              Subtitle of blog 
             </h2>
             {/* Custom Divider */}
             <div className="flex w-[264px]">
@@ -56,13 +56,14 @@ const DeveloperAccess = () => {
           {/* Description Text */}
           <div className="space-y-4 md:space-y-6 text-[#67739E] text-base md:text-lg font-normal font-['General_Sans']  md:text-justify">
             <p>
-              Yupland is a real estate marketing and information platform designed to provide structured access to property opportunities across the United Arab Emirates. It serves as a centralised gateway where users can explore real estate developments, analyse communities, and access organised property information through a clear and structured interface.
-            </p>
+             Yupland is a real estate marketing and information platform designed to provide structured access to property opportunities across the United Arab Emirates. It serves as a centralised gateway where users can explore real estate developments, analyse communities, and access organised property information through a clear and structured interface.
+
+ </p>
             <p>
-              The platform lets users explore both off-plan and ready properties, review developer profiles, evaluate community insights and market data, and stay informed with real estate-focused content and market updates.
+           The platform lets users explore both off-plan and ready properties, review developer profiles, evaluate community insights and market data, and stay informed with real estate-focused content and market updates. Yupland consolidates fragmented market information into a single, structured environment, allowing users to research and evaluate opportunities with greater clarity and efficiency
             </p>
             <p className="">
-              Yupland is currently focused primarily on Dubai and is progressively expanding its database and coverage across the UAE. The platform is designed to improve transparency and accessibility in property discovery while supporting informed real estate decisions.
+           Yupland is currently focused primarily on Dubai and is progressively expanding its database and coverage across the UAE. The platform is designed to improve transparency and accessibility in property discovery while supporting informed real estate decisions.
             </p>
           </div>
 

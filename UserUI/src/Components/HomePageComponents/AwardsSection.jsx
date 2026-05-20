@@ -31,7 +31,7 @@ const AwardsSection = () => {
   ];
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden flex flex-col items-center  bg-black py-20 px-6">
+    <section className="relative w-full h-[550px] overflow-hidden flex flex-col items-center  bg-black py-20 px-6">
       
       {/* Background Video */}
       <video

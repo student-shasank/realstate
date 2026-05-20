@@ -5,24 +5,26 @@ export const getDevelopers = async (req, res) => {
     const developers = await Listing.aggregate([
       {
         $project: {
-          developer: {
+          developer_name: {
             $trim: {
               input: {
-                $ifNull: ["$developer", ""],
+                $ifNull: ["$developer_name", ""],
               },
             },
           },
+          developer_image: 1,
         },
       },
       {
         $match: {
-          developer: { $ne: "" },
+          developer_name: { $ne: "" },
         },
       },
       {
         $group: {
-          _id: { $toLower: "$developer" }, // duplicate remove
-          name: { $first: "$developer" },  // original name
+          _id: { $toLower: "$developer_name" },
+          name: { $first: "$developer_name" },
+          image: { $first: "$developer_image" },
         },
       },
       {
@@ -40,6 +42,7 @@ export const getDevelopers = async (req, res) => {
               },
             ],
           },
+          image: 1,
         },
       },
       {

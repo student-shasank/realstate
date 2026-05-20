@@ -33,6 +33,7 @@ import SellPropertyPage from "./Pages/SellPropertyPage";
 import Profile from "./Pages/Profile";
 import Compare from "./Pages/Compare";
 import ScrollToTop from "./Components/Scroll/ScrollTop";
+import Blog from "./Pages/Blog";
 
 
 
@@ -91,6 +92,8 @@ function App() {
         <Route path="/handoverSnagging" element={<HandoverSnagging />} />
         <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
         <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
+           <Route path="/Blog" element={<Blog/>} />
+        
       </Routes>
    
 

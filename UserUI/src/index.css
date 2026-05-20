@@ -57,3 +57,9 @@ html, body {
   width: max-content;
   animation: marquee 40s linear infinite; /* Adjust speed here */
 }
+.Toastify__progress-bar--success{
+  background-color: #01155E !important ; 
+}
+.Toastify__zoom-enter svg {
+  fill: #01155E !important  ;
+}

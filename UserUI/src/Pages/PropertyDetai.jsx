@@ -319,28 +319,90 @@ const [showFullDesc, setShowFullDesc] = useState(false);
         { label: "Upon Handover", value: "40%" },
       ];
 
-  const propertyInfoRows =
-    info?.length > 0
-      ? info
-      : [
-        { label: "Built-Up Area", value: builtUpArea ? `${builtUpArea} Sq Ft` : "—" },
-        { label: "Total Building Area", value: totalBuildingArea ? `${totalBuildingArea} Sq Ft` : "—" },
-        { label: "ReferenceNo", value: referenceNo || "—" },
-        { label: "Year Built", value: yearBuilt || "—" },
-        { label: "Ownership", value: ownership || "—" },
-        { label: "Rooms", value: rooms ?? "—" },
-        { label: "Handover", value: handoverDate || "—" },
-        {
-          label: "Listing Date",
-          value: listingDate
-            ? new Date(listingDate).toLocaleDateString()
-            : "—"
-        },
-        { label: "Furnishing", value: furnishing || "—" },
-        { label: "Property Status", value: propertyStatus || "—" },
-        { label: "Service Charges", value: serviceCharges || "—" },
-        { label: "Completion Status", value: completionStatus || "—" },
-      ];
+ const propertyInfoRows = [
+  {
+    label: "Built-up Area",
+    value: builtUpArea
+      ? `${builtUpArea} Sq Ft`
+      : rawListing?.area_start
+      ? `${rawListing.area_start} Sq Ft`
+      : "—",
+  },
+
+  {
+    label: "Total Building Area",
+    value: totalBuildingArea
+      ? `${totalBuildingArea} Sq Ft`
+      : rawListing?.area_end
+      ? `${rawListing.area_end} Sq Ft`
+      : "—",
+  },
+
+  {
+    label: "Property ID",
+    value: referenceNo || rawListing?.id || "—",
+  },
+
+  {
+    label: "Year Built",
+    value:
+      yearBuilt ||
+      new Date(rawListing?.created_at).getFullYear() ||
+      "—",
+  },
+
+  {
+    label: "Ownership",
+    value: ownership || "Freehold",
+  },
+
+  {
+    label: "Rooms",
+    value: rooms || bedrooms || "—",
+  },
+
+  {
+    label: "Handover",
+    value:
+      handoverDate ||
+      rawListing?.expected_completion_date?.slice(0, 4) ||
+      "—",
+  },
+
+  {
+    label: "Listing Date",
+    value: rawListing?.created_at
+      ? new Date(rawListing.created_at).toLocaleDateString(
+          "en-GB",
+          {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }
+        )
+      : "—",
+  },
+
+  {
+    label: "Furnishing",
+    value: furnishing || "Furnished",
+  },
+
+  {
+    label: "Property Status",
+    value:
+      propertyStatus ||
+      rawListing?.project_status ||
+      "Vacant",
+  },
+
+  {
+    label: "Service Charges",
+    value: serviceCharges
+      ? `AED ${serviceCharges} / Sq Ft`
+      : "AED / Sq Ft",
+  },
+];
 
   const overviewStats = [
     { icon: <Bed size={24} className="text-[#67739E]" />, val: overview?.bedrooms ?? bedrooms ?? "—", label: "Bedrooms" },

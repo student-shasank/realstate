@@ -71,7 +71,7 @@ const ServicesSection = () => {
           Services
         </h2>
 
-        <div className="text-[#01155E99] text-[15px] sm:text-[17px] lg:text-[20px] leading-[1.7] max-w-[1000px] space-y-4">
+        <div className="text-[#01155E99] text-[15px] sm:text-[17px] lg:text-[20px] leading-[1.2] max-w-[1000px] space-y-4">
           <p>
             Yupland functions as a marketing and information platform designed to support buyers, investors, and property owners.
           </p>
