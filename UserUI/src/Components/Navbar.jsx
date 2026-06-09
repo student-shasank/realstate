@@ -41,7 +41,7 @@ const [isSignupOpen, setIsSignupOpen] = useState(false);
   const navItems = [
     { name: "Home", path: "/" },  
     { name: "Service", path: "/service" },
-    { name: "Blogs", path: "/blogs" },
+    { name: "Blogs", path: "/Blog" },
     { name: "About us", path: "/about" },
     { name: "Contact us", path: "/contact" },
     { name: "Communities", path: "/detailservice" },
@@ -145,11 +145,11 @@ useEffect(() => {
           </div>
 
           <Link
-            to="/blogs"
+            to="/Blog"
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/blogs" ? 700 : 400,
+              fontWeight: location.pathname === "/Blogs" ? 700 : 400,
               color: textColor,
             }}
           >

@@ -54,6 +54,7 @@ const [viewport, setViewport] = useState({
   const [propertyTab, setPropertyTab] = useState("Residential");
 
   const [viewMode, setViewMode] = useState("list");
+  
 
   const residentialOptions = [
     "Apartment",
@@ -822,10 +823,10 @@ const [viewport, setViewport] = useState({
           <h2 className="text-[16px] font-bold text-[#01155E]">Properties in UAE</h2>
           <span className="text-[12px] text-gray-500 font-medium">{projects.length} Available Listings</span>
         </div>
-        <label className="flex items-center gap-2 text-[13px] font-semibold text-[#374151] cursor-pointer bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-gray-200">
+        {/* <label className="flex items-center gap-2 text-[13px] font-semibold text-[#374151] cursor-pointer bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-gray-200">
           <input type="checkbox" className="w-4 h-4 accent-[#01155E]" />
           TruCheck™
-        </label>
+        </label> */}
       </div>
 
       {/* Scrollable Results Area */}
@@ -857,7 +858,7 @@ const [viewport, setViewport] = useState({
     {/* RIGHT SIDE: Mapbox Interface */}
    <div className="flex-1 relative bg-[#E8EEF4]">
   {/* Floating UI: Drive Time (Top Left) */}
-  <div className="absolute top-4 left-4 z-10">
+  {/* <div className="absolute top-4 left-4 z-10">
     <button className="flex items-center gap-2 bg-white rounded-lg px-4 py-2.5 shadow-xl border border-gray-200 hover:scale-105 transition-transform">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#01155E" strokeWidth="2.5">
         <circle cx="12" cy="12" r="10" />
@@ -868,7 +869,7 @@ const [viewport, setViewport] = useState({
         New
       </span>
     </button>
-  </div>
+  </div> */}
 
   {/* Floating UI: Close/Reset (Top Right) */}
   <div className="absolute top-4 right-4 z-10">

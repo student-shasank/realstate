@@ -1,6 +1,7 @@
 import React from 'react';
 import blog1 from '../../assets/Blog1.jpg';
 import blog2 from '../../assets/Blog2.jpg';
+import imageurl from "../../assets/underline.png";
 
 const BlogSection = () => {
   const blogs = [
@@ -56,25 +57,25 @@ const BlogSection = () => {
         </h2> */}
 
         {/* TITLE */}
-        <div className="mb-[50px]">
-          <h2
-            className="text-[#01155E] text-[32px] sm:text-[40px] lg:text-[48px] font-semibold mb-[10px]"
-            style={{
-              fontFamily: "Archivo, sans-serif",
-            }}
-          >
-            Blogs
-          </h2>
-
-          {/* UNDERLINE */}
-          <div className="flex w-[220px] sm:w-[260px] lg:w-[291px]">
-            {/* Thick left line */}
-            <div className="w-[110px] sm:w-[125px] lg:w-[135px] h-[6px] bg-[#01155E]" />
-
-            {/* Thin right line */}
-            <div className="flex-1 h-[2px] bg-[#01155E]" />
-          </div>
-        </div>
+        <div className="w-full max-w-[1200px] px-5 lg:px-0 mb-8 lg:mb-10">
+               <h2
+                 className="text-[#001A54] text-[32px] md:text-[40px] lg:text-[48px] font-bold mb-3 inline-block pb-2 leading-tight"
+                 style={{
+                   fontFamily: "Archivo, sans-serif",
+                   backgroundImage: `url(${imageurl})`,
+                   backgroundRepeat: "no-repeat",
+                   backgroundPosition: "left 90%",
+                   backgroundSize: "457px 6px",
+                 }}
+               >
+                 Market Updates
+               </h2>
+       
+               <p className="text-[#67739E] text-[16px] md:text-[18px] leading-relaxed max-w-[1200px]">
+                 Discover Dubai’s newest launches with expert guidance to secure the
+                 best prices and the most desirable units.
+               </p>
+             </div>
 
         {/* MAIN GRID */}
         <div className="flex flex-col lg:flex-row gap-[24px]">

@@ -149,49 +149,43 @@ const Compare = () => {
 
   /* ── Per-property card ── */
   const PropertyCard = ({ data, rawData, onViewDetails }) => {
-    if (!data || !rawData) {
+    if (!rawData) {
       return <div className="text-center py-12 text-gray-400">No data available</div>;
     }
 
     const {
       title,
-      price,
+      min_price,
+      max_price,
       currency = "AED",
-      bedrooms,
-      bathrooms,
-      builtUpArea,
-      garage,
-      type,
+      beds,
+      baths,
+      min_area,
+      max_area,
+      status,
       purpose,
-      furnishing,
-      developer,
-      listingStatus,
-      completionStatus,
-      yearBuilt,
-      handoverDate,
-      ownership,
-      plotArea,
-      totalBuildingArea,
-      serviceCharges,
-      paymentPlan = {},
-      investmentInsights = {},
-      buildingInfo = {},
-      regulatoryInfo = {},
-      location = {},
+      property_category = [],
+      developer_name,
+      feature_image,
+      city_name,
+      district_name,
+      expected_delivery_date,
       features = [],
-      agent = {},
-      projectInfo = {}
-    } = data;
+      isFeatured,
+      created_date,
+      _id
+    } = rawData;
 
-    const imageData = extractAllImages(rawData);
-    const featureImage = imageData.featureImage || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800";
+    const featureImage = feature_image || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800";
+    
+    const bedArray = beds ? beds.split(",").map(b => b.trim()) : [];
+    const areaRange = min_area && max_area ? `${min_area} - ${max_area}` : (min_area || max_area || "—");
+    const priceRange = min_price && max_price ? `${currency} ${Number(min_price).toLocaleString()} - ${Number(max_price).toLocaleString()}` : `${currency} ${Number(min_price || 0).toLocaleString()}`;
 
-    const paySteps = paymentPlan?.steps?.length
-      ? paymentPlan.steps
-      : [
-          { label: "Booking", percent: paymentPlan?.downPayment || 10 },
-          { label: "Handover", percent: 100 - (paymentPlan?.downPayment || 10) },
-        ];
+    const paySteps = [
+      { label: "Min Price", percent: 50 },
+      { label: "Max Price", percent: 50 }
+    ];
 
     return (
       <div className="flex flex-col">
@@ -219,7 +213,7 @@ const Compare = () => {
                   color: GOLD,
                 }}
               >
-                {type || "Property"}
+                {property_category?.[0] || "Property"}
               </span>
               <span
                 className="text-[16px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
@@ -229,7 +223,8 @@ const Compare = () => {
                   color: GREEN,
                 }}
               >
-                {completionStatus || "Ready"}
+                {/* {status || "On Sale"} */}
+                 { "Off Plan"}
               </span>
             </div>
             {/* Price + title bottom */}
@@ -237,7 +232,7 @@ const Compare = () => {
               <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
               <p className="font-black leading-none mb-4" style={{ color: GOLD, fontSize: 28 }}>
                 <span className="text-[18px] font-bold mr-1">{currency}</span>
-                {price ? Number(price).toLocaleString() : "—"}
+                {min_price ? Number(min_price).toLocaleString() : "—"}
               </p>
               <div className="flex gap-3">
                 <button
@@ -245,7 +240,7 @@ const Compare = () => {
                   style={{ background: "rgba(255,255,255,0.1)" }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = NAVY; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
-                  onClick={() => onViewDetails(rawData?._id)}
+                  onClick={() => onViewDetails(_id)}
                 >
                   View Details
                 </button>
@@ -262,68 +257,44 @@ const Compare = () => {
 
         {/* ── Quick Stats ── */}
         <div className="flex gap-3 mb-1">
-          <StatBox icon={<FaBed />} value={bedrooms} label="Beds" />
-          <StatBox icon={<FaBath />} value={bathrooms} label="Baths" />
-          <StatBox icon={<FaChartArea />} value={builtUpArea ? `${builtUpArea}` : null} label="SqFt" />
-          <StatBox icon={<FaCar />} value={garage} label="Garage" />
+          <StatBox icon={<FaBed />} value={bedArray?.[0] || "—"} label="Beds" />
+          <StatBox icon={<FaBath />} value={baths || "—"} label="Baths" />
+          <StatBox icon={<FaChartArea />} value={min_area ? `${min_area}` : null} label="SqFt" />
+          <StatBox icon={<FaCar />} value="—" label="Garage" />
         </div>
 
         {/* ── Core Specifications ── */}
         <SectionCard title="Core Specifications">
-          <InfoRow label="Type / Purpose" value={`${type || "—"} · ${purpose || "—"}`} />
-          <InfoRow label="Furnishing" value={furnishing} />
-          <InfoRow label="Developer" value={developer || projectInfo?.developer} />
-          <InfoRow label="Listing Type" value={listingStatus} />
-          <InfoRow label="Completion Status" value={completionStatus} />
-          <InfoRow label="Year Built" value={yearBuilt} />
-          <InfoRow label="Handover Date" value={handoverDate || projectInfo?.handoverDate} accent />
+          <InfoRow label="Category" value={property_category?.[0] || "—"} />
+          <InfoRow label="Purpose" value={purpose || "—"} />
+          <InfoRow label="Status" value={status || "—"} />
+          <InfoRow label="Developer" value={developer_name || "—"} />
+          <InfoRow label="Expected Delivery" value={expected_delivery_date || "—"} accent />
         </SectionCard>
 
-        {/* ── Ownership & Area ── */}
-        <SectionCard title="Ownership & Area">
-          <InfoRow label="Ownership" value={ownership} accent />
-          <InfoRow label="Built-up Area" value={builtUpArea ? `${builtUpArea} SqFt` : null} />
-          <InfoRow label="Total Building Area" value={totalBuildingArea ? `${Number(totalBuildingArea).toLocaleString()} SqFt` : null} />
-          <InfoRow label="Plot Area" value={plotArea} />
+        {/* ── Area Details ── */}
+        <SectionCard title="Area Details">
+          <InfoRow label="Min Area" value={min_area ? `${min_area} SqFt` : "—"} />
+          <InfoRow label="Max Area" value={max_area ? `${max_area} SqFt` : "—"} />
+          <InfoRow label="Area Range" value={areaRange} />
         </SectionCard>
 
-        {/* ── Financials ── */}
-        <SectionCard title="Financial Details">
-          <InfoRow label="Price" value={price ? `${currency} ${Number(price).toLocaleString()}` : null} accent />
-          <InfoRow label="Price / SqFt" value={investmentInsights?.pricePerSqFt ? `${currency} ${Number(investmentInsights.pricePerSqFt).toLocaleString()}` : null} />
-          <InfoRow label="Service Charges" value={serviceCharges ? `${currency} ${Number(serviceCharges).toLocaleString()}/yr` : null} />
-          <InfoRow label="Down Payment" value={paymentPlan?.downPayment ? `${paymentPlan.downPayment}%` : null} accent />
-          <InfoRow label="Installment Phases" value={paymentPlan?.installmentPlan?.length || paymentPlan?.steps?.length || "—"} />
+        {/* ── Price Details ── */}
+        <SectionCard title="Price Details">
+          <InfoRow label="Min Price" value={min_price ? `${currency} ${Number(min_price).toLocaleString()}` : "—"} accent />
+          <InfoRow label="Max Price" value={max_price ? `${currency} ${Number(max_price).toLocaleString()}` : "—"} accent />
+          <InfoRow label="Currency" value={currency} />
           <div className="mt-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Payment Structure</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Price Range</p>
             <PayBar steps={paySteps} />
           </div>
         </SectionCard>
 
-        {/* ── Investment Insights ── */}
-        <SectionCard title="Investment Insights">
-          <InfoRow label="Rental Yield" value={investmentInsights?.rentalYield} accent />
-          <InfoRow label="Price Trend" value={investmentInsights?.priceTrend} accent />
-          <InfoRow label="Rental Yield %" value={investmentInsights?.rentalYieldPercent ? `${investmentInsights.rentalYieldPercent}%` : null} />
-        </SectionCard>
-
-        {/* ── Building Info ── */}
-        <SectionCard title="Building Info">
-          <InfoRow label="Building Name" value={buildingInfo?.buildingName} />
-          <InfoRow label="Total Floors" value={buildingInfo?.totalFloors} />
-          <InfoRow label="Total Parking" value={buildingInfo?.totalParkingSpaces} />
-          <InfoRow label="Swimming Pools" value={buildingInfo?.swimmingPools} accent />
-          <InfoRow label="Elevators" value={buildingInfo?.elevators} />
-          <InfoRow label="Year of Completion" value={buildingInfo?.yearOfCompletion} />
-        </SectionCard>
-
-        {/* ── Regulatory ── */}
-        <SectionCard title="Regulatory">
-          <InfoRow label="Permit No." value={regulatoryInfo?.permitNumber} />
-          <InfoRow label="Zone" value={regulatoryInfo?.zoneName} />
-          <InfoRow label="RERA" value={regulatoryInfo?.rera} accent />
-          <InfoRow label="BRN" value={regulatoryInfo?.brn} />
-          <InfoRow label="Registered Agency" value={regulatoryInfo?.registeredAgency} />
+        {/* ── Unit Configuration ── */}
+        <SectionCard title="Unit Configuration">
+          <InfoRow label="Bedrooms" value={beds || "—"} />
+          <InfoRow label="Bathrooms" value={baths || "—"} />
+          <InfoRow label="Bed Types" value={bedArray?.length > 1 ? bedArray.join(", ") : bedArray?.[0] || "—"} accent />
         </SectionCard>
 
         {/* ── Location ── */}
@@ -336,16 +307,16 @@ const Compare = () => {
               <FaMapMarkerAlt className="text-white text-sm" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-sm">{location?.city}, {location?.country}</p>
-              <p className="text-xs  font-bold uppercase tracking-wide mt-0.5 text-[#67739E]">
-                {location?.community}
+              <p className="font-black text-gray-900 text-sm">{city_name || "—"}</p>
+              <p className="text-xs font-bold uppercase tracking-wide mt-0.5 text-[#67739E]">
+                {district_name || "—"}
               </p>
             </div>
           </div>
         </SectionCard>
 
         {/* ── Amenities ── */}
-        <SectionCard title="Luxury Amenities">
+        <SectionCard title="Amenities & Features">
           <div className="flex flex-wrap gap-2 mt-1">
             {features?.length
               ? features.map((f, idx) => <AmenityPill key={idx} label={f} />)
@@ -354,28 +325,12 @@ const Compare = () => {
           </div>
         </SectionCard>
 
-        {/* ── Agent ── */}
-        <div
-          className="mt-5 rounded-3xl p-5 flex items-center gap-4 border border-gray-100"
-          style={{ background: "#F8F9FB" }}
-        >
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-white text-lg flex-shrink-0"
-            style={{ background: NAVY }}
-          >
-            {agent?.name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "AG"}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-black text-gray-900 text-sm truncate">{agent?.name || "—"}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">{agent?.agency || "—"}</p>
-            {agent?.phone && (
-              <p className="text-xs text-gray-500 mt-1">{agent.phone}</p>
-            )}
-          </div>
-          <div className="bg-white p-3 rounded-2xl border border-gray-100">
-            <FaUserTie className="text-lg" style={{ color: NAVY }} />
-          </div>
-        </div>
+        {/* ── Additional Info ── */}
+        <SectionCard title="Additional Information">
+          <InfoRow label="Availability" value={status || "—"} />
+          <InfoRow label="Featured" value={isFeatured ? "Yes" : "No"} />
+          <InfoRow label="Created Date" value={created_date ? new Date(created_date).toLocaleDateString() : "—"} />
+        </SectionCard>
       </div>
     );
   };
@@ -421,7 +376,7 @@ const Compare = () => {
                   })
                   .map((item) => (
                     <option key={getID(item)} value={getID(item)}>
-                      {item.mapped?.title || "Listing"}
+                      {item.raw?.title || "Listing"}
                     </option>
                   ))}
               </select>

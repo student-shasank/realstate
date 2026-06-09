@@ -58,7 +58,8 @@ const UpcomingProjects = () => {
             backgroundSize: "457px 6px",
           }}
         >
-          Market Updates
+          Newest Launches
+          
         </h2>
 
         <p className="text-[#67739E] text-[16px] md:text-[18px] leading-relaxed max-w-[1200px]">

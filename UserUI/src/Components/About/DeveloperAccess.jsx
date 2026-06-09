@@ -82,16 +82,15 @@ const DeveloperAccess = () => {
 const ListItem = ({ text }) => (
   <div className="flex items-center gap-4 group">
     <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-[#F0F4FF] rounded-full   duration-300">
-      <svg 
-        className="w-3.5 h-3.5 stroke-[#01155E]  transition-colors duration-300"
-        viewBox="0 0 24 24" 
-        fill="none" 
-        strokeWidth="3" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      >
-        <path d="M5 12h14m-7-7 7 7-7 7"/>
-      </svg>
+      <svg
+  className=" h-5"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#01155E"
+  strokeWidth="2"
+>
+  <circle cx="12" cy="12" r="6" />
+</svg>
     </div>
     <span className="text-[#01155E] text-lg md:text-xl font-semibold font-['General_Sans']">
       {text}

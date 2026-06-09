@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
 import heartIcon from "../../assets/like.svg"
-import callIcon from '../../assets/phonecall.svg';
+import callIcon from '../../assets/phonecall2.svg';
 import whatsappIcon from '../../assets/whatsap.png';
-import shareIcon from '../../assets/linkshare.svg'
+import shareIcon from '../../assets/share2.svg'
 import listingimage from '../../assets/ListingCard.jpg'
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'
@@ -544,3 +544,5 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 };
 
 export default ListingCard;
+
+

@@ -102,20 +102,20 @@ const FeaturesSection = () => {
             />
 
             {/* TOP RIGHT BADGE */}
-            <div className="absolute top-4 -right-4 sm:top-6 sm:-right-6 lg:top-10 lg:-right-19 bg-[#001457] text-white rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-2 sm:gap-3 lg:gap-4 shadow-2xl z-20">
+            {/* <div className="absolute top-4 -right-4 sm:top-6 sm:-right-6 lg:top-10 lg:-right-19 bg-[#001457] text-white rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-2 sm:gap-3 lg:gap-4 shadow-2xl z-20">
               <span className="text-[28px] sm:text-[40px] lg:text-[60px] font-medium leading-none">87+</span>
               <p className="text-[11px] sm:text-[14px] lg:text-[24px] font-medium leading-tight w-[120px] sm:w-[190px] lg:w-[241px]">
                 Successful Transactions Monthly
               </p>
-            </div>
+            </div> */}
 
             {/* BOTTOM LEFT BADGE */}
-            <div className="absolute bottom-4 -left-4 sm:bottom-6 sm:-left-6 lg:bottom-25 lg:-left-19 bg-white text-[#001457] rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-3 sm:gap-4 lg:gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.12)] z-20 border border-gray-100">
+            {/* <div className="absolute bottom-4 -left-4 sm:bottom-6 sm:-left-6 lg:bottom-25 lg:-left-19 bg-white text-[#001457] rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-3 sm:gap-4 lg:gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.12)] z-20 border border-gray-100">
               <span className="text-[28px] sm:text-[40px] lg:text-[64px] font-medium leading-none">87+</span>
               <p className="text-[11px] sm:text-[14px] lg:text-[24px] font-medium leading-tight text-[#001457] w-[120px] sm:w-[190px] lg:w-[241px]">
                 Successful Transactions Monthly
               </p>
-            </div>
+            </div> */}
           </div>
 
         </div>

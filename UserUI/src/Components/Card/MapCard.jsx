@@ -85,12 +85,12 @@ const MapCard = ({ item }) => {
         )}
 
         {/* TruCheck Badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
+        {/* <div className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-black">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
           <span className="text-[11px] font-bold text-gray-800">TruCheck™</span>
-        </div>
+        </div> */}
 
         {/* Heart */}
         <button 
@@ -109,14 +109,30 @@ const MapCard = ({ item }) => {
               onClick={(e) => { e.stopPropagation(); setCurrentImg(prev => prev === 0 ? images.length - 1 : prev - 1); }}
               className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 rounded-full flex items-center justify-center opacity-100 hover:bg-white"
             >
-              ◀
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 18L9 12L15 6"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
 
             <button 
               onClick={(e) => { e.stopPropagation(); setCurrentImg(prev => prev === images.length - 1 ? 0 : prev + 1); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 rounded-full flex items-center justify-center opacity-100 hover:bg-white"
             >
-              ▶
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 18L15 12L9 6"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </button>
           </>
         )}
