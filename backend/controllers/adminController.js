@@ -25,34 +25,106 @@ const parseArray = (val) => {
 };
 
 // ── DASHBOARD ─────────────────────────────────────────────────
+// export const dashboard = async (req, res) => {
+//   try {
+//     const [
+//       totalListings,
+//       activeListings,
+//       pendingListings,
+//       featuredListings,
+//       listings,
+//     ] = await Promise.all([
+//       Listing.countDocuments(),
+//       Listing.countDocuments({ propertyStatus: "active" }),
+//       Listing.countDocuments({ propertyStatus: "pending" }),
+//       Listing.countDocuments({ isFeatured: true }),
+//       Listing.find().sort({ createdAt: -1 }).limit(2000),
+//     ]);
+
+//     return res.json({
+//   message: "Admin Dashboard Access",
+//   admin: req.user,
+//   stats: { totalListings, activeListings, pendingListings, featuredListings },
+//   listings,
+// });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
+// ── DASHBOARD with Pagination + MongoDB Search ─────────────────
 export const dashboard = async (req, res) => {
   try {
-    const [
-      totalListings,
-      activeListings,
-      pendingListings,
-      featuredListings,
-      listings,
-    ] = await Promise.all([
-      Listing.countDocuments(),
-      Listing.countDocuments({ propertyStatus: "active" }),
-      Listing.countDocuments({ propertyStatus: "pending" }),
-      Listing.countDocuments({ isFeatured: true }),
-      Listing.find().sort({ createdAt: -1 }).limit(2000),
+    const {
+      page = 1,
+      limit = 20,
+      search = "",
+      status = "",
+    } = req.query;
+
+    const pageNum  = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip     = (pageNum - 1) * limitNum;
+
+    // ── Build match filter ──────────────────────────────────────
+    const matchStage = {};
+
+    if (status && status !== "All") {
+      matchStage.propertyStatus = status.toLowerCase();
+    }
+
+    if (search.trim()) {
+      matchStage.$or = [
+        { title:          { $regex: search, $options: "i" } },
+        { city_name:      { $regex: search, $options: "i" } },
+        { district_name:  { $regex: search, $options: "i" } },
+        { developer_name: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // ── Run aggregation + count in parallel ────────────────────
+    const [result, stats] = await Promise.all([
+      Listing.aggregate([
+        { $match: matchStage },
+        { $sort:  { createdAt: -1 } },
+        { $skip:  skip },
+        { $limit: limitNum },
+      ]),
+
+      Listing.aggregate([
+        {
+          $facet: {
+            total:    [{ $count: "count" }],
+            active:   [{ $match: { propertyStatus: "active"   } }, { $count: "count" }],
+            pending:  [{ $match: { propertyStatus: "pending"  } }, { $count: "count" }],
+            featured: [{ $match: { isFeatured: true           } }, { $count: "count" }],
+          },
+        },
+      ]),
     ]);
 
+    const s = stats[0];
+
     return res.json({
-  message: "Admin Dashboard Access",
-  admin: req.user,
-  stats: { totalListings, activeListings, pendingListings, featuredListings },
-  listings,
-});
+      message: "Admin Dashboard Access",
+      admin: req.user,
+      stats: {
+        totalListings:    s.total[0]?.count    || 0,
+        activeListings:   s.active[0]?.count   || 0,
+        pendingListings:  s.pending[0]?.count  || 0,
+        featuredListings: s.featured[0]?.count || 0,
+      },
+      listings:    result,
+      currentPage: pageNum,
+      totalPages:  Math.ceil((s.total[0]?.count || 0) / limitNum),
+      totalCount:  s.total[0]?.count || 0,
+    });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
 };
-
 // ── CREATE LISTING ────────────────────────────────────────────
 // ── CREATE LISTING ────────────────────────────────────────────
 // ── CREATE LISTING ────────────────────────────────────────────

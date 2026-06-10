@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
@@ -256,7 +256,10 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const { data, loading, error } = useSelector((state) => state.dashboard);
+
+  // ── Updated: listings + pagination from slice ─────────────────
+  const { data, listings, loading, loadingMore, error, currentPage, totalPages } =
+    useSelector((state) => state.dashboard);
 
   const [editStatusId, setEditStatusId] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -269,65 +272,75 @@ function Dashboard() {
 
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+
+  // ── Debounce search 500ms ─────────────────────────────────────
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(searchQuery), 500);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  // ── Fetch on tab / search change — always page 1 ──────────────
+  useEffect(() => {
+    dispatch(fetchDashboard({ page: 1, limit: 20, search: debouncedQ, status: activeTab }));
+  }, [dispatch, debouncedQ, activeTab]);
+
+  // ── Infinite scroll loader ref ────────────────────────────────
+  const loaderRef = useRef(null);
 
   useEffect(() => {
-    dispatch(fetchDashboard());
-  }, [dispatch]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loadingMore &&
+          currentPage < totalPages
+        ) {
+          dispatch(fetchDashboard({
+            page: currentPage + 1,
+            limit: 20,
+            search: debouncedQ,
+            status: activeTab,
+          }));
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [dispatch, loadingMore, currentPage, totalPages, debouncedQ, activeTab]);
 
-  const listings = useMemo(() => {
-    if (!data || !Array.isArray(data.listings)) return [];
-    return data.listings;
-  }, [data]);
-
-  const filteredListings = useMemo(() => {
-    let list = listings;
-
-    if (activeTab !== "All") {
-      list = list.filter((item) =>
-        item.propertyStatus?.toLowerCase() === activeTab.toLowerCase()
-      );
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (item) =>
-          item.title?.toLowerCase().includes(q) ||
-          item.city_name?.toLowerCase().includes(q) ||
-          item.district_name?.toLowerCase().includes(q) ||
-          item.developer_name?.toLowerCase().includes(q)
-      );
-    }
-
-    return list;
-  }, [listings, activeTab, searchQuery]);
-
+  // ── Stats from backend ────────────────────────────────────────
   const stats = useMemo(() => ({
-    total: listings.length,
-    active: listings.filter((l) => l.propertyStatus === "active").length,
-    pending: listings.filter((l) => l.propertyStatus === "pending").length,
-    featured: listings.filter((l) => l.isFeatured).length,
-  }), [listings]);
+    total:    data?.stats?.totalListings    || 0,
+    active:   data?.stats?.activeListings   || 0,
+    pending:  data?.stats?.pendingListings  || 0,
+    featured: data?.stats?.featuredListings || 0,
+  }), [data]);
 
   const tabs = ["All", "active", "pending", "rejected"];
 
   const tabLabel = (t) =>
     t === "All" ? "All" : t.charAt(0).toUpperCase() + t.slice(1);
 
+  // ── Tab counts from backend stats ────────────────────────────
   const tabCount = (t) => {
-    if (t === "All") return listings.length;
-    return listings.filter((l) => l.propertyStatus?.toLowerCase() === t).length;
+    if (t === "All")      return stats.total;
+    if (t === "active")   return stats.active;
+    if (t === "pending")  return stats.pending;
+    if (t === "rejected") return data?.stats?.rejectedListings || 0;
+    return 0;
   };
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[#67739E] font-medium">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
+  //       <div className="flex flex-col items-center gap-3">
+  //         <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+  //         <p className="text-[#67739E] font-medium">Loading dashboard...</p>
+  //       </div>
+  //     </div>
+  //   );
 
   if (error)
     return (
@@ -339,12 +352,12 @@ function Dashboard() {
       </div>
     );
 
-  if (!data?.listings)
-    return (
-      <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
-        <p className="text-[#67739E]">No listings found.</p>
-      </div>
-    );
+  // if (!listings || listings.length === 0 && !loading)
+  //   return (
+  //     <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
+  //       <p className="text-[#67739E]">No listings found.</p>
+  //     </div>
+  //   );
 
   return (
     <div className="min-h-screen bg-[#F5F7FC] font-['General_Sans',sans-serif]">
@@ -427,17 +440,25 @@ function Dashboard() {
         </div>
 
         {/* ── Listings Grid ── */}
-        {filteredListings.length === 0 ? (
-          <div className="text-center py-20 text-[#67739E]">
-            <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            <p className="font-semibold text-[16px]">No listings found</p>
-            <p className="text-sm mt-1">Try adjusting your search or tab filter.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredListings.map((item) => (
+       {/* ── Listings Grid ── */}
+{loading ? (
+  <div className="flex justify-center py-20">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-[#67739E] font-medium">Loading...</p>
+    </div>
+  </div>
+) : listings.length === 0 ? (
+  <div className="text-center py-20 text-[#67739E]">
+    <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+    <p className="font-semibold text-[16px]">No listings found</p>
+    <p className="text-sm mt-1">Try adjusting your search or tab filter.</p>
+  </div>
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {listings.map((item) => (
               <div key={item._id} className="flex flex-col">
                 <ListingRowCard
                   item={item}
@@ -459,8 +480,7 @@ function Dashboard() {
                       value={newStatus}
                       onChange={setNewStatus}
                       onSave={() => {
-                        dispatch(updateListingStatus({ id: item._id, status: newStatus }))
-                          .then(() => dispatch(fetchDashboard()));
+                        dispatch(updateListingStatus({ id: item._id, status: newStatus }));
                         setEditStatusId(null);
                       }}
                       onCancel={() => setEditStatusId(null)}
@@ -480,8 +500,7 @@ function Dashboard() {
                       value={newAvailability}
                       onChange={setNewAvailability}
                       onSave={() => {
-                        dispatch(updateListingAvailability({ id: item._id, availability: newAvailability }))
-                          .then(() => dispatch(fetchDashboard()));
+                        dispatch(updateListingAvailability({ id: item._id, availability: newAvailability }));
                         setEditAvailabilityId(null);
                       }}
                       onCancel={() => setEditAvailabilityId(null)}
@@ -501,8 +520,7 @@ function Dashboard() {
                       value={newFeatured}
                       onChange={setNewFeatured}
                       onSave={() => {
-                        dispatch(updateListingFeatured({ id: item._id, isFeatured: newFeatured === "true" }))
-                          .then(() => dispatch(fetchDashboard()));
+                        dispatch(updateListingFeatured({ id: item._id, isFeatured: newFeatured === "true" }));
                         setEditFeaturedId(null);
                       }}
                       onCancel={() => setEditFeaturedId(null)}
@@ -514,6 +532,20 @@ function Dashboard() {
             ))}
           </div>
         )}
+
+        {/* ── Infinite Scroll Loader ── */}
+        <div ref={loaderRef} className="py-8 flex justify-center">
+          {loadingMore && (
+            <div className="flex items-center gap-2 text-[#67739E]">
+              <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-sm font-medium">Loading more...</span>
+            </div>
+          )}
+          {!loadingMore && currentPage >= totalPages && listings.length > 0 && (
+            <p className="text-[#A0AABF] text-sm">All {stats.total} listings loaded</p>
+          )}
+        </div>
+
       </div>
     </div>
   );

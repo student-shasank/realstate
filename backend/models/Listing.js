@@ -210,3 +210,6 @@ const ListingSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Listing", ListingSchema);
+// models/Listing.js ke schema mein ya connection ke baad ek baar
+ListingSchema.index({ propertyStatus: 1, createdAt: -1 });
+ListingSchema.index({ title: "text", city_name: "text", district_name: "text", developer_name: "text" });
