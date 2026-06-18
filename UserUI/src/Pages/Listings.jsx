@@ -1,16 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios"; // ADD THIS IMPORT
 import imageurl from "../assets/underline.png";
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown";
 import Map, { Marker, NavigationControl } from 'react-map-gl';
 
-import { VITE_MAPBOX_TOKEN } from "../Constant/constant";
+import { VITE_MAPBOX_TOKEN, PROJECTS_API } from "../Constant/constant"; // ADD PROJECTS_API
 import MapMarker from "../Components/Card/MapMarker"
-
-
-
-
 
 import {
   fetchProjects,
@@ -25,36 +22,46 @@ import {
   togglePrice,
   closeDropdowns,
   setDeveloper,
-  
+  setProjects,
+   appendProjects, // ADD THIS
 } from "../features/dashboard/searchSlice";
 import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
 import MapCard from "../Components/Card/MapCard"
 
-
 const Listings = () => {
-  const MAPBOX_TOKEN = VITE_MAPBOX_TOKEN ;
-const [viewport, setViewport] = useState({
-  latitude: 25.2048, // Dubai Default
-  longitude: 55.2708,
-  zoom: 11
-});
-
+  const MAPBOX_TOKEN = VITE_MAPBOX_TOKEN;
+  const [viewport, setViewport] = useState({
+    latitude: 25.2048, // Dubai Default
+    longitude: 55.2708,
+    zoom: 11
+  });
 
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const bedBathRef = useRef(null);
   const priceRef = useRef(null);
-
   const propertyTypeRef = useRef(null);
   const handoverRef = useRef(null);
   const emiratesRef = useRef(null);
+  const scrollContainerRef = useRef(null); // ADD THIS FOR SCROLL DETECTION
+
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [propertyTab, setPropertyTab] = useState("Residential");
-
   const [viewMode, setViewMode] = useState("list");
-  
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // FILTER STATE VARIABLES (moved here to fix dependency ordering before callbacks)
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedEmirates, setSelectedEmirates] = useState([]);
+  const [isHandoverOpen, setIsHandoverOpen] = useState(false);
+  const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
+  const [selectedDevelopers, setSelectedDevelopers] = useState([]);
+  const [hoveredListingId, setHoveredListingId] = useState(null);
+
+  // INFINITE SCROLL LOADER REF
+  const loaderRef = useRef(null);
 
   const residentialOptions = [
     "Apartment",
@@ -90,12 +97,106 @@ const [viewport, setViewport] = useState({
     minPrice,
     maxPrice,
     developer,
-    
     projects,
     loading,
     error,
     success,
+    totalPages,
+    currentPage,
   } = useSelector((state) => state.search);
+
+  // INFINITE SCROLL WITH INTERSECTION OBSERVER (like your Dashboard)
+  useEffect(() => {
+    console.log("👀 Setting up IntersectionObserver - loaderRef:", loaderRef.current);
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        console.log("🔔 IntersectionObserver triggered:", {
+          isIntersecting: entries[0].isIntersecting,
+          isLoadingMore,
+          currentPage,
+          totalPages,
+          shouldLoad: entries[0].isIntersecting && !isLoadingMore && currentPage < totalPages,
+        });
+        
+        if (
+          entries[0].isIntersecting &&
+          !isLoadingMore &&
+          currentPage < totalPages
+        ) {
+          console.log("📍 Loader detected - Loading page:", currentPage + 1);
+          loadMoreListings();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (loaderRef.current) {
+      console.log("✅ Observing loaderRef");
+      observer.observe(loaderRef.current);
+    } else {
+      console.log("❌ loaderRef is NULL - Loader not found!");
+    }
+    
+    return () => observer.disconnect();
+  }, [isLoadingMore, currentPage, totalPages]);
+
+  // FUNCTION TO LOAD MORE LISTINGS
+  const loadMoreListings = useCallback(async () => {
+    console.log("🔄 loadMoreListings called - currentPage:", currentPage);
+    setIsLoadingMore(true);
+    
+    const nextPage = currentPage + 1;
+    
+    const params = {
+      location: location || "",
+      completion: completion || "",
+      propertyType: propertyType || "",
+      beds: beds || "",
+      baths: baths || "",
+      minPrice: minPrice || "",
+      maxPrice: maxPrice || "",
+      developer: Array.isArray(developer) 
+        ? developer.map(d => d.toLowerCase().trim()).join(",")
+        : developer || "",
+      emirates: Array.isArray(selectedEmirates)
+        ? selectedEmirates.map(e => e.toLowerCase().trim()).join(",")
+        : "",
+      handoverYear: Array.isArray(selectedHandoverYears)
+        ? selectedHandoverYears.map(y => y.toLowerCase().trim()).join(",")
+        : "",
+      page: nextPage,
+      limit: 20,
+    };
+
+    console.log("📤 Sending params:", { page: nextPage, limit: 20, location: params.location });
+
+    try {
+      const response = await axios.get(PROJECTS_API, { params });
+      
+      console.log("📥 API Response received:", {
+        dataLength: response.data?.data?.length,
+        totalPages: response.data?.totalPages,
+        currentPage: response.data?.page,
+        total: response.data?.total,
+      });
+      
+      if (response.data?.data && response.data.data.length > 0) {
+        console.log("✅ Appending", response.data.data.length, "new items");
+        // APPEND new listings to existing ones
+        dispatch(appendProjects({
+  data: response.data.data,
+  currentPage: nextPage
+}));
+      } else {
+        console.log("⚠️ No data in response");
+      }
+    } catch (error) {
+      console.error("❌ Error loading more listings:", error.message);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [currentPage, location, completion, propertyType, beds, baths, minPrice, maxPrice, developer, selectedEmirates, selectedHandoverYears, projects, dispatch]);
 
   useEffect(() => {
     const urlLocation = searchParams.get("location") || "";
@@ -129,11 +230,8 @@ const [viewport, setViewport] = useState({
     dispatch(setBaths(urlBaths));
     dispatch(setMinPrice(urlMinPrice));
     dispatch(setMaxPrice(urlMaxPrice));
-
-
     dispatch(setDeveloper(urlDeveloper));
     setSelectedDevelopers(developerArray);
-   
     setSelectedHandoverYears(handoverYearArray);
 
     dispatch(
@@ -146,11 +244,14 @@ const [viewport, setViewport] = useState({
         minPrice: urlMinPrice,
         maxPrice: urlMaxPrice,
         developer: developerArray,
-        
         emirates: emiratesArray,
         handoverYear: handoverYearArray,
+        page: 1,          // ✅ IMPORTANT: Page 1
+        limit: 20,        // ✅ IMPORTANT: 20 per page
       })
     );
+    
+    console.log("🚀 Initial Fetch with page:1, limit:20");
   }, [dispatch, searchParams]);
 
   const closeAllDropdowns = () => {
@@ -192,6 +293,7 @@ const [viewport, setViewport] = useState({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dispatch]);
+
   const updateParams = (key, value) => {
     const params = new URLSearchParams(searchParams);
     if (value && value !== "") {
@@ -232,8 +334,6 @@ const [viewport, setViewport] = useState({
     updateParams("maxPrice", value);
   };
 
-
-
   const clearAllFilters = () => {
     dispatch(setLocation(""));
     dispatch(setCompletion(""));
@@ -244,8 +344,7 @@ const [viewport, setViewport] = useState({
     dispatch(setMaxPrice(""));
     setSelectedHandoverYears([]);
     setIsHandoverOpen(false);
-    setSearchParams({});
-   
+    setIsOpen(false);
     dispatch(setDeveloper(""));
     setSelectedDevelopers([]);
     setSelectedEmirates([]);
@@ -279,9 +378,6 @@ const [viewport, setViewport] = useState({
     overflow: "visible",
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedEmirates, setSelectedEmirates] = useState([]);
-
   const handleEmiratesChange = (emirate) => {
     const emirateValue = emirate.toLowerCase();
     const updatedEmirates = selectedEmirates.includes(emirateValue)
@@ -311,9 +407,6 @@ const [viewport, setViewport] = useState({
     "Sharjah", 
   ];
 
-  const [isHandoverOpen, setIsHandoverOpen] = useState(false);
-  const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
-
   const handoverYears = [
     { label: "2026", value: "2026" },
     { label: "2027", value: "2027" },
@@ -322,8 +415,6 @@ const [viewport, setViewport] = useState({
     { label: "Post 2030", value: "post 2030" },
   ];
 
-  const [selectedDevelopers, setSelectedDevelopers] = useState([]);
-
   const developerOptions = [
     "Zara Builders",
     "DAMAC",
@@ -331,7 +422,6 @@ const [viewport, setViewport] = useState({
     "Nakheel",
     "Azizi",
   ];
-  const [hoveredListingId, setHoveredListingId] = useState(null);
 
   return (
     <div className="pt-5 bg-white min-h-screen mt-20">
@@ -352,19 +442,15 @@ const [viewport, setViewport] = useState({
             >
               Properties for sale in UAE
             </h1>
-            {/* Decorative Blue Underline */}
           </div>
 
           <div className="flex items-center gap-6">
-            {/* Sort Dropdown */}
             <div className="flex items-center cursor-pointer gap-2">
               <span className="text-[#01155E] text-[18px]">Most popular</span>
               <ChevronDown className="h-5 w-5 text-[#01155E]" />
             </div>
 
-            {/* View Switchers */}
             <div className="flex items-center gap-2">
-              {/* List View Active */}
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-2.5 rounded-xl transition-all ${viewMode === "list"
@@ -377,7 +463,6 @@ const [viewport, setViewport] = useState({
                 </svg>
               </button>
 
-              {/* Grid View Inactive */}
               <button
                 onClick={() => setViewMode("map")}
                 className={`p-2.5 rounded-xl transition-all ${viewMode === "map"
@@ -396,6 +481,7 @@ const [viewport, setViewport] = useState({
           </div>
         </div>
 
+        {/* FILTERS SECTION */}
         <div className="w-[1290px] min-h-[236px] mx-auto bg-[#1C4DFF0A] border border-[#E5E7EB] rounded-[10px] p-[30px] flex flex-col gap-[30px] items-center font-['Archivo']">
           <div className="w-[1230px] flex flex-col gap-[16px]">
             <div className="flex gap-[24px] w-full">
@@ -413,7 +499,7 @@ const [viewport, setViewport] = useState({
               </div>
 
               <button
-                onClick={() =>
+                onClick={() => {
                   dispatch(
                     fetchProjects({
                       location,
@@ -424,12 +510,14 @@ const [viewport, setViewport] = useState({
                       minPrice,
                       maxPrice,
                       developer: selectedDevelopers,
-                      
                       emirates: selectedEmirates,
                       handoverYear: selectedHandoverYears,
+                      page: 1,
+                      limit: 20,
                     })
-                  )
-                }
+                  );
+                  console.log("🔄 Search clicked - page:1");
+                }}
                 className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
               >
                 Search
@@ -441,14 +529,12 @@ const [viewport, setViewport] = useState({
                 selectedDevelopers={selectedDevelopers}
                 setSelectedDevelopers={(developers) => {
                   setSelectedDevelopers(developers);
-
                   const joined = developers.join(",");
                   dispatch(setDeveloper(joined));
                   updateParams("developer", joined);
                 }}
               />
 
-              {/* BEDS & BATHS DROPDOWN START */}
               <div className="relative" ref={bedBathRef}>
                 <button
                   type="button"
@@ -494,9 +580,7 @@ const [viewport, setViewport] = useState({
                   </div>
                 )}
               </div>
-              {/* BEDS & BATHS DROPDOWN END */}
 
-              {/* PRICE DROPDOWN START */}
               <div className="relative" ref={priceRef}>
                 <button
                   type="button"
@@ -561,7 +645,6 @@ const [viewport, setViewport] = useState({
                   </div>
                 )}
               </div>
-              {/* PRICE DROPDOWN END */}
 
               <div className="relative w-full" ref={propertyTypeRef}>
                 <button
@@ -574,17 +657,13 @@ const [viewport, setViewport] = useState({
                   className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] text-[#67739E] text-[16px]"
                 >
                   <span className="truncate">{propertyType || "Residential"}</span>
-
                   <ChevronDown
-                    className={`h-4 w-4 text-[#67739E] transition-transform ${propertyTypeOpen ? "rotate-180" : ""
-                      }`}
+                    className={`h-4 w-4 text-[#67739E] transition-transform ${propertyTypeOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
                 {propertyTypeOpen && (
                   <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-[12px] shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
-
-                    {/* HEADER */}
                     <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
                       <span className="text-[14px] font-medium text-[#67739E]">
                         {propertyTab}
@@ -592,7 +671,6 @@ const [viewport, setViewport] = useState({
                       <ChevronDown className="h-4 w-4 text-[#67739E] rotate-180" />
                     </div>
 
-                    {/* TABS */}
                     <div className="grid grid-cols-2 px-3 pt-2">
                       <button
                         type="button"
@@ -617,7 +695,6 @@ const [viewport, setViewport] = useState({
                       </button>
                     </div>
 
-                    {/* OPTIONS */}
                     <div className="grid grid-cols-2 gap-x-2 gap-y-2 p-3 pt-2">
                       {(propertyTab === "Residential"
                         ? residentialOptions
@@ -640,8 +717,7 @@ const [viewport, setViewport] = useState({
                               }`}
                           >
                             <div
-                              className={`w-[16px] h-[16px] rounded-full border flex items-center justify-center flex-shrink-0 ${isActive ? "border-white" : "border-black"
-                                }`}
+                              className={`w-[16px] h-[16px] rounded-full border flex items-center justify-center flex-shrink-0 ${isActive ? "border-white" : "border-black"}`}
                             >
                               {isActive && (
                                 <div className="w-[7px] h-[7px] rounded-full bg-white" />
@@ -658,6 +734,7 @@ const [viewport, setViewport] = useState({
                   </div>
                 )}
               </div>
+
               <select className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
                 <option value="">Sale status</option>
               </select>
@@ -680,8 +757,7 @@ const [viewport, setViewport] = useState({
                   </span>
 
                   <svg
-                    className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${isHandoverOpen ? "rotate-180" : ""
-                      }`}
+                    className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${isHandoverOpen ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -703,8 +779,7 @@ const [viewport, setViewport] = useState({
                           key={year.value}
                           type="button"
                           onClick={() => handleHandoverYearChange(year.value)}
-                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""
-                            }`}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
                         >
                           <div className="w-[24px] flex justify-center flex-shrink-0">
                             <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
@@ -759,7 +834,7 @@ const [viewport, setViewport] = useState({
                 </button>
 
                 {isOpen && (
-                  <div className="absolute top-full left-0 mt-0 z-50 w-full  rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[2px] ">
+                  <div className="absolute top-full left-0 mt-0 z-50 w-full rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[2px]">
                     {emirates.map((emirate) => (
                       <div
                         key={emirate}
@@ -799,128 +874,133 @@ const [viewport, setViewport] = useState({
 
         {!loading && projects?.length > 0 && (
           viewMode === "list" ? (
-            <div style={listingsGridStyle}>
-              {projects.map((item) => (
-                <ListingCard
-                  key={item._id}
-                  listing={item}
-                  onRequireLogin={() => {
-                    const event = new CustomEvent("openLogin");
-                    window.dispatchEvent(event);
-                  }}
-                />
-              ))}
+            <div>
+              <div style={listingsGridStyle}>
+                {projects.map((item) => (
+                  <ListingCard
+                    key={item._id}
+                    listing={item}
+                    onRequireLogin={() => {
+                      const event = new CustomEvent("openLogin");
+                      window.dispatchEvent(event);
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Loader for list view */}
+              <div ref={loaderRef} className="py-8 flex justify-center">
+                {isLoadingMore && (
+                  <div className="flex items-center gap-2 text-[#67739E]">
+                    <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-medium">Loading more...</span>
+                  </div>
+                )}
+                {!isLoadingMore && currentPage >= totalPages && projects.length > 0 && (
+                  <p className="text-[#A0AABF] text-sm">All listings loaded</p>
+                )}
+              </div>
             </div>
           ) : (
             <div className="w-full max-w-[1440px] mx-auto mt-6 flex border border-[#E5E7EB] rounded-xl overflow-hidden bg-white h-[calc(100vh-160px)] min-h-[600px] shadow-sm">
-    
-    {/* LEFT SIDE: Scrollable Sidebar */}
-    <div className="w-[450px] lg:w-[500px] flex flex-col border-r border-[#E5E7EB] bg-[#F8F9FB]">
-      
-      {/* Sidebar Header */}
-      <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
-        <div className="flex flex-col">
-          <h2 className="text-[16px] font-bold text-[#01155E]">Properties in UAE</h2>
-          <span className="text-[12px] text-gray-500 font-medium">{projects.length} Available Listings</span>
-        </div>
-        {/* <label className="flex items-center gap-2 text-[13px] font-semibold text-[#374151] cursor-pointer bg-[#F3F4F6] px-3 py-1.5 rounded-lg border border-gray-200">
-          <input type="checkbox" className="w-4 h-4 accent-[#01155E]" />
-          TruCheck™
-        </label> */}
-      </div>
+              {/* LEFT SIDE: Scrollable Sidebar */}
+              <div className="w-[450px] lg:w-[500px] flex flex-col border-r border-[#E5E7EB] bg-[#F8F9FB]">
+                
+                {/* Sidebar Header */}
+                <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <h2 className="text-[16px] font-bold text-[#01155E]">Properties in UAE</h2>
+                    <span className="text-[12px] text-gray-500 font-medium">{projects.length} Available Listings</span>
+                  </div>
+                </div>
 
-      {/* Scrollable Results Area */}
-      <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-        <div className="grid grid-cols-2 gap-3">
-          {projects.map((item) => {
-  const itemId = item._id?.$oid || item._id;
+                {/* Scrollable Results Area WITH INFINITE SCROLL */}
+                <div 
+                  className="flex-1 overflow-y-auto p-4 custom-scrollbar"
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    {projects.map((item) => {
+                      const itemId = item._id?.$oid || item._id;
 
-  return (
-    <div
-      key={itemId}
-      className="rounded-xl transition-all"
-      onMouseEnter={() => setHoveredListingId(itemId)}
-      onMouseLeave={() => setHoveredListingId(null)}
-    >
-      <MapCard item={item} isHovered={hoveredListingId === itemId} />
-    </div>
-  );
-})}
-        </div>
-        {projects.length > 0 && (
-          <div className="py-10 text-center border-t border-gray-100 mt-6">
-            <p className="text-gray-400 text-sm font-medium">End of properties</p>
-          </div>
-        )}
-      </div>
-    </div>
+                      return (
+                        <div
+                          key={itemId}
+                          className="rounded-xl transition-all"
+                          onMouseEnter={() => setHoveredListingId(itemId)}
+                          onMouseLeave={() => setHoveredListingId(null)}
+                        >
+                          <MapCard item={item} isHovered={hoveredListingId === itemId} />
+                        </div>
+                      );
+                    })}
+                  </div>
 
-    {/* RIGHT SIDE: Mapbox Interface */}
-   <div className="flex-1 relative bg-[#E8EEF4]">
-  {/* Floating UI: Drive Time (Top Left) */}
-  {/* <div className="absolute top-4 left-4 z-10">
-    <button className="flex items-center gap-2 bg-white rounded-lg px-4 py-2.5 shadow-xl border border-gray-200 hover:scale-105 transition-transform">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#01155E" strokeWidth="2.5">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 6v6l4 2" />
-      </svg>
-      <span className="text-[14px] font-bold text-[#01155E]">Drive Time</span>
-      <span className="text-[9px] font-black bg-[#FF385C] text-white px-1.5 py-0.5 rounded uppercase tracking-tighter">
-        New
-      </span>
-    </button>
-  </div> */}
+                  {/* INFINITE SCROLL LOADER */}
+                  <div ref={loaderRef} className="py-6 flex justify-center">
+                    {isLoadingMore && (
+                      <div className="flex items-center gap-2 text-[#67739E]">
+                        <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm font-medium">Loading more...</span>
+                      </div>
+                    )}
+                    {!isLoadingMore && currentPage >= totalPages && projects.length > 0 && (
+                      <p className="text-[#A0AABF] text-sm">All listings loaded</p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-  {/* Floating UI: Close/Reset (Top Right) */}
-  <div className="absolute top-4 right-4 z-10">
-    <button
-      onClick={() => setViewMode("list")}
-      className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200 text-gray-800 hover:bg-gray-50 active:scale-90 transition-all"
-    >
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M18 6L6 18M6 6l12 12" />
-      </svg>
-    </button>
-  </div>
+              {/* RIGHT SIDE: Mapbox Interface */}
+              <div className="flex-1 relative bg-[#E8EEF4]">
+                <div className="absolute top-4 right-4 z-10">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200 text-gray-800 hover:bg-gray-50 active:scale-90 transition-all"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
 
-  {/* Mapbox Implementation */}
-  <Map
-    initialViewState={{
-      longitude:
-        projects?.[0]?.location?.coordinates?.coordinates?.[0] || 55.2708,
-      latitude:
-        projects?.[0]?.location?.coordinates?.coordinates?.[1] || 25.2048,
-      zoom: 8,
-    }}
-    mapboxAccessToken={MAPBOX_TOKEN}
-    style={{ width: "100%", height: "100%" }}
-    mapStyle="mapbox://styles/mapbox/streets-v12"
-  >
-    <NavigationControl position="bottom-right" />
+                {/* Mapbox Implementation */}
+                <Map
+                  initialViewState={{
+                    longitude:
+                      projects?.[0]?.location?.coordinates?.coordinates?.[0] || 55.2708,
+                    latitude:
+                      projects?.[0]?.location?.coordinates?.coordinates?.[1] || 25.2048,
+                    zoom: 8,
+                  }}
+                  mapboxAccessToken={MAPBOX_TOKEN}
+                  style={{ width: "100%", height: "100%" }}
+                  mapStyle="mapbox://styles/mapbox/streets-v12"
+                >
+                  <NavigationControl position="bottom-right" />
 
-    {projects.map((item) => {
-  if (!item?.lat_long) return null;
+                  {projects.map((item) => {
+                    if (!item?.lat_long) return null;
 
-const [lat, lng] = item.lat_long.split(",").map(Number);
-  const itemId = item._id?.$oid || item._id;
+                    const [lat, lng] = item.lat_long.split(",").map(Number);
+                    const itemId = item._id?.$oid || item._id;
 
-  return (
-    <Marker
-      key={itemId}
-      longitude={lng}
-      latitude={lat}
-      anchor="bottom"
-    >
-      <MapMarker
-        item={item}
-        isActive={hoveredListingId === itemId}
-      />
-    </Marker>
-  );
-})}
-  </Map>
-</div>
-  </div>
+                    return (
+                      <Marker
+                        key={itemId}
+                        longitude={lng}
+                        latitude={lat}
+                        anchor="bottom"
+                      >
+                        <MapMarker
+                          item={item}
+                          isActive={hoveredListingId === itemId}
+                        />
+                      </Marker>
+                    );
+                  })}
+                </Map>
+              </div>
+            </div>
           )
         )}
       </div>

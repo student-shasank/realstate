@@ -38,8 +38,10 @@ export const fetchProjects = createAsyncThunk(
             ? params.emirates.map((item) => item.toLowerCase().trim()).join(",")
             : params.emirates || "",
           handoverYear: Array.isArray(params.handoverYear)
-  ? params.handoverYear.map((item) => item.toLowerCase().trim()).join(",")
-  : params.handoverYear?.toLowerCase().trim() || "",
+            ? params.handoverYear.map((item) => item.toLowerCase().trim()).join(",")
+            : params.handoverYear?.toLowerCase().trim() || "",
+          page: params.page || 1,
+          limit: params.limit || 20,
         },
       });
 
@@ -79,6 +81,8 @@ const initialState = {
   success: false,
   error: null,
   projects: [],
+  totalPages: 1,  // ADD THIS
+  currentPage: 1, // ADD THIS
 };
 
 // ----------------------
@@ -136,6 +140,15 @@ const searchSlice = createSlice({
       state.error = null;
       state.projects = [];
     },
+    // Yeh add karo setProjects ke neeche
+appendProjects: (state, action) => {
+  state.projects = [...state.projects, ...action.payload.data];
+  state.currentPage = action.payload.currentPage;
+},
+    // ADD THIS ACTION FOR INFINITE SCROLL
+    setProjects: (state, action) => {
+      state.projects = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -150,6 +163,15 @@ const searchSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.projects = action.payload?.data || [];
+        state.totalPages = action.payload?.totalPages || 1;
+        state.currentPage = action.payload?.page || 1;
+        
+        console.log("✅ REDUX UPDATED:", {
+          page: action.payload?.page,
+          totalPages: action.payload?.totalPages,
+          dataLength: action.payload?.data?.length,
+          total: action.payload?.total,
+        });
       })
 
       .addCase(fetchProjects.rejected, (state, action) => {
@@ -175,6 +197,8 @@ export const {
   togglePrice,
   closeDropdowns,
   resetSearchState,
+  setProjects,
+   appendProjects, // EXPORT THIS
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

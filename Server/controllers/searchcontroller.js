@@ -212,12 +212,21 @@ if (completionRaw?.toLowerCase() === "offplan") {
       }
     }
 
-    console.log("REQ QUERY:", req.query);
-    console.log("MONGO QUERY:", JSON.stringify(query, null, 2));
+    console.log("📥 REQ QUERY:", req.query);
+    console.log("🔍 MONGO QUERY:", JSON.stringify(query, null, 2));
 
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.min(100, Math.max(1, Number(limit)));
     const skip = (pageNum - 1) * limitNum;
+
+    // 🔍 PAGINATION DEBUG
+    console.log("📄 PAGINATION DEBUG:", {
+      requestedPage: Number(page),
+      pageNum,
+      limitNum,
+      skip,
+      expectedRange: `Item ${skip + 1} to ${skip + limitNum}`,
+    });
 
     const [total, listings] = await Promise.all([
       Listing.countDocuments(query),
@@ -228,6 +237,16 @@ if (completionRaw?.toLowerCase() === "offplan") {
         .lean(),
     ]);
 
+    // 📊 RESPONSE DEBUG
+    console.log("📊 RESPONSE DEBUG:", {
+      totalDocuments: total,
+      returnedCount: listings.length,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+      firstItemId: listings[0]?._id,
+      lastItemId: listings[listings.length - 1]?._id,
+    });
+
     return res.status(200).json({
       success: true,
       total,
@@ -237,7 +256,7 @@ if (completionRaw?.toLowerCase() === "offplan") {
       data: listings,
     });
   } catch (error) {
-    console.error("SEARCH ERROR:", error);
+    console.error("❌ SEARCH ERROR:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
