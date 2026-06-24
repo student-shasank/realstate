@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
@@ -252,13 +252,103 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
   );
 };
 
+// ─── Pagination Bar ───────────────────────────────────────────────────────────
+
+const PaginationBar = ({ currentPage, totalPages, onPageChange }) => {
+  if (!totalPages || totalPages <= 1) return null;
+
+  const maxButtons = 5;
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, start + maxButtons - 1);
+  if (end - start < maxButtons - 1) {
+    start = Math.max(1, end - maxButtons + 1);
+  }
+
+  const pageNumbers = [];
+  for (let i = start; i <= end; i++) pageNumbers.push(i);
+
+  const baseBtn =
+    "min-w-[40px] h-[40px] px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center";
+
+  return (
+    <div className="flex items-center justify-center gap-2 py-8 flex-wrap">
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage <= 1}
+        className={`${baseBtn} ${
+          currentPage <= 1
+            ? "text-gray-300 cursor-not-allowed border border-gray-200"
+            : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+        }`}
+      >
+        Prev
+      </button>
+
+      {start > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => onPageChange(1)}
+            className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+          >
+            1
+          </button>
+          {start > 2 && <span className="px-1 text-[#67739E]">...</span>}
+        </>
+      )}
+
+      {pageNumbers.map((page) => (
+        <button
+          key={page}
+          type="button"
+          onClick={() => onPageChange(page)}
+          className={`${baseBtn} ${
+            page === currentPage
+              ? "bg-[#01155E] text-white border border-[#01155E]"
+              : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+
+      {end < totalPages && (
+        <>
+          {end < totalPages - 1 && <span className="px-1 text-[#67739E]">...</span>}
+          <button
+            type="button"
+            onClick={() => onPageChange(totalPages)}
+            className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+          >
+            {totalPages}
+          </button>
+        </>
+      )}
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage >= totalPages}
+        className={`${baseBtn} ${
+          currentPage >= totalPages
+            ? "text-gray-300 cursor-not-allowed border border-gray-200"
+            : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+        }`}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 function Dashboard() {
   const dispatch = useDispatch();
 
-  // ── Updated: listings + pagination from slice ─────────────────
-  const { data, listings, loading, loadingMore, error, currentPage, totalPages } =
+  // ── listings + pagination from slice ─────────────────
+  const { data, listings, loading, error, currentPage, totalPages } =
     useSelector((state) => state.dashboard);
 
   const [editStatusId, setEditStatusId] = useState(null);
@@ -274,6 +364,9 @@ function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
+  // ── Ref to scroll back to the grid top on page change ─────────
+  const gridTopRef = React.useRef(null);
+
   // ── Debounce search 500ms ─────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(searchQuery), 500);
@@ -285,30 +378,27 @@ function Dashboard() {
     dispatch(fetchDashboard({ page: 1, limit: 20, search: debouncedQ, status: activeTab }));
   }, [dispatch, debouncedQ, activeTab]);
 
-  // ── Infinite scroll loader ref ────────────────────────────────
-  const loaderRef = useRef(null);
+  // ── Go to a specific page (used by pagination controls) ────────
+  const goToPage = (pageNumber) => {
+    if (
+      pageNumber < 1 ||
+      (totalPages && pageNumber > totalPages) ||
+      pageNumber === currentPage
+    ) {
+      return;
+    }
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          !loadingMore &&
-          currentPage < totalPages
-        ) {
-          dispatch(fetchDashboard({
-            page: currentPage + 1,
-            limit: 20,
-            search: debouncedQ,
-            status: activeTab,
-          }));
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [dispatch, loadingMore, currentPage, totalPages, debouncedQ, activeTab]);
+    dispatch(fetchDashboard({
+      page: pageNumber,
+      limit: 20,
+      search: debouncedQ,
+      status: activeTab,
+    }));
+
+    if (gridTopRef.current) {
+      gridTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   // ── Stats from backend ────────────────────────────────────────
   const stats = useMemo(() => ({
@@ -332,16 +422,6 @@ function Dashboard() {
     return 0;
   };
 
-  // if (loading)
-  //   return (
-  //     <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
-  //       <div className="flex flex-col items-center gap-3">
-  //         <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-  //         <p className="text-[#67739E] font-medium">Loading dashboard...</p>
-  //       </div>
-  //     </div>
-  //   );
-
   if (error)
     return (
       <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
@@ -351,13 +431,6 @@ function Dashboard() {
         </div>
       </div>
     );
-
-  // if (!listings || listings.length === 0 && !loading)
-  //   return (
-  //     <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
-  //       <p className="text-[#67739E]">No listings found.</p>
-  //     </div>
-  //   );
 
   return (
     <div className="min-h-screen bg-[#F5F7FC] font-['General_Sans',sans-serif]">
@@ -439,26 +512,27 @@ function Dashboard() {
           </div>
         </div>
 
+        <div ref={gridTopRef} />
+
         {/* ── Listings Grid ── */}
-       {/* ── Listings Grid ── */}
-{loading ? (
-  <div className="flex justify-center py-20">
-    <div className="flex flex-col items-center gap-3">
-      <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-[#67739E] font-medium">Loading...</p>
-    </div>
-  </div>
-) : listings.length === 0 ? (
-  <div className="text-center py-20 text-[#67739E]">
-    <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-    <p className="font-semibold text-[16px]">No listings found</p>
-    <p className="text-sm mt-1">Try adjusting your search or tab filter.</p>
-  </div>
-) : (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-    {listings.map((item) => (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-[#67739E] font-medium">Loading...</p>
+            </div>
+          </div>
+        ) : listings.length === 0 ? (
+          <div className="text-center py-20 text-[#67739E]">
+            <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <p className="font-semibold text-[16px]">No listings found</p>
+            <p className="text-sm mt-1">Try adjusting your search or tab filter.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {listings.map((item) => (
               <div key={item._id} className="flex flex-col">
                 <ListingRowCard
                   item={item}
@@ -533,18 +607,14 @@ function Dashboard() {
           </div>
         )}
 
-        {/* ── Infinite Scroll Loader ── */}
-        <div ref={loaderRef} className="py-8 flex justify-center">
-          {loadingMore && (
-            <div className="flex items-center gap-2 text-[#67739E]">
-              <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm font-medium">Loading more...</span>
-            </div>
-          )}
-          {!loadingMore && currentPage >= totalPages && listings.length > 0 && (
-            <p className="text-[#A0AABF] text-sm">All {stats.total} listings loaded</p>
-          )}
-        </div>
+        {/* ── Pagination ── */}
+        {!loading && listings.length > 0 && (
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
+        )}
 
       </div>
     </div>

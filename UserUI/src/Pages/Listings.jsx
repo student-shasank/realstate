@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios"; // ADD THIS IMPORT
 import imageurl from "../assets/underline.png";
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown";
 import Map, { Marker, NavigationControl } from 'react-map-gl';
 
-import { VITE_MAPBOX_TOKEN, PROJECTS_API } from "../Constant/constant"; // ADD PROJECTS_API
+import { VITE_MAPBOX_TOKEN } from "../Constant/constant";
 import MapMarker from "../Components/Card/MapMarker"
 
 import {
@@ -23,7 +22,6 @@ import {
   closeDropdowns,
   setDeveloper,
   setProjects,
-   appendProjects, // ADD THIS
 } from "../features/dashboard/searchSlice";
 import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
@@ -45,12 +43,11 @@ const Listings = () => {
   const propertyTypeRef = useRef(null);
   const handoverRef = useRef(null);
   const emiratesRef = useRef(null);
-  const scrollContainerRef = useRef(null); // ADD THIS FOR SCROLL DETECTION
+  const resultsRef = useRef(null); // used to scroll results into view on page change
 
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [propertyTab, setPropertyTab] = useState("Residential");
   const [viewMode, setViewMode] = useState("list");
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // FILTER STATE VARIABLES (moved here to fix dependency ordering before callbacks)
   const [isOpen, setIsOpen] = useState(false);
@@ -59,9 +56,6 @@ const Listings = () => {
   const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [hoveredListingId, setHoveredListingId] = useState(null);
-
-  // INFINITE SCROLL LOADER REF
-  const loaderRef = useRef(null);
 
   const residentialOptions = [
     "Apartment",
@@ -105,98 +99,55 @@ const Listings = () => {
     currentPage,
   } = useSelector((state) => state.search);
 
-  // INFINITE SCROLL WITH INTERSECTION OBSERVER (like your Dashboard)
-  useEffect(() => {
-    console.log("👀 Setting up IntersectionObserver - loaderRef:", loaderRef.current);
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        console.log("🔔 IntersectionObserver triggered:", {
-          isIntersecting: entries[0].isIntersecting,
-          isLoadingMore,
-          currentPage,
-          totalPages,
-          shouldLoad: entries[0].isIntersecting && !isLoadingMore && currentPage < totalPages,
-        });
-        
-        if (
-          entries[0].isIntersecting &&
-          !isLoadingMore &&
-          currentPage < totalPages
-        ) {
-          console.log("📍 Loader detected - Loading page:", currentPage + 1);
-          loadMoreListings();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    if (loaderRef.current) {
-      console.log("✅ Observing loaderRef");
-      observer.observe(loaderRef.current);
-    } else {
-      console.log("❌ loaderRef is NULL - Loader not found!");
-    }
-    
-    return () => observer.disconnect();
-  }, [isLoadingMore, currentPage, totalPages]);
-
-  // FUNCTION TO LOAD MORE LISTINGS
-  const loadMoreListings = useCallback(async () => {
-    console.log("🔄 loadMoreListings called - currentPage:", currentPage);
-    setIsLoadingMore(true);
-    
-    const nextPage = currentPage + 1;
-    
-    const params = {
-      location: location || "",
-      completion: completion || "",
-      propertyType: propertyType || "",
-      beds: beds || "",
-      baths: baths || "",
-      minPrice: minPrice || "",
-      maxPrice: maxPrice || "",
-      developer: Array.isArray(developer) 
-        ? developer.map(d => d.toLowerCase().trim()).join(",")
-        : developer || "",
-      emirates: Array.isArray(selectedEmirates)
-        ? selectedEmirates.map(e => e.toLowerCase().trim()).join(",")
-        : "",
-      handoverYear: Array.isArray(selectedHandoverYears)
-        ? selectedHandoverYears.map(y => y.toLowerCase().trim()).join(",")
-        : "",
-      page: nextPage,
-      limit: 20,
-    };
-
-    console.log("📤 Sending params:", { page: nextPage, limit: 20, location: params.location });
-
-    try {
-      const response = await axios.get(PROJECTS_API, { params });
-      
-      console.log("📥 API Response received:", {
-        dataLength: response.data?.data?.length,
-        totalPages: response.data?.totalPages,
-        currentPage: response.data?.page,
-        total: response.data?.total,
-      });
-      
-      if (response.data?.data && response.data.data.length > 0) {
-        console.log("✅ Appending", response.data.data.length, "new items");
-        // APPEND new listings to existing ones
-        dispatch(appendProjects({
-  data: response.data.data,
-  currentPage: nextPage
-}));
-      } else {
-        console.log("⚠️ No data in response");
+  // FETCH A SPECIFIC PAGE (replaces results — used by pagination controls)
+  const goToPage = useCallback(
+    (pageNumber) => {
+      if (
+        pageNumber < 1 ||
+        (totalPages && pageNumber > totalPages) ||
+        pageNumber === currentPage
+      ) {
+        return;
       }
-    } catch (error) {
-      console.error("❌ Error loading more listings:", error.message);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [currentPage, location, completion, propertyType, beds, baths, minPrice, maxPrice, developer, selectedEmirates, selectedHandoverYears, projects, dispatch]);
+
+      dispatch(
+        fetchProjects({
+          location: location || "",
+          completion: completion || "",
+          propertyType: propertyType || "",
+          beds: beds || "",
+          baths: baths || "",
+          minPrice: minPrice || "",
+          maxPrice: maxPrice || "",
+          developer: selectedDevelopers,
+          emirates: selectedEmirates,
+          handoverYear: selectedHandoverYears,
+          page: pageNumber,
+          limit: 20,
+        })
+      );
+
+      // Scroll results back into view so the user sees page 1 of the new page
+      if (resultsRef.current) {
+        resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    [
+      dispatch,
+      location,
+      completion,
+      propertyType,
+      beds,
+      baths,
+      minPrice,
+      maxPrice,
+      selectedDevelopers,
+      selectedEmirates,
+      selectedHandoverYears,
+      totalPages,
+      currentPage,
+    ]
+  );
 
   useEffect(() => {
     const urlLocation = searchParams.get("location") || "";
@@ -207,7 +158,7 @@ const Listings = () => {
     const urlMinPrice = searchParams.get("minPrice") || "";
     const urlMaxPrice = searchParams.get("maxPrice") || "";
     const urlDeveloper = searchParams.get("developer") || "";
-    
+
     const urlEmirates = searchParams.get("emirates") || "";
     const emiratesArray = urlEmirates
       ? urlEmirates.split(",").map((item) => item.toLowerCase()).filter(Boolean)
@@ -246,12 +197,10 @@ const Listings = () => {
         developer: developerArray,
         emirates: emiratesArray,
         handoverYear: handoverYearArray,
-        page: 1,          // ✅ IMPORTANT: Page 1
-        limit: 20,        // ✅ IMPORTANT: 20 per page
+        page: 1,          // IMPORTANT: Page 1
+        limit: 20,         // IMPORTANT: 20 per page
       })
     );
-    
-    console.log("🚀 Initial Fetch with page:1, limit:20");
   }, [dispatch, searchParams]);
 
   const closeAllDropdowns = () => {
@@ -404,7 +353,7 @@ const Listings = () => {
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
     "Ras Al Khaimah", "Fujairah",
-    "Sharjah", 
+    "Sharjah",
   ];
 
   const handoverYears = [
@@ -422,6 +371,96 @@ const Listings = () => {
     "Nakheel",
     "Azizi",
   ];
+
+  // ---- PAGINATION BAR (Prev / 1 2 3 ... / Next) ----
+  const PaginationBar = () => {
+    if (!totalPages || totalPages <= 1) return null;
+
+    const pageNumbers = [];
+    const maxButtons = 5; // how many numbered buttons to show at once
+
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxButtons - 1);
+    if (end - start < maxButtons - 1) {
+      start = Math.max(1, end - maxButtons + 1);
+    }
+
+    for (let i = start; i <= end; i++) pageNumbers.push(i);
+
+    const baseBtn =
+      "min-w-[40px] h-[40px] px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center";
+
+    return (
+      <div className="flex items-center justify-center gap-2 py-8 flex-wrap">
+        <button
+          type="button"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className={`${baseBtn} ${
+            currentPage <= 1
+              ? "text-gray-300 cursor-not-allowed border border-gray-200"
+              : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+          }`}
+        >
+          Prev
+        </button>
+
+        {start > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => goToPage(1)}
+              className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+            >
+              1
+            </button>
+            {start > 2 && <span className="px-1 text-[#67739E]">...</span>}
+          </>
+        )}
+
+        {pageNumbers.map((page) => (
+          <button
+            key={page}
+            type="button"
+            onClick={() => goToPage(page)}
+            className={`${baseBtn} ${
+              page === currentPage
+                ? "bg-[#01155E] text-white border border-[#01155E]"
+                : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {end < totalPages && (
+          <>
+            {end < totalPages - 1 && <span className="px-1 text-[#67739E]">...</span>}
+            <button
+              type="button"
+              onClick={() => goToPage(totalPages)}
+              className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        <button
+          type="button"
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage >= totalPages}
+          className={`${baseBtn} ${
+            currentPage >= totalPages
+              ? "text-gray-300 cursor-not-allowed border border-gray-200"
+              : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="pt-5 bg-white min-h-screen mt-20">
@@ -516,7 +555,6 @@ const Listings = () => {
                       limit: 20,
                     })
                   );
-                  console.log("🔄 Search clicked - page:1");
                 }}
                 className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
               >
@@ -866,6 +904,8 @@ const Listings = () => {
           </button>
         </div>
 
+        <div ref={resultsRef} />
+
         {loading && <p style={{ textAlign: 'center', marginTop: '20px' }}>Loading listings...</p>}
         {!loading && error && <p style={{ color: "red", textAlign: 'center' }}>{error}</p>}
         {!loading && success && projects?.length === 0 && (
@@ -887,25 +927,15 @@ const Listings = () => {
                   />
                 ))}
               </div>
-              
-              {/* Loader for list view */}
-              <div ref={loaderRef} className="py-8 flex justify-center">
-                {isLoadingMore && (
-                  <div className="flex items-center gap-2 text-[#67739E]">
-                    <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm font-medium">Loading more...</span>
-                  </div>
-                )}
-                {!isLoadingMore && currentPage >= totalPages && projects.length > 0 && (
-                  <p className="text-[#A0AABF] text-sm">All listings loaded</p>
-                )}
-              </div>
+
+              {/* PAGINATION for list view */}
+              <PaginationBar />
             </div>
           ) : (
             <div className="w-full max-w-[1440px] mx-auto mt-6 flex border border-[#E5E7EB] rounded-xl overflow-hidden bg-white h-[calc(100vh-160px)] min-h-[600px] shadow-sm">
               {/* LEFT SIDE: Scrollable Sidebar */}
               <div className="w-[450px] lg:w-[500px] flex flex-col border-r border-[#E5E7EB] bg-[#F8F9FB]">
-                
+
                 {/* Sidebar Header */}
                 <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
                   <div className="flex flex-col">
@@ -914,8 +944,8 @@ const Listings = () => {
                   </div>
                 </div>
 
-                {/* Scrollable Results Area WITH INFINITE SCROLL */}
-                <div 
+                {/* Scrollable Results Area */}
+                <div
                   className="flex-1 overflow-y-auto p-4 custom-scrollbar"
                 >
                   <div className="grid grid-cols-2 gap-3">
@@ -935,18 +965,8 @@ const Listings = () => {
                     })}
                   </div>
 
-                  {/* INFINITE SCROLL LOADER */}
-                  <div ref={loaderRef} className="py-6 flex justify-center">
-                    {isLoadingMore && (
-                      <div className="flex items-center gap-2 text-[#67739E]">
-                        <div className="w-5 h-5 border-2 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-sm font-medium">Loading more...</span>
-                      </div>
-                    )}
-                    {!isLoadingMore && currentPage >= totalPages && projects.length > 0 && (
-                      <p className="text-[#A0AABF] text-sm">All listings loaded</p>
-                    )}
-                  </div>
+                  {/* PAGINATION for map sidebar */}
+                  <PaginationBar />
                 </div>
               </div>
 

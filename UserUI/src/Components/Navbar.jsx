@@ -87,19 +87,20 @@ useEffect(() => {
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center justify-between flex-1 max-w-[700px] mx-auto">
+        <div className="hidden md:flex items-center justify-between flex-1 max-w-[900px] mx-auto">
 
           <Link
             to="/"
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/" ? 700 : 400,
+              fontWeight: location.pathname === "/" ? 600 : 400,
               color: textColor,
             }}
           >
             Home
           </Link>
+
 
           <div className="relative group flex items-center h-full">
             {/* 1. Service Link */}
@@ -108,13 +109,14 @@ useEffect(() => {
               className="flex items-center gap-1 py-4" 
               style={{
                 ...textStyle,
-                fontWeight: location.pathname.includes("service") ? 700 : 400,
+                fontWeight: location.pathname.includes("service") ? 600 : 400,
                 color: textColor,
               }}
             >
-              Service
+              Services
               <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
             </Link>
+
 
             {/* 2. Dropdown Menu */}
             <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
@@ -143,51 +145,13 @@ useEffect(() => {
               </div>
             </div>
           </div>
-
-          <Link
-            to="/Blog"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight: location.pathname === "/Blogs" ? 700 : 400,
-              color: textColor,
-            }}
-          >
-            Blogs
-          </Link>
-
-          <Link
-            to="/about"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight: location.pathname === "/about" ? 700 : 400,
-              color: textColor,
-            }}
-          >
-            About us
-          </Link>
-
-          <Link
-            to="/contact"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight: location.pathname === "/contact" ? 700 : 400,
-              color: textColor,
-            }}
-          >
-            Contact us
-          </Link>
-
-          {/* Communities Dynamic Dropdown */}
           <div className="relative group flex items-center h-full">
             <Link
               to="/communities"
               className="flex items-center gap-1 py-4 transition-all"
               style={{
                 ...textStyle,
-                fontWeight: location.pathname.includes("communities") ? 700 : 400,
+                fontWeight: location.pathname.includes("communities") ? 600 : 400,
                 color: textColor,
               }}
             >
@@ -214,6 +178,77 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          
+          <Link
+            to="/listings?completion=off-plan"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight:
+                location.pathname === "/listings" &&
+                new URLSearchParams(location.search).get("completion") === "off-plan"
+                  ? 600
+                  : 400,
+              color: textColor,
+            }}
+          >
+            Off-plan
+          </Link>
+
+          <Link
+            to="/listings?completion=ready"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight:
+                location.pathname === "/listings" &&
+                new URLSearchParams(location.search).get("completion") === "ready"
+                  ? 700
+                  : 400,
+              color: textColor,
+            }}
+          >
+            Ready
+          </Link>
+
+          <Link
+            to="/Blog"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/Blogs" ? 600 : 400,
+              color: textColor,
+            }}
+          >
+            Blogs
+          </Link>
+
+          <Link
+            to="/about"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/about" ? 600 : 400,
+              color: textColor,
+            }}
+          >
+            About us
+          </Link>
+
+          <Link
+            to="/contact"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/contact" ? 600 : 400,
+              color: textColor,
+            }}
+          >
+            Contact us
+          </Link>
+
+          {/* Communities Dynamic Dropdown */}
+          
 
         </div>
 

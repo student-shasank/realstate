@@ -451,9 +451,8 @@ const [name, setName] = useState("");
   ];
 
   const youtubeEmbed = youtubeVideoId
-    ? `https://www.youtube.com/embed/${youtubeVideoId}`
-    : "https://www.youtube.com/embed/dQw4w9WgXcQ";
-
+  ? `https://www.youtube.com/embed/${youtubeVideoId}`
+  : null;
   const parseLatLong = (latlong) => {
     if (!latlong) return null;
 
@@ -801,14 +800,14 @@ onClick={() => setPopupType("brochure")}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               {unitTypesList.map((unit, i) => (
                 <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
-                  <h3 className="text-[#01155E] font-semibold text-[24px]">{unit.type}</h3>
+                  <h3 className="text-[#01155E] font-semibold text-[24px]">{unit.type}  Bedrooms</h3>
                   <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
                     <span className="flex items-center gap-2">
                       <Maximize size={20} className="text-[#01155E]" />
                       {unit.sqft}
                     </span>
                     <span className="flex items-center gap-2">
-                      <Banknote size={10} className="text-[#01155E]" />
+                      <Banknote size={20} className="text-[#01155E]" />
                       Starting at {unit.price}
                     </span>
                   </div>
@@ -988,19 +987,26 @@ onClick={() => setPopupType("brochure")}
               />
             </div>
 
-            <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Project Video</h2>
-            <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
-              <iframe
-                width="100%"
-                height="100%"
-                src={youtubeEmbed}
-                title="Property Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
+            {youtubeEmbed && (
+  <>
+    <h2 className="text-[28px] font-semibold text-[#01155E] mb-10 mt-10">
+      Project Video
+    </h2>
+
+    <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
+      <iframe
+        width="100%"
+        height="100%"
+         src={`https://www.youtube.com/embed/${videos[0]}`}
+        title="Property Video"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full h-full"
+      />
+    </div>
+  </>
+)}
 
           </div>
 

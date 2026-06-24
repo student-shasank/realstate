@@ -567,7 +567,7 @@ const Home = () => {
         <DeveloperSlider />
         <ChooseYourStrategy />
         <DubaiMarketActivity />
-        <AwardsSection/>
+        {/* <AwardsSection/> */}
         <FeaturesSection />
         <Services />
         <CommunitiesBrief />
