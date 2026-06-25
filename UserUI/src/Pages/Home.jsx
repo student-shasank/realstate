@@ -41,6 +41,10 @@ const Home = () => {
   const [selectedHandoverYears, setSelectedHandoverYears] = React.useState([]);
   const handoverRef = useRef(null);
 
+  const [saleStatusOpen, setSaleStatusOpen] = React.useState(false);
+  const [selectedSaleStatus, setSelectedSaleStatus] = React.useState([]);
+  const saleStatusRef = useRef(null);
+
   const [paymentOpen, setPaymentOpen] = React.useState(false);
   const [paymentPlan, setPaymentPlan] = React.useState('');
   const paymentRef = useRef(null);
@@ -92,6 +96,7 @@ const Home = () => {
     setPaymentOpen(false);
     setIsEmirateOpen(false);
     setPropertyTypeOpen(false);
+    setSaleStatusOpen(false);
 
   };
 
@@ -104,8 +109,10 @@ const Home = () => {
       const isOutsideEmirate = emirateRef.current && !emirateRef.current.contains(event.target);
       const isOutsidePropertyType =
         propertyTypeRef.current && !propertyTypeRef.current.contains(event.target);
+      const isOutsideSaleStatus =
+        saleStatusRef.current && !saleStatusRef.current.contains(event.target);
 
-      if (isOutsideBedBath && isOutsidePrice && isOutsideHandover && isOutsidePayment && isOutsideEmirate && isOutsidePropertyType) {
+      if (isOutsideBedBath && isOutsidePrice && isOutsideHandover && isOutsidePayment && isOutsideEmirate && isOutsidePropertyType && isOutsideSaleStatus) {
         closeAll();
       }
     };
@@ -143,6 +150,9 @@ const Home = () => {
     if (selectedHandoverYears.length > 0) {
       params.set('handoverYear', selectedHandoverYears.join(','));
     }
+    if (selectedSaleStatus.length > 0) {
+      params.set('saleStatus', selectedSaleStatus.join(','));
+    }
     if (paymentPlan) params.set('paymentPlan', paymentPlan);
     if (selectedDevelopers.length > 0) {
   const normalizedDevelopers = selectedDevelopers.map((dev) =>
@@ -171,6 +181,15 @@ const Home = () => {
   { label: "2029", value: "2029" },
   { label: "Post 2030", value: "post 2030" },
 ];
+
+  const saleStatusOptions = [
+    { label: "Announced", value: "announced" },
+    { label: "Presale/EOI", value: "presale_eoi" },
+    { label: "Start of Sales", value: "start_of_sales" },
+    { label: "On Sale", value: "on_sale" },
+    { label: "Out of Stock", value: "out_of_stock" },
+  ];
+
   const emirates = [
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
@@ -208,27 +227,6 @@ const Home = () => {
 
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">
-              {/* Buy / Sell Toggle Container */}
-              {/* <div className="flex bg-white/40 p-1 rounded-full border border-white/30 shadow-inner w-fit">
-                {["Buy", "Sell"].map((type) => {
-                  const value = type.toLowerCase();
-                  const isActive = purpose === value;
-
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => dispatch(setPurpose(value))}
-                      className={`px-13 py-2 text-sm font-semibold font-['Archivo'] transition-all rounded-full min-w-[100px] ${isActive
-                        ? "bg-[#01155E] text-white shadow-md"
-                        : "bg-white text-[#01155E]"
-                        }`}
-                    >
-                      {type}
-                    </button>
-                  );
-                })}
-              </div> */}
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
@@ -239,21 +237,10 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 ">
-              {/* <div className="flex bg-white/40 p-1 rounded-xl border border-white/30 shadow-inner">
-                {['All', 'Ready', 'Off-Plan'].map((status) => (
-                  <button key={status} onClick={() => dispatch(setCompletion(status))} className={`flex-1 py-1.5 px-3 text-sm font-['Archivo']  text-[#01155E] rounded-lg transition-all ${completion === status ? 'bg-[#2B3964] text-white shadow-md' : 'text-[#2B3964]'}`}>
-                    {status}
-                  </button>
-                ))}
-              </div> */}
               <div className="flex bg-white/40 py-1 px-2 rounded-full border border-white/30 shadow-inner w-fit -mt-1">
                 {['Off-Plan', 'Ready', ].map((status) => {
                   const isActive = completion === status;
 
-                  // Agar status 'Pre-construction' hai toh Circular Icon render karo
-                 
-
-                  // Normal Text Buttons (Off-Plan & Ready)
                   return (
                     <button
                       key={status}
@@ -348,7 +335,6 @@ const Home = () => {
 
                 {propertyTypeOpen && (
                   <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-xl shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
-                    {/* Top heading row */}
                     <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
                       <span className="text-[14px] font-medium text-[#67739E]">
                         {propertyTab}
@@ -356,7 +342,6 @@ const Home = () => {
                       <ChevronDown className="h-4 w-4 text-[#67739E] rotate-180" />
                     </div>
 
-                    {/* Tabs */}
                     <div className="grid grid-cols-2 px-3 pt-2">
                       <button
                         type="button"
@@ -381,7 +366,6 @@ const Home = () => {
                       </button>
                     </div>
 
-                    {/* Options */}
                     <div className="grid grid-cols-2 gap-x-2 gap-y-2 p-3 pt-2">
                       {(propertyTab === "Residential"
                         ? residentialOptions
@@ -428,9 +412,51 @@ const Home = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3 w-full">
 
-              <div className="relative">
-                <select className="w-full appearance-none bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] outline-none shadow-sm cursor-pointer"><option>Sale Status</option></select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+              <div className="relative" ref={saleStatusRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextState = !saleStatusOpen;
+                    closeAll();
+                    setSaleStatusOpen(nextState);
+                  }}
+                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm"
+                >
+                  <span className="truncate">
+                    {selectedSaleStatus.length > 0
+                      ? `${selectedSaleStatus.length} Status${selectedSaleStatus.length > 1 ? 'es' : ''} Selected`
+                      : 'Sale Status'}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${saleStatusOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {saleStatusOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-full z-50 flex flex-col gap-0.5">
+                    {saleStatusOptions.map((status) => (
+                      <div
+                        key={status.value}
+                        onClick={() => {
+                          setSelectedSaleStatus((prev) =>
+                            prev.includes(status.value)
+                              ? prev.filter((item) => item !== status.value)
+                              : [...prev, status.value]
+                          );
+                        }}
+                        className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
+                      >
+                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                          {selectedSaleStatus.includes(status.value) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
+                        </div>
+
+                        <span className="text-[16px] font-medium text-[#67739E]">
+                          {status.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="relative" ref={handoverRef}>
@@ -549,7 +575,7 @@ const Home = () => {
                           {selectedEmirates.includes(emirate) && (
                             <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
                           )}
-                        </div>b  
+                        </div>
 
                         <span className="text-[#67739E] text-[14px] truncate">
                           {emirate}

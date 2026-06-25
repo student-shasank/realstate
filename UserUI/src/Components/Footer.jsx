@@ -93,10 +93,8 @@ const Footer = () => {
         <div className="mt-16 border-t border-white/20 pt-6  Text-[#FFFFFF]">
           <p>© 2026 yupland. All rights reserved.</p>
           <p className="mt-2 max-w-[900px]">
-            All content on this website is original intellectual property of
-            yupland and may not be reproduced, republished, adapted,
-            paraphrased, reworded, distributed, or used to create derivative
-            works, in whole or in part, without prior written consent.
+          Unauthorised reproduction, redistribution, data extraction, or scraping of content, listings, or structured data from this platform is strictly prohibited.
+
           </p>
         </div>
 

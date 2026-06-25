@@ -43,6 +43,7 @@ const Listings = () => {
   const propertyTypeRef = useRef(null);
   const handoverRef = useRef(null);
   const emiratesRef = useRef(null);
+  const saleStatusRef = useRef(null);
   const resultsRef = useRef(null); // used to scroll results into view on page change
 
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
@@ -54,6 +55,8 @@ const Listings = () => {
   const [selectedEmirates, setSelectedEmirates] = useState([]);
   const [isHandoverOpen, setIsHandoverOpen] = useState(false);
   const [selectedHandoverYears, setSelectedHandoverYears] = useState([]);
+  const [isSaleStatusOpen, setIsSaleStatusOpen] = useState(false);
+  const [selectedSaleStatus, setSelectedSaleStatus] = useState([]);
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [hoveredListingId, setHoveredListingId] = useState(null);
 
@@ -122,6 +125,7 @@ const Listings = () => {
           developer: selectedDevelopers,
           emirates: selectedEmirates,
           handoverYear: selectedHandoverYears,
+          saleStatus: selectedSaleStatus,
           page: pageNumber,
           limit: 20,
         })
@@ -144,6 +148,7 @@ const Listings = () => {
       selectedDevelopers,
       selectedEmirates,
       selectedHandoverYears,
+      selectedSaleStatus,
       totalPages,
       currentPage,
     ]
@@ -169,6 +174,12 @@ const Listings = () => {
     const handoverYearArray = urlHandoverYear
       ? urlHandoverYear.split(",").map((item) => item.toLowerCase()).filter(Boolean)
       : [];
+
+    const urlSaleStatus = searchParams.get("saleStatus") || "";
+    const saleStatusArray = urlSaleStatus
+      ? urlSaleStatus.split(",").map((item) => item.toLowerCase()).filter(Boolean)
+      : [];
+    setSelectedSaleStatus(saleStatusArray);
 
     const developerArray = urlDeveloper
       ? urlDeveloper.split(",").map((item) => item.trim()).filter(Boolean)
@@ -197,6 +208,7 @@ const Listings = () => {
         developer: developerArray,
         emirates: emiratesArray,
         handoverYear: handoverYearArray,
+        saleStatus: saleStatusArray,
         page: 1,          // IMPORTANT: Page 1
         limit: 20,         // IMPORTANT: 20 per page
       })
@@ -207,6 +219,7 @@ const Listings = () => {
     dispatch(closeDropdowns());
     setPropertyTypeOpen(false);
     setIsHandoverOpen(false);
+    setIsSaleStatusOpen(false);
     setIsOpen(false);
   };
 
@@ -228,12 +241,16 @@ const Listings = () => {
       const isOutsideEmirates =
         emiratesRef.current && !emiratesRef.current.contains(event.target);
 
+      const isOutsideSaleStatus =
+        saleStatusRef.current && !saleStatusRef.current.contains(event.target);
+
       if (
         isOutsideBedBath &&
         isOutsidePrice &&
         isOutsidePropertyType &&
         isOutsideHandover &&
-        isOutsideEmirates
+        isOutsideEmirates &&
+        isOutsideSaleStatus
       ) {
         closeAllDropdowns();
       }
@@ -293,6 +310,8 @@ const Listings = () => {
     dispatch(setMaxPrice(""));
     setSelectedHandoverYears([]);
     setIsHandoverOpen(false);
+    setSelectedSaleStatus([]);
+    setIsSaleStatusOpen(false);
     setIsOpen(false);
     dispatch(setDeveloper(""));
     setSelectedDevelopers([]);
@@ -349,6 +368,15 @@ const Listings = () => {
     updateParams("handoverYear", updatedYears.join(","));
   };
 
+  const handleSaleStatusChange = (value) => {
+    const updatedStatus = selectedSaleStatus.includes(value)
+      ? selectedSaleStatus.filter((item) => item !== value)
+      : [...selectedSaleStatus, value];
+
+    setSelectedSaleStatus(updatedStatus);
+    updateParams("saleStatus", updatedStatus.join(","));
+  };
+
   const emirates = [
     "Dubai", "Umm AL Quwain",
     "Abu Dhabi", "Ajman",
@@ -362,6 +390,14 @@ const Listings = () => {
     { label: "2028", value: "2028" },
     { label: "2029", value: "2029" },
     { label: "Post 2030", value: "post 2030" },
+  ];
+
+  const saleStatusOptions = [
+    { label: "Announced", value: "announced" },
+    { label: "Presale/EOI", value: "presale_eoi" },
+    { label: "Start of Sales", value: "start_of_sales" },
+    { label: "On Sale", value: "on_sale" },
+    { label: "Out of Stock", value: "out_of_stock" },
   ];
 
   const developerOptions = [
@@ -551,6 +587,7 @@ const Listings = () => {
                       developer: selectedDevelopers,
                       emirates: selectedEmirates,
                       handoverYear: selectedHandoverYears,
+                      saleStatus: selectedSaleStatus,
                       page: 1,
                       limit: 20,
                     })
@@ -773,9 +810,63 @@ const Listings = () => {
                 )}
               </div>
 
-              <select className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
-                <option value="">Sale status</option>
-              </select>
+              <div className="relative w-full font-['General_Sans']" ref={saleStatusRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const wasOpen = isSaleStatusOpen;
+                    closeAllDropdowns();
+                    setIsSaleStatusOpen(!wasOpen);
+                  }}
+                  className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
+                  style={{ borderRadius: isSaleStatusOpen ? "16px 16px 0 0" : "16px" }}
+                >
+                  <span className="truncate">
+                    {selectedSaleStatus.length > 0
+                      ? `${selectedSaleStatus.length} Status${selectedSaleStatus.length > 1 ? "es" : ""} Selected`
+                      : "Sale status"}
+                  </span>
+
+                  <svg
+                    className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${isSaleStatusOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isSaleStatusOpen && (
+                  <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
+                    <div className="p-0">
+                      {saleStatusOptions.map((status, index) => (
+                        <button
+                          key={status.value}
+                          type="button"
+                          onClick={() => handleSaleStatusChange(status.value)}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${index === saleStatusOptions.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
+                        >
+                          <div className="w-[24px] flex justify-center flex-shrink-0">
+                            <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                              {selectedSaleStatus.includes(status.value) && (
+                                <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="truncate">{status.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="relative w-full font-['General_Sans']" ref={handoverRef}>
                 <button
@@ -940,7 +1031,7 @@ const Listings = () => {
                 <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
                   <div className="flex flex-col">
                     <h2 className="text-[16px] font-bold text-[#01155E]">Properties in UAE</h2>
-                    <span className="text-[12px] text-gray-500 font-medium">{projects.length} Available Listings</span>
+                    <span className="text-[12px] text-gray-500 font-medium">{projects.length} +  Available Listings</span>
                   </div>
                 </div>
 
@@ -1023,6 +1114,20 @@ const Listings = () => {
             </div>
           )
         )}
+
+
+        <div className="max-w-[1290px] mx-auto mt-12 mb-8 px-4">
+          <div className="border-t border-gray-200 pt-6">
+            <p className="text-[#67739E] font-normal text-[16px] leading-relaxed ">
+              Property information, pricing, availability, specifications, and
+              project details presented on this page are provided for general
+              informational purposes only. Such information may change without
+              notice and should be independently verified with the relevant
+              developer or licensed brokerage before making any property-related
+              decision.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
