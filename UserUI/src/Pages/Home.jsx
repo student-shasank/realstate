@@ -22,7 +22,7 @@ import backgroundVideo from '../assets/Untitled design (14).mp4';
 import Services from '../Components/HomePageComponents/Service';
 import CommunitiesBrief from '../Components/HomePageComponents/CommunitiesBrief';
 import UpcomingProjects from '../Components/HomePageComponents/UpcomingProjects';
-import BlogSection from '../Components/HomePageComponents/BlogSection';
+import FeaturedBlogs from "../Components/HomePageComponents/BlogSection"
 import DeveloperSlider from '../Components/HomePageComponents/Developerslider/DeveloperSlider';
 import ChooseYourStrategy from '../Components/HomePageComponents/ChooseYourStrategy';
 import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketActivity';
@@ -598,7 +598,7 @@ const Home = () => {
         <Services />
         <CommunitiesBrief />
         <UpcomingProjects />
-        <BlogSection />
+        <FeaturedBlogs />
       </div>
     </>
   );
