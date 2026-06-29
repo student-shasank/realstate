@@ -36,7 +36,7 @@
 .logo-track {
   display: flex;
   width: max-content;
-  animation: scroll-left 300s linear infinite;
+  animation: scroll-left 40s linear infinite;
 }
 
 .logo-track:hover {

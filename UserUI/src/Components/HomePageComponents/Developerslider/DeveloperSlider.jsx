@@ -1,7 +1,46 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import "./DeveloperSlider.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDevelopers } from "../../../features/dashboard/developerSlice";
+
+// Only these developers should appear in the slider
+const ALLOWED_DEVELOPERS = [
+  "Emaar Properties",
+  "Nakheel",
+  "Meraas",
+  "Dubai Properties",
+  "DAMAC Properties",
+  "Sobha Realty",
+  "Ellington Properties",
+  "Binghatti",
+  "Danube Properties",
+  "Majid Al Futtaim",
+  "Beyond Developments",
+  "OMNIYAT",
+  "Arada",
+  "Aldar Properties",
+  "MAG Lifestyle Development",
+  "Select Group",
+  "Imtiaz Developments",
+  "Object 1",
+  "Prescott Development",
+  "Tiger Properties",
+  "Deyaar Development",
+  "Azizi Developments",
+  "Samana Developers",
+  "Union Properties",
+  "Bnw Developments",
+  "BT Properties",
+  "Citi Developers",
+  "DHG Properties",
+  "Dar Global",
+  "Iman",
+  "Modon",
+  "Mira",
+];
+
+const normalize = (str = "") => str.trim().toLowerCase();
+const ALLOWED_SET = new Set(ALLOWED_DEVELOPERS.map(normalize));
 
 const DeveloperSlider = () => {
   const dispatch = useDispatch();
@@ -14,8 +53,43 @@ const DeveloperSlider = () => {
     dispatch(fetchDevelopers());
   }, [dispatch]);
 
+  // Filter to only allowed developers
+  const filteredDevelopers = useMemo(() => {
+    const matched = developers.filter((dev) =>
+      ALLOWED_SET.has(normalize(dev?.name))
+    );
+
+    // ---- DEBUG LOGS ----
+    console.log("📦 Total developers from API:", developers.length);
+    console.log("✅ Matched developers:", matched.length);
+    console.log(
+      "✅ Matched names:",
+      matched.map((d) => d?.name)
+    );
+
+    const apiNamesNormalized = developers.map((d) => normalize(d?.name));
+    const notMatchedFromApi = developers.filter(
+      (dev) => !ALLOWED_SET.has(normalize(dev?.name))
+    );
+    console.log(
+      "❌ From API but NOT in allowed list (name mismatch or not wanted):",
+      notMatchedFromApi.map((d) => d?.name)
+    );
+
+    const missingFromApi = ALLOWED_DEVELOPERS.filter(
+      (name) => !apiNamesNormalized.includes(normalize(name))
+    );
+    console.log(
+      "⚠️ In allowed list but NOT found in API response at all:",
+      missingFromApi
+    );
+    // ---- END DEBUG LOGS ----
+
+    return matched;
+  }, [developers]);
+
   // Infinity effect
-  const doubleDevelopers = [...developers, ...developers];
+  const doubleDevelopers = [...filteredDevelopers, ...filteredDevelopers];
 
   return (
     <section className="slider-wrapper">

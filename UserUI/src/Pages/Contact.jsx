@@ -5,6 +5,7 @@ import {
   setCurrentPage,
   setSearchTerm,
 } from "../features/dashboard/Blogslice.jsx";
+import Seo from "../Components/Seo.jsx"; // 👈 naya import
 
 const PER_PAGE = 6;
 
@@ -60,8 +61,24 @@ function Contact() {
     return pages;
   };
 
+  // 👇 Canonical path: page 1 ke liye "/contact", aur page 2+ ke liye "/contact?page=2" etc.
+  // (route /contact hai, isliye yahi actual URL canonical me jaana chahiye)
+  const canonicalPath =
+    currentPage > 1 ? `/contact?page=${currentPage}` : "/contact";
+
+  // 👇 Search results ko Google index na kare — isse thin/duplicate pages nahi banenge
+  const isSearchActive = Boolean(searchTerm);
+
   return (
     <div className="max-w-6xl mx-auto py-16 px-5 mt-20">
+      {/* 👇 SEO / canonical tag yahan add hua */}
+      <Seo
+        title="Blogs | Yupland"
+        description="Discover Dubai's newest launches with expert guidance to secure the best prices and the most desirable units."
+        canonicalPath={canonicalPath}
+        noindex={isSearchActive}
+      />
+
       {/* Page Heading */}
       <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">Blogs</h1>
 

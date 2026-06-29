@@ -57,7 +57,7 @@ const FeaturesSection = () => {
                 <div className="text-[15px] sm:text-[17px] lg:text-[20px] leading-[1.45] text-[#01155E99]">
                   <p className="mb-3 sm:mb-4">
                     <span className="text-[#001457] text-[26px] sm:text-[32px] lg:text-[40px] font-semibold leading-none">
-                      YupLand
+                      Yupland
                     </span>{" "}
                     is an independent Dubai real estate research and marketing platform founded and operated by Divyansh Chitkara.
                   </p>
