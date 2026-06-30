@@ -29,6 +29,7 @@ import DubaiMarketActivity from '../Components/HomePageComponents/DubaiMarketAct
 import Preconstruction from "../assets/preconstruction.svg"
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown"
 import AwardsSection from '../Components/HomePageComponents/AwardsSection';
+import PropertyFlipbookSection from "../Components/HomePageComponents/Propertyflipbooksection.jsx"
 
 
 const Home = () => {
@@ -599,6 +600,7 @@ const Home = () => {
         <CommunitiesBrief />
         <UpcomingProjects />
         <FeaturedBlogs />
+        <PropertyFlipbookSection/>
       </div>
     </>
   );

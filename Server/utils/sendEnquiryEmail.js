@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendEnquiryEmail = async ({ listing, to }) => {
+export const sendEnquiryEmail = async ({ listing, to, enquirer, requestType }) => {
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -12,14 +12,34 @@ export const sendEnquiryEmail = async ({ listing, to }) => {
 
   const internal = listing?.internal || {};
 
+  const requestLabel =
+    requestType === "brochure"
+      ? "Brochure Download Request"
+      : requestType === "availability"
+      ? "Check Availability Request"
+      : "General Enquiry";
+
   const html = `
   <div style="font-family: Arial, sans-serif; line-height:1.5;">
   
-  <h2>New Listing Enquiry</h2>
+  <h2>New Listing Enquiry — ${requestLabel}</h2>
+
+  <h3>Enquirer Details</h3>
+  <p><b>Name:</b> ${enquirer?.name || "-"}</p>
+  <p><b>Email:</b> ${enquirer?.email || "-"}</p>
+  <p><b>Phone:</b> ${enquirer?.phone || "-"}</p>
+
+  <hr/>
 
   <h3>Listing Details</h3>
   <p><b>Title:</b> ${listing?.title || "-"}</p>
-  <p><b>Price:</b> ${listing?.price || "-"} ${listing?.currency || ""}</p>
+  <p><b>Price Range:</b> ${
+    listing?.min_price ? Number(listing.min_price).toLocaleString() : "-"
+  } - ${
+    listing?.max_price ? Number(listing.max_price).toLocaleString() : "-"
+  } ${listing?.currency || ""}</p>
+  <p><b>Location:</b> ${listing?.location || "-"}</p>
+  <p><b>Developer:</b> ${listing?.developer_name || "-"}</p>
 
   <hr/>
 
@@ -42,7 +62,8 @@ export const sendEnquiryEmail = async ({ listing, to }) => {
   await transporter.sendMail({
     from: `"Real Estate CRM" <${process.env.SMTP_USER}>`,
     to: to,
-    subject: `New Enquiry for ${listing?.title}`,
+    replyTo: enquirer?.email || undefined, // reply seedha enquirer ko jaaye
+    subject: `${requestLabel} — ${listing?.title || "Listing"}`,
     html,
   });
 };

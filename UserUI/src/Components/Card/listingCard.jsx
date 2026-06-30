@@ -44,6 +44,10 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const { success: pdfSuccess, loading: pdfLoading, error: pdfError } = useSelector((state) => state.pdf);
   const { listing: detailedListing } = useSelector((state) => state.listingDetail);
 
+  // NOTE: adjust this path to match your actual auth slice
+  // e.g. state.auth.user, state.userProfile.data, etc.
+  const currentUser = useSelector((state) => state.auth?.user);
+
   const socialActions = [
     { id: 'like', icon: heartIcon, alt: 'Like' },
     { id: 'call', icon: callIcon, alt: 'Call' },
@@ -157,20 +161,46 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     setActiveImageIndex(index);
   };
 
-  const handleConnect = async (e) => {
-    e.stopPropagation();
-    setIsLocalSending(true);
+ const handleConnect = async (e) => {
+  e.stopPropagation();
 
-    try {
-      await dispatch(sendListingEnquiry({ listingId: currentId })).unwrap();
-      toast.success("Enquiry sent ✅");
-    } catch (err) {
-      toast.error(err || "Something went wrong");
-    } finally {
-      setIsLocalSending(false);
-      dispatch(resetEnquiryState());
-    }
-  };
+  if (!isLoggedIn) {
+    onRequireLogin?.();
+    return;
+  }
+
+  if (!listing?._id) {
+    toast.error("Something went wrong, please refresh and try again");
+    return;
+  }
+
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+  if (!storedUser?.name || !storedUser?.email) {
+    toast.error("Please complete your profile (name, email) before connecting");
+    return;
+  }
+
+  setIsLocalSending(true);
+
+  try {
+    await dispatch(
+      sendListingEnquiry({
+        listingId: listing._id, // Mongo _id specifically, not the numeric id
+        name: storedUser.name,
+        email: storedUser.email,
+        phone: storedUser.phone || "-",
+        requestType: "availability",
+      })
+    ).unwrap();
+    toast.success("Enquiry sent ✅");
+  } catch (err) {
+    toast.error(err || "Something went wrong");
+  } finally {
+    setIsLocalSending(false);
+    dispatch(resetEnquiryState());
+  }
+};
 
   const handleSendPdf = () => {
     if (!email || !phone) {
@@ -544,5 +574,3 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 };
 
 export default ListingCard;
-
-

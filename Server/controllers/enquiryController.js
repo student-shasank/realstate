@@ -3,8 +3,7 @@ import { sendEnquiryEmail } from "../utils/sendEnquiryEmail.js";
 
 export const sendListingEnquiry = async (req, res) => {
   try {
-    // only listingId from body
-    const { listingId } = req.body;
+    const { listingId, name, email, phone, requestType } = req.body;
 
     if (!listingId) {
       return res.status(400).json({
@@ -13,7 +12,13 @@ export const sendListingEnquiry = async (req, res) => {
       });
     }
 
-    // Fetch listing from database
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "name, email and phone are required",
+      });
+    }
+
     const listing = await Listing.findById(listingId);
 
     if (!listing) {
@@ -23,8 +28,7 @@ export const sendListingEnquiry = async (req, res) => {
       });
     }
 
-    // Decide email receiver
-    const toEmail =  process.env.ENQUIRY_TO_EMAIL;
+    const toEmail = process.env.ENQUIRY_TO_EMAIL;
 
     if (!toEmail) {
       return res.status(400).json({
@@ -33,10 +37,11 @@ export const sendListingEnquiry = async (req, res) => {
       });
     }
 
-    // Send email
-    sendEnquiryEmail({
+    await sendEnquiryEmail({
       listing,
       to: toEmail,
+      enquirer: { name, email, phone },
+      requestType: requestType || "general",
     });
 
     return res.status(200).json({

@@ -6,6 +6,7 @@ import PropertyMap from '../Components/Card/PropertyMap.jsx';
 import { useNavigate } from "react-router-dom";
 import { extractAllImages, getSafeImageUrl, getImageByIndex } from '../Components/utils/imageExtractor.jsx';
 import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
+import { sendListingEnquiry, resetEnquiryState } from "../features/Enquiery/enquirySlice.js";
 import {
   fetchListingDetail,
   resetListingDetailState,
@@ -22,6 +23,7 @@ import Appartmentimage from "../assets/Appartment.png"
 import floorplan1 from "../assets/floorplan.png"
 import propertycommunity from "../assets/propertydetailcommunity.jpg"
 import Breadcrumbs from '../Components/Card/Breadcrumbs';
+
 const SIMILAR = [1, 2, 3].map((i) => ({
   id: i,
   title: "High-Rise Townhouse",
@@ -50,8 +52,6 @@ const AMENITY_MAP = {
   laundry: { label: "Laundry", icon: "laundry" },
   salon: { label: "Salon", icon: "salon" },
 };
-
-
 
 const AmenityIcon = ({ type }) => {
   switch (type) {
@@ -96,7 +96,7 @@ function ReviewCard({ agentAvatar }) {
   );
 }
 
-function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, latlong, coordinates,title, }) {
+function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, latlong, coordinates, title, }) {
   const [activeTab, setActiveTab] = useState("photos");
 
   return (
@@ -147,13 +147,13 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, lat
               ))}
             </div>
           ) : (
-           <div className="flex-1 overflow-y-auto">
-  <PropertyMap
-    latlong={latlong}
-    coordinates={coordinates}
-    title={title}
-  />
-</div>
+            <div className="flex-1 overflow-y-auto">
+              <PropertyMap
+                latlong={latlong}
+                coordinates={coordinates}
+                title={title}
+              />
+            </div>
           )}
         </div>
 
@@ -195,6 +195,11 @@ export default function PropertyDetail() {
     (state) => state.listingDetail
   );
 
+  // Enquiry redux state — top-level hook, NOT inside any function
+  const { loading: enquiryLoading, success: enquirySuccess, error: enquiryError } = useSelector(
+    (state) => state.enquiry
+  );
+
   useEffect(() => {
     if (id) {
       dispatch(fetchListingDetail(Number(id)));
@@ -217,11 +222,10 @@ export default function PropertyDetail() {
   const [floorPlan2Open, setFloorPlan2Open] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [popupType, setPopupType] = useState(null);
-// brochure | availability
-const [email, setEmail] = useState("");
-const [phone, setPhone] = useState("");
-const [name, setName] = useState("");
-
+  // brochure | availability
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
 
   const {
     title,
@@ -273,6 +277,7 @@ const [name, setName] = useState("");
     regulatoryInfo = {},
     community = {},
   } = PROPERTY;
+
   const OFFPLAN_STATUSES = [
     "announced",
     "eoi",
@@ -280,6 +285,7 @@ const [name, setName] = useState("");
     "onsale",
     "outofstock",
   ];
+
   const getDisplayStatus = (status) => {
     if (!status) return "—";
 
@@ -287,10 +293,12 @@ const [name, setName] = useState("");
 
     return OFFPLAN_STATUSES.includes(key) ? "Off Plan" : status;
   };
+
   const developerImage =
     PROPERTY?.developer_image || rawListing?.developer_image;
   const [showFullDesc, setShowFullDesc] = useState(false);
   const shortDescription = description?.slice(0, 300);
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -328,7 +336,6 @@ const [name, setName] = useState("");
           ? `${rawListing.area_start} Sq Ft`
           : "—",
     },
-
     {
       label: "Total Building Area",
       value: totalBuildingArea
@@ -337,12 +344,10 @@ const [name, setName] = useState("");
           ? `${rawListing.area_end} Sq Ft`
           : "—",
     },
-
     {
       label: "Property ID",
       value: referenceNo || rawListing?.id || "—",
     },
-
     {
       label: "Year Built",
       value:
@@ -350,17 +355,14 @@ const [name, setName] = useState("");
         new Date(rawListing?.created_at).getFullYear() ||
         "—",
     },
-
     {
       label: "Ownership",
       value: ownership || "Freehold",
     },
-
     {
       label: "Rooms",
       value: rooms || bedrooms || "—",
     },
-
     {
       label: "Handover",
       value:
@@ -368,7 +370,6 @@ const [name, setName] = useState("");
         rawListing?.expected_completion_date?.slice(0, 4) ||
         "—",
     },
-
     {
       label: "Listing Date",
       value: rawListing?.created_at
@@ -382,12 +383,10 @@ const [name, setName] = useState("");
         )
         : "—",
     },
-
     {
       label: "Furnishing",
       value: furnishing || "Furnished",
     },
-
     {
       label: "Property Status",
       value:
@@ -395,7 +394,6 @@ const [name, setName] = useState("");
         rawListing?.project_status ||
         "Vacant",
     },
-
     {
       label: "Service Charges",
       value: serviceCharges
@@ -449,8 +447,9 @@ const [name, setName] = useState("");
   ];
 
   const youtubeEmbed = youtubeVideoId
-  ? `https://www.youtube.com/embed/${youtubeVideoId}`
-  : null;
+    ? `https://www.youtube.com/embed/${youtubeVideoId}`
+    : null;
+
   const parseLatLong = (latlong) => {
     if (!latlong) return null;
 
@@ -463,19 +462,32 @@ const [name, setName] = useState("");
       coordinates: [lng, lat], // correct order
     };
   };
- const handleSubmit = () => {
-  if (!email) return;
 
-  if (popupType === "brochure") {
-    if (brochureUrl) {
+  // Single, clean handleSubmit — handles both "brochure" and "availability" popups
+ const handleSubmit = async () => {
+  if (!name || !email || !phone) return;
+
+  const result = await dispatch(
+    sendListingEnquiry({
+      listingId: rawListing?._id,
+      name,
+      email,
+      phone,
+      requestType: popupType,
+    })
+  );
+
+  if (sendListingEnquiry.fulfilled.match(result)) {
+    if (popupType === "brochure" && brochureUrl) {
       window.open(brochureUrl, "_blank");
     }
-  } else {
-    console.log("Availability Request");
-    // API call yaha karna
-  }
 
-  setPopupType(null);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setPopupType(null);
+    dispatch(resetEnquiryState());
+  }
 };
 
   return (
@@ -487,9 +499,9 @@ const [name, setName] = useState("");
           agentName={agent?.name}
           agentAvatar={agent?.profileImage}
           agentPhone={agent?.phone}
-           latlong={rawListing?.latlong}
-         coordinates={location?.coordinates}
-         title={title}
+          latlong={rawListing?.latlong}
+          coordinates={location?.coordinates}
+          title={title}
         />
       )}
 
@@ -634,13 +646,13 @@ const [name, setName] = useState("");
 
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-[26px] font-semibold text-[#01155E]">Overview</h2>
-             <button
-onClick={() => setPopupType("brochure")}
-  className="flex items-center gap-2 bg-[#01155E] text-white px-5 py-2.5 rounded-lg text-[14px] font-semibold"
->
-  <Download size={16} />
-  Download Brochure
-</button>
+              <button
+                onClick={() => setPopupType("brochure")}
+                className="flex items-center gap-2 bg-[#01155E] text-white px-5 py-2.5 rounded-lg text-[14px] font-semibold"
+              >
+                <Download size={16} />
+                Download Brochure
+              </button>
             </div>
 
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
@@ -809,12 +821,12 @@ onClick={() => setPopupType("brochure")}
                       Starting at {unit.price}
                     </span>
                   </div>
-                 <button
-  onClick={() => setPopupType("availability")}
-  className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
->
-  Check Availability
-</button>
+                  <button
+                    onClick={() => setPopupType("availability")}
+                    className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
+                  >
+                    Check Availability
+                  </button>
                 </div>
               ))}
             </div>
@@ -986,25 +998,25 @@ onClick={() => setPopupType("brochure")}
             </div>
 
             {youtubeEmbed && (
-  <>
-    <h2 className="text-[28px] font-semibold text-[#01155E] mb-10 mt-10">
-      Project Video
-    </h2>
+              <>
+                <h2 className="text-[28px] font-semibold text-[#01155E] mb-10 mt-10">
+                  Project Video
+                </h2>
 
-    <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
-      <iframe
-        width="100%"
-        height="100%"
-         src={`https://www.youtube.com/embed/${videos[0]}`}
-        title="Property Video"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="w-full h-full"
-      />
-    </div>
-  </>
-)}
+                <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${videos[0]}`}
+                    title="Property Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+              </>
+            )}
 
           </div>
 
@@ -1145,75 +1157,77 @@ onClick={() => setPopupType("brochure")}
         </div>
 
       </div>
+
       {popupType && (
-  <div
-    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
-   onClick={() => setPopupType(null)}
-  >
-    <div
-      className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h3 className="text-2xl font-bold text-[#01155E] mb-2">
-       {popupType === "brochure"
-  ? "Download Brochure"
-  : "Check Availability"}
-      </h3>
+        <div
+          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setPopupType(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-2xl font-bold text-[#01155E] mb-2">
+              {popupType === "brochure"
+                ? "Download Brochure"
+                : "Check Availability"}
+            </h3>
 
-      <p className="text-[#67739E] text-sm mb-6">
-        Enter your details to receive brochure.
-      </p>
-
-      <input
-        type="text"
-        placeholder="Enter Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
-      />
-
-      <input
-        type="email"
-        placeholder="Enter Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
-      />
-      <input
-  type="tel"
-  placeholder="Enter Phone Number"
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
-/>
-
-      <button
-  onClick={handleSubmit}
-  className="w-full bg-[#01155E] text-white py-3 rounded-lg"
->
-  Submit
-</button>
-
-
-    </div>
-    
-  </div>
-  
-)}
- <div className="max-w-[1290px] mx-auto mt-12 mb-22 px-4">
-          <div className="border-t border-gray-200 pt-6">
-            <p className="text-[#67739E] font-normal text-[16px] leading-relaxed ">
-              Property information, pricing, availability, specifications, and
-              project details presented on this page are provided for general
-              informational purposes only. Such information may change without
-              notice and should be independently verified with the relevant
-              developer or licensed brokerage before making any property-related
-              decision.
+            <p className="text-[#67739E] text-sm mb-6">
+              Enter your details to receive {popupType === "brochure" ? "the brochure" : "availability info"}.
             </p>
+
+            <input
+              type="text"
+              placeholder="Enter Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
+            />
+
+            <input
+              type="email"
+              placeholder="Enter Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
+            />
+            <input
+              type="tel"
+              placeholder="Enter Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4"
+            />
+
+            {enquiryError && (
+              <p className="text-red-500 text-sm mb-3">{enquiryError}</p>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              disabled={enquiryLoading}
+              className="w-full bg-[#01155E] text-white py-3 rounded-lg disabled:opacity-50"
+            >
+              {enquiryLoading ? "Submitting..." : "Submit"}
+            </button>
+
           </div>
         </div>
+      )}
+
+      <div className="max-w-[1290px] mx-auto mt-12 mb-22 px-4">
+        <div className="border-t border-gray-200 pt-6">
+          <p className="text-[#67739E] font-normal text-[16px] leading-relaxed ">
+            Property information, pricing, availability, specifications, and
+            project details presented on this page are provided for general
+            informational purposes only. Such information may change without
+            notice and should be independently verified with the relevant
+            developer or licensed brokerage before making any property-related
+            decision.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
-
-
