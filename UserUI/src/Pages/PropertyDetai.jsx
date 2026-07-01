@@ -286,13 +286,19 @@ export default function PropertyDetail() {
     "outofstock",
   ];
 
-  const getDisplayStatus = (status) => {
+ const getDisplayStatus = (status) => {
     if (!status) return "—";
 
     const key = status.toLowerCase().replace(/\s+/g, "");
 
     return OFFPLAN_STATUSES.includes(key) ? "Off Plan" : status;
   };
+
+  const isOffPlan = completionStatus
+    ? OFFPLAN_STATUSES.includes(
+        completionStatus.toLowerCase().replace(/\s+/g, "")
+      )
+    : false;
 
   const developerImage =
     PROPERTY?.developer_image || rawListing?.developer_image;
@@ -721,34 +727,36 @@ export default function PropertyDetail() {
             <div className="mb-8">
               <h3 className="text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
               <div className="flex gap-6">
-                <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-6">
-                  <div className="grid grid-cols-2 gap-4 pb-5 border-b border-[#D9E1F2]">
-                    <div>
-                      <p className="text-[#67739E] text-[18px] mb-1">Permit Number</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{permitNumber}</p>
+                {!isOffPlan && (
+                  <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-6">
+                    <div className="grid grid-cols-2 gap-4 pb-5 border-b border-[#D9E1F2]">
+                      <div>
+                        <p className="text-[#67739E] text-[18px] mb-1">Permit Number</p>
+                        <p className="text-[#01155E] font-semibold text-[18px]">{permitNumber}</p>
+                      </div>
+                      <div>
+                        <p className="text-[#67739E] text-[18px] mb-1">Zone Name</p>
+                        <p className="text-[#01155E] font-semibold text-[18px]">{zoneName}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[#67739E] text-[18px] mb-1">Zone Name</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{zoneName}</p>
+                    <div className="grid grid-cols-2 gap-4 py-5 border-b border-[#D9E1F2]">
+                      <div>
+                        <p className="text-[#67739E] text-[18px] mb-1">RERA</p>
+                        <p className="text-[#01155E] font-semibold text-[18px]">{rera}</p>
+                      </div>
+                      <div>
+                        <p className="text-[#67739E] text-[18px] mb-1">BRN</p>
+                        <p className="text-[#01155E] font-semibold text-[18px]">{brn}</p>
+                      </div>
+                    </div>
+                    <div className="pt-5">
+                      <p className="text-[#67739E] text-[18px] mb-1">Registered Agency</p>
+                      <p className="text-[#01155E] font-semibold text-[18px]">{registeredAgency}</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 py-5 border-b border-[#D9E1F2]">
-                    <div>
-                      <p className="text-[#67739E] text-[18px] mb-1">RERA</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{rera}</p>
-                    </div>
-                    <div>
-                      <p className="text-[#67739E] text-[18px] mb-1">BRN</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{brn}</p>
-                    </div>
-                  </div>
-                  <div className="pt-5">
-                    <p className="text-[#67739E] text-[18px] mb-1">Registered Agency</p>
-                    <p className="text-[#01155E] font-semibold text-[18px]">{registeredAgency}</p>
-                  </div>
-                </div>
+                )}
 
-                <div className="w-[280px] border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6">
+                <div className={`${isOffPlan ? "w-full" : "w-[280px]"} border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6`}>
                   <div className="relative w-full h-full flex items-center justify-center">
                     <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#01155E] rounded-tl-[4px]" />
                     <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#01155E] rounded-tr-[4px]" />
@@ -806,30 +814,32 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-              {unitTypesList.map((unit, i) => (
-                <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
-                  <h3 className="text-[#01155E] font-semibold text-[24px]">{unit.type}  Bedrooms</h3>
-                  <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
-                    <span className="flex items-center gap-2">
-                      <Maximize size={20} className="text-[#01155E]" />
-                      {unit.sqft}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Banknote size={20} className="text-[#01155E]" />
-                      Starting at {unit.price}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setPopupType("availability")}
-                    className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
-                  >
-                    Check Availability
-                  </button>
-                </div>
-              ))}
-            </div>
+           <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+  {unitTypesList.map((unit, i) => (
+    <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
+      <h3 className="text-[#01155E] font-semibold text-[24px]">
+        {unit.type === 0 || unit.type === "0" ? "Studio" : `${unit.type} Bedrooms`}
+      </h3>
+      <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
+        <span className="flex items-center gap-2">
+          <Maximize size={20} className="text-[#01155E]" />
+          {unit.sqft}
+        </span>
+        <span className="flex items-center gap-2">
+          <Banknote size={20} className="text-[#01155E]" />
+          Starting at {unit.price}
+        </span>
+      </div>
+      <button
+        onClick={() => setPopupType("availability")}
+        className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
+      >
+        Check Availability
+      </button>
+    </div>
+  ))}
+</div>
 
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-[#01155E] mb-6">Building Information</h2>

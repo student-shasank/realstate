@@ -31,6 +31,9 @@ import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/
 import AwardsSection from '../Components/HomePageComponents/AwardsSection';
 import PropertyFlipbookSection from "../Components/HomePageComponents/Propertyflipbooksection.jsx"
 
+// Shared style constant so every dropdown "value" row uses the exact
+// same font style/size as the Payment Plan dropdown.
+const DROPDOWN_OPTION_TEXT_CLASS = "text-[14px] font-medium text-[#6b728e]";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -273,7 +276,7 @@ const Home = () => {
                       <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-['Archivo'] text-lg">Beds</h3></div>
                       <div className="flex flex-wrap gap-2">
                         {['Studio', '1', '2', '3', '4', '5', '6', '7', '8+'].map((opt) => (
-                          <button key={opt} type="button" onClick={() => dispatch(setBeds(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all text-sm ${beds === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white text-[#5B6B91] border-gray-300'}`}>{opt}</button>
+                          <button key={opt} type="button" onClick={() => dispatch(setBeds(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all ${DROPDOWN_OPTION_TEXT_CLASS} ${beds === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white border-gray-300'}`}>{opt}</button>
                         ))}
                       </div>
                     </div>
@@ -281,7 +284,7 @@ const Home = () => {
                       <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-medium text-lg">Baths</h3></div>
                       <div className="flex flex-wrap gap-2">
                         {['1', '2', '3', '4', '5', '6+'].map((opt) => (
-                          <button key={opt} type="button" onClick={() => dispatch(setBaths(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all text-sm ${baths === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white text-[#5B6B91] border-gray-300'}`}>{opt}</button>
+                          <button key={opt} type="button" onClick={() => dispatch(setBaths(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all ${DROPDOWN_OPTION_TEXT_CLASS} ${baths === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white border-gray-300'}`}>{opt}</button>
                         ))}
                       </div>
                     </div>
@@ -451,7 +454,7 @@ const Home = () => {
                           )}
                         </div>
 
-                        <span className="text-[16px] font-medium text-[#67739E]">
+                        <span className={DROPDOWN_OPTION_TEXT_CLASS}>
                           {status.label}
                         </span>
                       </div>
@@ -498,7 +501,7 @@ const Home = () => {
       )}
     </div>
 
-    <span className="text-[16px] font-medium text-[#67739E]">
+    <span className={DROPDOWN_OPTION_TEXT_CLASS}>
       {year.label}
     </span>
   </div>
@@ -529,7 +532,7 @@ const Home = () => {
                           <input type="radio" name="paymentPlan" value={plan} checked={paymentPlan === plan} onChange={() => { setPaymentPlan(plan); setPaymentOpen(false); }} className="peer appearance-none w-6 h-6 border-2 border-black rounded-full checked:border-black cursor-pointer" />
                           <div className="absolute w-3 h-3 bg-black rounded-full opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                         </div>
-                        <span className=" text-[14px] font-medium text-[#6b728e]">{plan}</span>
+                        <span className={DROPDOWN_OPTION_TEXT_CLASS}>{plan}</span>
                       </label>
                     ))}
                   </div>
@@ -578,7 +581,7 @@ const Home = () => {
                           )}
                         </div>
 
-                        <span className="text-[#67739E] text-[14px] truncate">
+                        <span className={`${DROPDOWN_OPTION_TEXT_CLASS} truncate`}>
                           {emirate}
                         </span>
                       </div>

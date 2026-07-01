@@ -62,9 +62,11 @@ const Footer = () => {
               <div className="flex gap-3 mb-5">
                 <Phone />
                 <div className="Text-[#FFFFFF] text-[18px]">
+                  
+                  <p>UAE : +971 505773767</p>
+                   <p>Canada: +1 437 328 8508</p>
                   <p>India: +91 99999 95871</p>
-                  <p>Canada: +1 437 328 8508</p>
-                  <p>Phone (UAE only): +971 505773767</p>
+                  
                 </div>
               </div>
 

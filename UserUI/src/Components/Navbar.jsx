@@ -220,7 +220,7 @@ useEffect(() => {
               color: textColor,
             }}
           >
-            Blogs
+            Market Updates 
           </Link>
 
           <Link

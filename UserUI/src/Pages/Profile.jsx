@@ -213,7 +213,7 @@ export default function Profile() {
           <div className="px-8 pb-6 mt-10">
 
             {/* Avatar row */}
-            <div className="flex items-end justify-between -mt-10 mb-4">
+            <div className="flex items-end justify-between -mt-7 mb-4">
               <div className="flex items-end gap-5">
                 <div className="w-[80px] h-[80px] rounded-full bg-[#01155E] border-4 border-white shadow-lg flex items-center justify-center text-white text-[32px] font-bold flex-shrink-0">
                   {user.name.charAt(0)}
