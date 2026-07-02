@@ -34,6 +34,7 @@ import Profile from "./Pages/Profile";
 import Compare from "./Pages/Compare";
 import ScrollToTop from "./Components/Scroll/ScrollTop";
 import Blog from "./Pages/Blog";
+import BlogDetail from "./Pages/BlogDetail";
 
 
 
@@ -93,6 +94,7 @@ function App() {
         <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
         <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
            <Route path="/Blog" element={<Blog/>} />
+            <Route path="/blog/:slug" element={<BlogDetail/>} />
         
       </Routes>
    

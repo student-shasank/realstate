@@ -162,7 +162,8 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, lat
             <img src={getSafeImageUrl(agentAvatar)} alt="Agent" className="w-12 h-12 rounded-full object-cover" />
             <div>
               <p className="text-[13px] text-[#67739E]">Listing by</p>
-              <p className="text-[#01155E] font-semibold text-[15px]">{agentName}</p>
+              {/* <p className="text-[#01155E] font-semibold text-[15px]">{agentName}</p> */}
+              <p className="text-[#01155E] font-semibold text-[15px]">Divyansh Chitkara</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -1103,8 +1104,11 @@ export default function PropertyDetail() {
                       alt="Agent"
                     />
                     <div>
-                      <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
+                      {/* <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
                         {agent?.name || "—"}
+                      </div> */}
+                        <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
+                      Divyansh Chitkara
                       </div>
                       <div className="text-[#01155E] flex items-center gap-2 text-[18px]">
                         <Phone size={18} />

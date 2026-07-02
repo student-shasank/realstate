@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import imageurl from "../../assets/underline.png";
-import { fetchFeaturedBlogs } from "../../features/dashboard/Blogslice.jsx";
+import { fetchAllBlogs, selectFeaturedBlogs } from "../../features/dashboard/Blogslice.jsx";
+import { useNavigate } from "react-router-dom";
+
+
 
 const DESIGN = {
   colors: {
@@ -20,7 +23,6 @@ const DESIGN = {
   },
 };
 
-// 👇 Naam fix kiya: "BlogSection" se "SectionHeading" — ab ye sab jagah match karega
 const SectionHeading = () => (
   <div className="w-full max-w-[1200px] px-5 lg:px-0 mb-8 lg:mb-10">
     <h2
@@ -44,20 +46,22 @@ const SectionHeading = () => (
 
 const FeaturedBlogs = () => {
   const dispatch = useDispatch();
-  const { featured, featuredLoading, featuredError } = useSelector(
+  const navigate = useNavigate();
+
+  // Ab seedha shared "all" cache se derive hota hai — koi alag API call nahi
+  const featured = useSelector(selectFeaturedBlogs);
+  const { allLoading: featuredLoading, allError: featuredError } = useSelector(
     (state) => state.blogs
   );
 
   useEffect(() => {
-    dispatch(fetchFeaturedBlogs());
+    // fetchAllBlogs ke andar `condition` guard hai — agar Contact page (ya koi
+    // aur component) ne pehle se ye data fetch kar liya hai ya fetch chal raha
+    // hai, to ye dispatch silently skip ho jaayega, duplicate API call nahi hogi.
+    dispatch(fetchAllBlogs());
   }, [dispatch]);
 
-  // Debug logs — issue confirm hone tak rakhna, baad me hata dena
-  console.log("featured:", featured);
-  console.log("featuredLoading:", featuredLoading);
-  console.log("featuredError:", featuredError);
-
-  if (featuredLoading) {
+  if (featuredLoading && featured.length === 0) {
     return (
       <section className="bg-white flex justify-center py-16 pb-[67px]">
         <div className="w-full max-w-[1200px] px-4 sm:px-6 lg:px-0">
@@ -157,7 +161,7 @@ const FeaturedBlogs = () => {
                 </p>
 
                 <button
-                  onClick={() => window.open(mainBlog.link, "_blank")}
+                 onClick={() => navigate(`/blog/${mainBlog.slug}`)}
                   className="px-8 py-3 rounded-xl text-sm font-medium transition-all duration-300 hover:opacity-90 active:scale-95"
                   style={{
                     backgroundColor: DESIGN.colors.primary,
@@ -233,7 +237,7 @@ const FeaturedBlogs = () => {
 
                   <div className="flex justify-end mt-4">
                     <button
-                      onClick={() => window.open(blog.link, "_blank")}
+                 onClick={() => navigate(`/blog/${blog.slug}`)}
                       className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:opacity-90 active:scale-95 flex-shrink-0"
                       style={{
                         backgroundColor: DESIGN.colors.primary,

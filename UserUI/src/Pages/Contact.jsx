@@ -1,34 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchBlogList,
+  fetchAllBlogs,
   setCurrentPage,
   setSearchTerm,
+  selectPaginatedBlogs,
+  selectTotalPages,
 } from "../features/dashboard/Blogslice.jsx";
-import Seo from "../Components/Seo.jsx"; // 👈 naya import
+import Seo from "../Components/Seo.jsx";
 
 const PER_PAGE = 6;
 
 function Contact() {
   const dispatch = useDispatch();
   const {
-    list: posts,
-    listLoading: loading,
-    listError: error,
+    allLoading: loading,
+    allError: error,
     currentPage,
-    totalPages,
     searchTerm,
   } = useSelector((state) => state.blogs);
 
-  // search input ki local value (jo type ho rahi hai, abhi tak submit nahi hui)
+  // Ab ye dono client-side derive hote hain "all" cache se — koi network call nahi
+  const posts = useSelector(selectPaginatedBlogs(PER_PAGE));
+  const totalPages = useSelector(selectTotalPages(PER_PAGE));
+
   const [searchInput, setSearchInput] = useState("");
 
-  // Page ya searchTerm badalne par data fetch karo
+  // Sirf EK BAAR fetch hota hai. `fetchAllBlogs` ke andar condition guard hai —
+  // agar FeaturedBlogs (ya kisi aur component) ne pehle se fetch kar diya hai ya
+  // fetch in-progress hai, to ye dispatch koi extra API call nahi karega.
   useEffect(() => {
-    dispatch(
-      fetchBlogList({ page: currentPage, perPage: PER_PAGE, search: searchTerm })
-    );
-  }, [dispatch, currentPage, searchTerm]);
+    dispatch(fetchAllBlogs());
+  }, [dispatch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -61,17 +64,13 @@ function Contact() {
     return pages;
   };
 
-  // 👇 Canonical path: page 1 ke liye "/contact", aur page 2+ ke liye "/contact?page=2" etc.
-  // (route /contact hai, isliye yahi actual URL canonical me jaana chahiye)
   const canonicalPath =
     currentPage > 1 ? `/contact?page=${currentPage}` : "/contact";
 
-  // 👇 Search results ko Google index na kare — isse thin/duplicate pages nahi banenge
   const isSearchActive = Boolean(searchTerm);
 
   return (
     <div className="max-w-6xl mx-auto py-16 px-5 mt-20">
-      {/* 👇 SEO / canonical tag yahan add hua */}
       <Seo
         title="Blogs | Yupland"
         description="Discover Dubai's newest launches with expert guidance to secure the best prices and the most desirable units."
@@ -112,7 +111,9 @@ function Contact() {
       </form>
 
       {/* Loading State */}
-      {loading && <div className="text-center py-20 text-xl">Loading...</div>}
+      {loading && posts.length === 0 && (
+        <div className="text-center py-20 text-xl">Loading...</div>
+      )}
 
       {/* Error State */}
       {!loading && error && (
