@@ -1,98 +1,239 @@
-import React from 'react';
-import patternImage from '../../src/assets/detailservicebackground.png';
-import cityBackground from "../assets/BlogpageBg.jpg";
-import SubtitelofBlog from '../Components/Blog/SubtitelofBlog';
-import BlogDetailSection from '../Components/Blog/BlogDetailSection';
-import BlogFullWidthSection from '../Components/Blog/BlogFullWidthSection';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAllBlogs,
+  setCurrentPage,
+  setSearchTerm,
+  selectPaginatedBlogs,
+  selectTotalPages,
+} from "../features/dashboard/Blogslice.jsx";
+import Seo from "../Components/Seo.jsx";
 
-const Blog = () => {
+const PER_PAGE = 6;
+
+function Blog() {
+  const dispatch = useDispatch();
+  const {
+    allLoading: loading,
+    
+    allError: error,
+    currentPage,
+    searchTerm,
+  } = useSelector((state) => state.blogs);
+
+  // Ab ye dono client-side derive hote hain "all" cache se — koi network call nahi
+  const posts = useSelector(selectPaginatedBlogs(PER_PAGE));
+  const totalPages = useSelector(selectTotalPages(PER_PAGE));
+
+  const [searchInput, setSearchInput] = useState("");
+
+  // Sirf EK BAAR fetch hota hai. `fetchAllBlogs` ke andar condition guard hai —
+  // agar FeaturedBlogs (ya kisi aur component) ne pehle se fetch kar diya hai ya
+  // fetch in-progress hai, to ye dispatch koi extra API call nahi karega.
+  useEffect(() => {
+    dispatch(fetchAllBlogs());
+  }, [dispatch]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    dispatch(setSearchTerm(searchInput.trim())); // ye currentPage ko 1 par reset kar deta hai
+  };
+
+  const handleClear = () => {
+    setSearchInput("");
+    dispatch(setSearchTerm(""));
+  };
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    dispatch(setCurrentPage(page));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Pagination number list banata hai (max 5 numbers dikhte hain, current ke around)
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
+
+  const canonicalPath =
+    currentPage > 1 ? `/contact?page=${currentPage}` : "/contact";
+
+  const isSearchActive = Boolean(searchTerm);
+
   return (
-    <>
-    <section className="relative w-full  bg-white overflow-hidden mt-20">
-      
-      {/* TOP LEFT PATTERN */}
-      <div
-        className="absolute top-0 left-0 z-0 h-[452px] w-[990px] bg-no-repeat bg-left-top opacity-100"
-        style={{
-          backgroundImage: `url(${patternImage})`,
-          backgroundSize: 'contain',
-        }}
+    <div className="max-w-6xl mx-auto py-16 px-5 mt-20">
+      <Seo
+        title="Blogs | Yupland"
+        description="Discover Dubai's newest launches with expert guidance to secure the best prices and the most desirable units."
+        canonicalPath={canonicalPath}
+        noindex={isSearchActive}
       />
 
-      {/* MAIN CONTENT CONTAINER - Restricted to 1440px to match specs */}
-      <div className="relative z-10  mx-auto">
+      {/* Page Heading */}
+      <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">Blogs</h1>
 
-        {/* BLOG TITLE SECTION - H: 168px, Padding: 50px 148px */}
-        <div className="w-full h-[168px] pt-[60px] pb-[50px] px-[148px] flex flex-col gap-[10px]">
-          <div className="w-[1200px] h-[52px]">
-            <h1 className="text-[#01155E] text-[48px] font-semibold font-['Archivo'] leading-[100%]">
-              Blog Title
-            </h1>
+      {/* Search Bar */}
+      <form
+        onSubmit={handleSearch}
+        className="flex items-center gap-3 mb-12 max-w-xl mx-auto"
+      >
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Search blogs..."
+          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
+        />
+        <button
+          type="submit"
+          className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
+        >
+          Search
+        </button>
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
+          >
+            Clear
+          </button>
+        )}
+      </form>
 
-            {/* Decorative Line */}
-            <div className="flex items-end w-[280px] mt-2">
-              <div className="w-[110px] h-[8px] bg-[#01155E]"></div>
-              <div className="flex-1 h-[2px] bg-[#01155E]"></div>
-            </div>
-          </div>
+      {/* Loading State */}
+      {loading && posts.length === 0 && (
+        <div className="text-center py-20 text-xl">Loading...</div>
+      )}
+
+      {/* Error State */}
+      {!loading && error && (
+        <div className="text-center py-20 text-xl text-red-500">{error}</div>
+      )}
+
+      {/* No Results */}
+      {!loading && !error && posts.length === 0 && (
+        <div className="text-center py-20 text-xl">
+          {searchTerm
+            ? `"${searchTerm}" ke liye koi blog nahi mila.`
+            : "Koi blog available nahi hai."}
         </div>
+      )}
 
-        {/* INTRODUCTION SECTION - H: 499px, Top: 319px */}
-        <div className="relative overflow-hidden h-[499px] flex items-center "> {/* Adjusting margin to align with 'top: 319px' flow */}
+      {/* Blog Grid */}
+      {!loading && !error && posts.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <a
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className="block rounded-2xl overflow-hidden border border-gray-200 hover:shadow-lg transition"
+              >
+                {post.image ? (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-[220px] object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-[220px] bg-gray-100 flex items-center justify-center text-gray-400">
+                    No Image
+                  </div>
+                )}
 
-          {/* BACKGROUND IMAGE with specific opacity from image_57c330.jpg */}
-          <div className="absolute inset-0 z-0 opacity-[0.65]">
-            <img
-              src={cityBackground}
-              alt="background"
-              className="w-full h-full object-cover"
-            />
+                <div className="p-5">
+                  <h2 className="text-xl font-semibold   text-[#01155E] mb-2 line-clamp-2">
+                    {post.title}
+                  </h2>
+
+                  <p className="text-gray-500 text-sm mb-3 line-clamp-2">
+                    {post.description}
+                  </p>
+
+                  <div className="flex items-center justify-between text-sm text-gray-400">
+                    {post.author && <span>{post.author}</span>}
+                    <span>{post.date}</span>
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
 
-          {/* WHITE OVERLAY */}
-          <div className="absolute inset-0 bg-white/40 z-[1]" />
+          {/* Number Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-12">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-[#01155E] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              >
+                Prev
+              </button>
 
-          {/* CONTENT BOX - Width: 1200px (Centered via 148px padding) */}
-          <div className="relative z-10 px-[148px] flex flex-col gap-[80px] w-full">
+              {getPageNumbers()[0] > 1 && (
+                <>
+                  <button
+                    onClick={() => goToPage(1)}
+                    className="w-10 h-10 rounded-lg border border-gray-300 text-[#01155E] font-medium hover:bg-gray-50 transition"
+                  >
+                    1
+                  </button>
+                  {getPageNumbers()[0] > 2 && <span className="text-gray-400">...</span>}
+                </>
+              )}
 
-            {/* INTRODUCTION HEADING - H: 50px */}
-            <div className="w-[1200px] h-[50px] flex flex-col gap-[10px]">
-              <h2 className="text-[#01155E] text-[32px] md:text-[42px] font-bold font-['Archivo'] leading-tight">
-                Introduction
-              </h2>
+              {getPageNumbers().map((num) => (
+                <button
+                  key={num}
+                  onClick={() => goToPage(num)}
+                  className={`w-10 h-10 rounded-lg border font-medium transition ${
+                    num === currentPage
+                      ? "bg-[#01155E] text-white border-[#01155E]"
+                      : "border-gray-300 text-[#01155E] hover:bg-gray-50"
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
 
-              <div className="flex items-end w-[400px] md:w-[850px]">
-                <div className="w-[180px] md:w-[220px] h-[8px] md:h-[10px] bg-[#01155E]"></div>
-                <div className="flex-1 h-[2px] bg-[#01155E]"></div>
-              </div>
+              {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+                <>
+                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                    <span className="text-gray-400">...</span>
+                  )}
+                  <button
+                    onClick={() => goToPage(totalPages)}
+                    className="w-10 h-10 rounded-lg border border-gray-300 text-[#01155E] font-medium hover:bg-gray-50 transition"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-[#01155E] font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              >
+                Next
+              </button>
             </div>
-
-            {/* TEXT BOX - Width: 1200px, Height: 205px */}
-            <div className="w-[1200px] h-[205px] flex flex-col gap-6">
-              <p className="text-[#01155E] text-[20px] md:text-[22px] font-medium font-['General_Sans'] leading-[1.6]">
-                Yupland is a real estate marketing and information platform managed by
-                <span className="font-bold"> Divyansh Chitkara</span>.
-                Yupland itself does not provide real estate brokerage services.
-              </p>
-
-              <p className="text-[#01155E] text-[18px] md:text-[20px] font-normal font-['General_Sans'] leading-[1.6] opacity-90">
-                While every effort is made to ensure that the information presented on
-                Yupland is accurate and current, all information is provided for general
-                informational purposes only and should not be considered legally binding.
-                Users are encouraged to independently verify property details,
-                availability, and pricing with the respective developers and authorised
-                representatives.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <SubtitelofBlog/>
-    <BlogDetailSection/>
-    <BlogFullWidthSection/>
-    </>
+          )}
+        </>
+      )}
+    </div>
   );
-};
+}
 
 export default Blog;

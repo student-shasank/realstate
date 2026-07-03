@@ -1,77 +1,82 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import underline from "../../assets/underline.png";
+import LoginPopup from "../../Pages/LoginPopup"; // adjust path to match your project structure
 
-/**
- * BROCHURE FLIPBOOK SECTION (React + Tailwind)
- * ---------------------------------------------
- * Matches the design tokens used in CommunitiesBrief.jsx:
- * - Font: Archivo
- * - Heading color: #001A54, with the same underline.png underline graphic
- * - Body text color: #01155E99
- * - Primary button: #001A54 bg, hover #01206b
- * - Container: max-w-[1200px], same px-5 lg:px-0 gutters (assumes a
- *   1440px page, same as the rest of the site)
- *
- * WHAT THIS DOES
- * - Title + description for the report/brochure
- * - Embeds the flipbook (currently a Simplebooklet iframe link)
- * - Shows a lock overlay nudging signup after a delay, since
- *   Simplebooklet gives one link with ALL pages — there's no way to
- *   tell it "only show 5 pages to guests"
- *
- * IMPORTANT
- * This is a SOFT gate (a UX nudge), not real security. A visitor can
- * still open the raw Simplebooklet link directly and see all pages,
- * because nothing on Simplebooklet's side is actually restricted.
- *
- * FOR A REAL (SECURE) GATE LATER:
- * 1. Convert the brochure PDF into N page images on your server.
- * 2. Build an endpoint like GET /api/brochure/:id/pages that returns
- *    image URLs for pages 1-5 to logged-out visitors, all N pages to
- *    logged-in users.
- * 3. Replace the <iframe> below with a flipbook library such as
- *    react-pageflip, fed by the image URLs from that endpoint.
- * 4. Delete the setTimeout-based gate below — the backend response
- *    itself becomes the gate.
- *
- * Alternative: Simplebooklet has a built-in "Lead Gate" feature that
- * can do this natively without any custom backend — worth asking the
- * client if they'd rather enable that inside their Simplebooklet
- * dashboard instead.
- *
- * PROPS
- * - eyebrow, title, description: section copy
- * - brochureUrl: the Simplebooklet (or similar) iframe link
- * - isLoggedIn: pass real auth state here once you have it
- * - signupHref: where the "Sign up" buttons should send the visitor
- * - gateDelayMs: how long a guest can view before the overlay appears
- */
+// Reads the same "user" object your favorites-sync code writes to
+// localStorage, and treats its presence as "logged in".
+function getIsLoggedIn() {
+  try {
+    const raw = localStorage.getItem("user");
+    const user = JSON.parse(raw);
+    const result = Boolean(user && Object.keys(user).length > 0);
+    // 🐛 DEBUG
+    console.log("[Flipbook] getIsLoggedIn() raw localStorage.user:", raw);
+    console.log("[Flipbook] getIsLoggedIn() parsed:", user, "-> result:", result);
+    return result;
+  } catch (err) {
+    console.log("[Flipbook] getIsLoggedIn() threw error:", err);
+    return false;
+  }
+}
+
 export default function PropertyFlipbookSection({
   eyebrow = "Yupland Research",
   title = "Dubai Real Estate Market Report 2026",
   description = "Structured, research-led analysis of Dubai's off-plan and ready property markets — covering transaction trends, escrow regulation, investment risk frameworks, and where institutional capital is moving next. This report tracks the shift from speculative cycles to a more mature, regulation-backed market, with data sourced from the Dubai Land Department, JLL, and CBRE.",
   description2 = "Full breakdowns, charts, and the structural case for long-term investment are in the report below. Sign up for free to unlock the complete report.",
-  brochureUrl = "https://simplebooklet.com/photo10",
-  isLoggedIn = false,
-  signupHref = "/signup",
-  gateDelayMs = 25000,
+  fullBookUrl = " https://heyzine.com/flip-book/1c8e4fadcc.html",
+  previewBookUrl = "https://heyzine.com/flip-book/52e562bcf0.html",
 }) {
-  const [gateVisible, setGateVisible] = useState(false);
-  const timerRef = useRef(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const initial = getIsLoggedIn();
+    console.log("[Flipbook] INITIAL isLoggedIn state:", initial);
+    return initial;
+  });
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const hasAutoPromptedRef = useRef(false);
+
+  const refreshLoginState = useCallback(() => {
+    console.log("[Flipbook] refreshLoginState() called — event fired");
+    const next = getIsLoggedIn();
+    console.log("[Flipbook] setting isLoggedIn to:", next);
+    setIsLoggedIn(next);
+  }, []);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      setGateVisible(false);
+    console.log("[Flipbook] mounting — attaching storage & auth-changed listeners");
+    window.addEventListener("storage", refreshLoginState);
+    window.addEventListener("auth-changed", refreshLoginState);
+    return () => {
+      console.log("[Flipbook] unmounting — removing listeners");
+      window.removeEventListener("storage", refreshLoginState);
+      window.removeEventListener("auth-changed", refreshLoginState);
+    };
+  }, [refreshLoginState]);
+
+  // 🐛 DEBUG: log every time isLoggedIn actually changes / re-renders
+  useEffect(() => {
+    console.log("[Flipbook] RENDER — isLoggedIn is now:", isLoggedIn);
+  }, [isLoggedIn]);
+
+  const brochureUrl = isLoggedIn ? fullBookUrl : previewBookUrl;
+  console.log("[Flipbook] computed brochureUrl:", brochureUrl);
+
+  const handleUnlockClick = () => {
+    if (getIsLoggedIn()) {
+      setIsLoggedIn(true);
       return;
     }
-    timerRef.current = setTimeout(() => setGateVisible(true), gateDelayMs);
-    return () => clearTimeout(timerRef.current);
-  }, [isLoggedIn, gateDelayMs]);
+    setShowLoginPopup(true);
+  };
+
+  const handleLoginClose = () => {
+    setShowLoginPopup(false);
+    refreshLoginState();
+  };
 
   return (
-    <section className="w-full bg-white overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16 pb-14">
-        {/* --- Header, matches CommunitiesBrief heading style --- */}
+    <section className="w-full bg-white overflow-hidden mb-30">
+      <div className="max-w-[1200px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16">
         <div className="max-w-2xl">
           <p
             className="mb-2 text-[13px] font-semibold uppercase tracking-wider text-[#001A54]"
@@ -102,82 +107,62 @@ export default function PropertyFlipbookSection({
             {description2}
           </p>
         </div>
+      </div>
 
-        {/* --- Flipbook frame --- */}
-        <div className="relative mt-8">
-          <div className="relative h-[420px] sm:h-[600px] lg:h-[760px] w-full overflow-hidden rounded-[20px] bg-[#001A54]">
+      <div className="mt-8 w-full flex justify-center px-5 lg:px-0">
+        <div className="w-full max-w-[1440px]">
+          <div className="relative">
             <iframe
+              key={brochureUrl}
               src={brochureUrl}
               title={`${title} - ${eyebrow}`}
-              loading="lazy"
               allowFullScreen
-              className="h-full w-full border-0"
+              allow="autoplay; fullscreen; clipboard-write"
+              scrolling="no"
+              className="fp-iframe"
+              style={{
+                border: "1px solid lightgray",
+                width: "100%",
+                height: "400px",
+              }}
             />
 
-            {!isLoggedIn && gateVisible && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#001A54]/95 px-6 text-center">
-                <svg
-                  className="h-8 w-8 text-white/70"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-                  />
-                </svg>
-                <p
-                  className="text-[20px] font-semibold text-white"
-                  style={{ fontFamily: "Archivo, sans-serif" }}
-                >
-                  Sign up to keep reading
-                </p>
-                <p className="max-w-xs text-[16px] leading-relaxed text-white/70">
-                  Create a free account to see the full report, including
-                  transaction data and investment frameworks.
-                </p>
-                <a
-                  href={signupHref}
-                  className="mt-3 w-full sm:w-auto min-w-[220px] h-[50px] flex items-center justify-center rounded-md bg-white text-[#001A54] text-[16px] font-semibold transition-all duration-300 hover:bg-blue-50"
-                >
-                  Sign up free
-                </a>
+            {!isLoggedIn && (
+              <p className="mt-3 text-center text-[14px] text-[#01155E99]">
+                Showing a 5-page preview.{" "}
                 <button
                   type="button"
-                  onClick={() => setGateVisible(false)}
-                  className="mt-1 text-[13px] text-white/60 underline underline-offset-2 hover:text-white"
+                  onClick={handleUnlockClick}
+                  className="font-semibold text-[#001A54] underline underline-offset-2"
                 >
-                  Keep browsing preview
-                </button>
-              </div>
+                  Log in
+                </button>{" "}
+                to view the full 23-page report.
+              </p>
             )}
           </div>
 
           {!isLoggedIn && (
-            <p className="mt-3 text-center text-[14px] text-[#01155E99]">
-              Showing a preview.{" "}
-              <a
-                href={signupHref}
-                className="font-semibold text-[#001A54] underline underline-offset-2"
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleUnlockClick}
+                className="mt-8 mb-14 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
               >
-                Sign up
-              </a>{" "}
-              to view the full report.
-            </p>
+                Get Full Report
+              </button>
+            </div>
           )}
         </div>
-
-        <button
-          onClick={() => (window.location.href = signupHref)}
-          className="mt-8 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
-        >
-          Get Full Report
-        </button>
       </div>
+
+      <LoginPopup
+        isOpen={showLoginPopup}
+        onClose={handleLoginClose}
+        openSignup={() => {
+          setShowLoginPopup(false);
+        }}
+      />
     </section>
   );
 }

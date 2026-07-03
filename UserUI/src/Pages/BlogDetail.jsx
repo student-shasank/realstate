@@ -49,7 +49,7 @@ function BlogDetail() {
         canonicalPath={`/blog/${post.slug}`}
       />
 
-      <Link to="/contact" className="text-[#01155E] font-medium mb-6 inline-block">
+      <Link to="/blog" className="text-[#01155E] font-medium mb-6 inline-block">
         ← Back to blogs
       </Link>
 

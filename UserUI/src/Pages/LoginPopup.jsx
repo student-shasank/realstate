@@ -28,6 +28,7 @@ function LoginPopup({ isOpen, onClose, openSignup }) {
   useEffect(() => {
     if (success && user) {
       toast.success("Login Successful!");
+      window.dispatchEvent(new Event("auth-changed"));
       onClose();
       dispatch(resetLoginState());
     }

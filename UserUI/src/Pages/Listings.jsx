@@ -519,7 +519,7 @@ const Listings = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-6">
+          {/* <div className="flex items-center gap-6">
             <div className="flex items-center cursor-pointer gap-2">
               <span className="text-[#01155E] text-[18px]">Most popular</span>
               <ChevronDown className="h-5 w-5 text-[#01155E]" />
@@ -553,7 +553,55 @@ const Listings = () => {
                 </svg>
               </button>
             </div>
-          </div>
+          </div> */}
+          <div className="flex items-center gap-6">
+  <div className="flex items-center cursor-pointer gap-2">
+    <span className="text-[#01155E] text-[18px]">Most popular</span>
+    <ChevronDown className="h-5 w-5 text-[#01155E]" />
+  </div>
+
+  <div className="flex items-center bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1">
+    <button
+      onClick={() => setViewMode("list")}
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+        viewMode === "list"
+          ? "bg-[#EEF2F9] text-[#01155E]"
+          : "text-[#01155E]/70 hover:text-[#01155E]"
+      }`}
+    >
+      <svg width="18" height="16" viewBox="0 0 20 18" fill="none">
+        <path
+          d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>List</span>
+    </button>
+
+    <button
+      onClick={() => setViewMode("map")}
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+        viewMode === "map"
+          ? "bg-[#EEF2F9] text-[#01155E]"
+          : "text-[#01155E]/70 hover:text-[#01155E]"
+      }`}
+    >
+      <svg width="16" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="2" />
+      </svg>
+      <span>Map</span>
+    </button>
+  </div>
+</div>
         </div>
 
         {/* FILTERS SECTION */}
