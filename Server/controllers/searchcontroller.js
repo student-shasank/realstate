@@ -74,6 +74,7 @@ export const searchListings = async (req, res) => {
       developer,
       emirates,
       handoverYear,
+       saleStatus,
       location,
       page = 1,
       limit = 20,
@@ -111,22 +112,49 @@ export const searchListings = async (req, res) => {
     }
 
     // ───── Completion Status ─────
-   const completionRaw = completion || propertyStatus;
+ // ───── Status Filter ─────
 
-if (completionRaw?.toLowerCase() === "offplan") {
-  query.status = {
-    $in: [
-      "Announced",
-      "EOI",
-      "Start of Sales",
-      "On Sale",
-    
-    ]
+// Agar Sale Status aaya hai to wahi use hoga
+if (saleStatus) {
+  const SALE_STATUS_MAP = {
+    on_sale: "On Sale",
+    announced: "Announced",
+    presale_eoi: "EOI",
+    eoi: "EOI",
+    start_of_sales: "Start of Sales",
+    out_of_stock: "Out Of Stock",
+    sold_out: "Sold Out",
+    ready: "Ready",
   };
+
+ 
+ const saleStatusArray = saleStatus
+  .split(",")
+  .map((s) => SALE_STATUS_MAP[s.trim().toLowerCase()])
+  .filter(Boolean);
+
+if (saleStatusArray.length > 0) {
+  query.status = { $in: saleStatusArray };
+}
 } else {
-  const mappedStatus = normalizeCompletion(completionRaw);
-  if (mappedStatus) {
-    query.status = mappedStatus;
+  // Agar Sale Status nahi hai tab Completion use karo
+  const completionRaw = completion || propertyStatus;
+
+  if (completionRaw?.toLowerCase() === "offplan") {
+    query.status = {
+      $in: [
+        "Announced",
+        "EOI",
+        "Start of Sales",
+        "On Sale",
+       
+      ],
+    };
+  } else {
+    const mappedStatus = normalizeCompletion(completionRaw);
+    if (mappedStatus) {
+      query.status = mappedStatus;
+    }
   }
 }
     // ───── Property Type ─────
@@ -211,6 +239,8 @@ if (completionRaw?.toLowerCase() === "offplan") {
         });
       }
     }
+
+
 
     console.log("📥 REQ QUERY:", req.query);
     console.log("🔍 MONGO QUERY:", JSON.stringify(query, null, 2));

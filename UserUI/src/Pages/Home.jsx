@@ -539,56 +539,57 @@ const Home = () => {
                 )}
               </div>
               <div className="relative w-full font-['Archivo']" ref={emirateRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = !isEmirateOpen;
-                    closeAll();
-                    setIsEmirateOpen(next);
-                  }}
-                  className="w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl text-sm text-[#67739E] shadow-sm"
-                  style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
-                >
-                  <span className="truncate">
-                    {selectedEmirates.length > 0
-                      ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? 's' : ''} Selected`
-                      : "Emirates"}
-                  </span>
+  <button
+    type="button"
+    onClick={() => {
+      const next = !isEmirateOpen;
+      closeAll();
+      setIsEmirateOpen(next);
+    }}
+    className="w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl text-sm text-[#67739E] shadow-sm"
+    style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
+  >
+    <span className="truncate">
+      {selectedEmirates.length > 0
+        ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? 's' : ''} Selected`
+        : "Emirates"}
+    </span>
 
-                  <ChevronDown
-                    className={`h-4 w-4 text-gray-400 transition-transform ${isEmirateOpen ? "rotate-180" : ""
-                      }`}
-                  />
-                </button>
+    <ChevronDown
+      className={`h-4 w-4 text-gray-400 transition-transform ${isEmirateOpen ? "rotate-180" : ""}`}
+    />
+  </button>
 
-                {isEmirateOpen && (
-                  <div className="absolute top-full left-0 z-50 w-full  rounded-xl  grid grid-cols-2 ">
-                    {emirates.map((emirate) => (
-                      <div
-                        key={emirate}
-                        onClick={() => {
-                          setSelectedEmirates((prev) =>
-                            prev.includes(emirate)
-                              ? prev.filter((item) => item !== emirate)
-                              : [...prev, emirate]
-                          );
-                        }}
-                        className="flex items-center gap-[8px] w-full h-[36px] bg-white border border-[#D9E1F2] rounded-xl px-[12px] cursor-pointer hover:border-[#01155E] transition-colors"
-                      >
-                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-                          {selectedEmirates.includes(emirate) && (
-                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-                          )}
-                        </div>
+  {isEmirateOpen && (
+    <div className="absolute top-full left-0 z-50 w-full bg-white rounded-b-xl shadow-lg border border-[#D9E1F2] border-t-0 overflow-hidden">
+      {emirates.map((emirate, idx) => (
+        <div
+          key={emirate}
+          onClick={() => {
+            setSelectedEmirates((prev) =>
+              prev.includes(emirate)
+                ? prev.filter((item) => item !== emirate)
+                : [...prev, emirate]
+            );
+          }}
+          className={`flex items-center gap-[10px] w-full h-[44px] px-4 cursor-pointer hover:bg-[#F5F7FC] transition-colors ${
+            idx !== emirates.length - 1 ? "border-b border-[#E9EDF7]" : ""
+          }`}
+        >
+          <div className="w-[16px] h-[16px] shrink-0 rounded-full border border-[#67739E] flex items-center justify-center">
+            {selectedEmirates.includes(emirate) && (
+              <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+            )}
+          </div>
 
-                        <span className={`${DROPDOWN_OPTION_TEXT_CLASS} truncate`}>
-                          {emirate}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+          <span className={`${DROPDOWN_OPTION_TEXT_CLASS} truncate`}>
+            {emirate}
+          </span>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
             </div>
           </div>
         </div>

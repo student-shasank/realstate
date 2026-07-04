@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import underline from "../../assets/underline.png";
 import LoginPopup from "../../Pages/LoginPopup"; // adjust path to match your project structure
 
-// Reads the same "user" object your favorites-sync code writes to
-// localStorage, and treats its presence as "logged in".
+/**
+ * Reads the same "user" object your auth flow writes to localStorage
+ * and treats a valid, authenticated user as "logged in".
+ *
+ * NOTE: We check for a real identifier (token/_id/id), not just
+ * "an object with any keys" — an empty/placeholder user object should
+ * NOT count as logged in.
+ */
 function getIsLoggedIn() {
   try {
     const raw = localStorage.getItem("user");
+    if (!raw) return false;
+
     const user = JSON.parse(raw);
-    const result = Boolean(user && Object.keys(user).length > 0);
-    // 🐛 DEBUG
-    console.log("[Flipbook] getIsLoggedIn() raw localStorage.user:", raw);
-    console.log("[Flipbook] getIsLoggedIn() parsed:", user, "-> result:", result);
-    return result;
-  } catch (err) {
-    console.log("[Flipbook] getIsLoggedIn() threw error:", err);
+    return Boolean(user && (user.token || user._id || user.id));
+  } catch {
     return false;
   }
 }
@@ -24,42 +27,26 @@ export default function PropertyFlipbookSection({
   title = "Dubai Real Estate Market Report 2026",
   description = "Structured, research-led analysis of Dubai's off-plan and ready property markets — covering transaction trends, escrow regulation, investment risk frameworks, and where institutional capital is moving next. This report tracks the shift from speculative cycles to a more mature, regulation-backed market, with data sourced from the Dubai Land Department, JLL, and CBRE.",
   description2 = "Full breakdowns, charts, and the structural case for long-term investment are in the report below. Sign up for free to unlock the complete report.",
-  fullBookUrl = " https://heyzine.com/flip-book/1c8e4fadcc.html",
-  previewBookUrl = "https://heyzine.com/flip-book/52e562bcf0.html",
+  fullBookUrl = "https://heyzine.com/flip-book/52e562bcf0.html",
+  previewBookUrl = "https://heyzine.com/flip-book/1c8e4fadcc.html",
 }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const initial = getIsLoggedIn();
-    console.log("[Flipbook] INITIAL isLoggedIn state:", initial);
-    return initial;
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(getIsLoggedIn);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
-  const hasAutoPromptedRef = useRef(false);
 
   const refreshLoginState = useCallback(() => {
-    console.log("[Flipbook] refreshLoginState() called — event fired");
-    const next = getIsLoggedIn();
-    console.log("[Flipbook] setting isLoggedIn to:", next);
-    setIsLoggedIn(next);
+    setIsLoggedIn(getIsLoggedIn());
   }, []);
 
   useEffect(() => {
-    console.log("[Flipbook] mounting — attaching storage & auth-changed listeners");
     window.addEventListener("storage", refreshLoginState);
     window.addEventListener("auth-changed", refreshLoginState);
     return () => {
-      console.log("[Flipbook] unmounting — removing listeners");
       window.removeEventListener("storage", refreshLoginState);
       window.removeEventListener("auth-changed", refreshLoginState);
     };
   }, [refreshLoginState]);
 
-  // 🐛 DEBUG: log every time isLoggedIn actually changes / re-renders
-  useEffect(() => {
-    console.log("[Flipbook] RENDER — isLoggedIn is now:", isLoggedIn);
-  }, [isLoggedIn]);
-
   const brochureUrl = isLoggedIn ? fullBookUrl : previewBookUrl;
-  console.log("[Flipbook] computed brochureUrl:", brochureUrl);
 
   const handleUnlockClick = () => {
     if (getIsLoggedIn()) {

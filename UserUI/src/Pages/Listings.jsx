@@ -60,6 +60,21 @@ const Listings = () => {
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [hoveredListingId, setHoveredListingId] = useState(null);
 
+
+
+  const sortRef = useRef(null);
+const [isSortOpen, setIsSortOpen] = useState(false);
+const [selectedSort, setSelectedSort] = useState("most_popular");
+
+const sortOptions = [
+  { label: "Most popular", value: "most_popular" },
+  { label: "Featured", value: "featured" },
+  { label: "Newest", value: "newest" },
+  { label: "Price (low to high)", value: "price_asc" },
+  { label: "Price (high to low)", value: "price_desc" },
+  { label: "Beds (least)", value: "beds_asc" },
+  { label: "Beds (most)", value: "beds_desc" },
+];
   const residentialOptions = [
     "Apartment",
     "Penthouse",
@@ -214,6 +229,30 @@ const Listings = () => {
       })
     );
   }, [dispatch, searchParams]);
+  const handleSortChange = (value) => {
+  setSelectedSort(value);
+  setIsSortOpen(false);
+  updateParams("sortBy", value);
+
+  dispatch(
+    fetchProjects({
+      location: location || "",
+      completion: completion || "",
+      propertyType: propertyType || "",
+      beds: beds || "",
+      baths: baths || "",
+      minPrice: minPrice || "",
+      maxPrice: maxPrice || "",
+      developer: selectedDevelopers,
+      emirates: selectedEmirates,
+      handoverYear: selectedHandoverYears,
+      saleStatus: selectedSaleStatus,
+      sortBy: value,
+      page: 1,
+      limit: 20,
+    })
+  );
+};
 
   const closeAllDropdowns = () => {
     dispatch(closeDropdowns());
@@ -221,7 +260,9 @@ const Listings = () => {
     setIsHandoverOpen(false);
     setIsSaleStatusOpen(false);
     setIsOpen(false);
+     setIsSortOpen(false);
   };
+  
 
   // Handle Outside Click for Dropdown
   useEffect(() => {
@@ -250,7 +291,9 @@ const Listings = () => {
         isOutsidePropertyType &&
         isOutsideHandover &&
         isOutsideEmirates &&
-        isOutsideSaleStatus
+        isOutsideSaleStatus &&
+         isOutsideSort
+
       ) {
         closeAllDropdowns();
       }
@@ -555,10 +598,60 @@ const Listings = () => {
             </div>
           </div> */}
           <div className="flex items-center gap-6">
-  <div className="flex items-center cursor-pointer gap-2">
-    <span className="text-[#01155E] text-[18px]">Most popular</span>
-    <ChevronDown className="h-5 w-5 text-[#01155E]" />
-  </div>
+ <div className="relative" ref={sortRef}>
+  <button
+    type="button"
+    onClick={() => {
+      const wasOpen = isSortOpen;
+      closeAllDropdowns();
+      setIsSortOpen(!wasOpen);
+    }}
+    className={`h-[44px] min-w-[150px] px-4 flex items-center justify-between gap-3 bg-white border text-[15px] font-semibold text-[#01155E] transition-colors ${
+      isSortOpen
+        ? "border-[#01155E] rounded-t-[12px]"
+        : "border-[#D1D5DB] rounded-[12px]"
+    }`}
+  >
+    <span className="truncate">
+      {sortOptions.find((opt) => opt.value === selectedSort)?.label || "Most popular"}
+    </span>
+    <ChevronDown
+      className={`h-4 w-4 shrink-0 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
+    />
+  </button>
+
+  {isSortOpen && (
+    <div className="absolute top-[44px] left-0 z-50 w-[260px] bg-white border border-[#01155E] rounded-b-[12px] shadow-[0_10px_20px_rgba(1,21,94,0.1)] overflow-hidden">
+      <div className="px-4 pt-3 pb-2">
+        <span className="text-[#01155E] text-[14px] font-bold">Sort by</span>
+      </div>
+
+      {sortOptions.map((option, index) => {
+        const isSelected = option.value === selectedSort;
+        return (
+          <div
+            key={option.value}
+            onClick={() => handleSortChange(option.value)}
+            className={`flex items-center gap-3 px-4 h-[40px] cursor-pointer transition-colors ${
+              isSelected ? "bg-[#F4F6FF]" : "hover:bg-[#F8FAFF]"
+            } ${index !== sortOptions.length - 1 ? "border-b border-[#EEF2F7]" : ""}`}
+          >
+            <div className="w-[15px] h-[15px] rounded-full border border-[#67739E] flex items-center justify-center shrink-0">
+              {isSelected && <div className="w-[7px] h-[7px] bg-[#01155E] rounded-full" />}
+            </div>
+            <span
+              className={`text-[13.5px] truncate ${
+                isSelected ? "text-[#01155E] font-semibold" : "text-[#4B5563]"
+              }`}
+            >
+              {option.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
 
   <div className="flex items-center bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1">
     <button
