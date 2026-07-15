@@ -58,7 +58,7 @@ const UpcomingProjects = () => {
             backgroundSize: "457px 6px",
           }}
         >
-          Newest Launches
+          New Launches
           
         </h2>
 

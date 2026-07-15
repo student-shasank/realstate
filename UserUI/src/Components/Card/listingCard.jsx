@@ -161,46 +161,46 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     setActiveImageIndex(index);
   };
 
- const handleConnect = async (e) => {
-  e.stopPropagation();
+  const handleConnect = async (e) => {
+    e.stopPropagation();
 
-  if (!isLoggedIn) {
-    onRequireLogin?.();
-    return;
-  }
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
 
-  if (!listing?._id) {
-    toast.error("Something went wrong, please refresh and try again");
-    return;
-  }
+    if (!listing?._id) {
+      toast.error("Something went wrong, please refresh and try again");
+      return;
+    }
 
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+    const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
-  if (!storedUser?.name || !storedUser?.email) {
-    toast.error("Please complete your profile (name, email) before connecting");
-    return;
-  }
+    if (!storedUser?.name || !storedUser?.email) {
+      toast.error("Please complete your profile (name, email) before connecting");
+      return;
+    }
 
-  setIsLocalSending(true);
+    setIsLocalSending(true);
 
-  try {
-    await dispatch(
-      sendListingEnquiry({
-        listingId: listing._id, // Mongo _id specifically, not the numeric id
-        name: storedUser.name,
-        email: storedUser.email,
-        phone: storedUser.phone || "-",
-        requestType: "availability",
-      })
-    ).unwrap();
-    toast.success("Enquiry sent ✅");
-  } catch (err) {
-    toast.error(err || "Something went wrong");
-  } finally {
-    setIsLocalSending(false);
-    dispatch(resetEnquiryState());
-  }
-};
+    try {
+      await dispatch(
+        sendListingEnquiry({
+          listingId: listing._id, // Mongo _id specifically, not the numeric id
+          name: storedUser.name,
+          email: storedUser.email,
+          phone: storedUser.phone || "-",
+          requestType: "availability",
+        })
+      ).unwrap();
+      toast.success("Enquiry sent ✅");
+    } catch (err) {
+      toast.error(err || "Something went wrong");
+    } finally {
+      setIsLocalSending(false);
+      dispatch(resetEnquiryState());
+    }
+  };
 
   const handleSendPdf = () => {
     if (!email || !phone) {
@@ -269,7 +269,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Status Badge */}
         <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
           <span className="font-semibold">
-            {["announced","eoi","start of sales","on sale","out of stock"]
+            {["announced", "eoi", "start of sales", "on sale", "out of stock"]
               .includes(listing?.status?.toLowerCase())
               ? "Off-plan"
               : listing?.status}
@@ -374,19 +374,29 @@ const ListingCard = ({ listing, onRequireLogin }) => {
             {/* Row 2: Location and Builder */}
             <div className="flex items-center gap-6 mt-2">
               {/* Location Section */}
-              <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
-                <img src={Icon5} alt="Location" className="w-5 h-5 object-contain" />
+              <div className="flex items-start gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
+                <img
+                  src={Icon5}
+                  alt="Location"
+                  className="w-5 h-5 object-contain flex-shrink-0 mt-1"
+                />
                 <span>
                   {[
                     listing?.district_name,
-                    listing?.city_name
-                  ].filter(Boolean).join(", ") || "N/A"}
+                    listing?.city_name,
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "N/A"}
                 </span>
               </div>
 
               {/* Builder Section */}
-              <div className="flex items-center gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
-                <img src={Icon4} alt="Builder" className="w-5 h-5 object-contain" />
+              <div className="flex items-start gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
+                <img
+                  src={Icon4}
+                  alt="Builder"
+                  className="w-5 h-5 object-contain flex-shrink-0 mt-1"
+                />
                 <span>{listing.developer_name || "N/A"}</span>
               </div>
             </div>
@@ -407,23 +417,22 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                     : "bg-[#E2E8F0] hover:bg-[#01155E]"
                     }`}
                 >
-                 {isLikeBtn ? (
-  isFavorite ? (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff0000">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-    </svg>
-  ) : (
-    <img src={btn.icon} alt={btn.alt} className="w-5 h-5 object-contain group-hover:brightness-0 group-hover:invert" />
-  )
-) : (
-  <img
-    src={btn.icon}
-    alt={btn.alt}
-    className={`w-5 h-5 object-contain transition-all duration-300 ${
-      btn.id !== "whatsapp" ? "group-hover:brightness-0 group-hover:invert" : ""
-    }`}
-  />
-)}
+                  {isLikeBtn ? (
+                    isFavorite ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff0000">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                      </svg>
+                    ) : (
+                      <img src={btn.icon} alt={btn.alt} className="w-5 h-5 object-contain group-hover:brightness-0 group-hover:invert" />
+                    )
+                  ) : (
+                    <img
+                      src={btn.icon}
+                      alt={btn.alt}
+                      className={`w-5 h-5 object-contain transition-all duration-300 ${btn.id !== "whatsapp" ? "group-hover:brightness-0 group-hover:invert" : ""
+                        }`}
+                    />
+                  )}
                 </button>
               );
             })}
@@ -435,7 +444,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon3} alt="bed" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-             {listing.beds || "N/A"}
+              {listing.beds || "N/A"}
             </span>
           </div>
 
@@ -444,7 +453,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon2} alt="bath" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-            {listing.baths || "N/A"}
+              {listing.baths || "N/A"}
             </span>
           </div>
 
@@ -460,7 +469,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon4} alt="handover" className="w-5 h-5" />
             <span className="text-[18px] font-medium">
-            {getHandover(listing?.expected_delivery_date)}
+              {getHandover(listing?.expected_delivery_date)}
             </span>
           </div>
 
@@ -479,29 +488,29 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex justify-between items-center">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-  {listing?.propertyStatus?.toLowerCase() === "offplan" ? (
-    <>
-      <span className="text-[24px] font-semibold mr-1">
-        Starting at
-      </span>
-      <span className='text-[24px] mr-2'>
-        {listing.currency?.toUpperCase()}
-      </span>
-      <span className="text-[32px] ">
-        {listing.min_price?.toLocaleString() || "10,00,239"}
-      </span>
-    </>
-  ) : (
-    <>
-      <span className='text-[24px] mr-2'>
-        {listing.currency?.toUpperCase()}
-      </span>
-      <span className="text-[32px] ">
-        {listing.min_price?.toLocaleString() || "10,00,239"}
-      </span>
-    </>
-  )}
-</div>
+            {listing?.propertyStatus?.toLowerCase() === "offplan" ? (
+              <>
+                <span className="text-[24px] font-semibold mr-1">
+                  Starting at
+                </span>
+                <span className='text-[24px] mr-2'>
+                  {listing.currency?.toUpperCase()}
+                </span>
+                <span className="text-[32px] ">
+                  {listing.min_price?.toLocaleString() || "10,00,239"}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className='text-[24px] mr-2'>
+                  {listing.currency?.toUpperCase()}
+                </span>
+                <span className="text-[32px] ">
+                  {listing.min_price?.toLocaleString() || "10,00,239"}
+                </span>
+              </>
+            )}
+          </div>
 
           <div className="flex gap-3">
             <button
@@ -549,12 +558,12 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 <input
-  type="tel"
-  placeholder="Enter your phone number"
-  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-/>
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
                 {pdfError && <p className="text-red-500 text-xs mb-4">Invalid email ID</p>}
                 <button
                   onClick={handleSendPdf}

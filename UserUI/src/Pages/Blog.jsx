@@ -10,12 +10,13 @@ import {
 import Seo from "../Components/Seo.jsx";
 
 const PER_PAGE = 6;
+const SEARCH_DEBOUNCE_MS = 300; // typing rukne ke kitni der baad search trigger ho
 
 function Blog() {
   const dispatch = useDispatch();
   const {
     allLoading: loading,
-    
+
     allError: error,
     currentPage,
     searchTerm,
@@ -34,9 +35,30 @@ function Blog() {
     dispatch(fetchAllBlogs());
   }, [dispatch]);
 
+  // LIVE SEARCH: jaise hi searchInput change hota hai, debounce ke baad
+  // Redux searchTerm update ho jata hai. Chunki poora data already "all" cache
+  // mein client-side maujood hai, isse koi extra API call nahi hoti — sirf
+  // filtering re-run hoti hai. Redux ke andar setSearchTerm currentPage ko
+  // 1 par reset karta hai.
+  useEffect(() => {
+    const trimmed = searchInput.trim();
+
+    // Agar already same term set hai to dobara dispatch mat karo (avoids
+    // unnecessary page reset loops)
+    if (trimmed === searchTerm) return;
+
+    const timer = setTimeout(() => {
+      dispatch(setSearchTerm(trimmed));
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
+
   const handleSearch = (e) => {
+    // Enter dabane par ya button click par turant search (bina debounce wait ke)
     e.preventDefault();
-    dispatch(setSearchTerm(searchInput.trim())); // ye currentPage ko 1 par reset kar deta hai
+    dispatch(setSearchTerm(searchInput.trim()));
   };
 
   const handleClear = () => {
@@ -80,31 +102,34 @@ function Blog() {
       />
 
       {/* Page Heading */}
-      <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">Blogs</h1>
+      <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">Market Insights</h1>
 
-      {/* Search Bar */}
+      {/* Live Search Bar */}
       <form
         onSubmit={handleSearch}
         className="flex items-center gap-3 mb-12 max-w-xl mx-auto"
       >
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Search blogs..."
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
-        />
-        <button
-          type="submit"
-          className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
-        >
-          Search
-        </button>
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search blogs..."
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
+          />
+          {/* Chhota loading indicator jab tak typing ke baad search apply nahi hoti */}
+          {searchInput.trim() !== searchTerm && (
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+              ...
+            </span>
+          )}
+        </div>
+
         {searchTerm && (
           <button
             type="button"
             onClick={handleClear}
-            className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
+            className="w-[120px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[16px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
           >
             Clear
           </button>

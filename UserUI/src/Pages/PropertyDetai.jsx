@@ -17,7 +17,7 @@ import {
   Map,
   ChevronDown, ChevronUp, Play, Star, Phone, Mail, Heart,
   Share2, Maximize, Download, Wifi, Dumbbell, Car,
-  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image
+  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image, ChevronLeft, ChevronRight, ArrowLeft
 } from 'lucide-react';
 import Appartmentimage from "../assets/Appartment.png"
 import floorplan1 from "../assets/floorplan.png"
@@ -96,14 +96,38 @@ function ReviewCard({ agentAvatar }) {
   );
 }
 
-function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, latlong, coordinates, title, }) {
+function GalleryModal({ images, onClose, agentAvatar, latlong, coordinates, title }) {
   const [activeTab, setActiveTab] = useState("photos");
+  const [selectedIndex, setSelectedIndex] = useState(null); // null = grid view, number = single image view
+
+  const openImage = (i) => setSelectedIndex(i);
+  const backToGrid = () => setSelectedIndex(null);
+
+  const showPrev = (e) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const showNext = (e) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl w-full max-w-[1100px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
 
         <div className="flex items-center border-b border-[#D9E1F2] px-6 py-0 relative">
+          {selectedIndex !== null && activeTab === "photos" && (
+            <button
+              onClick={backToGrid}
+              className="flex items-center gap-2 px-4 py-4 text-[15px] font-semibold text-[#01155E] hover:text-[#254B86] transition-colors"
+            >
+              <ArrowLeft size={18} />
+              Back to gallery
+            </button>
+          )}
+
           <button
             onClick={() => setActiveTab("photos")}
             className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "photos"
@@ -115,7 +139,7 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, lat
             Photos ({images?.length || 0})
           </button>
           <button
-            onClick={() => setActiveTab("map")}
+            onClick={() => { setActiveTab("map"); setSelectedIndex(null); }}
             className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "map"
               ? "border-[#01155E] text-[#01155E]"
               : "border-transparent text-[#67739E] hover:text-[#01155E]"
@@ -133,19 +157,51 @@ function GalleryModal({ images, onClose, agentName, agentAvatar, agentPhone, lat
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative">
           {activeTab === "photos" ? (
-            <div className="p-4 grid grid-cols-2 gap-3">
-              {images?.map((src, i) => (
-                <div key={i} className="overflow-hidden rounded-[10px] h-[260px]">
-                  <img
-                    src={getSafeImageUrl(src)}
-                    alt={`Property ${i + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                  />
-                </div>
-              ))}
-            </div>
+            selectedIndex === null ? (
+              <div className="p-4 grid grid-cols-2 gap-3">
+                {images?.map((src, i) => (
+                  <div
+                    key={i}
+                    className="overflow-hidden rounded-[10px] h-[260px] cursor-pointer"
+                    onClick={() => openImage(i)}
+                  >
+                    <img
+                      src={getSafeImageUrl(src)}
+                      alt={`Property ${i + 1}`}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="relative bg-black flex items-center justify-center h-full min-h-[500px]">
+                <button
+                  onClick={showPrev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+
+                <img
+                  src={getSafeImageUrl(images[selectedIndex])}
+                  alt={`Property ${selectedIndex + 1}`}
+                  className="max-h-[70vh] max-w-[90%] object-contain rounded-md"
+                />
+
+                <button
+                  onClick={showNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
+                >
+                  <ChevronRight size={22} />
+                </button>
+
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-[14px] bg-black/50 px-3 py-1 rounded-full">
+                  {selectedIndex + 1} / {images.length}
+                </span>
+              </div>
+            )
           ) : (
             <div className="flex-1 overflow-y-auto">
               <PropertyMap
@@ -503,9 +559,7 @@ export default function PropertyDetail() {
         <GalleryModal
           images={images}
           onClose={() => setShowGallery(false)}
-          agentName={agent?.name}
           agentAvatar={agent?.profileImage}
-          agentPhone={agent?.phone}
           latlong={rawListing?.latlong}
           coordinates={location?.coordinates}
           title={title}
@@ -819,9 +873,13 @@ export default function PropertyDetail() {
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
   {unitTypesList.map((unit, i) => (
     <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
-      <h3 className="text-[#01155E] font-semibold text-[24px]">
-        {unit.type === 0 || unit.type === "0" ? "Studio" : `${unit.type} Bedrooms`}
-      </h3>
+     <h3 className="text-[#01155E] font-semibold text-[24px]">
+  {unit.type === 0 || unit.type === "0"
+    ? "Studio"
+    : unit.type === 1 || unit.type === "1"
+    ? "1 Bedroom"
+    : `${unit.type} Bedrooms`}
+</h3>
       <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
         <span className="flex items-center gap-2">
           <Maximize size={20} className="text-[#01155E]" />
@@ -1112,7 +1170,7 @@ export default function PropertyDetail() {
                       </div>
                       <div className="text-[#01155E] flex items-center gap-2 text-[18px]">
                         <Phone size={18} />
-                        <span>{agent?.phone || "—"}</span>
+                        <span>{'+91 99999 95871'}</span>
                       </div>
                     </div>
                   </div>

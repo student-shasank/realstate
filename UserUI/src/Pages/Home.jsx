@@ -221,13 +221,46 @@ const Home = () => {
             Pre-construction and Ready properties tailored to your investment goals
           </h3>
 
-          <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+          {/* <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
             {['Properties', 'New Project', 'Transaction', 'Agents'].map((tab) => (
               <button key={tab} className="transition-all flex items-center justify-center" style={{ width: '280px', height: '46px', borderRadius: '8px', fontWeight: '600', fontSize: '20px', border: 'none', cursor: 'pointer', backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF', color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92', boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)' }}>
                 {tab}
               </button>
             ))}
-          </div>
+          </div> */}
+          <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+  {['Properties', 'Off-Plan', 'Ready', 'Metro Expansion'].map((tab) => (
+    <button
+      key={tab}
+      onClick={() => {
+        if (tab === 'Off-Plan' || tab === 'Ready') {
+          dispatch(setCompletion(tab));
+          const params = new URLSearchParams();
+          params.set('completion', tab);
+          navigate(`/listings?${params.toString()}`);
+        } else if (tab === 'Agent') {
+          navigate('/agents');
+        }
+        // 'Properties' tab: no navigation, just stays here and shows the search bar below
+      }}
+      className="transition-all flex items-center justify-center"
+      style={{
+        width: '280px',
+        height: '46px',
+        borderRadius: '8px',
+        fontWeight: '600',
+        fontSize: '20px',
+        border: 'none',
+        cursor: 'pointer',
+        backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF',
+        color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92',
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)'
+      }}
+    >
+      {tab}
+    </button>
+  ))}
+</div>
 
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-3 mb-5">

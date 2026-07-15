@@ -29,6 +29,7 @@ export default function PropertyFlipbookSection({
   description2 = "Full breakdowns, charts, and the structural case for long-term investment are in the report below. Sign up for free to unlock the complete report.",
   fullBookUrl = "https://heyzine.com/flip-book/52e562bcf0.html",
   previewBookUrl = "https://heyzine.com/flip-book/1c8e4fadcc.html",
+  
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(getIsLoggedIn);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
@@ -48,6 +49,12 @@ export default function PropertyFlipbookSection({
 
   const brochureUrl = isLoggedIn ? fullBookUrl : previewBookUrl;
 
+  const reportLink =
+  "https://drive.google.com/drive/folders/1WDIUSVNMSUP2rakTqUvOqedQ-9HG7gJi?usp=sharing";
+  const handleGetReport = () => {
+  window.open(reportLink, "_blank", "noopener,noreferrer");
+};
+
   const handleUnlockClick = () => {
     if (getIsLoggedIn()) {
       setIsLoggedIn(true);
@@ -63,7 +70,7 @@ export default function PropertyFlipbookSection({
 
   return (
     <section className="w-full bg-white overflow-hidden mb-30">
-      <div className="max-w-[1200px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16">
+      <div className="max-w-[1000px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16">
         <div className="max-w-2xl">
           <p
             className="mb-2 text-[13px] font-semibold uppercase tracking-wider text-[#001A54]"
@@ -129,17 +136,17 @@ export default function PropertyFlipbookSection({
             )}
           </div>
 
-          {!isLoggedIn && (
+          
             <div className="flex justify-center">
               <button
-                type="button"
-                onClick={handleUnlockClick}
-                className="mt-8 mb-14 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
-              >
-                Get Full Report
-              </button>
+  type="button"
+  onClick={handleGetReport}
+  className="mt-8 mb-14 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
+>
+  Get Full Report
+</button>
             </div>
-          )}
+        
         </div>
       </div>
 

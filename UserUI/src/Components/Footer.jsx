@@ -73,7 +73,7 @@ const Footer = () => {
               <div className="flex gap-3 mb-5">
                 <Mail />
                 <div className="text-[#FFFFFF] text-[18px] break-words">
-                  <p>divyansh@aquaproperties.com</p>
+                  <p>info@yupland.ae</p>
                   <p>chitkaradivyansh@gmail.com</p>
                 </div>
               </div>

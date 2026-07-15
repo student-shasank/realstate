@@ -10,31 +10,31 @@ import Service3 from "../../assets/servicecard3.jpg";
 const ServicesSection = () => {
   const services = [
     {
-      title: "Project Marketing And Sales Structuring",
+      title: "Project Marketing ",
       description: "We work with developers and landowners to structure and position real estate projects for market",
       image: Service1,
       path: "/marketingandSales",
     },
     {
-      title: "Property Management Structuring",
+      title: "Property Management",
       description: "We help manage properties efficiently for better ROI and operations",
       image: Service2,
       path: "/propertyStructuring",
     },
     {
-      title: "Asset Management Structuring",
+      title: "Asset Management",
       description: "Optimize your real estate portfolio with expert asset management",
       image: Service3,
       path: "/assetStructuring",
     },
     {
-      title: "Development Advisory And Project Coordination",
+      title: "Development Advisory",
       description: "End-to-end support for project development and execution",
       image: Service1,
       path: "/advisoryCoordination",
     },
     {
-      title: "Handover & Snagging Representation",
+      title: "Handover & Snagging",
       description: "Ensure quality and compliance during handover process",
       image: Service2,
       path: "/handoverSnagging",

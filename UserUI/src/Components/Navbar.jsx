@@ -100,6 +100,82 @@ useEffect(() => {
           >
             Home
           </Link>
+          <Link
+            to="/listings?completion=off-plan"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight:
+                location.pathname === "/listings" &&
+                new URLSearchParams(location.search).get("completion") === "off-plan"
+                  ? 600
+                  : 400,
+              color: textColor,
+            }}
+          >
+            Off-plan
+          </Link>
+
+          <Link
+            to="/listings?completion=ready"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight:
+                location.pathname === "/listings" &&
+                new URLSearchParams(location.search).get("completion") === "ready"
+                  ? 700
+                  : 400,
+              color: textColor,
+            }}
+          >
+            Ready Properties
+          </Link>
+           <div className="relative group flex items-center h-full">
+            <Link
+              to="/communities"
+              className="flex items-center gap-1 py-4 transition-all"
+              style={{
+                ...textStyle,
+                fontWeight: location.pathname.includes("communities") ? 600 : 400,
+                color: textColor,
+              }}
+            >
+              Communities
+              <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
+            </Link>
+
+            {/* Dynamic Dropdown Menu based on Redux navList */}
+            <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+                {navList && navList.length > 0 ? (
+                  navList.map((item) => (
+                    <Link
+                      key={item._id}
+                      to={`/communities/${item.slug}`}
+                      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
+                    >
+                      {item.title}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-400">Loading...</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+            <Link
+            to="/Blog"
+            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+            style={{
+              ...textStyle,
+              fontWeight: location.pathname === "/Blogs" ? 600 : 400,
+              color: textColor,
+            }}
+          >
+            Market Insights
+          </Link>
 
 
           <div className="relative group flex items-center h-full">
@@ -145,83 +221,11 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <div className="relative group flex items-center h-full">
-            <Link
-              to="/communities"
-              className="flex items-center gap-1 py-4 transition-all"
-              style={{
-                ...textStyle,
-                fontWeight: location.pathname.includes("communities") ? 600 : 400,
-                color: textColor,
-              }}
-            >
-              Communities
-              <span className="text-[10px] transition-transform group-hover:rotate-180">▼</span>
-            </Link>
-
-            {/* Dynamic Dropdown Menu based on Redux navList */}
-            <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                {navList && navList.length > 0 ? (
-                  navList.map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/communities/${item.slug}`}
-                      className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
-                    >
-                      {item.title}
-                    </Link>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-sm text-gray-400">Loading...</div>
-                )}
-              </div>
-            </div>
-          </div>
+         
           
-          <Link
-            to="/listings?completion=off-plan"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight:
-                location.pathname === "/listings" &&
-                new URLSearchParams(location.search).get("completion") === "off-plan"
-                  ? 600
-                  : 400,
-              color: textColor,
-            }}
-          >
-            Off-plan
-          </Link>
+          
 
-          <Link
-            to="/listings?completion=ready"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight:
-                location.pathname === "/listings" &&
-                new URLSearchParams(location.search).get("completion") === "ready"
-                  ? 700
-                  : 400,
-              color: textColor,
-            }}
-          >
-            Ready
-          </Link>
-
-          <Link
-            to="/Blog"
-            className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-            style={{
-              ...textStyle,
-              fontWeight: location.pathname === "/Blogs" ? 600 : 400,
-              color: textColor,
-            }}
-          >
-            Market Updates 
-          </Link>
+        
 
           <Link
             to="/about"
