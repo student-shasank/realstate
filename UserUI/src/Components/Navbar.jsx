@@ -7,6 +7,7 @@ import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSl
 import { fetchNavList } from "../features/communities/communitySlice"; // Added this import
 import LoginPopup from "../Pages/LoginPopup";
 import SignupPopup from "../Pages/SignupPopup";
+import Logo2 from "../assets/logo2.jpeg"
 
 function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -78,14 +79,15 @@ useEffect(() => {
       <div className="w-full px-4 md:px-12 flex items-center justify-between">
 
         {/* Brand Logo */}
-        <Link
-          to="/"
-          className="text-2xl font-black tracking-tight shrink-0"
-          style={{ color: textColor }}
-        >
-          yupland
-        </Link>
+      
 
+<Link to="/" className="shrink-0">
+  <img
+    src={Logo2}
+    alt="Yupland Logo"
+    className="h-20 w-auto"
+  />
+</Link>
         {/* Navigation Links */}
         <div className="hidden md:flex items-center justify-between flex-1 max-w-[900px] mx-auto">
 
