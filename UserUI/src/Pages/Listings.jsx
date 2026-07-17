@@ -23,6 +23,10 @@ import {
   setDeveloper,
   setProjects,
 } from "../features/dashboard/searchSlice";
+import {
+  fetchSortedProjects, // NEW: fully separate sort slice/endpoint
+  setSortBy,
+} from "../features/dashboard/sortSlice";
 import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
@@ -63,18 +67,18 @@ const Listings = () => {
 
 
   const sortRef = useRef(null);
-const [isSortOpen, setIsSortOpen] = useState(false);
-const [selectedSort, setSelectedSort] = useState("most_popular");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [selectedSort, setSelectedSort] = useState("most_popular");
 
-const sortOptions = [
-  { label: "Most popular", value: "most_popular" },
-  { label: "Featured", value: "featured" },
-  { label: "Newest", value: "newest" },
-  { label: "Price (low to high)", value: "price_asc" },
-  { label: "Price (high to low)", value: "price_desc" },
-  { label: "Beds (least)", value: "beds_asc" },
-  { label: "Beds (most)", value: "beds_desc" },
-];
+  const sortOptions = [
+    { label: "Most popular", value: "most_popular" },
+    { label: "Featured", value: "featured" },
+    { label: "Newest", value: "newest" },
+    { label: "Price (low to high)", value: "price_asc" },
+    { label: "Price (high to low)", value: "price_desc" },
+    { label: "Beds (least)", value: "beds_asc" },
+    { label: "Beds (most)", value: "beds_desc" },
+  ];
   const residentialOptions = [
     "Apartment",
     "Penthouse",
@@ -109,15 +113,41 @@ const sortOptions = [
     minPrice,
     maxPrice,
     developer,
-    projects,
-    loading,
-    error,
-    success,
-    totalPages,
-    currentPage,
+    projects: searchProjects,
+    loading: searchLoading,
+    error: searchError,
+    success: searchSuccess,
+    totalPages: searchTotalPages,
+    currentPage: searchCurrentPage,
   } = useSelector((state) => state.search);
 
+  // NEW: separate sort slice — completely independent state/reducer
+  const {
+    projects: sortedProjects,
+    loading: sortLoading,
+    error: sortError,
+    success: sortSuccess,
+    totalPages: sortTotalPages,
+    currentPage: sortCurrentPage,
+  } = useSelector((state) => state.sort);
+
+  // Whether the page is currently showing sorted results (from sortSlice)
+  // or normal filtered results (from searchSlice). True whenever a
+  // non-default sort is active.
+  const isSortActive = selectedSort && selectedSort !== "most_popular";
+
+  // Unified view — picks from whichever slice is currently "in control"
+  const projects = isSortActive ? sortedProjects : searchProjects;
+  const loading = isSortActive ? sortLoading : searchLoading;
+  const error = isSortActive ? sortError : searchError;
+  const success = isSortActive ? sortSuccess : searchSuccess;
+  const totalPages = isSortActive ? sortTotalPages : searchTotalPages;
+  const currentPage = isSortActive ? sortCurrentPage : searchCurrentPage;
+
   // FETCH A SPECIFIC PAGE (replaces results — used by pagination controls)
+  // Now includes sortBy so paging through results keeps the active sort,
+  // and routes through the dedicated sort endpoint when a non-default
+  // sort is active (falls back to the normal search endpoint otherwise).
   const goToPage = useCallback(
     (pageNumber) => {
       if (
@@ -128,23 +158,25 @@ const sortOptions = [
         return;
       }
 
-      dispatch(
-        fetchProjects({
-          location: location || "",
-          completion: completion || "",
-          propertyType: propertyType || "",
-          beds: beds || "",
-          baths: baths || "",
-          minPrice: minPrice || "",
-          maxPrice: maxPrice || "",
-          developer: selectedDevelopers,
-          emirates: selectedEmirates,
-          handoverYear: selectedHandoverYears,
-          saleStatus: selectedSaleStatus,
-          page: pageNumber,
-          limit: 20,
-        })
-      );
+      const payload = {
+        location: location || "",
+        completion: completion || "",
+        propertyType: propertyType || "",
+        beds: beds || "",
+        baths: baths || "",
+        minPrice: minPrice || "",
+        maxPrice: maxPrice || "",
+        developer: selectedDevelopers,
+        emirates: selectedEmirates,
+        handoverYear: selectedHandoverYears,
+        saleStatus: selectedSaleStatus,
+        sortBy: selectedSort,
+        page: pageNumber,
+        limit: 20,
+      };
+
+      // Paginate whichever slice is currently active
+      dispatch(isSortActive ? fetchSortedProjects(payload) : fetchProjects(payload));
 
       // Scroll results back into view so the user sees page 1 of the new page
       if (resultsRef.current) {
@@ -164,6 +196,8 @@ const sortOptions = [
       selectedEmirates,
       selectedHandoverYears,
       selectedSaleStatus,
+      selectedSort,
+      isSortActive,
       totalPages,
       currentPage,
     ]
@@ -178,6 +212,7 @@ const sortOptions = [
     const urlMinPrice = searchParams.get("minPrice") || "";
     const urlMaxPrice = searchParams.get("maxPrice") || "";
     const urlDeveloper = searchParams.get("developer") || "";
+    const urlSortBy = searchParams.get("sortBy") || "most_popular"; // NEW
 
     const urlEmirates = searchParams.get("emirates") || "";
     const emiratesArray = urlEmirates
@@ -210,32 +245,45 @@ const sortOptions = [
     dispatch(setDeveloper(urlDeveloper));
     setSelectedDevelopers(developerArray);
     setSelectedHandoverYears(handoverYearArray);
+    setSelectedSort(urlSortBy); // keep local dropdown label in sync on load/refresh
 
-    dispatch(
-      fetchProjects({
-        location: urlLocation,
-        completion: urlCompletion,
-        propertyType: urlPropertyType,
-        beds: urlBeds,
-        baths: urlBaths,
-        minPrice: urlMinPrice,
-        maxPrice: urlMaxPrice,
-        developer: developerArray,
-        emirates: emiratesArray,
-        handoverYear: handoverYearArray,
-        saleStatus: saleStatusArray,
-        page: 1,          // IMPORTANT: Page 1
-        limit: 20,         // IMPORTANT: 20 per page
-      })
-    );
+    const payload = {
+      location: urlLocation,
+      completion: urlCompletion,
+      propertyType: urlPropertyType,
+      beds: urlBeds,
+      baths: urlBaths,
+      minPrice: urlMinPrice,
+      maxPrice: urlMaxPrice,
+      developer: developerArray,
+      emirates: emiratesArray,
+      handoverYear: handoverYearArray,
+      saleStatus: saleStatusArray,
+      sortBy: urlSortBy,
+      page: 1,          // IMPORTANT: Page 1
+      limit: 20,         // IMPORTANT: 20 per page
+    };
+
+    // If the URL already carries a non-default sort (e.g. shared/bookmarked
+    // link), load via the SEPARATE sort slice/endpoint so behavior matches
+    // what the user last selected. Otherwise use the normal search slice.
+    if (urlSortBy && urlSortBy !== "most_popular") {
+      dispatch(setSortBy(urlSortBy));
+      dispatch(fetchSortedProjects(payload));
+    } else {
+      dispatch(fetchProjects(payload));
+    }
   }, [dispatch, searchParams]);
-  const handleSortChange = (value) => {
-  setSelectedSort(value);
-  setIsSortOpen(false);
-  updateParams("sortBy", value);
 
-  dispatch(
-    fetchProjects({
+  // Sort dropdown change handler — ALWAYS hits the separate sort
+  // slice/endpoint (fetchSortedProjects), never touches searchSlice.
+  const handleSortChange = (value) => {
+    setSelectedSort(value);
+    dispatch(setSortBy(value));
+    setIsSortOpen(false);
+    updateParams("sortBy", value);
+
+    const payload = {
       location: location || "",
       completion: completion || "",
       propertyType: propertyType || "",
@@ -250,9 +298,16 @@ const sortOptions = [
       sortBy: value,
       page: 1,
       limit: 20,
-    })
-  );
-};
+    };
+
+    if (value === "most_popular") {
+      // "Most popular" is the search slice's natural default — fall back
+      // to the normal search endpoint instead of the sort endpoint.
+      dispatch(fetchProjects(payload));
+    } else {
+      dispatch(fetchSortedProjects(payload));
+    }
+  };
 
   const closeAllDropdowns = () => {
     dispatch(closeDropdowns());
@@ -260,9 +315,9 @@ const sortOptions = [
     setIsHandoverOpen(false);
     setIsSaleStatusOpen(false);
     setIsOpen(false);
-     setIsSortOpen(false);
+    setIsSortOpen(false);
   };
-  
+
 
   // Handle Outside Click for Dropdown
   useEffect(() => {
@@ -285,6 +340,11 @@ const sortOptions = [
       const isOutsideSaleStatus =
         saleStatusRef.current && !saleStatusRef.current.contains(event.target);
 
+      // FIX: this was referenced but never defined before — caused a
+      // ReferenceError every time this handler ran.
+      const isOutsideSort =
+        sortRef.current && !sortRef.current.contains(event.target);
+
       if (
         isOutsideBedBath &&
         isOutsidePrice &&
@@ -292,8 +352,7 @@ const sortOptions = [
         isOutsideHandover &&
         isOutsideEmirates &&
         isOutsideSaleStatus &&
-         isOutsideSort
-
+        isOutsideSort
       ) {
         closeAllDropdowns();
       }
@@ -359,6 +418,12 @@ const sortOptions = [
     dispatch(setDeveloper(""));
     setSelectedDevelopers([]);
     setSelectedEmirates([]);
+    // NOTE: sort intentionally left as-is — clearing filters shouldn't
+    // reset a user's chosen sort order. Remove the comment/lines below
+    // if you'd rather reset sort too:
+    // setSelectedSort("most_popular");
+    // dispatch(setSortBy("most_popular"));
+    // updateParams("sortBy", "");
   };
 
   const getPriceLabel = () => {
@@ -562,139 +627,104 @@ const sortOptions = [
             </h1>
           </div>
 
-          {/* <div className="flex items-center gap-6">
-            <div className="flex items-center cursor-pointer gap-2">
-              <span className="text-[#01155E] text-[18px]">Most popular</span>
-              <ChevronDown className="h-5 w-5 text-[#01155E]" />
+          <div className="flex items-center gap-6">
+            <div className="relative" ref={sortRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  const wasOpen = isSortOpen;
+                  closeAllDropdowns();
+                  setIsSortOpen(!wasOpen);
+                }}
+                className={`h-[44px] min-w-[150px] px-4 flex items-center justify-between gap-3 bg-white border text-[15px] font-semibold text-[#01155E] transition-colors ${
+                  isSortOpen
+                    ? "border-[#01155E] rounded-t-[12px]"
+                    : "border-[#D1D5DB] rounded-[12px]"
+                }`}
+              >
+                <span className="truncate">
+                  {sortOptions.find((opt) => opt.value === selectedSort)?.label || "Most popular"}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isSortOpen && (
+                <div className="absolute top-[44px] left-0 z-50 w-[260px] bg-white border border-[#01155E] rounded-b-[12px] shadow-[0_10px_20px_rgba(1,21,94,0.1)] overflow-hidden">
+                  <div className="px-4 pt-3 pb-2">
+                    <span className="text-[#01155E] text-[14px] font-bold">Sort by</span>
+                  </div>
+
+                  {sortOptions.map((option, index) => {
+                    const isSelected = option.value === selectedSort;
+                    return (
+                      <div
+                        key={option.value}
+                        onClick={() => handleSortChange(option.value)}
+                        className={`flex items-center gap-3 px-4 h-[40px] cursor-pointer transition-colors ${
+                          isSelected ? "bg-[#F4F6FF]" : "hover:bg-[#F8FAFF]"
+                        } ${index !== sortOptions.length - 1 ? "border-b border-[#EEF2F7]" : ""}`}
+                      >
+                        <div className="w-[15px] h-[15px] rounded-full border border-[#67739E] flex items-center justify-center shrink-0">
+                          {isSelected && <div className="w-[7px] h-[7px] bg-[#01155E] rounded-full" />}
+                        </div>
+                        <span
+                          className={`text-[13.5px] truncate ${
+                            isSelected ? "text-[#01155E] font-semibold" : "text-[#4B5563]"
+                          }`}
+                        >
+                          {option.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1">
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2.5 rounded-xl transition-all ${viewMode === "list"
-                    ? "border border-[#01155E] bg-white shadow-sm"
-                    : "opacity-40 hover:opacity-100"
-                  }`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+                  viewMode === "list"
+                    ? "bg-[#EEF2F9] text-[#01155E]"
+                    : "text-[#01155E]/70 hover:text-[#01155E]"
+                }`}
               >
-                <svg width="20" height="18" viewBox="0 0 20 18" fill="none">
-                  <path d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3" stroke="#01155E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="18" height="16" viewBox="0 0 20 18" fill="none">
+                  <path
+                    d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
+                <span>List</span>
               </button>
 
               <button
                 onClick={() => setViewMode("map")}
-                className={`p-2.5 rounded-xl transition-all ${viewMode === "map"
-                    ? "border border-[#01155E] bg-white shadow-sm opacity-100"
-                    : "opacity-40 hover:opacity-100"
-                  }`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+                  viewMode === "map"
+                    ? "bg-[#EEF2F9] text-[#01155E]"
+                    : "text-[#01155E]/70 hover:text-[#01155E]"
+                }`}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
-                  <rect x="12" y="2" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
-                  <rect x="2" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
-                  <rect x="12" y="12" width="6" height="6" rx="1.5" stroke="#01155E" strokeWidth="2" />
+                <svg width="16" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="2" />
                 </svg>
+                <span>Map</span>
               </button>
             </div>
-          </div> */}
-          <div className="flex items-center gap-6">
- <div className="relative" ref={sortRef}>
-  <button
-    type="button"
-    onClick={() => {
-      const wasOpen = isSortOpen;
-      closeAllDropdowns();
-      setIsSortOpen(!wasOpen);
-    }}
-    className={`h-[44px] min-w-[150px] px-4 flex items-center justify-between gap-3 bg-white border text-[15px] font-semibold text-[#01155E] transition-colors ${
-      isSortOpen
-        ? "border-[#01155E] rounded-t-[12px]"
-        : "border-[#D1D5DB] rounded-[12px]"
-    }`}
-  >
-    <span className="truncate">
-      {sortOptions.find((opt) => opt.value === selectedSort)?.label || "Most popular"}
-    </span>
-    <ChevronDown
-      className={`h-4 w-4 shrink-0 transition-transform ${isSortOpen ? "rotate-180" : ""}`}
-    />
-  </button>
-
-  {isSortOpen && (
-    <div className="absolute top-[44px] left-0 z-50 w-[260px] bg-white border border-[#01155E] rounded-b-[12px] shadow-[0_10px_20px_rgba(1,21,94,0.1)] overflow-hidden">
-      <div className="px-4 pt-3 pb-2">
-        <span className="text-[#01155E] text-[14px] font-bold">Sort by</span>
-      </div>
-
-      {sortOptions.map((option, index) => {
-        const isSelected = option.value === selectedSort;
-        return (
-          <div
-            key={option.value}
-            onClick={() => handleSortChange(option.value)}
-            className={`flex items-center gap-3 px-4 h-[40px] cursor-pointer transition-colors ${
-              isSelected ? "bg-[#F4F6FF]" : "hover:bg-[#F8FAFF]"
-            } ${index !== sortOptions.length - 1 ? "border-b border-[#EEF2F7]" : ""}`}
-          >
-            <div className="w-[15px] h-[15px] rounded-full border border-[#67739E] flex items-center justify-center shrink-0">
-              {isSelected && <div className="w-[7px] h-[7px] bg-[#01155E] rounded-full" />}
-            </div>
-            <span
-              className={`text-[13.5px] truncate ${
-                isSelected ? "text-[#01155E] font-semibold" : "text-[#4B5563]"
-              }`}
-            >
-              {option.label}
-            </span>
           </div>
-        );
-      })}
-    </div>
-  )}
-</div>
-
-  <div className="flex items-center bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1">
-    <button
-      onClick={() => setViewMode("list")}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
-        viewMode === "list"
-          ? "bg-[#EEF2F9] text-[#01155E]"
-          : "text-[#01155E]/70 hover:text-[#01155E]"
-      }`}
-    >
-      <svg width="18" height="16" viewBox="0 0 20 18" fill="none">
-        <path
-          d="M7 3H19M7 9H19M7 15H19M1 3H3M1 9H3M1 15H3"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span>List</span>
-    </button>
-
-    <button
-      onClick={() => setViewMode("map")}
-      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
-        viewMode === "map"
-          ? "bg-[#EEF2F9] text-[#01155E]"
-          : "text-[#01155E]/70 hover:text-[#01155E]"
-      }`}
-    >
-      <svg width="16" height="18" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="2" />
-      </svg>
-      <span>Map</span>
-    </button>
-  </div>
-</div>
         </div>
 
         {/* FILTERS SECTION */}
@@ -716,23 +746,25 @@ const sortOptions = [
 
               <button
                 onClick={() => {
-                  dispatch(
-                    fetchProjects({
-                      location,
-                      completion,
-                      propertyType,
-                      beds,
-                      baths,
-                      minPrice,
-                      maxPrice,
-                      developer: selectedDevelopers,
-                      emirates: selectedEmirates,
-                      handoverYear: selectedHandoverYears,
-                      saleStatus: selectedSaleStatus,
-                      page: 1,
-                      limit: 20,
-                    })
-                  );
+                  const payload = {
+                    location,
+                    completion,
+                    propertyType,
+                    beds,
+                    baths,
+                    minPrice,
+                    maxPrice,
+                    developer: selectedDevelopers,
+                    emirates: selectedEmirates,
+                    handoverYear: selectedHandoverYears,
+                    saleStatus: selectedSaleStatus,
+                    sortBy: selectedSort,
+                    page: 1,
+                    limit: 20,
+                  };
+                  // Re-run search with current filters, on whichever
+                  // slice (search vs sort) is currently active
+                  dispatch(isSortActive ? fetchSortedProjects(payload) : fetchProjects(payload));
                 }}
                 className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
               >

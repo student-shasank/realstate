@@ -1,5 +1,5 @@
 import React from 'react';
-import communityimage from "../../assets/communityimage.jpg";
+import communityimage from "../../assets/homepage.png";
 import { MessageSquare, Users, Building2 } from "lucide-react";
 import imageurl from '../../assets/underline.png';
 
@@ -96,11 +96,10 @@ const FeaturesSection = () => {
           {/* RIGHT IMAGE */}
           <div className="relative w-full lg:w-[600px] h-[320px] sm:h-[480px] lg:h-auto lg:self-stretch flex-shrink-0 mt-6 lg:mt-0">
             <img
-              src={communityimage}
-              alt="Dubai Architecture"
-              className="w-full h-full lg:absolute lg:inset-0 object-cover rounded-[20px] sm:rounded-[28px] lg:rounded-[32px]"
-            />
-
+  src={communityimage}
+  alt="Dubai Architecture"
+  className="w-full h-full lg:absolute lg:inset-0 object-cover object-top rounded-[20px] sm:rounded-[28px] lg:rounded-[32px]"
+/>
             {/* TOP RIGHT BADGE */}
             {/* <div className="absolute top-4 -right-4 sm:top-6 sm:-right-6 lg:top-10 lg:-right-19 bg-[#001457] text-white rounded-[12px] sm:rounded-[16px] px-3 sm:px-4 lg:px-5 py-3 sm:py-4 lg:py-5 flex items-center gap-2 sm:gap-3 lg:gap-4 shadow-2xl z-20">
               <span className="text-[28px] sm:text-[40px] lg:text-[60px] font-medium leading-none">87+</span>

@@ -36,5 +36,6 @@ export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;
 export const SELLER_LEAD_API = `${BASE_URL}/seller-leads`;
 export const SELLER_LEAD_UPDATE_API = `${BASE_URL}/seller-leads`;
 export const UPDATE_USER_API = `${BASE_URL}/update`;
+export const PROJECTS_SORT_API = `${BASE_URL}/sort`;
 
 export const Token = "c137153e7594e1388278ce6fb5ed80b88b86bb09f8fdf8ee2e834dea59383dd1" 

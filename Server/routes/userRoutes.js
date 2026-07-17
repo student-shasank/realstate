@@ -3,7 +3,7 @@ import { protect} from "../middleware/authMiddleware.js";
 import { dashboard, getListingById, getListings,updateUser } from "../controllers/usercontroller.js";
 
 import { sendListingPdf } from "../controllers/pdfcontroller.js"
-import { searchListings } from "../controllers/searchcontroller.js"
+import { searchListings,sortListings} from "../controllers/searchcontroller.js"
 import { toggleFavoriteListing } from "../controllers/togglefavoriteListing.js";
 import { protect2 } from "../middleware/Favmiddleware.js";
 import { 
@@ -30,6 +30,7 @@ router.post("/favorites", protect2, toggleFavoriteListing);
 router.get("/navigation", getCommunityNavigation); // Dropdown ke liye
 router.get("/profile/:slug", getCommunityPublicProfile);
 router.get("/developers", getDevelopers);
+router.get("/sort", sortListings);
 
 
 export default router;

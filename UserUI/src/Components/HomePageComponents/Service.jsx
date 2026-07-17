@@ -2,57 +2,66 @@ import React from "react";
 import imageurl from "../../assets/underline.png";
 import { Link } from "react-router-dom";
 
-// 👉 Add images (same like reference)
-import Service1 from "../../assets/servicecard1.jpg";
-import Service2 from "../../assets/servicecard2.jpg";
-import Service3 from "../../assets/servicecard3.jpg";
+// 👉 Add images (matching files in assets/services)
+import ProjectMarketing from "../../assets/services/Project Marketing.jpg";
+import PropertyManagement from "../../assets/services/Property Management.jpg";
+import AssetManagement from "../../assets/services/Asset management.jpg";
+import DevelopmentAdvisory from "../../assets/services/Development Advisory.jpg";
+import HandoverSnagging from "../../assets/services/Handover and snagging.jpg";
+import Mortgage from "../../assets/services/mortgage.jpg";
+import ResidencyImage from "../../assets/services/Residency image.jpg";
 
 const ServicesSection = () => {
   const services = [
     {
       title: "Project Marketing ",
       description: "We work with developers and landowners to structure and position real estate projects for market",
-      image: Service1,
+      image: ProjectMarketing,
       path: "/marketingandSales",
     },
     {
       title: "Property Management",
       description: "We help manage properties efficiently for better ROI and operations",
-      image: Service2,
+      image: PropertyManagement,
       path: "/propertyStructuring",
     },
     {
       title: "Asset Management",
       description: "Optimize your real estate portfolio with expert asset management",
-      image: Service3,
+      image: AssetManagement,
       path: "/assetStructuring",
     },
     {
       title: "Development Advisory",
       description: "End-to-end support for project development and execution",
-      image: Service1,
+      image: DevelopmentAdvisory,
       path: "/advisoryCoordination",
     },
     {
       title: "Handover & Snagging",
       description: "Ensure quality and compliance during handover process",
-      image: Service2,
+      image: HandoverSnagging,
       path: "/handoverSnagging",
     },
     {
       title: "Mortgage Coordination",
       description: "Seamless mortgage assistance for buyers and investors",
-      image: Service3,
+      image: Mortgage,
       path: "/mortgageCoordination",
+    },
+    {
+      title: "Investor Visa Advisory",
+      description: "Assess eligibility, investment needs, and program suitability before starting your immigration process.",
+      image: ResidencyImage,
+      path: "/investorVisaAdvisory",
     },
     // {
     //   title: "Residency & Investor Visa Advisory (UAE)",
     //   description: "Guidance for UAE residency and investor visa process",
-    //   image: Service1,
+    //   image: ResidencyImage,
     //   path: "/investorVisaAdvisory",
     // },
   ];
-
   return (
     <section className="w-full bg-white px-4 sm:px-6 lg:px-8 py-12 lg:py-[120px]">
 

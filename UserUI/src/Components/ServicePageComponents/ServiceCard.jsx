@@ -1,53 +1,57 @@
 import React from 'react';
-import Service1 from '../../assets/servicecard1.jpg';
-import Service2 from '../../assets/servicecard2.jpg';
-import Service3 from '../../assets/servicecard3.jpg';
+import ProjectMarketing from '../../assets/services/Project Marketing.jpg';
+import AssetManagement from '../../assets/services/Asset management.jpg';
+import PropertyManagement from '../../assets/services/Property Management.jpg';
+import DevelopmentAdvisory from '../../assets/services/Development Advisory.jpg';
+import HandoverSnagging from '../../assets/services/Handover and snagging.jpg';
+import Mortgage from '../../assets/services/mortgage.jpg';
+import ResidencyImage from '../../assets/services/Residency image.jpg';
 import { Link } from 'react-router-dom';
 
 const SERVICES_DATA = [
-   {
+  {
     title: "Project Marketing And SalesStructuring",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service1,
+    image: ProjectMarketing,
     path: "/marketingandSales",
   },
   {
     title: "Asset Management Structuring",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service1,
+    image: AssetManagement,
     path: "/assetStructuring",
   },
   {
     title: "Property Management Structuring",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service1,
+    image: PropertyManagement,
     path: "/propertyStructuring",
   },
   {
     title: "Development Advisory and Project Coordination",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service2,
+    image: DevelopmentAdvisory,
     path: "/advisoryCoordination",
   },
   {
     title: "Handover & Snagging Representation",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service3,
+    image: HandoverSnagging,
     path: "/handoverSnagging",
   },
   {
     title: "Mortgage Coordination",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service1,
+    image: Mortgage,
     path: "/mortgageCoordination",
   },
   {
     title: "Residency & Investor Visa Advisory (UAE)",
     description: "We work with developers and landowners to structure and position real estate projects for market",
-    image: Service2,
+    image: ResidencyImage,
     path: "/investorVisaAdvisory",
   },
- 
+
 ];
 
 const ServiceCard = () => {
