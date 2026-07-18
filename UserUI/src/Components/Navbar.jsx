@@ -64,19 +64,19 @@ useEffect(() => {
     window.removeEventListener("openLogin", handleLoginOpen);
   };
 }, []);
-  const textColor = isHomePage ? "#01155E" : "#FFFFFF";
+  const textColor = isHomePage ? "#000000" : "#FFFFFF";
 
   return (<>
     <nav
       className={`fixed top-0 left-0 right-0 w-full z-50 h-[72px] md:h-[100px] flex justify-center transition-all duration-300
         ${
           isHomePage
-            ? "bg-white/20 backdrop-blur-md border-b border-white/10"
+            ? "bg-white backdrop-blur-md border-b border-white/10"
             : "bg-[#01155E]"
         }
       `}
     >
-      <div className="w-full px-4 md:px-12 flex items-center justify-between">
+      <div className="w-full px-4 md:px-12  2xl:px-20   flex items-center justify-between">
 
         {/* Brand Logo */}
       
