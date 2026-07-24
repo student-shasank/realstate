@@ -35,7 +35,7 @@ const SectionHeading = () => (
         backgroundSize: "457px 6px",
       }}
     >
-      Market Updates
+      Market  Insights
     </h2>
     <p className="text-[#67739E] text-[16px] md:text-[18px] leading-relaxed max-w-[1200px]">
       Discover Dubai's newest launches with expert guidance to secure the
@@ -237,7 +237,7 @@ const FeaturedBlogs = () => {
 
                   <div className="flex justify-end mt-4">
                     <button
-                 onClick={() => navigate(`/blog/${blog.slug}`)}
+                 onClick={() => navigate(`/MarketInsigts/${blog.slug}`)}
                       className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:opacity-90 active:scale-95 flex-shrink-0"
                       style={{
                         backgroundColor: DESIGN.colors.primary,

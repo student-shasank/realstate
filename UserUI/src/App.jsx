@@ -93,8 +93,8 @@ function App() {
         <Route path="/handoverSnagging" element={<HandoverSnagging />} />
         <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
         <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
-           <Route path="/Blog" element={<Blog/>} />
-            <Route path="/blog/:slug" element={<BlogDetail/>} />
+           <Route path="/MarketInsigts" element={<Blog/>} />
+            <Route path="//MarketInsigts/:slug" element={<BlogDetail/>} />
         
       </Routes>
    

@@ -7,7 +7,8 @@ import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSl
 import { fetchNavList } from "../features/communities/communitySlice"; // Added this import
 import LoginPopup from "../Pages/LoginPopup";
 import SignupPopup from "../Pages/SignupPopup";
-import Logo2 from "../assets/logo2.jpeg"
+import Logo2 from "../assets/logo2.png"
+import Logo3 from "../assets/logo3.png"
 
 function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -64,7 +65,7 @@ useEffect(() => {
     window.removeEventListener("openLogin", handleLoginOpen);
   };
 }, []);
-  const textColor = isHomePage ? "#000000" : "#FFFFFF";
+  const textColor = isHomePage ? "#01155e" : "#FFFFFF";
 
   return (<>
     <nav
@@ -83,9 +84,9 @@ useEffect(() => {
 
 <Link to="/" className="shrink-0">
   <img
-    src={Logo2}
+    src={isHomePage ? Logo2 : Logo3}
     alt="Yupland Logo"
-    className="h-20 w-auto"
+    className="h-13 w-auto"
   />
 </Link>
         {/* Navigation Links */}
@@ -96,7 +97,7 @@ useEffect(() => {
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/" ? 600 : 400,
+              fontWeight: location.pathname === "/" ? 600 : 500,
               color: textColor,
             }}
           >
@@ -111,7 +112,7 @@ useEffect(() => {
                 location.pathname === "/listings" &&
                 new URLSearchParams(location.search).get("completion") === "off-plan"
                   ? 600
-                  : 400,
+                  : 500,
               color: textColor,
             }}
           >
@@ -127,7 +128,7 @@ useEffect(() => {
                 location.pathname === "/listings" &&
                 new URLSearchParams(location.search).get("completion") === "ready"
                   ? 700
-                  : 400,
+                  : 500,
               color: textColor,
             }}
           >
@@ -139,7 +140,7 @@ useEffect(() => {
               className="flex items-center gap-1 py-4 transition-all"
               style={{
                 ...textStyle,
-                fontWeight: location.pathname.includes("communities") ? 600 : 400,
+                fontWeight: location.pathname.includes("communities") ? 600 : 500,
                 color: textColor,
               }}
             >
@@ -168,11 +169,11 @@ useEffect(() => {
           </div>
 
             <Link
-            to="/Blog"
+            to="/MarketInsigts"
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/Blogs" ? 600 : 400,
+              fontWeight: location.pathname === "/Blogs" ? 600 : 500,
               color: textColor,
             }}
           >
@@ -187,7 +188,7 @@ useEffect(() => {
               className="flex items-center gap-1 py-4" 
               style={{
                 ...textStyle,
-                fontWeight: location.pathname.includes("service") ? 600 : 400,
+                fontWeight: location.pathname.includes("service") ? 600 : 500,
                 color: textColor,
               }}
             >
@@ -223,18 +224,15 @@ useEffect(() => {
               </div>
             </div>
           </div>
-         
-          
-          
+      
 
-        
-
+      
           <Link
             to="/about"
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/about" ? 600 : 400,
+              fontWeight: location.pathname === "/about" ? 600 : 500,
               color: textColor,
             }}
           >
@@ -246,7 +244,7 @@ useEffect(() => {
             className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
             style={{
               ...textStyle,
-              fontWeight: location.pathname === "/contact" ? 600 : 400,
+              fontWeight: location.pathname === "/contact" ? 600 : 500,
               color: textColor,
             }}
           >
@@ -270,7 +268,7 @@ useEffect(() => {
       style={{
         ...textStyle,
         color: textColor,
-        fontWeight: 400,
+        fontWeight: 500,
       }}
     >
       Login
@@ -332,7 +330,7 @@ useEffect(() => {
               style={{
                 ...textStyle,
                 color: textColor,
-                fontWeight: 400,
+                fontWeight: 500,
               }}
             >
               Language

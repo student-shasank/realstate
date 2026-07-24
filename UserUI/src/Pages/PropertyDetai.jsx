@@ -457,12 +457,12 @@ export default function PropertyDetail() {
         rawListing?.project_status ||
         "Vacant",
     },
-    {
-      label: "Service Charges",
-      value: serviceCharges
-        ? `AED ${serviceCharges} / Sq Ft`
-        : "AED / Sq Ft",
-    },
+   {
+  label: "Service Charges",
+  value: serviceCharges?.value
+    ? `AED ${serviceCharges.value} / Sq Ft`
+    : "—",
+}
   ];
 
   const overviewStats = [
@@ -505,7 +505,19 @@ export default function PropertyDetail() {
   ];
   const buildingInfoRow2 = [
     { label: "Total Parking Spaces", value: buildingInfo?.totalParkingSpaces ?? "—" },
-    { label: "Total Building Area", value: buildingInfo?.totalBuildingArea ? `${buildingInfo.totalBuildingArea} Sq Ft` : totalBuildingArea ? `${totalBuildingArea} Sq Ft` : "—" },
+   {
+  label: "Total Building Area",
+  value:
+    buildingInfo?.totalBuildingArea &&
+    buildingInfo.totalBuildingArea !== "—" &&
+    buildingInfo.totalBuildingArea !== "-"
+      ? `${buildingInfo.totalBuildingArea} Sq Ft`
+      : totalBuildingArea &&
+        totalBuildingArea !== "—" &&
+        totalBuildingArea !== "-"
+      ? `${totalBuildingArea} Sq Ft`
+      : "—",
+},
     { label: "Elevators", value: buildingInfo?.elevators || "—" },
   ];
 
@@ -1093,10 +1105,16 @@ export default function PropertyDetail() {
             <div className="sticky top-8 space-y-6">
               <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-6">
 
-                <div className="flex items-center gap-3 mb-4">
-                  <Star size={18} fill="#0e0d0d" />
-                  <span className="text-[#01155E] font-semibold text-[22px] capitalize">{title || "—"}</span>
-                </div>
+                <div className="flex items-start gap-2 mb-4">
+  <Star
+    size={18}
+    fill="#0e0d0d"
+    className="mt-1 flex-shrink-0"
+  />
+  <span className="text-[#01155E] font-semibold text-[22px] capitalize leading-[1.3]">
+    {title || "—"}
+  </span>
+</div>
 
                 <div className="flex items-center gap-2 mb-4">
                   <span className="bg-[#01155E] text-white text-[12px] px-2.5 py-1.5 rounded-[4px] font-medium uppercase">
