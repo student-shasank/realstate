@@ -2,13 +2,14 @@ import React from "react";
 import { Facebook, Instagram, Linkedin, Phone, Mail } from "lucide-react";
 import footerBg from "../assets/footer-bg.jpg";
 import { Link } from "react-router-dom";
+import logo from "../assets/logo3.png"; // apna path update kar lo
 
 const Footer = () => {
   return (
     <footer className="relative w-full min-h-[627px] overflow-hidden">
 
       {/* BACKGROUND IMAGE */}
-     <img src={footerBg} alt="Footer Background" className="absolute inset-0 w-full h-full object-cover object-bottom" />
+      <img src={footerBg} alt="Footer Background" className="absolute inset-0 w-full h-full object-cover object-bottom" />
 
       {/* BLUE OVERLAY */}
       <div className="absolute inset-0 bg-[#1E2F6B]/90" />
@@ -21,10 +22,13 @@ const Footer = () => {
           {/* LEFT SECTION */}
           <div className="max-w-[320px]">
 
-            <div className="bg-[#142A63] inline-block px-6 py-3 mb-6">
-              <h2 className="text-[48px] font-bold leading-none">yupland</h2>
-            </div>
-
+           <div className="bg-[#142A63] inline-block px-6 py-3 mb-6">
+  <img
+    src={logo}
+    alt="Yupland Logo"
+    className="h-14 w-auto object-contain"
+  />
+</div>
             <p className="text-[18px] leading-relaxed Text-[#FFFFFF] ">
               Yupland is a real estate platform helping buyers and investors
               discover, evaluate, and secure the right properties across the UAE.
@@ -39,9 +43,9 @@ const Footer = () => {
             <div>
               <h4 className="font-semibold text-[18px] mb-4">Platform</h4>
               <div className="flex flex-col gap-3 Text-[#FFFFFF]  text-[18px]">
-                
-<Link to="/about">About</Link>
-<Link to="/contact">Contact</Link>
+
+                <Link to="/about">About</Link>
+                <Link to="/contact">Contact</Link>
               </div>
             </div>
 
@@ -49,34 +53,32 @@ const Footer = () => {
             <div>
               <h4 className="font-semibold text-[18px] mb-4">Legal</h4>
               <div className="flex flex-col gap-3 text-[18px] Text-[#FFFFFF]">
-               <Link to="/termsofuse">Terms of Use</Link>
-<Link to="/privacy">Privacy Policy</Link>
-<Link to="/disclamer">Disclaimer</Link>
-<Link to="/datascource">Data Sources</Link>
+                <Link to="/termsofuse">Terms of Use</Link>
+                <Link to="/privacy">Privacy Policy</Link>
+                <Link to="/disclamer">Disclaimer</Link>
+                <Link to="/datascource">Data Sources</Link>
               </div>
             </div>
 
             {/* CONTACT */}
             <div className="max-w-[280px]">
 
-              <div className="flex gap-3 mb-5">
-                <Phone />
-                <div className="Text-[#FFFFFF] text-[18px]">
-                  
-                  <p>UAE : +971 505773767</p>
-                   <p>Canada: +1 437 328 8508</p>
-                  <p>India: +91 99999 95871</p>
-                  
-                </div>
-              </div>
+             <div className="flex gap-3 mb-5">
+  <Phone size={20} className="shrink-0 mt-1" />
+  <div className="text-[#FFFFFF] text-[18px]">
+    <p>UAE : +971 505773767</p>
+    <p>Canada: +1 437 328 8508</p>
+    <p>India: +91 99999 95871</p>
+  </div>
+</div>
 
-              <div className="flex gap-3 mb-5">
-                <Mail />
-                <div className="text-[#FFFFFF] text-[18px] break-words">
-                  <p>info@yupland.ae</p>
-                  <p>chitkaradivyansh@gmail.com</p>
-                </div>
-              </div>
+<div className="flex gap-3 mb-5">
+  <Mail size={20} className="shrink-0 mt-1" />
+  <div className="text-[#FFFFFF] text-[18px] break-words">
+    <p>divyansh@equaproperties.com</p>
+    <p>info@yupland.ae</p>
+  </div>
+</div>
 
               <div className="flex items-center gap-4 mt-4">
                 <span className="text-[#9CA3AF] text-sm">Follow us :</span>
@@ -95,7 +97,7 @@ const Footer = () => {
         <div className="mt-16 border-t border-white/20 pt-6  Text-[#FFFFFF]">
           <p>© 2026 yupland. All rights reserved.</p>
           <p className="mt-2 max-w-[900px]">
-          Unauthorised reproduction, redistribution, data extraction, or scraping of content, listings, or structured data from this platform is strictly prohibited.
+            Unauthorised reproduction, redistribution, data extraction, or scraping of content, listings, or structured data from this platform is strictly prohibited.
 
           </p>
         </div>

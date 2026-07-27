@@ -50,7 +50,7 @@ export default function PropertyFlipbookSection({
   const brochureUrl = isLoggedIn ? fullBookUrl : previewBookUrl;
 
   const reportLink =
-  "https://drive.google.com/drive/folders/1WDIUSVNMSUP2rakTqUvOqedQ-9HG7gJi?usp=sharing";
+ "https://acrobat.adobe.com/id/urn:aaid:sc:AP:3c0df375-ee73-4cd2-92d2-19651d06fc96";
   const handleGetReport = () => {
   window.open(reportLink, "_blank", "noopener,noreferrer");
 };
