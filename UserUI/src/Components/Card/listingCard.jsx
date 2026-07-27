@@ -118,23 +118,29 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       setIsLoadingImages(true);
       try {
         const result = await dispatch(fetchListingDetail(Number(cardId))).unwrap();
-
+git 
         if (result) {
           const imageData = extractAllImages(result);
           setCarouselImages(imageData.allImages);
           console.log(`Loaded ${imageData.allImages.length} images for listing ${cardId}`);
         }
       } catch (error) {
+
+
+
         console.error('Error fetching listing images:', error);
         setCarouselImages(fallbackGalleryImages);
         toast.error('Failed to load images');
       } finally {
+
+9
         setIsLoadingImages(false);
-      }
+      }  
     }
   };
 
   /**
+   * 
    * Reset carousel when mouse leaves
    */
   const handleImageMouseLeave = () => {

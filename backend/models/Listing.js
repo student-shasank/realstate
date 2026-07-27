@@ -143,6 +143,7 @@ const ListingSchema = new mongoose.Schema(
   ref: "Community",
 },
 
+
     type: { type: String },
     purpose: {
       type: String,
@@ -157,10 +158,12 @@ const ListingSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "active", "rejected", "sold"],
       default: "pending",             // admin approval status--
-    },
+    },   
     listingStatus: {
       type: String,
       enum: ["resale", "new launch", "secondary"],
+
+
     },
     availability: {
       type: String,
