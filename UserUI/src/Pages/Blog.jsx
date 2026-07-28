@@ -1,50 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchAllBlogs,
+  fetchBlogsPage,
   setCurrentPage,
   setSearchTerm,
-  selectPaginatedBlogs,
-  selectTotalPages,
 } from "../features/dashboard/Blogslice.jsx";
 import Seo from "../Components/Seo.jsx";
 
 const PER_PAGE = 6;
-const SEARCH_DEBOUNCE_MS = 300; // typing rukne ke kitni der baad search trigger ho
+const SEARCH_DEBOUNCE_MS = 300;
 
 function Blog() {
   const dispatch = useDispatch();
   const {
-    allLoading: loading,
-
-    allError: error,
+    items: posts,
+    loading,
+    error,
     currentPage,
+    totalPages,
     searchTerm,
   } = useSelector((state) => state.blogs);
 
-  // Ab ye dono client-side derive hote hain "all" cache se — koi network call nahi
-  const posts = useSelector(selectPaginatedBlogs(PER_PAGE));
-  const totalPages = useSelector(selectTotalPages(PER_PAGE));
-
   const [searchInput, setSearchInput] = useState("");
 
-  // Sirf EK BAAR fetch hota hai. `fetchAllBlogs` ke andar condition guard hai —
-  // agar FeaturedBlogs (ya kisi aur component) ne pehle se fetch kar diya hai ya
-  // fetch in-progress hai, to ye dispatch koi extra API call nahi karega.
-  useEffect(() => {
-    dispatch(fetchAllBlogs());
-  }, [dispatch]);
-
-  // LIVE SEARCH: jaise hi searchInput change hota hai, debounce ke baad
-  // Redux searchTerm update ho jata hai. Chunki poora data already "all" cache
-  // mein client-side maujood hai, isse koi extra API call nahi hoti — sirf
-  // filtering re-run hoti hai. Redux ke andar setSearchTerm currentPage ko
-  // 1 par reset karta hai.
+  // Debounce: typing rukne ke 300ms baad Redux searchTerm update hota hai
   useEffect(() => {
     const trimmed = searchInput.trim();
-
-    // Agar already same term set hai to dobara dispatch mat karo (avoids
-    // unnecessary page reset loops)
     if (trimmed === searchTerm) return;
 
     const timer = setTimeout(() => {
@@ -55,8 +36,14 @@ function Blog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput]);
 
+  // Page ya searchTerm badalte hi server se sirf usi page ka data aata hai
+  useEffect(() => {
+    dispatch(
+      fetchBlogsPage({ page: currentPage, perPage: PER_PAGE, search: searchTerm })
+    );
+  }, [dispatch, currentPage, searchTerm]);
+
   const handleSearch = (e) => {
-    // Enter dabane par ya button click par turant search (bina debounce wait ke)
     e.preventDefault();
     dispatch(setSearchTerm(searchInput.trim()));
   };
@@ -72,24 +59,20 @@ function Blog() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Pagination number list banata hai (max 5 numbers dikhte hain, current ke around)
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
-
     if (end - start + 1 < maxVisible) {
       start = Math.max(1, end - maxVisible + 1);
     }
-
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   };
 
   const canonicalPath =
     currentPage > 1 ? `/contact?page=${currentPage}` : "/contact";
-
   const isSearchActive = Boolean(searchTerm);
 
   return (
@@ -101,10 +84,10 @@ function Blog() {
         noindex={isSearchActive}
       />
 
-      {/* Page Heading */}
-      <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">Market Insights</h1>
+      <h1 className="text-4xl text-[#01155E] font-bold mb-8 text-center">
+        Market Insights
+      </h1>
 
-      {/* Live Search Bar */}
       <form
         onSubmit={handleSearch}
         className="flex items-center gap-3 mb-12 max-w-xl mx-auto"
@@ -117,8 +100,7 @@ function Blog() {
             placeholder="Search blogs..."
             className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:border-black transition"
           />
-          {/* Chhota loading indicator jab tak typing ke baad search apply nahi hoti */}
-          {searchInput.trim() !== searchTerm && (
+          {(searchInput.trim() !== searchTerm || loading) && (
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               ...
             </span>
@@ -136,17 +118,14 @@ function Blog() {
         )}
       </form>
 
-      {/* Loading State */}
       {loading && posts.length === 0 && (
         <div className="text-center py-20 text-xl">Loading...</div>
       )}
 
-      {/* Error State */}
       {!loading && error && (
         <div className="text-center py-20 text-xl text-red-500">{error}</div>
       )}
 
-      {/* No Results */}
       {!loading && !error && posts.length === 0 && (
         <div className="text-center py-20 text-xl">
           {searchTerm
@@ -155,7 +134,6 @@ function Blog() {
         </div>
       )}
 
-      {/* Blog Grid */}
       {!loading && !error && posts.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -178,7 +156,7 @@ function Blog() {
                 )}
 
                 <div className="p-5">
-                  <h2 className="text-xl font-semibold   text-[#01155E] mb-2 line-clamp-2">
+                  <h2 className="text-xl font-semibold text-[#01155E] mb-2 line-clamp-2">
                     {post.title}
                   </h2>
 
@@ -195,7 +173,6 @@ function Blog() {
             ))}
           </div>
 
-          {/* Number Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-12">
               <button
@@ -214,7 +191,9 @@ function Blog() {
                   >
                     1
                   </button>
-                  {getPageNumbers()[0] > 2 && <span className="text-gray-400">...</span>}
+                  {getPageNumbers()[0] > 2 && (
+                    <span className="text-gray-400">...</span>
+                  )}
                 </>
               )}
 
@@ -234,9 +213,8 @@ function Blog() {
 
               {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
                 <>
-                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
-                    <span className="text-gray-400">...</span>
-                  )}
+                  {getPageNumbers()[getPageNumbers().length - 1] <
+                    totalPages - 1 && <span className="text-gray-400">...</span>}
                   <button
                     onClick={() => goToPage(totalPages)}
                     className="w-10 h-10 rounded-lg border border-gray-300 text-[#01155E] font-medium hover:bg-gray-50 transition"

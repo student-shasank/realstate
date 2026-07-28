@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import imageurl from "../../assets/underline.png";
-import { fetchAllBlogs, selectFeaturedBlogs } from "../../features/dashboard/Blogslice.jsx";
+import { fetchFeaturedBlogs, selectFeaturedBlogs } from "../../features/dashboard/Blogslice.jsx";
 import { useNavigate } from "react-router-dom";
 
 
@@ -48,17 +48,17 @@ const FeaturedBlogs = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Ab seedha shared "all" cache se derive hota hai — koi alag API call nahi
+  // Ab apne alag chhote "featured" cache se derive hota hai (sirf 4 latest posts)
   const featured = useSelector(selectFeaturedBlogs);
-  const { allLoading: featuredLoading, allError: featuredError } = useSelector(
+  const { featuredLoading, featuredError } = useSelector(
     (state) => state.blogs
   );
 
   useEffect(() => {
-    // fetchAllBlogs ke andar `condition` guard hai — agar Contact page (ya koi
-    // aur component) ne pehle se ye data fetch kar liya hai ya fetch chal raha
-    // hai, to ye dispatch silently skip ho jaayega, duplicate API call nahi hogi.
-    dispatch(fetchAllBlogs());
+    // fetchFeaturedBlogs ke andar `condition` guard hai — agar ye component
+    // dobara mount ho ya kahin aur se pehle hi fetch ho chuka ho, to duplicate
+    // API call nahi hogi.
+    dispatch(fetchFeaturedBlogs());
   }, [dispatch]);
 
   if (featuredLoading && featured.length === 0) {
@@ -161,7 +161,7 @@ const FeaturedBlogs = () => {
                 </p>
 
                 <button
-                 onClick={() => navigate(`/blog/${mainBlog.slug}`)}
+                 onClick={() => navigate(`/market-insights/${mainBlog.slug}`)}
                   className="px-8 py-3 rounded-xl text-sm font-medium transition-all duration-300 hover:opacity-90 active:scale-95"
                   style={{
                     backgroundColor: DESIGN.colors.primary,
