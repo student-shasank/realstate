@@ -1062,7 +1062,7 @@ export default function PropertyDetail() {
                   <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
                   <p className="text-[#01155E] font-bold text-[17px]">
                     {investmentInsights?.pricePerSqFt
-                      ? `${investmentInsights.pricePerSqFt} AED / Sq Ft`
+                      ? `${investmentInsights.pricePerSqFt}`
                       : pricePerSqFt || "—"}
                   </p>
                 </div>
@@ -1122,16 +1122,21 @@ export default function PropertyDetail() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
-                  <MapPin size={14} />
-                  <span>
-                    {[
-                      location?.address,
-                      location?.country
-                    ].filter(Boolean).join(", ") || "—"}
-                  </span>
-                </div>
+                <div className="flex items-start gap-2 text-[#67739E] text-[18px] mb-4">
+  <MapPin
+    size={19}
+    className="mt-1 flex-shrink-0 text-[#67739E]"
+  />
 
+  <span className="leading-7">
+    {[
+      location?.address,
+      location?.country,
+    ]
+      .filter(Boolean)
+      .join(", ") || "—"}
+  </span>
+</div>
                 <hr className="border-[#D9E1F2] mb-4" />
 
                 <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">

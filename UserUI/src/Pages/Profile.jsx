@@ -19,26 +19,52 @@ const MailIcon = () => (
     <path d="M3 9l9 5 9-5" stroke="#67739E" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
+
 const PhoneIcon = () => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1v3.5a1 1 0 01-1 1A17 17 0 013 5a1 1 0 011-1H7.5a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z" stroke="#67739E" strokeWidth="1.8" strokeLinecap="round" />
+    <path
+      d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1v3.5a1 1 0 01-1 1A17 17 0 013 5a1 1 0 011-1H7.5a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z"
+      stroke="#67739E"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
   </svg>
 );
+
 const LockIcon = () => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
     <rect x="5" y="11" width="14" height="10" rx="2" stroke="#67739E" strokeWidth="1.8" />
     <path d="M8 11V7a4 4 0 118 0v4" stroke="#67739E" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
+
 const HeartIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#ff0000" : "none"} stroke={filled ? "#ff0000" : "#67739E"} strokeWidth="2">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill={filled ? "#ff0000" : "none"}
+    stroke={filled ? "#ff0000" : "#67739E"}
+    strokeWidth="2"
+  >
     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
   </svg>
 );
+
 const EditIcon = () => (
   <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path
+      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -58,9 +84,17 @@ const PasswordModal = ({ onClose }) => {
       >
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-[22px] font-bold text-[#01155E]">Change Password</h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-[#E9EEF6] flex items-center justify-center text-[#67739E] hover:bg-[#D9E1F2] transition-colors">
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-[#E9EEF6] flex items-center justify-center text-[#67739E] hover:bg-[#D9E1F2] transition-colors"
+          >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              <path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </div>
@@ -68,7 +102,11 @@ const PasswordModal = ({ onClose }) => {
         {["current", "newPass", "confirm"].map((field) => (
           <div key={field} className="mb-4">
             <label className="block text-[#01155E] text-[14px] font-semibold mb-1.5">
-              {field === "current" ? "Current Password" : field === "newPass" ? "New Password" : "Confirm New Password"}
+              {field === "current"
+                ? "Current Password"
+                : field === "newPass"
+                ? "New Password"
+                : "Confirm New Password"}
             </label>
             <div className="relative">
               <input
@@ -84,10 +122,40 @@ const PasswordModal = ({ onClose }) => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-[#67739E] hover:text-[#01155E] transition-colors"
               >
                 <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
-                  {show[field]
-                    ? <><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></>
-                    : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" /></>
-                  }
+                  {show[field] ? (
+                    <>
+                      <path
+                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="1"
+                        y1="1"
+                        x2="23"
+                        y2="23"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <path
+                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
+                    </>
+                  )}
                 </svg>
               </button>
             </div>
@@ -95,7 +163,10 @@ const PasswordModal = ({ onClose }) => {
         ))}
 
         <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="flex-1 py-3 border border-[#D9E1F2] text-[#67739E] rounded-[10px] font-semibold text-[15px] hover:bg-[#E9EEF6] transition-colors">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 border border-[#D9E1F2] text-[#67739E] rounded-[10px] font-semibold text-[15px] hover:bg-[#E9EEF6] transition-colors"
+          >
             Cancel
           </button>
           <button className="flex-1 py-3 bg-[#01155E] text-white rounded-[10px] font-semibold text-[15px] hover:opacity-90 transition-opacity">
@@ -120,7 +191,10 @@ export default function Profile() {
     email: storedUser.email || "",
     phone: storedUser.phone || storedUser.phoneNumber || "",
     joinDate: storedUser.createdAt
-      ? new Date(storedUser.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+      ? new Date(storedUser.createdAt).toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        })
       : "",
   });
   const [editForm, setEditForm] = useState({ name: user.name, phone: user.phone });
@@ -135,12 +209,12 @@ export default function Profile() {
 
   // ── Favorites
   const favoriteIds = useSelector((state) => state.favorites.favorites || []);
-  console.log("FAVORITE IDS:", favoriteIds);
   const [favoriteListings, setFavoriteListings] = useState([]);
   const [favLoading, setFavLoading] = useState(false);
 
   // ── Fetch favorites
   useEffect(() => {
+    let isMounted = true;
     if (favoriteIds.length === 0) {
       setFavoriteListings([]);
       return;
@@ -152,17 +226,21 @@ export default function Profile() {
           favoriteIds.map((id) => dispatch(fetchListingByIdThunk(id)).unwrap())
         );
 
-        setFavoriteListings(results);
-        console.log("API RESULTS:", results);
+        if (isMounted) {
+          setFavoriteListings(results);
+        }
       } catch (err) {
         console.error("Failed to fetch favorite listings:", err);
       } finally {
-        setFavLoading(false);
+        if (isMounted) setFavLoading(false);
       }
     };
     fetchAll();
+
+    return () => {
+      isMounted = false;
+    };
   }, [dispatch, favoriteIds]);
-  
 
   // ── updateUser success handler
   useEffect(() => {
@@ -180,13 +258,12 @@ export default function Profile() {
 
       dispatch(resetUpdateUser());
     }
-  }, [updateSuccess, dispatch]);
+  }, [updateSuccess, dispatch, editForm]);
 
   // ── Save handler — dispatch to Redux
   const handleSaveEdit = () => {
     const stored = getStoredUser();
     const userId = stored._id || stored.id;
-    console.log(userId)
 
     if (!userId) {
       console.error("User ID nahi mila localStorage mein");
@@ -207,11 +284,9 @@ export default function Profile() {
   return (
     <div className="w-full min-h-screen bg-[#F4F7FC] font-['General_Sans'] mt-10">
       <div className="w-full max-w-[1440px] mx-auto px-[120px] py-8">
-
         {/* ── PROFILE HEADER CARD ── */}
         <div className="bg-white rounded-[16px] border border-[#D9E1F2] shadow-sm overflow-hidden mb-6 mt-30 max-w-[1200px]">
           <div className="px-8 pb-6 mt-10">
-
             {/* Avatar row */}
             <div className="flex items-end justify-between -mt-7 mb-4">
               <div className="flex items-end gap-5">
@@ -228,7 +303,9 @@ export default function Profile() {
                   ) : (
                     <h1 className="text-[22px] font-bold text-[#01155E]">{user.name}</h1>
                   )}
-                  <p className="text-[#67739E] text-[14px]">Member since {user.joinDate}</p>
+                  <p className="text-[#67739E] text-[14px]">
+                    Member since {user.joinDate || "N/A"}
+                  </p>
                 </div>
               </div>
 
@@ -236,7 +313,6 @@ export default function Profile() {
               <div className="flex gap-2 pb-1">
                 {editMode ? (
                   <>
-                    {/* Error message */}
                     {updateError && (
                       <p className="text-red-500 text-[13px] self-center mr-2">{updateError}</p>
                     )}
@@ -285,8 +361,12 @@ export default function Profile() {
                   <MailIcon />
                 </div>
                 <div className="overflow-hidden">
-                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">Email</p>
-                  <p className="text-[#01155E] text-[14px] font-semibold truncate">{user.email}</p>
+                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">
+                    Email
+                  </p>
+                  <p className="text-[#01155E] text-[14px] font-semibold truncate">
+                    {user.email || "—"}
+                  </p>
                 </div>
               </div>
 
@@ -296,7 +376,9 @@ export default function Profile() {
                   <PhoneIcon />
                 </div>
                 <div>
-                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">Phone</p>
+                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">
+                    Phone
+                  </p>
                   {editMode ? (
                     <input
                       value={editForm.phone}
@@ -304,7 +386,9 @@ export default function Profile() {
                       className="text-[#01155E] text-[14px] font-semibold border-b border-[#2F6BFF] outline-none bg-transparent w-full"
                     />
                   ) : (
-                    <p className="text-[#01155E] text-[14px] font-semibold">{user.phone || "—"}</p>
+                    <p className="text-[#01155E] text-[14px] font-semibold">
+                      {user.phone || "—"}
+                    </p>
                   )}
                 </div>
               </div>
@@ -315,8 +399,12 @@ export default function Profile() {
                   <LockIcon />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">Password</p>
-                  <p className="text-[#01155E] text-[14px] font-semibold tracking-widest">••••••••</p>
+                  <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">
+                    Password
+                  </p>
+                  <p className="text-[#01155E] text-[14px] font-semibold tracking-widest">
+                    ••••••••
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowPasswordModal(true)}
@@ -358,7 +446,6 @@ export default function Profile() {
         {/* ── CONTENT ── */}
         {activeTab === "favorites" && (
           <div className="space-y-4 max-w-[1200px]">
-
             {/* Loading spinner */}
             {favLoading && (
               <div className="flex justify-center py-16">
@@ -375,21 +462,24 @@ export default function Profile() {
                 <div className="w-16 h-16 bg-[#E9EEF6] rounded-full flex items-center justify-center mx-auto mb-4">
                   <HeartIcon filled={false} />
                 </div>
-                <p className="text-[#01155E] text-[18px] font-semibold mb-1">No Favourites Yet</p>
+                <p className="text-[#01155E] text-[18px] font-semibold mb-1">
+                  No Favourites Yet
+                </p>
                 <p className="text-[#67739E] text-[14px]">
                   Like listings from the properties page to save them here.
                 </p>
               </div>
             )}
 
-            {/* ListingCard */}
-            {!favLoading && favoriteListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                onRequireLogin={() => setShowLoginPrompt(true)}
-              />
-            ))}
+            {/* Listing Cards */}
+            {!favLoading &&
+              favoriteListings.map((listing, index) => (
+                <ListingCard
+                  key={listing._id || listing.id || index}
+                  listing={listing}
+                  onRequireLogin={() => setShowLoginPrompt(true)}
+                />
+              ))}
           </div>
         )}
       </div>
@@ -411,7 +501,9 @@ export default function Profile() {
               <HeartIcon filled={false} />
             </div>
             <h3 className="text-[20px] font-bold text-[#01155E] mb-2">Login Required</h3>
-            <p className="text-[#67739E] text-[14px] mb-6">Please login to save your favourite listings.</p>
+            <p className="text-[#67739E] text-[14px] mb-6">
+              Please login to save your favourite listings.
+            </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowLoginPrompt(false)}

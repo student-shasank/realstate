@@ -197,7 +197,7 @@ function Navbar() {
             </div>
 
             <Link
-              to="/MarketInsigts"
+              to="/market-insights"
               className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
               style={{
                 ...textStyle,
@@ -487,7 +487,7 @@ function Navbar() {
             </div>
 
             <Link
-              to="/MarketInsigts"
+              to="/market-insights"
               className="py-3.5 text-white text-base"
               style={{
                 fontWeight: location.pathname === "/Blogs" ? 700 : 500,

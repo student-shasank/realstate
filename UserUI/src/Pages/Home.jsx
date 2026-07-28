@@ -205,7 +205,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="mx-auto w-full h-[960px] flex flex-col items-center relative overflow-hidden">
+      <div className="mx-auto w-full h-auto min-h-[820px] sm:min-h-[900px] lg:h-[960px] flex flex-col items-center relative overflow-hidden overflow-x-hidden pb-8 sm:pb-10 lg:pb-0">
         <div className="absolute inset-0 -z-10">
           <video autoPlay loop muted playsInline className="w-full h-full object-cover">
             <source src={backgroundVideo} type="video/mp4" />
@@ -213,11 +213,11 @@ const Home = () => {
           <div className="absolute inset-0 bg-transparent" />
         </div>
 
-        <div className="w-full max-w-[1248px] px-4 md:px-6 pt-[110px] md:pt-[180px]">
-          <h1 className="text-white text-[48px] font-bold text-center drop-shadow-2xl" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '700', lineHeight: '100%', letterSpacing: '0%' }}>
+        <div className="w-full max-w-[1248px] px-4 sm:px-5 md:px-6 pt-[70px] sm:pt-[90px] md:pt-[180px] lg:pt-[180px]">
+          <h1 className="text-white text-[26px] sm:text-[34px] md:text-[42px] lg:text-[48px] font-bold text-center drop-shadow-2xl" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '700', lineHeight: '110%', letterSpacing: '0%' }}>
             Dubai Real Estate Investments
           </h1>
-          <h3 className="text-white text-[24px] font-bold text-center mb-5 mt-5 drop-shadow-2xl" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '500', letterSpacing: '0%' }}>
+          <h3 className="text-white text-[14px] sm:text-[17px] md:text-[21px] lg:text-[24px] font-bold text-center mb-4 sm:mb-5 mt-3 sm:mt-5 drop-shadow-2xl px-2" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '500', letterSpacing: '0%' }}>
             Pre-construction and Ready properties tailored to your investment goals
           </h3>
 
@@ -228,7 +228,7 @@ const Home = () => {
               </button>
             ))}
           </div> */}
-          <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="flex flex-wrap items-center justify-center bg-transparent mx-auto w-full lg:w-[1192px] lg:h-[70px] gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-3">
   {['Properties', 'Off-Plan', 'Ready', 'Metro Expansion'].map((tab) => (
     <button
       key={tab}
@@ -243,15 +243,8 @@ const Home = () => {
         }
         // 'Properties' tab: no navigation, just stays here and shows the search bar below
       }}
-      className="transition-all flex items-center justify-center"
+      className="transition-all flex items-center justify-center w-[47%] xs:w-[45%] sm:w-[160px] md:w-[210px] lg:w-[280px] h-[38px] sm:h-[42px] md:h-[44px] lg:h-[46px] rounded-lg font-semibold text-[13px] sm:text-[15px] md:text-[18px] lg:text-[20px] border-none cursor-pointer"
       style={{
-        width: '280px',
-        height: '46px',
-        borderRadius: '8px',
-        fontWeight: '600',
-        fontSize: '20px',
-        border: 'none',
-        cursor: 'pointer',
         backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF',
         color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92',
         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)'
@@ -262,19 +255,19 @@ const Home = () => {
   ))}
 </div>
 
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[25px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
-            <div className="flex flex-col md:flex-row gap-3 mb-5">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+            <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-5">
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
                 </div>
                 <input type="text" placeholder="Enter Location" className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium shadow-sm" value={location} onChange={(e) => dispatch(setLocation(e.target.value))} />
               </div>
-              <button onClick={handleSearch} className="bg-[#01155E] text-white px-10 py-2.5 rounded-lg font-['Archivo'] text-lg shadow-md min-w-[160px]">Search</button>
+              <button onClick={handleSearch} className="bg-[#01155E] text-white px-6 sm:px-8 md:px-10 py-2.5 rounded-lg font-['Archivo'] text-base sm:text-lg shadow-md w-full md:w-auto md:min-w-[160px]">Search</button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 ">
-              <div className="flex bg-white/40 py-1 px-2 rounded-full border border-white/30 shadow-inner w-fit -mt-1">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4 ">
+              <div className="flex bg-white/40 py-1 px-2 rounded-full border border-white/30 shadow-inner w-full md:w-fit justify-center md:justify-start -mt-1">
                 {['Off-Plan', 'Ready', ].map((status) => {
                   const isActive = completion === status;
 
@@ -282,7 +275,7 @@ const Home = () => {
                     <button
                       key={status}
                       onClick={() => dispatch(setCompletion(status))}
-                      className={`px-10 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full ${isActive
+                      className={`px-5 sm:px-7 md:px-10 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full flex-1 md:flex-none ${isActive
                         ? 'bg-[#01155E] text-white shadow-md'
                         : 'text-[#01155E] bg-[#ffff]'
                         }`}
@@ -304,7 +297,7 @@ const Home = () => {
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isBedBathOpen && (
-                  <div className="absolute top-full -right-5 mt-0 w-full md:w-[320px] bg-white border border-gray-200 rounded-3xl shadow-xl z-50 p-6">
+                  <div className="absolute top-full right-0 md:-right-5 mt-0 w-[92vw] max-w-[320px] md:w-[320px] bg-white border border-gray-200 rounded-3xl shadow-xl z-50 p-4 sm:p-6">
                     <div className="mb-6">
                       <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-['Archivo'] text-lg">Beds</h3></div>
                       <div className="flex flex-wrap gap-2">
@@ -322,8 +315,8 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-3 border border-black text-[#5B6B91] text-lg rounded-3xl hover:bg-gray-50 transition-colors">Reset</button>
-                      <button type="button" onClick={() => closeAll()} className="flex-1 py-3 bg-[#000E47] text-white text-lg rounded-3xl hover:bg-blue-900 transition-colors">Done</button>
+                      <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-3 border border-black text-[#5B6B91] text-base sm:text-lg rounded-3xl hover:bg-gray-50 transition-colors">Reset</button>
+                      <button type="button" onClick={() => closeAll()} className="flex-1 py-3 bg-[#000E47] text-white text-base sm:text-lg rounded-3xl hover:bg-blue-900 transition-colors">Done</button>
                     </div>
                   </div>
                 )}
@@ -339,8 +332,8 @@ const Home = () => {
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isPriceOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-full md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-5">
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="absolute top-full right-0 mt-2 w-[92vw] max-w-[300px] md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-4 sm:p-5">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
                       <div><label className="text-gray-400 text-xs mb-1 block font-medium">Minimum</label><input type="number" placeholder="0" value={minPrice} onChange={(e) => dispatch(setMinPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" /></div>
                       <div><label className="text-gray-400 text-xs mb-1 block font-medium">Maximum</label><input type="number" placeholder="Any" value={maxPrice} onChange={(e) => dispatch(setMaxPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" /></div>
                     </div>
@@ -361,7 +354,7 @@ const Home = () => {
                     closeAll();
                     setPropertyTypeOpen(nextState);
                   }}
-                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[15px] font-medium text-[#67739E] shadow-sm"
+                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[14px] sm:text-[15px] font-medium text-[#67739E] shadow-sm"
                 >
                   <span className="truncate">{propertyType || "Residential"}</span>
                   <ChevronDown
@@ -371,7 +364,7 @@ const Home = () => {
                 </button>
 
                 {propertyTypeOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-xl shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
+                  <div className="absolute top-full left-0 mt-1 w-[92vw] max-w-[345px] md:w-[345px] bg-white rounded-xl shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
                     <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
                       <span className="text-[14px] font-medium text-[#67739E]">
                         {propertyTab}
@@ -383,7 +376,7 @@ const Home = () => {
                       <button
                         type="button"
                         onClick={() => setPropertyTab("Residential")}
-                        className={`text-left text-[15px] h-[32px] border-b-2 ${propertyTab === "Residential"
+                        className={`text-left text-[14px] sm:text-[15px] h-[32px] border-b-2 ${propertyTab === "Residential"
                           ? "text-[#67739E] border-[#01155E]"
                           : "text-[#8B95B7] border-transparent"
                           }`}
@@ -394,7 +387,7 @@ const Home = () => {
                       <button
                         type="button"
                         onClick={() => setPropertyTab("Commercial")}
-                        className={`text-left text-[15px] h-[32px] pl-3 border-b-2 ${propertyTab === "Commercial"
+                        className={`text-left text-[14px] sm:text-[15px] h-[32px] pl-3 border-b-2 ${propertyTab === "Commercial"
                           ? "text-[#67739E] border-[#01155E]"
                           : "text-[#8B95B7] border-transparent"
                           }`}
@@ -447,7 +440,7 @@ const Home = () => {
 
 
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2.5 sm:gap-3 w-full">
 
               <div className="relative" ref={saleStatusRef}>
                 <button
@@ -627,7 +620,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <div>
+      <div className="overflow-x-hidden">
         <DeveloperSlider />
         <ChooseYourStrategy />
         <DubaiMarketActivity />

@@ -162,7 +162,7 @@ function Blog() {
             {posts.map((post) => (
               <a
                 key={post.id}
-                href={`/MarketInsigts/${post.slug}`}
+                href={`/market-insights/${post.slug}`}
                 className="block rounded-2xl overflow-hidden border border-gray-200 hover:shadow-lg transition"
               >
                 {post.image ? (

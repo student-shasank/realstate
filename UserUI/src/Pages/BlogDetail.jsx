@@ -46,10 +46,10 @@ function BlogDetail() {
       <Seo
         title={`${post.title} | Yupland`}
         description={post.title}
-        canonicalPath={`/MarketInsigts/${post.slug}`}
+        canonicalPath={`/market-insights/${post.slug}`}
       />
 
-      <Link to="/MarketInsigts" className="text-[#01155E] font-medium mb-6 inline-block">
+      <Link to="/market-insights" className="text-[#01155E] font-medium mb-6 inline-block">
         ← Back to blogs
       </Link>
 

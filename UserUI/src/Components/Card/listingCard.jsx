@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
-import heartIcon from "../../assets/like.svg"
+import heartIcon from "../../assets/like.svg";
 import callIcon from '../../assets/Phone2.svg';
 import whatsappIcon from '../../assets/whatsap.png';
-import shareIcon from '../../assets/Share3.svg'
-import listingimage from '../../assets/ListingCard.jpg'
-import Icon1 from '../../assets/icon1.png'
-import Icon2 from '../../assets/icon2.png'
-import Icon3 from '../../assets/icon3.png'
-import Icon4 from '../../assets/icon4.png'
-import Icon5 from '../../assets/icon5.png'
+import shareIcon from '../../assets/Share3.svg';
+import listingimage from '../../assets/ListingCard.jpg';
+import Icon1 from '../../assets/icon1.png';
+import Icon2 from '../../assets/icon2.png';
+import Icon3 from '../../assets/icon3.png';
+import Icon4 from '../../assets/icon4.png';
+import Icon5 from '../../assets/icon5.png';
 import { useNavigate } from "react-router-dom";
 import { sendListingEnquiry, resetEnquiryState } from "../../features/Enquiery/enquirySlice.js";
 import { toast } from 'react-toastify';
@@ -24,15 +24,13 @@ import {
   toggleFavorite,
 } from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
 
-
-// Note: Ensure General Sans font is imported in your global CSS
 const ListingCard = ({ listing, onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isLocalSending, setIsLocalSending] = useState(false);
 
-  // NEW: hover carousel states
+  // Hover carousel states
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [carouselImages, setCarouselImages] = useState([]);
@@ -44,8 +42,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const { success: pdfSuccess, loading: pdfLoading, error: pdfError } = useSelector((state) => state.pdf);
   const { listing: detailedListing } = useSelector((state) => state.listingDetail);
 
-  // NOTE: adjust this path to match your actual auth slice
-  // e.g. state.auth.user, state.userProfile.data, etc.
   const currentUser = useSelector((state) => state.auth?.user);
 
   const socialActions = [
@@ -56,7 +52,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   ];
 
   const currentId = listing?._id || listing?.id;
-  const cardId = listing.id;
+  const cardId = listing?.id;
 
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
@@ -89,12 +85,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     ? [listing.feature_image]
     : [listingimage];
 
-  // Display logic: Use carousel images if available, else fallback
   const displayImages = carouselImages.length > 0 ? carouselImages : fallbackGalleryImages;
 
-  /**
-   * Safe image URL handler (supports various image formats)
-   */
   const getSafeImageUrl = (url) => {
     if (!url) return listingimage;
     if (typeof url !== 'string') {
@@ -106,43 +98,28 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     return url;
   };
 
-  /**
-   * Fetch all images when card is hovered using cardId
-   * Only fetches once per card (caches result)
-   */
   const handleImageMouseEnter = async () => {
     setIsImageHovered(true);
 
-    // Only fetch if we don't already have carousel images
-    if (carouselImages.length === 0 && !isLoadingImages) {
+    if (carouselImages.length === 0 && !isLoadingImages && cardId) {
       setIsLoadingImages(true);
       try {
         const result = await dispatch(fetchListingDetail(Number(cardId))).unwrap();
-git 
+
         if (result) {
           const imageData = extractAllImages(result);
           setCarouselImages(imageData.allImages);
-          console.log(`Loaded ${imageData.allImages.length} images for listing ${cardId}`);
         }
       } catch (error) {
-
-
-
         console.error('Error fetching listing images:', error);
         setCarouselImages(fallbackGalleryImages);
         toast.error('Failed to load images');
       } finally {
-
-9
         setIsLoadingImages(false);
       }  
     }
   };
 
-  /**
-   * 
-   * Reset carousel when mouse leaves
-   */
   const handleImageMouseLeave = () => {
     setIsImageHovered(false);
     setActiveImageIndex(0);
@@ -192,7 +169,7 @@ git
     try {
       await dispatch(
         sendListingEnquiry({
-          listingId: listing._id, // Mongo _id specifically, not the numeric id
+          listingId: listing._id,
           name: storedUser.name,
           email: storedUser.email,
           phone: storedUser.phone || "-",
@@ -228,7 +205,6 @@ git
     }
   }, [pdfSuccess, isPopupOpen]);
 
-  // Reset carousel when listing changes
   useEffect(() => {
     setActiveImageIndex(0);
     setCarouselImages([]);
@@ -236,14 +212,16 @@ git
   }, [currentId]);
 
   const openDetails = () => {
-    navigate(`/listing/${listing.id}`);
+    if (listing?.id) {
+      navigate(`/listing/${listing.id}`);
+    }
   };
 
   const getHandover = (dateString) => {
     if (!dateString) return "N/A";
 
     const date = new Date(dateString);
-    const month = date.getMonth() + 1; // 1–12
+    const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
     let quarter = "";
@@ -257,18 +235,18 @@ git
   };
 
   return (
-    <div className="w-[1290px] h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
+    <div className="w-full lg:w-[1290px] h-auto lg:h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex flex-col lg:flex-row overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
 
       {/* LEFT: IMAGE SECTION */}
       <div
-        className="relative w-[450px] h-full cursor-pointer flex-shrink-0 overflow-hidden"
+        className="relative w-full lg:w-[450px] h-60 sm:h-72 lg:h-full cursor-pointer flex-shrink-0 overflow-hidden"
         onClick={openDetails}
         onMouseEnter={handleImageMouseEnter}
         onMouseLeave={handleImageMouseLeave}
       >
         <img
           src={getSafeImageUrl(displayImages[activeImageIndex])}
-          alt={listing.title}
+          alt={listing?.title || 'Listing image'}
           className="w-full h-full object-cover transition-all duration-300"
         />
 
@@ -362,31 +340,29 @@ git
 
       {/* RIGHT: CONTENT SECTION */}
       <div
-        className={`flex-1 p-[30px] flex flex-col justify-between ${listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
+        className={`flex-1 p-5 lg:p-[30px] flex flex-col justify-between ${listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
           }`}
       >
-
-
         {/* Row 1: Title and Icon Buttons */}
-        <div className="flex justify-between items-start">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-2">
+          <div className="flex-1 min-w-0 pr-2">
             <h2
-              className="text-[#01155E] text-[24px] font-semibold leading-[125%] capitalize cursor-pointer"
+              className="text-[#01155E] text-[20px] sm:text-[24px] font-semibold leading-[125%] capitalize cursor-pointer"
               onClick={openDetails}
             >
-              {listing.title || 'High-Rise Townhouse'}
+              {listing?.title || 'High-Rise Townhouse'}
             </h2>
 
-            {/* Row 2: Location and Builder */}
-            <div className="flex items-center gap-6 mt-2">
+            {/* Row 2: Location and Builder (Dynamic 2-line Wrapping like screenshot) */}
+            <div className="flex flex-wrap items-start gap-4 sm:gap-6 mt-2">
               {/* Location Section */}
-              <div className="flex items-start gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
+              <div className="flex items-start gap-2 text-[#67739E] text-[15px] sm:text-[18px] font-normal leading-[130%] sm:leading-[140%] max-w-[220px] sm:max-w-[260px]">
                 <img
                   src={Icon5}
                   alt="Location"
-                  className="w-5 h-5 object-contain flex-shrink-0 mt-1"
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0 mt-0.5"
                 />
-                <span>
+                <span className="break-words">
                   {[
                     listing?.district_name,
                     listing?.city_name,
@@ -397,20 +373,19 @@ git
               </div>
 
               {/* Builder Section */}
-              <div className="flex items-start gap-2 text-[#67739E] text-[18px] font-normal leading-[160%]">
+              <div className="flex items-start gap-2 text-[#67739E] text-[15px] sm:text-[18px] font-normal leading-[130%] sm:leading-[140%] max-w-[200px] sm:max-w-[240px]">
                 <img
                   src={Icon4}
                   alt="Builder"
-                  className="w-5 h-5 object-contain flex-shrink-0 mt-1"
+                  className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0 mt-0.5"
                 />
-                <span>{listing.developer_name || "N/A"}</span>
+                <span className="break-words">{listing?.developer_name || "N/A"}</span>
               </div>
             </div>
           </div>
 
           {/* Social/Action Icons */}
-
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-shrink-0 self-start">
             {socialActions.map((btn) => {
               const isLikeBtn = btn.id === "like";
 
@@ -446,11 +421,11 @@ git
         </div>
 
         {/* Row 3: Features */}
-        <div className="flex items-center gap-6 mt-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon3} alt="bed" className="w-5 h-5" />
-            <span className="text-[18px] font-medium">
-              {listing.beds || "N/A"}
+            <span className="text-[16px] sm:text-[18px] font-medium">
+              {listing?.beds || "N/A"}
             </span>
           </div>
 
@@ -458,8 +433,8 @@ git
 
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon2} alt="bath" className="w-5 h-5" />
-            <span className="text-[18px] font-medium">
-              {listing.baths || "N/A"}
+            <span className="text-[16px] sm:text-[18px] font-medium">
+              {listing?.baths || "N/A"}
             </span>
           </div>
 
@@ -467,68 +442,70 @@ git
 
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon1} alt="area" className="w-5 h-5" />
-            <span className="text-[18px] font-medium">
-              {listing.max_area?.toLocaleString()} sqft
+            <span className="text-[16px] sm:text-[18px] font-medium">
+              {listing?.max_area?.toLocaleString() || "N/A"} sqft
             </span>
           </div>
+
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
+
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon4} alt="handover" className="w-5 h-5" />
-            <span className="text-[18px] font-medium">
+            <span className="text-[16px] sm:text-[18px] font-medium">
               {getHandover(listing?.expected_delivery_date)}
             </span>
           </div>
 
-          {/* Internal Logic: PDF Trigger */}
+          {/* Download PDF Trigger */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsPopupOpen(true); }}
-            className="ml-auto text-[14px] text-[#01155E] font-semibold underline underline-offset-4"
+            className="sm:ml-auto text-[14px] text-[#01155E] font-semibold underline underline-offset-4 cursor-pointer"
           >
             Download PDF
           </button>
         </div>
 
         {/* Divider */}
-        <div className="w-full h-[1px] bg-[#D9E1F2] my-4"></div>
+        <div className="w-full h-[1px] bg-[#D9E1F2] my-3 sm:my-4"></div>
 
         {/* Bottom Row: Price and View Button */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
             {listing?.propertyStatus?.toLowerCase() === "offplan" ? (
               <>
-                <span className="text-[24px] font-semibold mr-1">
+                <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
                   Starting at
                 </span>
-                <span className='text-[24px] mr-2'>
-                  {listing.currency?.toUpperCase()}
+                <span className="text-[20px] sm:text-[24px] mr-2">
+                  {listing?.currency?.toUpperCase()}
                 </span>
-                <span className="text-[32px] ">
-                  {listing.min_price?.toLocaleString() || "10,00,239"}
+                <span className="text-[26px] sm:text-[32px]">
+                  {listing?.min_price?.toLocaleString() || "10,00,239"}
                 </span>
               </>
             ) : (
               <>
-                <span className='text-[24px] mr-2'>
-                  {listing.currency?.toUpperCase()}
+                <span className="text-[20px] sm:text-[24px] mr-2">
+                  {listing?.currency?.toUpperCase()}
                 </span>
-                <span className="text-[32px] ">
-                  {listing.min_price?.toLocaleString() || "10,00,239"}
+                <span className="text-[26px] sm:text-[32px]">
+                  {listing?.min_price?.toLocaleString() || "10,00,239"}
                 </span>
               </>
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 w-full sm:w-auto">
             <button
               onClick={handleConnect}
               disabled={isLocalSending}
-              className="px-6 py-2 text-[#01155E] font-semibold border border-[#01155E] rounded-[10px]  transition-colors hover:bg-[#01155E] hover:text-[#ffff] bg-[#ffff]"
+              className="flex-1 sm:flex-none px-6 py-2 text-[#01155E] font-semibold border border-[#01155E] rounded-[10px] transition-colors hover:bg-[#01155E] hover:text-[#ffff] bg-[#ffff]"
             >
               {isLocalSending ? "Connecting..." : "Connect"}
             </button>
             <button
               onClick={openDetails}
-              className="w-[135px] h-[48px] bg-white border border-[#01155E] rounded-[10px] text-[#01155E] text-[16px] font-semibold leading-[150%] hover:bg-[#01155E] hover:text-[#ffff] transition-colors"
+              className="flex-1 sm:flex-none w-full sm:w-[135px] h-[48px] bg-white border border-[#01155E] rounded-[10px] text-[#01155E] text-[16px] font-semibold leading-[150%] hover:bg-[#01155E] hover:text-[#ffff] transition-colors"
             >
               View Details
             </button>
@@ -536,14 +513,14 @@ git
         </div>
       </div>
 
-      {/* MODAL PORTAL (Kept original logic) */}
+      {/* MODAL PORTAL */}
       {isPopupOpen && ReactDOM.createPortal(
         <div
           className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
           onClick={() => setIsPopupOpen(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl"
+            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {pdfSuccess ? (

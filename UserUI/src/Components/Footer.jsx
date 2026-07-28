@@ -2,7 +2,7 @@ import React from "react";
 import { Facebook, Instagram, Linkedin, Phone, Mail } from "lucide-react";
 import footerBg from "../assets/footer-bg.jpg";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo3.png"; // apna path update kar lo
+import logo from "../assets/logonew1.jpeg"; // apna path update kar lo
 
 const Footer = () => {
   return (
@@ -22,11 +22,11 @@ const Footer = () => {
           {/* LEFT SECTION */}
           <div className="max-w-[320px]">
 
-           <div className="bg-[#142A63] inline-block px-6 py-3 mb-6">
+           <div className=" inline-block  py-3 mb-2">
   <img
     src={logo}
     alt="Yupland Logo"
-    className="h-14 w-auto object-contain"
+    className="h-30 w-auto object-contain"
   />
 </div>
             <p className="text-[18px] leading-relaxed Text-[#FFFFFF] ">
@@ -66,17 +66,18 @@ const Footer = () => {
              <div className="flex gap-3 mb-5">
   <Phone size={20} className="shrink-0 mt-1" />
   <div className="text-[#FFFFFF] text-[18px]">
-    <p>UAE : +971 505773767</p>
-    <p>Canada: +1 437 328 8508</p>
-    <p>India: +91 99999 95871</p>
+    <p>UAE :  505773767</p>
+    <p>Canada:  437 328 8508</p>
+    <p>India:  99999 95871</p>
   </div>
 </div>
 
 <div className="flex gap-3 mb-5">
   <Mail size={20} className="shrink-0 mt-1" />
   <div className="text-[#FFFFFF] text-[18px] break-words">
-    <p>divyansh@equaproperties.com</p>
-    <p>info@yupland.ae</p>
+     <p>info@yupland.ae</p>
+    <p>@aquaproperties.com</p>
+   
   </div>
 </div>
 
