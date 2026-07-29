@@ -214,14 +214,7 @@ function GalleryModal({ images, onClose, agentAvatar, latlong, coordinates, titl
         </div>
 
         <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-3">
-            <img src={getSafeImageUrl(agentAvatar)} alt="Agent" className="w-12 h-12 rounded-full object-cover" />
-            <div>
-              <p className="text-[13px] text-[#67739E]">Listing by</p>
-              {/* <p className="text-[#01155E] font-semibold text-[15px]">{agentName}</p> */}
-              <p className="text-[#01155E] font-semibold text-[15px]">Divyansh Chitkara</p>
-            </div>
-          </div>
+          
           <div className="flex gap-3">
             <button className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors">
               <Mail size={16} /> Email

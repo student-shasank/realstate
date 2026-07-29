@@ -218,7 +218,7 @@ const Home = () => {
             Dubai Real Estate Investments
           </h1>
           <h3 className="text-white text-[14px] sm:text-[17px] md:text-[21px] lg:text-[24px] font-bold text-center mb-4 sm:mb-5 mt-3 sm:mt-5 drop-shadow-2xl px-2" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '500', letterSpacing: '0%' }}>
-            Pre-construction and Ready properties tailored to your investment goals
+Offplan (Preconstruction) and Ready properties tailored to your investment goals
           </h3>
 
           {/* <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
@@ -228,7 +228,7 @@ const Home = () => {
               </button>
             ))}
           </div> */}
-          <div className="flex flex-wrap items-center justify-center bg-transparent mx-auto w-full lg:w-[1192px] lg:h-[70px] gap-2 sm:gap-3 lg:gap-4 p-2 sm:p-3 lg:p-3">
+         <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
   {['Properties', 'Off-Plan', 'Ready', 'Metro Expansion'].map((tab) => (
     <button
       key={tab}
@@ -240,11 +240,24 @@ const Home = () => {
           navigate(`/listings?${params.toString()}`);
         } else if (tab === 'Agent') {
           navigate('/agents');
+        } else if (tab === 'Metro Expansion') {
+          window.open(
+            'https://www.google.com/maps/d/u/1/edit?mid=193yuyhpEkRom7IC2tBpfgYI2LVShBvo&usp=sharing',
+            '_blank',
+            'noopener,noreferrer'
+          );
         }
         // 'Properties' tab: no navigation, just stays here and shows the search bar below
       }}
-      className="transition-all flex items-center justify-center w-[47%] xs:w-[45%] sm:w-[160px] md:w-[210px] lg:w-[280px] h-[38px] sm:h-[42px] md:h-[44px] lg:h-[46px] rounded-lg font-semibold text-[13px] sm:text-[15px] md:text-[18px] lg:text-[20px] border-none cursor-pointer"
+      className="transition-all flex items-center justify-center"
       style={{
+        width: '280px',
+        height: '46px',
+        borderRadius: '8px',
+        fontWeight: '600',
+        fontSize: '20px',
+        border: 'none',
+        cursor: 'pointer',
         backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF',
         color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92',
         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)'
@@ -255,7 +268,7 @@ const Home = () => {
   ))}
 </div>
 
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-5">
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">

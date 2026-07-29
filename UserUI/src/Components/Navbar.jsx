@@ -439,52 +439,43 @@ function Navbar() {
             </Link>
 
             {/* Communities - collapsible */}
-            <div className="py-1">
-              <button
-                onClick={() => setMobileCommunitiesOpen(!mobileCommunitiesOpen)}
-                className="w-full flex items-center justify-between py-2.5 text-white text-base"
-                style={{
-                  fontWeight: location.pathname.includes("communities")
-                    ? 700
-                    : 500,
-                }}
-              >
-                Communities
-                <ChevronDown
-                  size={18}
-                  className={`transition-transform duration-200 ${
-                    mobileCommunitiesOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  mobileCommunitiesOpen ? "max-h-96 pb-2" : "max-h-0"
-                }`}
-              >
-                <Link
-                  to="/communities"
-                  className="block py-2 pl-3 text-sm text-white/80"
-                >
-                  All Communities
-                </Link>
-                {navList && navList.length > 0 ? (
-                  navList.map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/communities/${item.slug}`}
-                      className="block py-2 pl-3 text-sm text-white/80"
-                    >
-                      {item.title}
-                    </Link>
-                  ))
-                ) : (
-                  <div className="py-2 pl-3 text-sm text-white/50">
-                    Loading...
-                  </div>
-                )}
-              </div>
-            </div>
+         <div className="relative group flex items-center h-full">
+  <Link
+    to="/communities"
+    className="flex items-center gap-1.5 py-4 leading-none transition-all"
+    style={{
+      ...textStyle,
+      fontWeight: location.pathname.includes("communities") ? 600 : 500,
+      color: textColor,
+    }}
+  >
+    <span>Communities</span>
+    <ChevronDown
+      size={15}
+      strokeWidth={2.5}
+      className="mt-[1px] transition-transform duration-200 group-hover:rotate-180"
+    />
+  </Link>
+
+  {/* Dynamic Dropdown Menu based on Redux navList */}
+  <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+    <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+      {navList && navList.length > 0 ? (
+        navList.map((item) => (
+          <Link
+            key={item._id}
+            to={`/communities/${item.slug}`}
+            className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
+          >
+            {item.title}
+          </Link>
+        ))
+      ) : (
+        <div className="px-4 py-3 text-sm text-gray-400">Loading...</div>
+      )}
+    </div>
+  </div>
+</div>
 
             <Link
               to="/market-insights"

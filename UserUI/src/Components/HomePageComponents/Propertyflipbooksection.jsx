@@ -67,44 +67,34 @@ export default function PropertyFlipbookSection({
     setShowLoginPopup(false);
     refreshLoginState();
   };
+return (
+  <section className="w-full bg-white overflow-hidden mb-30">
+    {/* Single outer wrapper — matches FeaturesSection's outer 1440 logic */}
+    <div className="max-w-[1440px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16">
 
-  return (
-    <section className="w-full bg-white overflow-hidden mb-30">
-      <div className="max-w-[1000px] mx-auto px-5 lg:px-0 pt-12 lg:pt-16">
+      {/* Inner content wrapper — everything text/button related sits at 1200 */}
+      <div className="max-w-[1200px] mx-auto">
         <div className="max-w-2xl">
-          <p
-            className="mb-2 text-[13px] font-semibold uppercase tracking-wider text-[#001A54]"
-            style={{ fontFamily: "Archivo, sans-serif" }}
-          >
-            {eyebrow}
-          </p>
+         
 
-          <h2
-            className="text-[32px] md:text-[40px] lg:text-[48px] font-bold text-[#001A54] inline-block pb-4 lg:pb-6 leading-tight"
-            style={{
-              fontFamily: "Archivo, sans-serif",
-              backgroundImage: `url(${underline})`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "left 90%",
-              backgroundSize: "457px 6px",
-            }}
-          >
-            {title}
-          </h2>
-        </div>
-
-        <div className="mt-5 space-y-4 max-w-2xl">
-          <p className="text-[16px] md:text-[18px] lg:text-[20px] text-[#01155E99]">
-            {description}
-          </p>
-          <p className="text-[16px] md:text-[18px] lg:text-[20px] text-[#01155E99]">
-            {description2}
-          </p>
+         <h2
+  className="w-full text-[32px] md:text-[40px] lg:text-[48px] font-bold text-[#001A54] pb-4 lg:pb-6 leading-[1.15] lg:whitespace-nowrap"
+  style={{
+    fontFamily: "Archivo, sans-serif",
+    backgroundImage: `url(${underline})`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "left bottom",
+    backgroundSize: "457px 6px",
+  }}
+>
+  {title}
+</h2>
         </div>
       </div>
 
-      <div className="mt-8 w-full flex justify-center px-5 lg:px-0">
-        <div className="w-full max-w-[1440px]">
+      {/* Flipbook — stays full width of the 1440 outer, like FeaturesSection's image column */}
+      <div className="mt-8 w-full flex justify-center">
+        <div className="w-full">
           <div className="relative">
             <iframe
               key={brochureUrl}
@@ -135,28 +125,28 @@ export default function PropertyFlipbookSection({
               </p>
             )}
           </div>
-
-          
-            <div className="flex justify-center">
-              <button
-  type="button"
-  onClick={handleGetReport}
-  className="mt-8 mb-14 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
->
-  Get Full Report
-</button>
-            </div>
-        
         </div>
       </div>
 
-      <LoginPopup
-        isOpen={showLoginPopup}
-        onClose={handleLoginClose}
-        openSignup={() => {
-          setShowLoginPopup(false);
-        }}
-      />
-    </section>
-  );
-}
+      {/* Button back inside the 1200 inner wrapper, aligned with heading */}
+     <div className="max-w-[1200px] mx-auto flex items-center justify-center">
+  <button
+    type="button"
+    onClick={handleGetReport}
+    className="mt-8 mb-14 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
+  >
+    Get Full Report
+  </button>
+</div>
+    </div>
+
+    <LoginPopup
+      isOpen={showLoginPopup}
+      onClose={handleLoginClose}
+      openSignup={() => {
+        setShowLoginPopup(false);
+      }}
+    />
+  </section>
+);
+ }

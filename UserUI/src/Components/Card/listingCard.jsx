@@ -30,6 +30,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const [phone, setPhone] = useState('');
   const [isLocalSending, setIsLocalSending] = useState(false);
 
+  // Call / Contact Us popup
+  const [isCallPopupOpen, setIsCallPopupOpen] = useState(false);
+
   // Hover carousel states
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -79,6 +82,18 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
     dispatch(toggleFavorite(currentId));
   };
+
+  const handleCallClick = (e) => {
+    e.stopPropagation();
+    setIsCallPopupOpen(true);
+  };
+
+  // Contact details shown in the "Contact Us" popup.
+  // Falls back to the provided sample values when the listing has no agent data.
+  const agentName = listing?.agent_name || listing?.agentName || "Divyansh Chitkara";
+  const agentPhoneRaw = listing?.contact_phone || listing?.agent_phone || "91 99999 95871";
+  const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
+  const agencyName = listing?.developer_name || listing?.agency_name || "N/A";
 
   // Fallback gallery images
   const fallbackGalleryImages = listing?.feature_image
@@ -388,11 +403,18 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex gap-3 flex-shrink-0 self-start">
             {socialActions.map((btn) => {
               const isLikeBtn = btn.id === "like";
+              const isCallBtn = btn.id === "call";
 
               return (
                 <button
                   key={btn.id}
-                  onClick={isLikeBtn ? handleFavorite : (e) => e.stopPropagation()}
+                  onClick={
+                    isLikeBtn
+                      ? handleFavorite
+                      : isCallBtn
+                        ? handleCallClick
+                        : (e) => e.stopPropagation()
+                  }
                   className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${listing?.isFeatured
                     ? "bg-white hover:bg-[#01155E]"
                     : "bg-[#E2E8F0] hover:bg-[#01155E]"
@@ -400,7 +422,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                 >
                   {isLikeBtn ? (
                     isFavorite ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff0000">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#01155E">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                       </svg>
                     ) : (
@@ -422,19 +444,25 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
         {/* Row 3: Features */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
-          <div className="flex items-center gap-2 text-[#67739E]">
-            <img src={Icon3} alt="bed" className="w-5 h-5" />
-            <span className="text-[16px] sm:text-[18px] font-medium">
-              {listing?.beds || "N/A"}
-            </span>
-          </div>
+         <div className="flex items-center gap-2 text-[#67739E]">
+  <img src={Icon3} alt="bed" className="w-5 h-5" />
+  <span className="text-[16px] sm:text-[18px] font-medium">
+    {listing?.beds
+      ? listing.beds
+          .toString()
+          .split(",")
+          .map((b) => (b.trim() === "0" ? "Studio" : b.trim()))
+          .join(", ")
+      : "N/A"}
+  </span>
+</div>
 
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
 
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon2} alt="bath" className="w-5 h-5" />
-            <span className="text-[16px] sm:text-[18px] font-medium">
-              {listing?.baths || "N/A"}
+            <span className="text-[16px] sm:text-[18px] font-medium">Enquire
+              {/* {listing?.baths || ""} */}
             </span>
           </div>
 
@@ -512,6 +540,80 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           </div>
         </div>
       </div>
+
+      {/* CALL / CONTACT US MODAL */}
+      {isCallPopupOpen && ReactDOM.createPortal(
+        <div
+          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setIsCallPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setIsCallPopupOpen(false)}
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-[#67739E] hover:text-[#01155E] transition-colors"
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h3 className="text-xl sm:text-2xl font-bold text-[#01155E] text-center mb-4">
+              Contact Us
+            </h3>
+
+            {/* Property Details */}
+            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+              <p className="text-[#01155E] font-semibold text-[16px] sm:text-[18px] capitalize">
+                {listing?.title || "Property Name N/A"}
+              </p>
+              <p className="text-[#67739E] text-[13px] sm:text-[14px] mt-1">
+                by <span className="text-[#01155E] font-semibold">{agencyName}</span>
+              </p>
+            </div>
+
+            {/* Phone Row */}
+            <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
+                  <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                </svg>
+              </div>
+              <a
+                href={`tel:${agentPhoneDial}`}
+                className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+              >
+                {agentPhoneRaw}
+              </a>
+            </div>
+
+            {/* Agent Name */}
+            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+              <p className="text-[#67739E] text-[14px] sm:text-[15px]">
+                Broker: <span className="text-[#01155E] font-semibold">{agentName}</span>
+              </p>
+            </div>
+
+            {/* Property Reference */}
+            {currentId && (
+              <div className="text-center">
+                <p className="text-[#67739E] text-[12px] sm:text-[13px] leading-[150%]">
+                  Please quote property reference<br />
+                  <span className="font-semibold text-[#01155E]">
+                    Bayut - {currentId}
+                  </span>{" "}
+                  when calling us.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* MODAL PORTAL */}
       {isPopupOpen && ReactDOM.createPortal(
