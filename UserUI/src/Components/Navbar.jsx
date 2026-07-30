@@ -19,6 +19,9 @@ function Navbar() {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileCommunitiesOpen, setMobileCommunitiesOpen] = useState(false);
 
+  // NEW: tracks whether the page has been scrolled past the TopBar height
+  const [scrolled, setScrolled] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,6 +80,19 @@ function Navbar() {
     };
   }, [open]);
 
+  // NEW: watch scroll position — once we scroll past the TopBar's height,
+  // the Navbar snaps to top:0 (like most professional sticky navbars).
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    handleScroll(); // run once on mount in case page loads pre-scrolled
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const textColor = isHomePage ? "#01155e" : "#FFFFFF";
 
   const serviceLinks = [
@@ -92,12 +108,14 @@ function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 w-full z-50 h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-all duration-300
+        className={`fixed left-0 right-0 w-full z-50 h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-all duration-300 ease-in-out
+        ${scrolled ? "top-0" : "top-0 lg:top-[38px]"}
         ${
           isHomePage
             ? "bg-white backdrop-blur-md border-b border-white/10"
             : "bg-[#01155E]"
         }
+        ${scrolled ? "shadow-md" : ""}
       `}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 flex items-center justify-between">
@@ -169,7 +187,7 @@ function Navbar() {
                 }}
               >
                 Communities
-                <span className="text-[10px] transition-transform group-hover:rotate-180">
+                <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
                   ▼
                 </span>
               </Link>
@@ -222,7 +240,7 @@ function Navbar() {
                 }}
               >
                 Services
-                <span className="text-[10px] transition-transform group-hover:rotate-180">
+                <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
                   ▼
                 </span>
               </Link>
@@ -259,22 +277,12 @@ function Navbar() {
               About us
             </Link>
 
-            <Link
-              to="/contact"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight: location.pathname === "/contact" ? 600 : 500,
-                color: textColor,
-              }}
-            >
-              Contact us
-            </Link>
+          
           </div>
 
           {/* Auth & Language */}
           <div className="flex items-center gap-x-3 lg:gap-x-5 xl:gap-x-8 2xl:gap-x-10 shrink-0">
-            {!user || !user?.name ? (
+            {!user || !user?.firstName ? (
               <button
                 type="button"
                 onClick={() => setIsLoginOpen(true)}
@@ -306,7 +314,7 @@ function Navbar() {
                       fontWeight: 700,
                     }}
                   >
-                    {user.name}
+                    {user.firstName}
                   </span>
                   <div className="bg-[#01155E] p-1.5 rounded-full">
                     <User size={18} className="text-white fill-current" />
@@ -339,19 +347,7 @@ function Navbar() {
             )}
 
             {/* Language */}
-            <div className="hidden lg:flex items-center gap-2 cursor-pointer hover:opacity-70 transition-all">
-              <Languages size={20} className="text-white shrink-0" />
-              <span
-                className="hidden xl:inline"
-                style={{
-                  ...textStyle,
-                  color: textColor,
-                  fontWeight: 500,
-                }}
-              >
-                Language
-              </span>
-            </div>
+           
 
             {/* Menu Button - visible on mobile AND tablet (below lg) */}
             <button
@@ -557,7 +553,7 @@ function Navbar() {
 
         {/* Drawer footer - auth actions */}
         <div className="px-4 sm:px-6 py-5 border-t border-white/10 shrink-0">
-          {!user || !user?.name ? (
+          {!user || !user?.firstName ? (
             <button
               type="button"
               onClick={() => {
@@ -575,7 +571,7 @@ function Navbar() {
                 <div className="bg-white/15 p-1.5 rounded-full">
                   <User size={18} className="text-white" />
                 </div>
-                {user.name}
+                {user.firstName}
               </div>
               <button
                 onClick={() => {

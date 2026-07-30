@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
 import heartIcon from "../../assets/like.svg";
-import callIcon from '../../assets/Phone2.svg';
+import callIcon from '../../assets/phone5.png';
 import whatsappIcon from '../../assets/whatsap.png';
-import shareIcon from '../../assets/Share3.svg';
+import shareIcon from '../../assets/share5.png';
 import listingimage from '../../assets/ListingCard.jpg';
 import Icon1 from '../../assets/icon1.png';
 import Icon2 from '../../assets/icon2.png';
@@ -174,7 +174,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
     const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
-    if (!storedUser?.name || !storedUser?.email) {
+    if (!storedUser?.firstName || !storedUser?.email) {
       toast.error("Please complete your profile (name, email) before connecting");
       return;
     }
@@ -185,7 +185,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       await dispatch(
         sendListingEnquiry({
           listingId: listing._id,
-          name: storedUser.name,
+          name: storedUser.firstName,
           email: storedUser.email,
           phone: storedUser.phone || "-",
           requestType: "availability",

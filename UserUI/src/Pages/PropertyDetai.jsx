@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
@@ -7,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { extractAllImages, getSafeImageUrl, getImageByIndex } from '../Components/utils/imageExtractor.jsx';
 import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
 import { sendListingEnquiry, resetEnquiryState } from "../features/Enquiery/enquirySlice.js";
+import { toast } from 'react-toastify';
 
 import {
   fetchListingDetail,
@@ -98,7 +100,18 @@ function ReviewCard({ agentAvatar }) {
   );
 }
 
-function GalleryModal({ images, onClose, agentAvatar, latlong, coordinates, title }) {
+function GalleryModal({
+  images,
+  onClose,
+  agentAvatar,
+  latlong,
+  coordinates,
+  title,
+  onEmailClick,
+  onCallClick,
+  onWhatsAppClick,
+  isEmailSending,
+}) {
   const [activeTab, setActiveTab] = useState("photos");
   const [selectedIndex, setSelectedIndex] = useState(null); // null = grid view, number = single image view
 
@@ -216,15 +229,25 @@ function GalleryModal({ images, onClose, agentAvatar, latlong, coordinates, titl
         </div>
 
         <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-between bg-white">
-          
+
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors">
-              <Mail size={16} /> Email
+            <button
+              onClick={onEmailClick}
+              disabled={isEmailSending}
+              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <Mail size={16} /> {isEmailSending ? "Sending..." : "Email"}
             </button>
-            <button className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors">
+            <button
+              onClick={onCallClick}
+              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors"
+            >
               <Phone size={16} /> Call
             </button>
-            <button className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[15px] hover:bg-green-50 transition-colors">
+            <button
+              onClick={onWhatsAppClick}
+              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[15px] hover:bg-green-50 transition-colors"
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                 <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L.057 23.571l5.9-1.548A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.939 0-3.756-.523-5.318-1.432l-.381-.226-3.499.918.934-3.408-.249-.394A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
@@ -278,6 +301,10 @@ export default function PropertyDetail() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+
+  // Call / Contact Us popup + Email(Connect) sending state — same pattern as ListingCard
+  const [isCallPopupOpen, setIsCallPopupOpen] = useState(false);
+  const [isEmailSending, setIsEmailSending] = useState(false);
 
   const {
     title,
@@ -356,6 +383,95 @@ export default function PropertyDetail() {
     PROPERTY?.developer_image || rawListing?.developer_image;
   const [showFullDesc, setShowFullDesc] = useState(false);
   const shortDescription = description?.slice(0, 300);
+
+  // Contact details / login check — same pattern as ListingCard
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const currentId = rawListing?._id || rawListing?.id;
+
+  const agentName = agent?.name || rawListing?.agent_name || rawListing?.agentName || "Divyansh Chitkara";
+  const agentPhoneRaw =  "91 99999 95871";
+  const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
+  const agencyName = developer || rawListing?.developer_name || rawListing?.agency_name || "N/A";
+
+  // Same behavior as ListingCard's handleCallClick
+  const handleCallClick = () => {
+    setIsCallPopupOpen(true);
+  };
+
+  // Same behavior as ListingCard's handleWhatsAppClick
+  const handleWhatsAppClick = () => {
+    const whatsappNumber = agentPhoneDial.replace(/^\+/, '');
+
+    if (!whatsappNumber) {
+      toast.error("Contact number not available");
+      return;
+    }
+
+    const listingUrl = rawListing?.id
+      ? `${window.location.origin}/listing/${rawListing.id}`
+      : window.location.href;
+
+    const priceText = price
+      ? `${currency?.toUpperCase() || ''} ${Number(price).toLocaleString()}`
+      : 'Price on request';
+
+    const locationText = [location?.address, location?.country]
+      .filter(Boolean)
+      .join(', ') || 'N/A';
+
+    const message =
+      `Hello, I'm interested in this property listed on your platform:\n\n` +
+      `🏠 *${title || 'Property'}*\n` +
+      `📍 Location: ${locationText}\n` +
+      `💰 Price: ${priceText}\n` +
+      `🆔 Ref: Bayut - ${currentId || 'N/A'}\n\n` +
+      `Listing link: ${listingUrl}\n\n` +
+      `Could you please share more details? Thank you.`;
+
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // Same behavior as ListingCard's handleConnect
+  const handleEmailClick = async () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    if (!rawListing?._id) {
+      toast.error("Something went wrong, please refresh and try again");
+      return;
+    }
+
+    const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+
+    if (!storedUser?.firstName || !storedUser?.email) {
+      toast.error("Please complete your profile (name, email) before connecting");
+      return;
+    }
+
+    setIsEmailSending(true);
+
+    try {
+      await dispatch(
+        sendListingEnquiry({
+          listingId: rawListing._id,
+          name: storedUser.firstName,
+          email: storedUser.email,
+          phone: storedUser.phone || "-",
+          requestType: "availability",
+        })
+      ).unwrap();
+      toast.success("Enquiry sent ✅");
+    } catch (err) {
+      toast.error(err || "Something went wrong");
+    } finally {
+      setIsEmailSending(false);
+      dispatch(resetEnquiryState());
+    }
+  };
 
   if (loading) {
     return (
@@ -570,7 +686,80 @@ export default function PropertyDetail() {
           latlong={rawListing?.latlong}
           coordinates={location?.coordinates}
           title={title}
+          onEmailClick={handleEmailClick}
+          onCallClick={handleCallClick}
+          onWhatsAppClick={handleWhatsAppClick}
+          isEmailSending={isEmailSending}
         />
+      )}
+
+      {/* CALL / CONTACT US MODAL — same pattern as ListingCard */}
+      {isCallPopupOpen && ReactDOM.createPortal(
+        <div
+          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setIsCallPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsCallPopupOpen(false)}
+              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-[#67739E] hover:text-[#01155E] transition-colors"
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h3 className="text-xl sm:text-2xl font-bold text-[#01155E] text-center mb-4">
+              Contact Us
+            </h3>
+
+            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+              <p className="text-[#01155E] font-semibold text-[16px] sm:text-[18px] capitalize">
+                {title || "Property Name N/A"}
+              </p>
+              <p className="text-[#67739E] text-[13px] sm:text-[14px] mt-1">
+                by <span className="text-[#01155E] font-semibold">{agencyName}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
+                  <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                </svg>
+              </div>
+              <a
+                href={`tel:${agentPhoneDial}`}
+                className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+              >
+                {agentPhoneRaw}
+              </a>
+            </div>
+
+            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+              <p className="text-[#67739E] text-[14px] sm:text-[15px]">
+                Broker: <span className="text-[#01155E] font-semibold">Divyansh Chitkara</span>
+              </p>
+            </div>
+
+            {currentId && (
+              <div className="text-center">
+                <p className="text-[#67739E] text-[12px] sm:text-[13px] leading-[150%]">
+                  Please quote property reference<br />
+                  <span className="font-semibold text-[#01155E]">
+                    Bayut - {currentId}
+                  </span>{" "}
+                  when calling us.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
 
       <Breadcrumbs />
@@ -1194,11 +1383,18 @@ export default function PropertyDetail() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <button className="w-[42px] h-[42px] flex items-center justify-center border border-[#01155E] rounded-[10px]">
+                    <button
+                      onClick={handleCallClick}
+                      className="w-[42px] h-[42px] flex items-center justify-center border border-[#01155E] rounded-[10px]"
+                    >
                       <Phone size={18} />
                     </button>
-                    <button className="flex-1 h-[42px] border border-[#01155E] text-[#01155E] rounded-[10px] font-semibold text-[18px] hover:bg-[#01155E] hover:text-white transition-all">
-                      Request Details
+                    <button
+                      onClick={handleEmailClick}
+                      disabled={isEmailSending}
+                      className="flex-1 h-[42px] border border-[#01155E] text-[#01155E] rounded-[10px] font-semibold text-[18px] hover:bg-[#01155E] hover:text-white transition-all disabled:opacity-50"
+                    >
+                      {isEmailSending ? "Connecting..." : "Request Details"}
                     </button>
                   </div>
                 </div>

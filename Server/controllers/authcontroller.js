@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { firstName, lastName, email, password, role } = req.body;
 
     const exist = await User.findOne({ email });
     if (exist) {
@@ -18,7 +18,8 @@ export const signup = async (req, res) => {
       req.socket.remoteAddress;
 
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password: hashed,
       role: role || "user",
@@ -53,15 +54,14 @@ export const login = async (req, res) => {
       token,
       user: {
         id: user._id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         role: user.role,
-          favorites: user.favorites.map(f => f._id),
+        favorites: user.favorites.map(f => f._id),
       },
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
-

@@ -12,7 +12,8 @@ function SignupPopup({ isOpen, onClose, openLogin }) {
   );
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     role: "user",
@@ -31,7 +32,7 @@ function SignupPopup({ isOpen, onClose, openLogin }) {
     if (success) {
       toast.success("Registration successful!");
       dispatch(resetRegisterState());
-      setFormData({ name: "", email: "", password: "", role: "user" });
+      setFormData({ firstName: "", lastName: "", email: "", password: "", role: "user" });
       onClose();
     }
   }, [success, dispatch, onClose]);
@@ -82,15 +83,28 @@ function SignupPopup({ isOpen, onClose, openLogin }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center">
-          <input
-            name="name"
-            type="text"
-            placeholder="Enter your Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full h-[50px] px-4 rounded-[8px] bg-white outline-none text-[#01155E]"
-            required
-          />
+          {/* First Name + Last Name side by side */}
+          <div className="w-full flex gap-3">
+            <input
+              name="firstName"
+              type="text"
+              placeholder="First Name"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="w-1/2 h-[50px] px-4 rounded-[8px] bg-white outline-none text-[#01155E]"
+              required
+            />
+            <input
+              name="lastName"
+              type="text"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-1/2 h-[50px] px-4 rounded-[8px] bg-white outline-none text-[#01155E]"
+              required
+            />
+          </div>
+
           <input
             name="email"
             type="email"
