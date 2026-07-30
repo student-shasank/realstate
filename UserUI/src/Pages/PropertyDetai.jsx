@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { extractAllImages, getSafeImageUrl, getImageByIndex } from '../Components/utils/imageExtractor.jsx';
 import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
 import { sendListingEnquiry, resetEnquiryState } from "../features/Enquiery/enquirySlice.js";
+
 import {
   fetchListingDetail,
   resetListingDetailState,
@@ -23,6 +24,7 @@ import Appartmentimage from "../assets/Appartment.png"
 import floorplan1 from "../assets/floorplan.png"
 import propertycommunity from "../assets/propertydetailcommunity.jpg"
 import Breadcrumbs from '../Components/Card/Breadcrumbs';
+import Broker from '../assets/brocker.jpeg';
 
 const SIMILAR = [1, 2, 3].map((i) => ({
   id: i,
@@ -1173,10 +1175,10 @@ export default function PropertyDetail() {
                 <div className="rounded-xl bg-[#F5F8FF] p-4 w-full max-w-[350px]">
                   <div className="flex items-center gap-4 mb-4">
                     <img
-                      src={getSafeImageUrl(agent?.profileImage)}
-                      className="w-[56px] h-[56px] rounded-full object-cover"
-                      alt="Agent"
-                    />
+  src={Broker}
+  alt="Agent"
+  className="w-14 h-14 rounded-full object-cover object-[center_20%]"
+/>
                     <div>
                       {/* <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
                         {agent?.name || "—"}

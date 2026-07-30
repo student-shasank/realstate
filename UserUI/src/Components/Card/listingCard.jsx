@@ -209,6 +209,44 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     dispatch(sendListingPdf({ listingId: currentId, email, phone }));
   };
 
+  // Opens WhatsApp with a predefined, professional message pre-filled,
+  // including the listing's title, location, price, reference ID, and link.
+  const handleWhatsAppClick = (e) => {
+    e.stopPropagation();
+
+    const whatsappNumber = agentPhoneDial.replace(/^\+/, '');
+
+    if (!whatsappNumber) {
+      toast.error("Contact number not available");
+      return;
+    }
+
+    const listingUrl = listing?.id
+      ? `${window.location.origin}/listing/${listing.id}`
+      : window.location.href;
+
+    const priceText = listing?.min_price
+      ? `${listing?.currency?.toUpperCase() || ''} ${listing.min_price.toLocaleString()}`
+      : 'Price on request';
+
+    const locationText = [listing?.district_name, listing?.city_name]
+      .filter(Boolean)
+      .join(', ') || 'N/A';
+
+    const message =
+      `Hello, I'm interested in this property listed on your platform:\n\n` +
+      `🏠 *${listing?.title || 'Property'}*\n` +
+      `📍 Location: ${locationText}\n` +
+      `💰 Price: ${priceText}\n` +
+      `🆔 Ref: Bayut - ${currentId || 'N/A'}\n\n` +
+      `Listing link: ${listingUrl}\n\n` +
+      `Could you please share more details? Thank you.`;
+
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
   useEffect(() => {
     if (pdfSuccess && isPopupOpen) {
       const timer = setTimeout(() => {
@@ -413,7 +451,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                       ? handleFavorite
                       : isCallBtn
                         ? handleCallClick
-                        : (e) => e.stopPropagation()
+                        : btn.id === "whatsapp"
+                          ? handleWhatsAppClick
+                          : (e) => e.stopPropagation()
                   }
                   className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${listing?.isFeatured
                     ? "bg-white hover:bg-[#01155E]"
@@ -499,29 +539,34 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-            {listing?.propertyStatus?.toLowerCase() === "offplan" ? (
-              <>
-                <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
-                  Starting at
-                </span>
-                <span className="text-[20px] sm:text-[24px] mr-2">
-                  {listing?.currency?.toUpperCase()}
-                </span>
-                <span className="text-[26px] sm:text-[32px]">
-                  {listing?.min_price?.toLocaleString() || "10,00,239"}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-[20px] sm:text-[24px] mr-2">
-                  {listing?.currency?.toUpperCase()}
-                </span>
-                <span className="text-[26px] sm:text-[32px]">
-                  {listing?.min_price?.toLocaleString() || "10,00,239"}
-                </span>
-              </>
-            )}
-          </div>
+  {listing?.propertyStatus?.toLowerCase() === "out of stock" ||
+  listing?.propertyStatus?.toLowerCase() === "outofstock" ? (
+    <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
+      Out of Stock
+    </span>
+  ) : listing?.propertyStatus?.toLowerCase() === "offplan" ? (
+    <>
+      <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
+        Starting at
+      </span>
+      <span className="text-[20px] sm:text-[24px] mr-2">
+        {listing?.currency?.toUpperCase()}
+      </span>
+      <span className="text-[26px] sm:text-[32px]">
+        {listing?.min_price?.toLocaleString() || "10,00,239"}
+      </span>
+    </>
+  ) : (
+    <>
+      <span className="text-[20px] sm:text-[24px] mr-2">
+        {listing?.currency?.toUpperCase()}
+      </span>
+      <span className="text-[26px] sm:text-[32px]">
+        {listing?.min_price?.toLocaleString() || "10,00,239"}
+      </span>
+    </>
+  )}
+</div>
 
           <div className="flex gap-3 w-full sm:w-auto">
             <button

@@ -2,7 +2,7 @@ import React from "react";
 import { Facebook, Instagram, Linkedin, Phone, Mail } from "lucide-react";
 import footerBg from "../assets/footer-bg.jpg";
 import { Link } from "react-router-dom";
-import logo from "../assets/logonew1.jpeg"; // apna path update kar lo
+import logo from "../assets/logo4.png"; // apna path update kar lo
 
 const Footer = () => {
   return (
@@ -22,7 +22,7 @@ const Footer = () => {
           {/* LEFT SECTION */}
           <div className="max-w-[320px]">
 
-           <div className=" inline-block  py-3 mb-2">
+           <div className=" inline-block  ">
   <img
     src={logo}
     alt="Yupland Logo"
@@ -66,9 +66,9 @@ const Footer = () => {
              <div className="flex gap-3 mb-5">
   <Phone size={20} className="shrink-0 mt-1" />
   <div className="text-[#FFFFFF] text-[18px]">
-    <p>UAE : +971 505773767</p>
+    <p>UAE : +971 505 773 767</p>
     <p>Canada: +1 437 328 8508</p>
-    <p>India: +91 99999 95871</p>
+    <p>India: +91 999 999 5871</p>
   </div>
 </div>
 
@@ -76,7 +76,7 @@ const Footer = () => {
   <Mail size={20} className="shrink-0 mt-1" />
   <div className="text-[#FFFFFF] text-[18px] break-words">
      <p>info@yupland.ae</p>
-    <p>divyansh@equaproperties.com</p>
+    <p>divyansh@aquaproperties.com</p>
    
   </div>
 </div>
