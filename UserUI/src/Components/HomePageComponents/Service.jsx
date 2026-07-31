@@ -3,13 +3,13 @@ import imageurl from "../../assets/underline.png";
 import { Link } from "react-router-dom";
 
 // 👉 Add images (matching files in assets/services)
-import ProjectMarketing from "../../assets/services/Project Marketing.jpg";
-import PropertyManagement from "../../assets/services/Property Management.jpg";
-import AssetManagement from "../../assets/services/Asset management.jpg";
-import DevelopmentAdvisory from "../../assets/services/Development Advisory.jpg";
-import HandoverSnagging from "../../assets/services/Handover and snagging.jpg";
-import Mortgage from "../../assets/services/mortgage.jpg";
-import ResidencyImage from "../../assets/services/Residency image.jpg";
+import ProjectMarketing from "../../assets/services/Project Marketing1.png";
+import PropertyManagement from "../../assets/services/Property Management1.png";
+import AssetManagement from "../../assets/services/Asset management 11.png";
+import DevelopmentAdvisory from "../../assets/services/Development Advisory1.png";
+import HandoverSnagging from "../../assets/services/Handover and snagging1.png";
+import Mortgage from "../../assets/services/mortgage1.png";
+import ResidencyImage from "../../assets/services/Residency image1.png";
 
 const ServicesSection = () => {
   const services = [

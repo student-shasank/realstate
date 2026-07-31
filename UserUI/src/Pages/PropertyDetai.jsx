@@ -228,7 +228,7 @@ function GalleryModal({
           )}
         </div>
 
-        <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-between bg-white">
+        <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-end bg-white">
 
           <div className="flex gap-3">
             <button
@@ -389,7 +389,7 @@ export default function PropertyDetail() {
   const currentId = rawListing?._id || rawListing?.id;
 
   const agentName = agent?.name || rawListing?.agent_name || rawListing?.agentName || "Divyansh Chitkara";
-  const agentPhoneRaw =  "91 99999 95871";
+  const agentPhoneRaw =  "+971 505 773767";
   const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
   const agencyName = developer || rawListing?.developer_name || rawListing?.agency_name || "N/A";
 
@@ -424,7 +424,7 @@ export default function PropertyDetail() {
       `🏠 *${title || 'Property'}*\n` +
       `📍 Location: ${locationText}\n` +
       `💰 Price: ${priceText}\n` +
-      `🆔 Ref: Bayut - ${currentId || 'N/A'}\n\n` +
+      `🆔 Ref: Yupland - ${currentId || 'N/A'}\n\n` +
       `Listing link: ${listingUrl}\n\n` +
       `Could you please share more details? Thank you.`;
 
@@ -751,7 +751,7 @@ export default function PropertyDetail() {
                 <p className="text-[#67739E] text-[12px] sm:text-[13px] leading-[150%]">
                   Please quote property reference<br />
                   <span className="font-semibold text-[#01155E]">
-                    Bayut - {currentId}
+                    Yupland - {currentId}
                   </span>{" "}
                   when calling us.
                 </p>
@@ -1359,7 +1359,7 @@ export default function PropertyDetail() {
 
                 <hr className="border-[#D9E1F2] mb-4" />
 
-                <h4 className="text-[#01155E] font-semibold text-[20px] mb-4">Contact With Us Now !</h4>
+                <h4 className="text-[#01155E] font-semibold text-[20px] mb-4">Contact Us Now !</h4>
 
                 <div className="rounded-xl bg-[#F5F8FF] p-4 w-full max-w-[350px]">
                   <div className="flex items-center gap-4 mb-4">
@@ -1377,7 +1377,7 @@ export default function PropertyDetail() {
                       </div>
                       <div className="text-[#01155E] flex items-center gap-2 text-[18px]">
                         <Phone size={18} />
-                        <span>{'+91 99999 95871'}</span>
+                        <span>{'+971 505 773767'}</span>
                       </div>
                     </div>
                   </div>
@@ -1437,6 +1437,12 @@ export default function PropertyDetail() {
                     </button>
                   </div>
                 </div>
+
+
+
+
+
+                
               </div>
             ))}
           </div>

@@ -32,7 +32,7 @@ function TopBar() {
             className={`flex items-center gap-2 transition-colors ${hoverTextClass}`}
           >
             <Phone size={14} className="shrink-0" />
-            <span>+91 999 999 5871</span>
+            <span>+971 505 773767 </span>
           </a>
 
           <span className={dividerClass}>|</span>

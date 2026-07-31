@@ -70,7 +70,13 @@ const EditIcon = () => (
 
 // ── Password Change Modal ──────────────────────────────────────────────────────
 const PasswordModal = ({ onClose }) => {
-  const [form, setForm] = useState({ current: "", newPass: "", confirm: "" });
+  const storedUser = getStoredUser();
+
+  const [form, setForm] = useState({
+    current: storedUser.password || "", // pre-fill old password if it exists in localStorage
+    newPass: "",
+    confirm: "",
+  });
   const [show, setShow] = useState({ current: false, newPass: false, confirm: false });
 
   return (
@@ -290,24 +296,30 @@ export default function Profile() {
             {/* Avatar row */}
             <div className="flex items-end justify-between -mt-7 mb-4">
               <div className="flex items-end gap-5">
-                <div className="w-[80px] h-[80px] rounded-full bg-[#01155E] border-4 border-white shadow-lg flex items-center justify-center text-white text-[32px] font-bold flex-shrink-0">
-                  {user.name.charAt(0)}
-                </div>
-                <div className="pb-1">
-                  {editMode ? (
-                    <input
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="text-[22px] font-bold text-[#01155E] border-b-2 border-[#2F6BFF] outline-none bg-transparent w-[280px]"
-                    />
-                  ) : (
-                    <h1 className="text-[22px] font-bold text-[#01155E]">{user.name}</h1>
-                  )}
-                  <p className="text-[#67739E] text-[14px]">
-                    Member since {user.joinDate || "N/A"}
-                  </p>
-                </div>
-              </div>
+  <div className="w-[64px] h-[64px] rounded-full bg-[#01155E] border-4 border-white shadow-lg flex items-center justify-center text-white text-[26px] font-bold flex-shrink-0">
+    {user.name.charAt(0)}
+  </div>
+
+  <div className="pb-1">
+    {editMode ? (
+      <input
+        value={editForm.name}
+        onChange={(e) =>
+          setEditForm({ ...editForm, name: e.target.value })
+        }
+        className="text-[22px] font-bold text-[#01155E] border-b-2 border-[#2F6BFF] outline-none bg-transparent w-[280px]"
+      />
+    ) : (
+      <h1 className="text-[22px] font-bold text-[#01155E]">
+        {user.name}
+      </h1>
+    )}
+
+    <p className="text-[#67739E] text-[14px]">
+      Member since {user.joinDate || "N/A"}
+    </p>
+  </div>
+</div>
 
               {/* Edit buttons */}
               <div className="flex gap-2 pb-1">

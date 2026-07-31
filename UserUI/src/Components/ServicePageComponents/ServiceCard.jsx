@@ -1,11 +1,11 @@
 import React from 'react';
-import ProjectMarketing from '../../assets/services/Project Marketing.jpg';
-import AssetManagement from '../../assets/services/Asset management.jpg';
-import PropertyManagement from '../../assets/services/Property Management.jpg';
-import DevelopmentAdvisory from '../../assets/services/Development Advisory.jpg';
-import HandoverSnagging from '../../assets/services/Handover and snagging.jpg';
-import Mortgage from '../../assets/services/mortgage.jpg';
-import ResidencyImage from '../../assets/services/Residency image.jpg';
+import ProjectMarketing from '../../assets/services/Project Marketing1.png';
+import AssetManagement from '../../assets/services/Asset management 11.png';
+import PropertyManagement from '../../assets/services/Property Management1.png';
+import DevelopmentAdvisory from '../../assets/services/Development Advisory1.png';
+import HandoverSnagging from '../../assets/services/Handover and snagging1.png';
+import Mortgage from '../../assets/services/mortgage1.png';
+import ResidencyImage from '../../assets/services/Residency image1.png';
 import { Link } from 'react-router-dom';
 
 const SERVICES_DATA = [

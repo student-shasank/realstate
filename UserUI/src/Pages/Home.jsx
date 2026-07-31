@@ -218,7 +218,7 @@ const Home = () => {
             Dubai Real Estate Investments
           </h1>
           <h3 className="text-white text-[14px] sm:text-[17px] md:text-[21px] lg:text-[24px] font-bold text-center mb-4 sm:mb-5 mt-3 sm:mt-5 drop-shadow-2xl px-2" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '500', letterSpacing: '0%' }}>
-Offplan (Preconstruction) and Ready properties tailored to your investment goals
+Off-plan (Pre-construction) and Ready properties tailored to your investment goals
           </h3>
 
           {/* <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>

@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { sendListingPdf } from '../../features/dashboard/listingpdfSlice';
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { sendListingPdf } from "../../features/dashboard/listingpdfSlice";
 import heartIcon from "../../assets/like.svg";
-import callIcon from '../../assets/phone5.png';
-import whatsappIcon from '../../assets/whatsap.png';
-import shareIcon from '../../assets/share5.png';
-import listingimage from '../../assets/ListingCard.jpg';
-import Icon1 from '../../assets/icon1.png';
-import Icon2 from '../../assets/icon2.png';
-import Icon3 from '../../assets/icon3.png';
-import Icon4 from '../../assets/icon4.png';
-import Icon5 from '../../assets/icon5.png';
+import callIcon from "../../assets/phone5.png";
+import whatsappIcon from "../../assets/whatsap.png";
+import shareIcon from "../../assets/share5.png";
+import listingimage from "../../assets/ListingCard.jpg";
+import Icon1 from "../../assets/icon1.png";
+import Icon2 from "../../assets/icon2.png";
+import Icon3 from "../../assets/icon3.png";
+import Icon4 from "../../assets/icon4.png";
+import Icon5 from "../../assets/icon5.png";
 import { useNavigate } from "react-router-dom";
-import { sendListingEnquiry, resetEnquiryState } from "../../features/Enquiery/enquirySlice.js";
-import { toast } from 'react-toastify';
-import { fetchListingDetail } from '../../features/dashboard/listingDetailSlice';
-import { extractAllImages } from '../../Components/utils/imageExtractor';
+import {
+  sendListingEnquiry,
+  resetEnquiryState,
+} from "../../features/Enquiery/enquirySlice.js";
+import { toast } from "react-toastify";
+import { fetchListingDetail } from "../../features/dashboard/listingDetailSlice";
+import { extractAllImages } from "../../Components/utils/imageExtractor";
 
 import {
   addFavoriteLocal,
@@ -26,8 +29,8 @@ import {
 
 const ListingCard = ({ listing, onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [isLocalSending, setIsLocalSending] = useState(false);
 
   // Call / Contact Us popup
@@ -42,16 +45,22 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { success: pdfSuccess, loading: pdfLoading, error: pdfError } = useSelector((state) => state.pdf);
-  const { listing: detailedListing } = useSelector((state) => state.listingDetail);
+  const {
+    success: pdfSuccess,
+    loading: pdfLoading,
+    error: pdfError,
+  } = useSelector((state) => state.pdf);
+  const { listing: detailedListing } = useSelector(
+    (state) => state.listingDetail,
+  );
 
   const currentUser = useSelector((state) => state.auth?.user);
 
   const socialActions = [
-    { id: 'like', icon: heartIcon, alt: 'Like' },
-    { id: 'call', icon: callIcon, alt: 'Call' },
-    { id: 'whatsapp', icon: whatsappIcon, alt: 'WhatsApp' },
-    { id: 'share', icon: shareIcon, alt: 'Share' }
+    { id: "like", icon: heartIcon, alt: "Like" },
+    { id: "call", icon: callIcon, alt: "Call" },
+    { id: "whatsapp", icon: whatsappIcon, alt: "WhatsApp" },
+    { id: "share", icon: shareIcon, alt: "Share" },
   ];
 
   const currentId = listing?._id || listing?.id;
@@ -59,9 +68,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-  const favorites = useSelector(
-    (state) => state.favorites.favorites || []
-  );
+  const favorites = useSelector((state) => state.favorites.favorites || []);
   const isFavorite = favorites.includes(currentId);
 
   const handleFavorite = (e) => {
@@ -90,8 +97,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
   // Contact details shown in the "Contact Us" popup.
   // Falls back to the provided sample values when the listing has no agent data.
-  const agentName = listing?.agent_name || listing?.agentName || "Divyansh Chitkara";
-  const agentPhoneRaw = listing?.contact_phone || listing?.agent_phone || "91 99999 95871";
+  const agentName =
+    listing?.agent_name || listing?.agentName || "Divyansh Chitkara";
+  const agentPhoneRaw = "+971 505 773767";
   const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
   const agencyName = listing?.developer_name || listing?.agency_name || "N/A";
 
@@ -100,11 +108,12 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     ? [listing.feature_image]
     : [listingimage];
 
-  const displayImages = carouselImages.length > 0 ? carouselImages : fallbackGalleryImages;
+  const displayImages =
+    carouselImages.length > 0 ? carouselImages : fallbackGalleryImages;
 
   const getSafeImageUrl = (url) => {
     if (!url) return listingimage;
-    if (typeof url !== 'string') {
+    if (typeof url !== "string") {
       if (url?.url) return url.url;
       if (url?.secure_url) return url.secure_url;
       if (url?.imageUrl) return url.imageUrl;
@@ -119,19 +128,21 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     if (carouselImages.length === 0 && !isLoadingImages && cardId) {
       setIsLoadingImages(true);
       try {
-        const result = await dispatch(fetchListingDetail(Number(cardId))).unwrap();
+        const result = await dispatch(
+          fetchListingDetail(Number(cardId)),
+        ).unwrap();
 
         if (result) {
           const imageData = extractAllImages(result);
           setCarouselImages(imageData.allImages);
         }
       } catch (error) {
-        console.error('Error fetching listing images:', error);
+        console.error("Error fetching listing images:", error);
         setCarouselImages(fallbackGalleryImages);
-        toast.error('Failed to load images');
+        toast.error("Failed to load images");
       } finally {
         setIsLoadingImages(false);
-      }  
+      }
     }
   };
 
@@ -143,14 +154,14 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const handlePrevImage = (e) => {
     e.stopPropagation();
     setActiveImageIndex((prev) =>
-      prev === 0 ? displayImages.length - 1 : prev - 1
+      prev === 0 ? displayImages.length - 1 : prev - 1,
     );
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
     setActiveImageIndex((prev) =>
-      prev === displayImages.length - 1 ? 0 : prev + 1
+      prev === displayImages.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -175,7 +186,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
     if (!storedUser?.firstName || !storedUser?.email) {
-      toast.error("Please complete your profile (name, email) before connecting");
+      toast.error(
+        "Please complete your profile (name, email) before connecting",
+      );
       return;
     }
 
@@ -189,7 +202,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           email: storedUser.email,
           phone: storedUser.phone || "-",
           requestType: "availability",
-        })
+        }),
       ).unwrap();
       toast.success("Enquiry sent ✅");
     } catch (err) {
@@ -202,7 +215,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
   const handleSendPdf = () => {
     if (!email || !phone) {
-      toast.error('Please enter email');
+      toast.error("Please enter email");
       return;
     }
 
@@ -214,7 +227,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const handleWhatsAppClick = (e) => {
     e.stopPropagation();
 
-    const whatsappNumber = agentPhoneDial.replace(/^\+/, '');
+    const whatsappNumber = agentPhoneDial.replace(/^\+/, "");
 
     if (!whatsappNumber) {
       toast.error("Contact number not available");
@@ -226,33 +239,33 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       : window.location.href;
 
     const priceText = listing?.min_price
-      ? `${listing?.currency?.toUpperCase() || ''} ${listing.min_price.toLocaleString()}`
-      : 'Price on request';
+      ? `${listing?.currency?.toUpperCase() || ""} ${listing.min_price.toLocaleString()}`
+      : "Price on request";
 
-    const locationText = [listing?.district_name, listing?.city_name]
-      .filter(Boolean)
-      .join(', ') || 'N/A';
+    const locationText =
+      [listing?.district_name, listing?.city_name].filter(Boolean).join(", ") ||
+      "N/A";
 
     const message =
       `Hello, I'm interested in this property listed on your platform:\n\n` +
-      `🏠 *${listing?.title || 'Property'}*\n` +
+      `🏠 *${listing?.title || "Property"}*\n` +
       `📍 Location: ${locationText}\n` +
       `💰 Price: ${priceText}\n` +
-      `🆔 Ref: Bayut - ${currentId || 'N/A'}\n\n` +
+      `🆔 Ref: Yupland - ${currentId || "N/A"}\n\n` +
       `Listing link: ${listingUrl}\n\n` +
       `Could you please share more details? Thank you.`;
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   useEffect(() => {
     if (pdfSuccess && isPopupOpen) {
       const timer = setTimeout(() => {
         setIsPopupOpen(false);
-        setEmail('');
-        setPhone('');
+        setEmail("");
+        setPhone("");
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -289,7 +302,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
   return (
     <div className="w-full lg:w-[1290px] h-auto lg:h-[273px] bg-white border border-[#D9E1F2] rounded-[10px] flex flex-col lg:flex-row overflow-hidden font-['General_Sans'] shadow-sm mb-6 transition-all duration-300 hover:border-[#2F6BFF] hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]">
-
       {/* LEFT: IMAGE SECTION */}
       <div
         className="relative w-full lg:w-[450px] h-60 sm:h-72 lg:h-full cursor-pointer flex-shrink-0 overflow-hidden"
@@ -299,15 +311,20 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       >
         <img
           src={getSafeImageUrl(displayImages[activeImageIndex])}
-          alt={listing?.title || 'Listing image'}
+          alt={listing?.title || "Listing image"}
           className="w-full h-full object-cover transition-all duration-300"
         />
 
         {/* Status Badge */}
         <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
           <span className="font-semibold">
-            {["announced", "eoi", "start of sales", "on sale", "out of stock"]
-              .includes(listing?.status?.toLowerCase())
+            {[
+              "announced",
+              "eoi",
+              "start of sales",
+              "on sale",
+              "out of stock",
+            ].includes(listing?.status?.toLowerCase())
               ? "Off-plan"
               : listing?.status}
           </span>
@@ -366,9 +383,24 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
         {/* Image Count Badge */}
         <div className="absolute bottom-4 left-4 bg-black/50 text-white px-2 py-1 rounded flex items-center gap-1.5 text-[12px] z-20">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          <svg
+            width="14"
+            height="14"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+            />
           </svg>
           <span>{displayImages.length || 1}</span>
         </div>
@@ -380,10 +412,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               <button
                 key={index}
                 onClick={(e) => handleDotClick(e, index)}
-                className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${activeImageIndex === index
-                  ? 'bg-white'
-                  : 'bg-white/45'
-                  }`}
+                className={`w-[8px] h-[8px] rounded-full transition-all duration-300 ${
+                  activeImageIndex === index ? "bg-white" : "bg-white/45"
+                }`}
                 aria-label={`Go to image ${index + 1}`}
               />
             ))}
@@ -393,8 +424,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
       {/* RIGHT: CONTENT SECTION */}
       <div
-        className={`flex-1 p-5 lg:p-[30px] flex flex-col justify-between ${listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
-          }`}
+        className={`flex-1 p-5 lg:p-[30px] flex flex-col justify-between ${
+          listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
+        }`}
       >
         {/* Row 1: Title and Icon Buttons */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-2">
@@ -403,7 +435,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               className="text-[#01155E] text-[20px] sm:text-[24px] font-semibold leading-[125%] capitalize cursor-pointer"
               onClick={openDetails}
             >
-              {listing?.title || 'High-Rise Townhouse'}
+              {listing?.title || "High-Rise Townhouse"}
             </h2>
 
             {/* Row 2: Location and Builder (Dynamic 2-line Wrapping like screenshot) */}
@@ -416,10 +448,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0 mt-0.5"
                 />
                 <span className="break-words">
-                  {[
-                    listing?.district_name,
-                    listing?.city_name,
-                  ]
+                  {[listing?.district_name, listing?.city_name]
                     .filter(Boolean)
                     .join(", ") || "N/A"}
                 </span>
@@ -432,7 +461,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   alt="Builder"
                   className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0 mt-0.5"
                 />
-                <span className="break-words">{listing?.developer_name || "N/A"}</span>
+                <span className="break-words">
+                  {listing?.developer_name || "N/A"}
+                </span>
               </div>
             </div>
           </div>
@@ -442,6 +473,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
             {socialActions.map((btn) => {
               const isLikeBtn = btn.id === "like";
               const isCallBtn = btn.id === "call";
+              const disableHover = isLikeBtn && isFavorite;
 
               return (
                 <button
@@ -455,25 +487,36 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                           ? handleWhatsAppClick
                           : (e) => e.stopPropagation()
                   }
-                  className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${listing?.isFeatured
-                    ? "bg-white hover:bg-[#01155E]"
-                    : "bg-[#E2E8F0] hover:bg-[#01155E]"
-                    }`}
+                  className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                    listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
+                  } ${!disableHover ? "hover:bg-[#01155E]" : ""}`}
                 >
                   {isLikeBtn ? (
                     isFavorite ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#01155E">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="#01155E"
+                      >
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                       </svg>
                     ) : (
-                      <img src={btn.icon} alt={btn.alt} className="w-5 h-5 object-contain group-hover:brightness-0 group-hover:invert" />
+                      <img
+                        src={btn.icon}
+                        alt={btn.alt}
+                        className="w-5 h-5 object-contain group-hover:brightness-0 group-hover:invert"
+                      />
                     )
                   ) : (
                     <img
                       src={btn.icon}
                       alt={btn.alt}
-                      className={`w-5 h-5 object-contain transition-all duration-300 ${btn.id !== "whatsapp" ? "group-hover:brightness-0 group-hover:invert" : ""
-                        }`}
+                      className={`w-5 h-5 object-contain transition-all duration-300 ${
+                        btn.id !== "whatsapp"
+                          ? "group-hover:brightness-0 group-hover:invert"
+                          : ""
+                      }`}
                     />
                   )}
                 </button>
@@ -484,24 +527,25 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
         {/* Row 3: Features */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
-         <div className="flex items-center gap-2 text-[#67739E]">
-  <img src={Icon3} alt="bed" className="w-5 h-5" />
-  <span className="text-[16px] sm:text-[18px] font-medium">
-    {listing?.beds
-      ? listing.beds
-          .toString()
-          .split(",")
-          .map((b) => (b.trim() === "0" ? "Studio" : b.trim()))
-          .join(", ")
-      : "N/A"}
-  </span>
-</div>
+          <div className="flex items-center gap-2 text-[#67739E]">
+            <img src={Icon3} alt="bed" className="w-5 h-5" />
+            <span className="text-[16px] sm:text-[18px] font-medium">
+              {listing?.beds
+                ? listing.beds
+                    .toString()
+                    .split(",")
+                    .map((b) => (b.trim() === "0" ? "Studio" : b.trim()))
+                    .join(", ")
+                : "N/A"}
+            </span>
+          </div>
 
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
 
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon2} alt="bath" className="w-5 h-5" />
-            <span className="text-[16px] sm:text-[18px] font-medium">Enquire
+            <span className="text-[16px] sm:text-[18px] font-medium">
+              Enquire
               {/* {listing?.baths || ""} */}
             </span>
           </div>
@@ -526,7 +570,10 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
           {/* Download PDF Trigger */}
           <button
-            onClick={(e) => { e.stopPropagation(); setIsPopupOpen(true); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPopupOpen(true);
+            }}
             className="sm:ml-auto text-[14px] text-[#01155E] font-semibold underline underline-offset-4 cursor-pointer"
           >
             Download PDF
@@ -539,12 +586,16 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-  {listing?.propertyStatus?.toLowerCase() === "out of stock" ||
-  listing?.propertyStatus?.toLowerCase() === "outofstock" ? (
+  {listing?.status?.toLowerCase() === "out of stock" ||
+  listing?.status?.toLowerCase() === "outofstock" ? (
     <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
       Out of Stock
     </span>
-  ) : listing?.propertyStatus?.toLowerCase() === "offplan" ? (
+  ) : listing?.status?.toLowerCase() === "announced" ? (
+    <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
+      Coming Soon
+    </span>
+  ) : listing?.status?.toLowerCase() === "offplan" ? (
     <>
       <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
         Starting at
@@ -587,127 +638,164 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       </div>
 
       {/* CALL / CONTACT US MODAL */}
-      {isCallPopupOpen && ReactDOM.createPortal(
-        <div
-          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={() => setIsCallPopupOpen(false)}
-        >
+      {isCallPopupOpen &&
+        ReactDOM.createPortal(
           <div
-            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setIsCallPopupOpen(false)}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setIsCallPopupOpen(false)}
-              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-[#67739E] hover:text-[#01155E] transition-colors"
-              aria-label="Close"
+            <div
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <h3 className="text-xl sm:text-2xl font-bold text-[#01155E] text-center mb-4">
-              Contact Us
-            </h3>
-
-            {/* Property Details */}
-            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
-              <p className="text-[#01155E] font-semibold text-[16px] sm:text-[18px] capitalize">
-                {listing?.title || "Property Name N/A"}
-              </p>
-              <p className="text-[#67739E] text-[13px] sm:text-[14px] mt-1">
-                by <span className="text-[#01155E] font-semibold">{agencyName}</span>
-              </p>
-            </div>
-
-            {/* Phone Row */}
-            <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
-                  <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
-                </svg>
-              </div>
-              <a
-                href={`tel:${agentPhoneDial}`}
-                className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+              {/* Close Button */}
+              <button
+                onClick={() => setIsCallPopupOpen(false)}
+                className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-[#67739E] hover:text-[#01155E] transition-colors"
+                aria-label="Close"
               >
-                {agentPhoneRaw}
-              </a>
-            </div>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            {/* Agent Name */}
-            <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
-              <p className="text-[#67739E] text-[14px] sm:text-[15px]">
-                Broker: <span className="text-[#01155E] font-semibold">{agentName}</span>
-              </p>
-            </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-[#01155E] text-center mb-4">
+                Contact Us
+              </h3>
 
-            {/* Property Reference */}
-            {currentId && (
-              <div className="text-center">
-                <p className="text-[#67739E] text-[12px] sm:text-[13px] leading-[150%]">
-                  Please quote property reference<br />
-                  <span className="font-semibold text-[#01155E]">
-                    Bayut - {currentId}
-                  </span>{" "}
-                  when calling us.
+              {/* Property Details */}
+              <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+                <p className="text-[#01155E] font-semibold text-[16px] sm:text-[18px] capitalize">
+                  {listing?.title || "Property Name N/A"}
+                </p>
+                <p className="text-[#67739E] text-[13px] sm:text-[14px] mt-1">
+                  by{" "}
+                  <span className="text-[#01155E] font-semibold">
+                    {agencyName}
+                  </span>
                 </p>
               </div>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+
+              {/* Phone Row */}
+              <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="#22c55e"
+                  >
+                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                  </svg>
+                </div>
+                <a
+                  href={`tel:${agentPhoneDial}`}
+                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                >
+                  {agentPhoneRaw}
+                </a>
+              </div>
+
+              {/* Agent Name */}
+              <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
+                <p className="text-[#67739E] text-[14px] sm:text-[15px]">
+                  Broker:{" "}
+                  <span className="text-[#01155E] font-semibold">
+                    {agentName}
+                  </span>
+                </p>
+              </div>
+
+              {/* Property Reference */}
+              {currentId && (
+                <div className="text-center">
+                  <p className="text-[#67739E] text-[12px] sm:text-[13px] leading-[150%]">
+                    Please quote property reference
+                    <br />
+                    <span className="font-semibold text-[#01155E]">
+                      Bayut - {currentId}
+                    </span>{" "}
+                    when calling us.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* MODAL PORTAL */}
-      {isPopupOpen && ReactDOM.createPortal(
-        <div
-          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={() => setIsPopupOpen(false)}
-        >
+      {isPopupOpen &&
+        ReactDOM.createPortal(
           <div
-            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setIsPopupOpen(false)}
           >
-            {pdfSuccess ? (
-              <div className="text-center">
-                <div className="text-5xl mb-4">✅</div>
-                <h3 className="text-xl font-bold text-[#01155E] mb-2">PDF Sent!</h3>
-                <p className="text-[#67739E]">Check your inbox for the brochure.</p>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-2xl font-bold text-[#01155E] mb-2">Send Brochure</h3>
-                <p className="text-[#67739E] text-sm mb-6">Enter your email to receive full details.</p>
-                <input
-                  type="email"
-                  placeholder="yourname@gmail.com"
-                  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-                {pdfError && <p className="text-red-500 text-xs mb-4">Invalid email ID</p>}
-                <button
-                  onClick={handleSendPdf}
-                  disabled={pdfLoading}
-                  className="w-full py-3 bg-[#01155E] text-white rounded-lg font-bold hover:opacity-90 disabled:opacity-50 transition-opacity"
-                >
-                  {pdfLoading ? 'Sending...' : 'Send PDF Now'}
-                </button>
-              </>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+            <div
+              className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {pdfSuccess ? (
+                <div className="text-center">
+                  <div className="text-5xl mb-4">✅</div>
+                  <h3 className="text-xl font-bold text-[#01155E] mb-2">
+                    PDF Sent!
+                  </h3>
+                  <p className="text-[#67739E]">
+                    Check your inbox for the brochure.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-bold text-[#01155E] mb-2">
+                    Send Brochure
+                  </h3>
+                  <p className="text-[#67739E] text-sm mb-6">
+                    Enter your email to receive full details.
+                  </p>
+                  <input
+                    type="email"
+                    placeholder="yourname@gmail.com"
+                    className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    className="w-full p-3 border border-[#D9E1F2] rounded-lg mb-4 focus:ring-2 focus:ring-[#01155E] outline-none"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                  {pdfError && (
+                    <p className="text-red-500 text-xs mb-4">
+                      Invalid email ID
+                    </p>
+                  )}
+                  <button
+                    onClick={handleSendPdf}
+                    disabled={pdfLoading}
+                    className="w-full py-3 bg-[#01155E] text-white rounded-lg font-bold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  >
+                    {pdfLoading ? "Sending..." : "Send PDF Now"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
