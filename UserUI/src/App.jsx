@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux"; // ✅ useSelector add
-import Navbar from "./Components/Navbar";
+import Header from "./Components/Header";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
@@ -35,7 +35,6 @@ import Compare from "./Pages/Compare";
 import ScrollToTop from "./Components/Scroll/ScrollTop";
 import Blog from "./Pages/Blog";
 import BlogDetail from "./Pages/BlogDetail";
-import TopBar from "./Components/Card/Topbar";
 
 
 
@@ -65,42 +64,47 @@ function App() {
 
   return (
     <>
-    
-    <TopBar/>
-      <Navbar />
-      <ScrollToTop/>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+      {/* TopBar + Navbar combined in one fixed wrapper — fixes scroll gap issue */}
+      <Header />
+
+      <ScrollToTop />
+
+      {/* pt-[64px] sm:pt-[72px] lg:pt-[90px] xl:pt-[100px] matches Navbar's fixed height
+          so page content doesn't hide behind it. Adjust per-page if a page wants a
+          full-bleed hero behind the header. */}
+      <div className="pt-[64px] sm:pt-[72px] lg:pt-[90px] xl:pt-[100px]">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/compare" element={<Compare />} />
-        <Route path="/communities/:slug" element={<Communities/>} />
-        <Route path="/communities" element={<AllCommunities/>} />
-        <Route path="/profile" element={<Profile/>} />
+          <Route path="/communities/:slug" element={<Communities/>} />
+          <Route path="/communities" element={<AllCommunities/>} />
+          <Route path="/profile" element={<Profile/>} />
           <Route path="/sell-property" element={<SellPropertyPage/>} />
-  
-         <Route path="/termsofuse" element={<TermsOfUse />} />
+
+          <Route path="/termsofuse" element={<TermsOfUse />} />
           <Route path="/disclamer" element={<Disclaimer/>} />
           <Route path="/privacy" element={<PrivacyPolicy/>} />
-          <Route path="/datascource" element={<DataSources/>} />     
-        <Route path="/service" element={<Service />} />
-        <Route path="/listings" element={<Listings />} />
-        <Route path="/listing/:id" element={< PropertyDetail/>} />
-         <Route path="/propertyDetail" element ={<PropertyDetail/>} />
+          <Route path="/datascource" element={<DataSources/>} />
+          <Route path="/service" element={<Service />} />
+          <Route path="/listings" element={<Listings />} />
+          <Route path="/listing/:id" element={< PropertyDetail/>} />
+          <Route path="/propertyDetail" element ={<PropertyDetail/>} />
 
-        {/* Individual Service Pages */}
-        <Route path="/marketingandSales" element={<MarketingandSales />} />
-        <Route path="/assetStructuring" element={<AssetStructuring />} />
-        <Route path="/propertyStructuring" element={<PropertyStructuring />} />
-        <Route path="/advisoryCoordination" element={<AdvisoryCoordination />} />
-        <Route path="/handoverSnagging" element={<HandoverSnagging />} />
-        <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
-        <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
+          {/* Individual Service Pages */}
+          <Route path="/marketingandSales" element={<MarketingandSales />} />
+          <Route path="/assetStructuring" element={<AssetStructuring />} />
+          <Route path="/propertyStructuring" element={<PropertyStructuring />} />
+          <Route path="/advisoryCoordination" element={<AdvisoryCoordination />} />
+          <Route path="/handoverSnagging" element={<HandoverSnagging />} />
+          <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
+          <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
           <Route path="/market-insights" element={<Blog />} />
-<Route path="/market-insights/:slug" element={<BlogDetail />} />
-        
-      </Routes>
-   
+          <Route path="/market-insights/:slug" element={<BlogDetail />} />
+
+        </Routes>
+      </div>
 
       <Footer />
       <ToastContainer position="top-right" autoClose={3000} />
@@ -109,4 +113,3 @@ function App() {
 }
 
 export default App;
- 

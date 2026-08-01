@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; // Added useEffect
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Menu, X, Languages, ChevronDown } from "lucide-react";
@@ -11,16 +11,13 @@ import SignupPopup from "../Pages/SignupPopup";
 import Logo2 from "../assets/logo2.png";
 import Logo3 from "../assets/logo3.png";
 
-function Navbar() {
+function Navbar({ scrolled = false }) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [open, setOpen] = React.useState(false); // mobile menu open/close
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileCommunitiesOpen, setMobileCommunitiesOpen] = useState(false);
-
-  // NEW: tracks whether the page has been scrolled past the TopBar height
-  const [scrolled, setScrolled] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -80,19 +77,6 @@ function Navbar() {
     };
   }, [open]);
 
-  // NEW: watch scroll position — once we scroll past the TopBar's height,
-  // the Navbar snaps to top:0 (like most professional sticky navbars).
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
-
-    handleScroll(); // run once on mount in case page loads pre-scrolled
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const textColor = isHomePage ? "#01155e" : "#FFFFFF";
 
   const serviceLinks = [
@@ -108,8 +92,7 @@ function Navbar() {
   return (
     <>
       <nav
-        className={`fixed left-0 right-0 w-full z-50 h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-all duration-300 ease-in-out
-        ${scrolled ? "top-0" : "top-0 lg:top-[38px]"}
+        className={`relative w-full h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-all duration-300 ease-in-out
         ${
           isHomePage
             ? "bg-white backdrop-blur-md border-b border-white/10"
