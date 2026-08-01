@@ -20,7 +20,8 @@ import {
   Map,
   ChevronDown, ChevronUp, Play, Star, Phone, Mail, Heart,
   Share2, Maximize, Download, Wifi, Dumbbell, Car,
-  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image, ChevronLeft, ChevronRight, ArrowLeft
+  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image, ChevronLeft, ChevronRight, ArrowLeft,BadgeCheck,
+  ShirtIcon
 } from 'lucide-react';
 import Appartmentimage from "../assets/Appartment.png"
 import floorplan1 from "../assets/floorplan.png"
@@ -72,7 +73,7 @@ const AmenityIcon = ({ type }) => {
     case "retail": return <Store size={22} className="text-slate-400" />;
     case "laundry": return <Shirt size={22} className="text-slate-400" />;
     case "salon": return <Scissors size={22} className="text-slate-400" />;
-    default: return <ShieldCheck size={22} className="text-slate-400" />;
+    default: return <BadgeCheck size={22} className="text-slate-400" />;
   }
 };
 
@@ -1118,20 +1119,20 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenities</h2>
+            <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenites</h2>
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
-                {amenitiesList.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 group">
-                    <div className="flex-shrink-0 transition-transform group-hover:scale-110">
-                      <AmenityIcon type={item.icon} />
-                    </div>
-                    <span className="text-[#01155E] font-medium text-[17px] leading-tight">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+  {amenitiesList.map((item, i) => (
+    <div key={i} className="flex items-start gap-4 group">
+      <div className="flex-shrink-0 transition-transform group-hover:scale-110">
+        <AmenityIcon type={item.icon} />
+      </div>
+      <span className="text-[#01155E] font-medium text-[17px] leading-tight">
+        {item.label}
+      </span>
+    </div>
+  ))}
+</div>
 
               <div className="flex justify-center pt-4 border-t border-gray-50">
                 <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-10 py-3.5 rounded-xl uppercase text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">

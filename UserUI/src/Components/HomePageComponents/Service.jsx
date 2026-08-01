@@ -90,7 +90,7 @@ const ServicesSection = () => {
         </div>
       </div>
 
-      {/* 🔥 New Card Layout */}
+      {/* Card Layout */}
       <div className="max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
 
@@ -100,25 +100,14 @@ const ServicesSection = () => {
               key={index}
               className="w-full flex justify-center"
             >
-              <div className="flex flex-col max-w-[390px] w-full group cursor-pointer">
+              <div className="flex flex-col max-w-[390px] w-full cursor-pointer">
 
                 {/* Image */}
-                <div className="relative h-[267px] rounded-lg overflow-hidden">
+                <div className="relative h-[267px] rounded-lg overflow-hidden group">
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url(${service.image})` }}
                   />
-
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/40" />
-
-                  {/* Hover Description */}
-                  <div className="absolute top-6 left-6 right-6 flex opacity-0 -translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-                    <div className="w-1.5 bg-white rounded-full mr-4" />
-                    <p className="font-semibold text-[18px] text-white leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
                 </div>
 
                 {/* Title */}
