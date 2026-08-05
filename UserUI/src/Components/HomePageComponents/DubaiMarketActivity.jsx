@@ -24,7 +24,7 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
   };
 
   return (
-    <div className="relative w-full max-w-[576px] h-auto lg:h-[402px] bg-[#01155E] rounded-[16px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)]">
+    <div className="relative w-full max-w-[576px] h-auto lg:h-[352px] bg-[#01155E] rounded-[16px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)]">
       {/* Decorative Background Pattern - Absolute Positioned */}
       <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-40">
         <div className="absolute top-[-10%] right-[-10%] w-[307px] h-[347px] bg-[radial-gradient(circle,_#3B82F6_0%,_transparent_70%)] blur-3xl rounded-full"></div>
@@ -75,9 +75,9 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
         >
           {reportLabel}
         </a>
-        <button className="w-full h-[50px] font-['Archivo'] bg-transparent border border-white/30 hover:bg-white/10 transition-colors text-white rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]">
+        {/* <button className="w-full h-[50px] font-['Archivo'] bg-transparent border border-white/30 hover:bg-white/10 transition-colors text-white rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]">
           Delivered via WhatsApp
-        </button>
+        </button> */}
       </div>
     </div>
   );

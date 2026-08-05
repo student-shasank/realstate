@@ -16,7 +16,7 @@ const ALLOWED_DEVELOPERS = [
   "Danube Properties",
   "Majid Al Futtaim",
   "Beyond Developments",
-  "Beyond by Omniyat",
+  // "Beyond by Omniyat",
   "Omniyat properties",
   "Arada properties",
   "Aldar",

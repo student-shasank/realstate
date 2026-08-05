@@ -325,8 +325,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               ? "Off-plan"
               : listing?.status}
           </span>
-          <span className="mx-1 text-gray-300">|</span>
-          <span className="font-normal">Sell</span>
+          {/* <span className="mx-1 text-gray-300">|</span>
+          <span className="font-normal">Sell</span> */}
         </div>
         {listing?.isFeatured && (
           <div className="absolute top-4 right-4 bg-[#FFC107] text-[#01155E] px-3 py-1 rounded-[6px] text-[14px] font-semibold z-20 shadow-sm">
