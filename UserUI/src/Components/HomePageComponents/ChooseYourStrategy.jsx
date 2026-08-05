@@ -4,7 +4,7 @@ import Secondimage from "../../assets/chooseyourstrategy2.jpg"
 
 const ChooseYourStrategy = () => {
   return (
-    <section className="w-full flex justify-center py-12 md:py-[100px] px-4 bg-white font-sans">
+    <section className="w-full flex justify-center py-12 md:py-[70px] px-4 bg-white font-sans">
       <div className="w-full max-w-[1452px] flex flex-col items-center">
         
         {/* --- Header Block --- */}
@@ -105,3 +105,8 @@ const ChooseYourStrategy = () => {
 };
 
 export default ChooseYourStrategy;
+
+
+
+
+

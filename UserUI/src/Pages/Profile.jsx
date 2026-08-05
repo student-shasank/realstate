@@ -418,12 +418,14 @@ export default function Profile() {
                     ••••••••
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="text-[13px] text-[#2F6BFF] font-semibold underline underline-offset-2 hover:text-[#01155E] transition-colors flex-shrink-0"
-                >
-                  Change
-                </button>
+                {editMode && (
+                  <button
+                    onClick={() => setShowPasswordModal(true)}
+                    className="text-[13px] text-[#2F6BFF] font-semibold underline underline-offset-2 hover:text-[#01155E] transition-colors flex-shrink-0"
+                  >
+                    Change
+                  </button>
+                )}
               </div>
             </div>
           </div>

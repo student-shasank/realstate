@@ -59,7 +59,7 @@ export default function DeveloperDropdown({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[15px] font-medium text-[#67739E] shadow-sm"
+        className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[14px] font-medium text-[#67739E] shadow-sm"
       >
         <span className="truncate">
           {selectedDevelopers.length === 0
@@ -84,7 +84,7 @@ export default function DeveloperDropdown({
       {open && (
         <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-[12px] shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
           <div className="px-3 pt-3 pb-2 border-b border-[#EEF2F7]">
-            <p className="text-[12px] font-medium text-[#67739E]">
+            <p className="text-[14px] font-medium text-[#67739E]">
               Filter by developer
             </p>
           </div>

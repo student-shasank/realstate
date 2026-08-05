@@ -95,12 +95,17 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     setIsCallPopupOpen(true);
   };
 
-  // Contact details shown in the "Contact Us" popup.
-  // Falls back to the provided sample values when the listing has no agent data.
-  const agentName =
-    listing?.agent_name || listing?.agentName || "Divyansh Chitkara";
+  // Contact details shown in the "Contact Us" popup — same pattern as PropertyDetail
+  const agentName = "Divyansh Chitkara";
+
+  // Primary agent phone
   const agentPhoneRaw = "+971 505 773767";
   const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
+
+  // Secondary agent phone
+  const agentPhoneRaw2 = "+1 437 328 8508";
+  const agentPhoneDial2 = agentPhoneRaw2.replace(/[^\d+]/g, "");
+
   const agencyName = listing?.developer_name || listing?.agency_name || "N/A";
 
   // Fallback gallery images
@@ -222,8 +227,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     dispatch(sendListingPdf({ listingId: currentId, email, phone }));
   };
 
-  // Opens WhatsApp with a predefined, professional message pre-filled,
-  // including the listing's title, location, price, reference ID, and link.
+  // Opens WhatsApp with a predefined, professional message pre-filled —
+  // same message format/pattern as PropertyDetail's handleWhatsAppClick
   const handleWhatsAppClick = (e) => {
     e.stopPropagation();
 
@@ -238,22 +243,14 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       ? `${window.location.origin}/listing/${listing.id}`
       : window.location.href;
 
-    const priceText = listing?.min_price
-      ? `${listing?.currency?.toUpperCase() || ""} ${listing.min_price.toLocaleString()}`
-      : "Price on request";
-
-    const locationText =
-      [listing?.district_name, listing?.city_name].filter(Boolean).join(", ") ||
-      "N/A";
-
     const message =
-      `Hello, I'm interested in this property listed on your platform:\n\n` +
-      `🏠 *${listing?.title || "Property"}*\n` +
-      `📍 Location: ${locationText}\n` +
-      `💰 Price: ${priceText}\n` +
-      `🆔 Ref: Yupland - ${currentId || "N/A"}\n\n` +
-      `Listing link: ${listingUrl}\n\n` +
-      `Could you please share more details? Thank you.`;
+      `Hi Divyansh,\n\n` +
+      `I'm reaching out regarding the following property on Yupland.\n\n` +
+      `Project: ${listing?.title || "N/A"}\n` +
+      `Developer: ${listing?.developer_name || "N/A"}\n\n` +
+      `Listing ID: ${currentId || "N/A"}\n` +
+      `Listing: ${listingUrl}\n\n` +
+      `I look forward to discussing this property with you.`;
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
@@ -470,58 +467,52 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
           {/* Social/Action Icons */}
           <div className="flex gap-3 flex-shrink-0 self-start">
-            {socialActions.map((btn) => {
-              const isLikeBtn = btn.id === "like";
-              const isCallBtn = btn.id === "call";
-              const disableHover = isLikeBtn && isFavorite;
+           {socialActions.map((btn) => {
+  const isLikeBtn = btn.id === "like";
+  const isCallBtn = btn.id === "call";
 
-              return (
-                <button
-                  key={btn.id}
-                  onClick={
-                    isLikeBtn
-                      ? handleFavorite
-                      : isCallBtn
-                        ? handleCallClick
-                        : btn.id === "whatsapp"
-                          ? handleWhatsAppClick
-                          : (e) => e.stopPropagation()
-                  }
-                  className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
-                  } ${!disableHover ? "hover:bg-[#01155E]" : ""}`}
-                >
-                  {isLikeBtn ? (
-                    isFavorite ? (
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="#01155E"
-                      >
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
-                    ) : (
-                      <img
-                        src={btn.icon}
-                        alt={btn.alt}
-                        className="w-5 h-5 object-contain group-hover:brightness-0 group-hover:invert"
-                      />
-                    )
-                  ) : (
-                    <img
-                      src={btn.icon}
-                      alt={btn.alt}
-                      className={`w-5 h-5 object-contain transition-all duration-300 ${
-                        btn.id !== "whatsapp"
-                          ? "group-hover:brightness-0 group-hover:invert"
-                          : ""
-                      }`}
-                    />
-                  )}
-                </button>
-              );
-            })}
+  return (
+    <button
+      key={btn.id}
+      onClick={
+        isLikeBtn
+          ? handleFavorite
+          : isCallBtn
+            ? handleCallClick
+            : btn.id === "whatsapp"
+              ? handleWhatsAppClick
+              : (e) => e.stopPropagation()
+      }
+      className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+        listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
+      } ${!isLikeBtn ? "hover:bg-[#01155E]" : ""}`}
+    >
+      {isLikeBtn ? (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill={isFavorite ? "#01155E" : "none"}
+          stroke="#01155E"
+          strokeWidth="1.8"
+          className="transition-all duration-200"
+        >
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      ) : (
+        <img
+          src={btn.icon}
+          alt={btn.alt}
+          className={`w-5 h-5 object-contain transition-all duration-300 ${
+            btn.id !== "whatsapp"
+              ? "group-hover:brightness-0 group-hover:invert"
+              : ""
+          }`}
+        />
+      )}
+    </button>
+  );
+})}
           </div>
         </div>
 
@@ -592,10 +583,24 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       Out of Stock
     </span>
   ) : listing?.status?.toLowerCase() === "announced" ? (
+  listing?.min_price && Number(listing.min_price) > 0 ? (
+    <>
+      <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
+        Starting at
+      </span>
+      <span className="text-[20px] sm:text-[24px] mr-2">
+        {listing?.currency?.toUpperCase()}
+      </span>
+      <span className="text-[26px] sm:text-[32px]">
+        {listing.min_price.toLocaleString()}
+      </span>
+    </>
+  ) : (
     <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
       Coming Soon
     </span>
-  ) : listing?.status?.toLowerCase() === "offplan" ? (
+  )
+) : listing?.status?.toLowerCase() === "offplan" ? (
     <>
       <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
         Starting at
@@ -637,7 +642,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         </div>
       </div>
 
-      {/* CALL / CONTACT US MODAL */}
+      {/* CALL / CONTACT US MODAL — same pattern as PropertyDetail */}
       {isCallPopupOpen &&
         ReactDOM.createPortal(
           <div
@@ -687,24 +692,45 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                 </p>
               </div>
 
-              {/* Phone Row */}
-              <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
-                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="#22c55e"
+              {/* Phone Rows — primary + secondary number */}
+              <div className="flex flex-col items-center gap-3 pb-5 mb-5 border-b border-[#D9E1F2]">
+                <div className="flex items-center justify-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="#22c55e"
+                    >
+                      <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                    </svg>
+                  </div>
+                  <a
+                    href={`tel:${agentPhoneDial}`}
+                    className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
                   >
-                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
-                  </svg>
+                    {agentPhoneRaw}
+                  </a>
                 </div>
-                <a
-                  href={`tel:${agentPhoneDial}`}
-                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
-                >
-                  {agentPhoneRaw}
-                </a>
+
+                <div className="flex items-center justify-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="#22c55e"
+                    >
+                      <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                    </svg>
+                  </div>
+                  <a
+                    href={`tel:${agentPhoneDial2}`}
+                    className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                  >
+                    {agentPhoneRaw2}
+                  </a>
+                </div>
               </div>
 
               {/* Agent Name */}
@@ -724,7 +750,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                     Please quote property reference
                     <br />
                     <span className="font-semibold text-[#01155E]">
-                      Bayut - {currentId}
+                      Yupland - {currentId}
                     </span>{" "}
                     when calling us.
                   </p>

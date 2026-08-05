@@ -31,9 +31,18 @@ import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/
 import AwardsSection from '../Components/HomePageComponents/AwardsSection';
 import PropertyFlipbookSection from "../Components/HomePageComponents/Propertyflipbooksection.jsx"
 
-// Shared style constant so every dropdown "value" row uses the exact
-// same font style/size as the Payment Plan dropdown.
-const DROPDOWN_OPTION_TEXT_CLASS = "text-[14px] font-medium text-[#6b728e]";
+// ---------------------------------------------------------------------------
+// SHARED FONT PRINCIPLE
+// Every filter control (the closed "trigger" button AND the options inside
+// its open dropdown) reads from these two constants instead of declaring
+// its own font classes, so the whole search bar is one consistent type
+// system:
+//   - Font family : Archivo
+//   - Trigger label : text-sm (14px) font-medium, color #67739E
+//   - Dropdown option : text-[14px] font-medium, color #67739E
+// ---------------------------------------------------------------------------
+const DROPDOWN_TRIGGER_TEXT_CLASS = "text-sm font-medium font-['Archivo'] text-[#67739E]";
+const DROPDOWN_OPTION_TEXT_CLASS = "text-[14px] font-medium font-['Archivo'] text-[#67739E]";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -93,6 +102,28 @@ const Home = () => {
     error
   } = useSelector((state) => state.search);
 
+  // Whether "Ready" properties are selected — Handover Year and Payment
+  // Plan are not applicable to ready (already-completed) properties,
+  // so both filters are disabled whenever this is true.
+  const isReadyCompletion = completion === 'Ready';
+
+  // Clear any stale selections and close those dropdowns as soon as
+  // "Ready" is selected, so a disabled filter can't silently stay applied.
+  useEffect(() => {
+    if (isReadyCompletion) {
+      setSelectedHandoverYears([]);
+      setPaymentPlan('');
+      setHandoverOpen(false);
+      setPaymentOpen(false);
+    }
+    // Sale Status option set differs between Ready and Off-Plan, so clear
+    // any selection that no longer belongs to the currently active list
+    // whenever completion changes (prevents a stale "announced" selection
+    // from silently persisting after switching to Ready, for example).
+    setSelectedSaleStatus([]);
+    setSaleStatusOpen(false);
+  }, [isReadyCompletion]);
+
   // HELPER TO CLOSE ALL DROPDOWNS
   const closeAll = () => {
     dispatch(closeDropdowns());
@@ -151,13 +182,13 @@ const Home = () => {
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
     // if (purpose) params.set('purpose', purpose);
-    if (selectedHandoverYears.length > 0) {
+    if (!isReadyCompletion && selectedHandoverYears.length > 0) {
       params.set('handoverYear', selectedHandoverYears.join(','));
     }
     if (selectedSaleStatus.length > 0) {
       params.set('saleStatus', selectedSaleStatus.join(','));
     }
-    if (paymentPlan) params.set('paymentPlan', paymentPlan);
+    if (!isReadyCompletion && paymentPlan) params.set('paymentPlan', paymentPlan);
     if (selectedDevelopers.length > 0) {
   const normalizedDevelopers = selectedDevelopers.map((dev) =>
     dev.toLowerCase().trim()
@@ -186,13 +217,26 @@ const Home = () => {
   { label: "Post 2030", value: "post 2030" },
 ];
 
-  const saleStatusOptions = [
+  // Sale status options differ by completion type:
+  // - Off-Plan: Announced, Presale/EOI, Start of Sales, On Sale, Out of Stock
+  // - Ready: On Sale, Exclusive Inventory, Out of Stock
+  const offPlanSaleStatusOptions = [
     { label: "Announced", value: "announced" },
     { label: "Presale/EOI", value: "presale_eoi" },
     { label: "Start of Sales", value: "start_of_sales" },
     { label: "On Sale", value: "on_sale" },
     { label: "Out of Stock", value: "out_of_stock" },
   ];
+
+  const readySaleStatusOptions = [
+    { label: "On Sale", value: "on_sale" },
+    { label: "Exclusive Inventory", value: "exclusive_inventory" },
+    { label: "Out of Stock", value: "out_of_stock" },
+  ];
+
+  const saleStatusOptions = isReadyCompletion
+    ? readySaleStatusOptions
+    : offPlanSaleStatusOptions;
 
   const emirates = [
     "Dubai", "Umm AL Quwain",
@@ -205,7 +249,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="mx-auto w-full h-auto min-h-[820px] sm:min-h-[900px] lg:h-[960px] flex flex-col items-center relative overflow-hidden overflow-x-hidden pb-8 sm:pb-10 lg:pb-0">
+      <div className="mx-auto w-full h-auto  sm:min-h-[800px] lg:h-[860px] flex flex-col items-center relative  pb-8 sm:pb-10 lg:pb-0">
         <div className="absolute inset-0 -z-10">
           <video autoPlay loop muted playsInline className="w-full h-full object-cover">
             <source src={backgroundVideo} type="video/mp4" />
@@ -213,7 +257,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-transparent" />
         </div>
 
-        <div className="w-full max-w-[1248px] px-4 sm:px-5 md:px-6 pt-[70px] sm:pt-[90px] md:pt-[180px] lg:pt-[180px]">
+        <div className="w-full max-w-[1248px] px-4 sm:px-5 md:px-6 pt-[70px] sm:pt-[90px] md:pt-[180px] lg:pt-[240px]">
           <h1 className="text-white text-[26px] sm:text-[34px] md:text-[42px] lg:text-[48px] font-bold text-center drop-shadow-2xl" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '700', lineHeight: '110%', letterSpacing: '0%' }}>
             Dubai Real Estate Investments
           </h1>
@@ -249,7 +293,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
         }
         // 'Properties' tab: no navigation, just stays here and shows the search bar below
       }}
-      className="transition-all flex items-center justify-center"
+      className="transition-all flex items-center justify-center font-['Archivo']"
       style={{
         width: '280px',
         height: '46px',
@@ -274,9 +318,9 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
                 </div>
-                <input type="text" placeholder="Enter Location" className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium shadow-sm" value={location} onChange={(e) => dispatch(setLocation(e.target.value))} />
+                <input type="text" placeholder="Enter Location" className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium font-['Archivo'] shadow-sm" value={location} onChange={(e) => dispatch(setLocation(e.target.value))} />
               </div>
-              <button onClick={handleSearch} className="bg-[#01155E] text-white px-6 sm:px-8 md:px-10 py-2.5 rounded-lg font-['Archivo'] text-base sm:text-lg shadow-md w-full md:w-auto md:min-w-[160px]">Search</button>
+              <button onClick={handleSearch} className="bg-[#01155E] text-white px-6 sm:px-8 md:px-10 py-2.5 rounded-lg font-['Archivo'] font-semibold text-base sm:text-lg shadow-md w-full md:w-auto md:min-w-[160px]">Search</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4 ">
@@ -305,7 +349,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                   const nextState = !isBedBathOpen;
                   closeAll();
                   if (nextState) dispatch(toggleBedBath());
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
+                }} className={`w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}>
                   <span className="truncate">{beds} Beds / {baths} Baths</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -320,7 +364,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                       </div>
                     </div>
                     <div className="mb-8">
-                      <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-medium text-lg">Baths</h3></div>
+                      <div className="flex items-center gap-2 mb-4"><div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div><h3 className="text-[#5B6B91] font-['Archivo'] text-lg">Baths</h3></div>
                       <div className="flex flex-wrap gap-2">
                         {['1', '2', '3', '4', '5', '6+'].map((opt) => (
                           <button key={opt} type="button" onClick={() => dispatch(setBaths(opt))} className={`px-4 py-1.5 min-w-[55px] flex items-center justify-center rounded-full border transition-all ${DROPDOWN_OPTION_TEXT_CLASS} ${baths === opt ? 'bg-[#01155E] text-white border-[#01155E]' : 'bg-white border-gray-300'}`}>{opt}</button>
@@ -328,8 +372,8 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-3 border border-black text-[#5B6B91] text-base sm:text-lg rounded-3xl hover:bg-gray-50 transition-colors">Reset</button>
-                      <button type="button" onClick={() => closeAll()} className="flex-1 py-3 bg-[#000E47] text-white text-base sm:text-lg rounded-3xl hover:bg-blue-900 transition-colors">Done</button>
+                      <button type="button" onClick={() => { dispatch(setBeds('Studio')); dispatch(setBaths('1')); }} className="flex-1 py-3 border border-black text-[#5B6B91] font-['Archivo'] text-base sm:text-lg rounded-3xl hover:bg-gray-50 transition-colors">Reset</button>
+                      <button type="button" onClick={() => closeAll()} className="flex-1 py-3 bg-[#000E47] text-white font-['Archivo'] text-base sm:text-lg rounded-3xl hover:bg-blue-900 transition-colors">Done</button>
                     </div>
                   </div>
                 )}
@@ -340,19 +384,19 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                   const nextState = !isPriceOpen;
                   closeAll();
                   if (nextState) dispatch(togglePrice());
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
+                }} className={`w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}>
                   <span className="truncate">{getPriceLabel()}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isPriceOpen && (
                   <div className="absolute top-full right-0 mt-2 w-[92vw] max-w-[300px] md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-4 sm:p-5">
                     <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
-                      <div><label className="text-gray-400 text-xs mb-1 block font-medium">Minimum</label><input type="number" placeholder="0" value={minPrice} onChange={(e) => dispatch(setMinPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" /></div>
-                      <div><label className="text-gray-400 text-xs mb-1 block font-medium">Maximum</label><input type="number" placeholder="Any" value={maxPrice} onChange={(e) => dispatch(setMaxPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm outline-none text-black" /></div>
+                      <div><label className="text-gray-400 text-xs mb-1 block font-medium font-['Archivo']">Minimum</label><input type="number" placeholder="0" value={minPrice} onChange={(e) => dispatch(setMinPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm font-['Archivo'] outline-none text-black" /></div>
+                      <div><label className="text-gray-400 text-xs mb-1 block font-medium font-['Archivo']">Maximum</label><input type="number" placeholder="Any" value={maxPrice} onChange={(e) => dispatch(setMaxPrice(e.target.value))} className="w-full border rounded-lg px-3 py-2 text-sm font-['Archivo'] outline-none text-black" /></div>
                     </div>
                     <div className="flex gap-3">
-                      <button type="button" onClick={() => { dispatch(setMinPrice('')); dispatch(setMaxPrice('')); }} className="flex-1 py-2 border border-[#01155E] text-[#01155E] font-bold rounded-lg">Reset</button>
-                      <button type="button" onClick={() => closeAll()} className="flex-1 py-2 bg-[#01155E] text-white font-bold rounded-lg">Done</button>
+                      <button type="button" onClick={() => { dispatch(setMinPrice('')); dispatch(setMaxPrice('')); }} className="flex-1 py-2 border border-[#01155E] text-[#01155E] font-bold font-['Archivo'] rounded-lg">Reset</button>
+                      <button type="button" onClick={() => closeAll()} className="flex-1 py-2 bg-[#01155E] text-white font-bold font-['Archivo'] rounded-lg">Done</button>
                     </div>
                   </div>
                 )}
@@ -367,7 +411,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                     closeAll();
                     setPropertyTypeOpen(nextState);
                   }}
-                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 h-[41px] text-[14px] sm:text-[15px] font-medium text-[#67739E] shadow-sm"
+                  className={`w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}
                 >
                   <span className="truncate">{propertyType || "Residential"}</span>
                   <ChevronDown
@@ -379,7 +423,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 {propertyTypeOpen && (
                   <div className="absolute top-full left-0 mt-1 w-[92vw] max-w-[345px] md:w-[345px] bg-white rounded-xl shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
                     <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
-                      <span className="text-[14px] font-medium text-[#67739E]">
+                      <span className={DROPDOWN_OPTION_TEXT_CLASS}>
                         {propertyTab}
                       </span>
                       <ChevronDown className="h-4 w-4 text-[#67739E] rotate-180" />
@@ -389,9 +433,9 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                       <button
                         type="button"
                         onClick={() => setPropertyTab("Residential")}
-                        className={`text-left text-[14px] sm:text-[15px] h-[32px] border-b-2 ${propertyTab === "Residential"
-                          ? "text-[#67739E] border-[#01155E]"
-                          : "text-[#8B95B7] border-transparent"
+                        className={`text-left h-[32px] border-b-2 ${DROPDOWN_OPTION_TEXT_CLASS} ${propertyTab === "Residential"
+                          ? "border-[#01155E]"
+                          : "border-transparent opacity-60"
                           }`}
                       >
                         Residential
@@ -400,9 +444,9 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                       <button
                         type="button"
                         onClick={() => setPropertyTab("Commercial")}
-                        className={`text-left text-[14px] sm:text-[15px] h-[32px] pl-3 border-b-2 ${propertyTab === "Commercial"
-                          ? "text-[#67739E] border-[#01155E]"
-                          : "text-[#8B95B7] border-transparent"
+                        className={`text-left h-[32px] pl-3 border-b-2 ${DROPDOWN_OPTION_TEXT_CLASS} ${propertyTab === "Commercial"
+                          ? "border-[#01155E]"
+                          : "border-transparent opacity-60"
                           }`}
                       >
                         Commercial
@@ -438,7 +482,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                               )}
                             </div>
 
-                            <span className="text-[13px] leading-none truncate">
+                            <span className="text-[14px] font-medium font-['Archivo'] leading-none truncate">
                               {option}
                             </span>
                           </button>
@@ -455,6 +499,9 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-2.5 sm:gap-3 w-full">
 
+              {/* Sale Status — option list changes depending on whether
+                  Off-Plan or Ready is selected (see saleStatusOptions
+                  above). Always enabled. */}
               <div className="relative" ref={saleStatusRef}>
                 <button
                   type="button"
@@ -463,7 +510,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                     closeAll();
                     setSaleStatusOpen(nextState);
                   }}
-                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm"
+                  className={`w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}
                 >
                   <span className="truncate">
                     {selectedSaleStatus.length > 0
@@ -502,25 +549,34 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 )}
               </div>
 
+              {/* Handover Year — disabled whenever "Ready" completion is selected,
+                  since handover year only applies to off-plan projects. */}
               <div className="relative" ref={handoverRef}>
                 <button
                   type="button"
+                  disabled={isReadyCompletion}
                   onClick={() => {
+                    if (isReadyCompletion) return;
                     const nextState = !handoverOpen;
                     closeAll();
                     setHandoverOpen(nextState);
                   }}
-                  className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm"
+                  title={isReadyCompletion ? 'Not applicable for Ready properties' : undefined}
+                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${
+                    isReadyCompletion
+                      ? 'bg-gray-100 !text-gray-400 cursor-not-allowed opacity-70'
+                      : 'bg-white'
+                  }`}
                 >
                   <span className="truncate">
                     {selectedHandoverYears.length > 0
                       ? `${selectedHandoverYears.length} Year${selectedHandoverYears.length > 1 ? 's' : ''} Selected`
                       : 'Handover Year'}
                   </span>
-                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${handoverOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isReadyCompletion ? 'text-gray-300' : 'text-gray-400'} ${handoverOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {handoverOpen && (
+                {!isReadyCompletion && handoverOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full z-50 flex flex-col gap-0.5">
                     {handoverYears.map((year) => (
   <div
@@ -554,16 +610,29 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 setSelectedDevelopers={setSelectedDevelopers}
               />
 
+              {/* Payment Plan — disabled whenever "Ready" completion is selected,
+                  since payment plans only apply to off-plan projects. */}
               <div className="relative" ref={paymentRef}>
-                <button type="button" onClick={() => {
-                  const nextState = !paymentOpen;
-                  closeAll();
-                  setPaymentOpen(nextState);
-                }} className="w-full flex items-center justify-between bg-white rounded-xl px-4 py-2.5 text-sm font-['Archivo'] text-[#67739E] shadow-sm">
-                  <span>{paymentPlan || 'Payment Plan'}</span>
-                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${paymentOpen ? 'rotate-180' : ''}`} />
+                <button
+                  type="button"
+                  disabled={isReadyCompletion}
+                  onClick={() => {
+                    if (isReadyCompletion) return;
+                    const nextState = !paymentOpen;
+                    closeAll();
+                    setPaymentOpen(nextState);
+                  }}
+                  title={isReadyCompletion ? 'Not applicable for Ready properties' : undefined}
+                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${
+                    isReadyCompletion
+                      ? 'bg-gray-100 !text-gray-400 cursor-not-allowed opacity-70'
+                      : 'bg-white'
+                  }`}
+                >
+                  <span className="truncate">{paymentPlan || 'Payment Plan'}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isReadyCompletion ? 'text-gray-300' : 'text-gray-400'} ${paymentOpen ? 'rotate-180' : ''}`} />
                 </button>
-                {paymentOpen && (
+                {!isReadyCompletion && paymentOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-3xl shadow-2xl z-50 p-3 flex flex-col gap-2">
                     {['During Construction', 'Post Handover'].map((plan) => (
                       <label key={plan} className="flex items-center gap-2 px-3 py-4 cursor-pointer hover:bg-gray-50 border border-gray-100 rounded-2xl transition-all">
@@ -585,7 +654,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
       closeAll();
       setIsEmirateOpen(next);
     }}
-    className="w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl text-sm text-[#67739E] shadow-sm"
+    className={`w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}
     style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
   >
     <span className="truncate">

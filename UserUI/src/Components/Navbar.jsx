@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // Added useEffect
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Menu, X, Languages, ChevronDown } from "lucide-react";
@@ -11,13 +11,19 @@ import SignupPopup from "../Pages/SignupPopup";
 import Logo2 from "../assets/logo2.png";
 import Logo3 from "../assets/logo3.png";
 
-function Navbar({ scrolled = false }) {
+const TOPBAR_HEIGHT = 38; // must match TopBar's height in px
+
+function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [open, setOpen] = React.useState(false); // mobile menu open/close
   const [profileOpen, setProfileOpen] = React.useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileCommunitiesOpen, setMobileCommunitiesOpen] = useState(false);
+
+  // NEW: numeric top offset (px) that tracks scroll position smoothly,
+  // instead of a boolean threshold that caused a jump/gap on scroll.
+  const [navTop, setNavTop] = useState(TOPBAR_HEIGHT);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -77,6 +83,42 @@ function Navbar({ scrolled = false }) {
     };
   }, [open]);
 
+  // UPDATED: instead of snapping at a threshold, continuously compute
+  // how much of the TopBar has scrolled out of view and slide the
+  // Navbar up by exactly that amount. This keeps Navbar glued to the
+  // bottom of TopBar the whole time — no gap, no jump.
+  useEffect(() => {
+    let ticking = false;
+
+    const computeOffset = () => {
+      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+      if (!isDesktop) return 0; // TopBar is hidden below lg, so no offset needed
+      return Math.max(0, TOPBAR_HEIGHT - window.scrollY);
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setNavTop(computeOffset());
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    handleScroll(); // run once on mount in case page loads pre-scrolled
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
+
+  // Derived boolean, kept for shadow styling
+  const scrolled = navTop === 0;
+
   const textColor = isHomePage ? "#01155e" : "#FFFFFF";
 
   const serviceLinks = [
@@ -92,7 +134,8 @@ function Navbar({ scrolled = false }) {
   return (
     <>
       <nav
-        className={`relative w-full h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-all duration-300 ease-in-out
+        style={{ top: `${navTop}px` }}
+        className={`fixed left-0 right-0 w-full z-50 h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-[top,box-shadow] duration-300 ease-in-out
         ${
           isHomePage
             ? "bg-white backdrop-blur-md border-b border-white/10"
@@ -112,8 +155,8 @@ function Navbar({ scrolled = false }) {
             />
           </Link>
           {/* Navigation Links - full menu only on lg+ (tablets get the drawer) */}
-          <div className="hidden lg:flex items-center justify-between flex-1 xl:max-w-[900px] mx-auto gap-3 xl:gap-0">
-            <Link
+          <div className="hidden lg:flex items-center justify-between flex-1 xl:max-w-[750px] mx-auto gap-3 xl:gap-0 xl:pr-5">
+            {/* <Link
               to="/"
               className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
               style={{
@@ -123,7 +166,7 @@ function Navbar({ scrolled = false }) {
               }}
             >
               Home
-            </Link>
+            </Link> */}
             <Link
               to="/listings?completion=off-plan"
               className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
@@ -330,7 +373,19 @@ function Navbar({ scrolled = false }) {
             )}
 
             {/* Language */}
-           
+            <div className="hidden lg:flex items-center gap-2 cursor-pointer hover:opacity-70 transition-all">
+              <Languages size={20} className={isHomePage ? "text-[#01155e] shrink-0" : "text-white shrink-0"} />
+              <span
+                className="hidden xl:inline"
+                style={{
+                  ...textStyle,
+                  color: textColor,
+                  fontWeight: 500,
+                }}
+              >
+                Language
+              </span>
+            </div>
 
             {/* Menu Button - visible on mobile AND tablet (below lg) */}
             <button

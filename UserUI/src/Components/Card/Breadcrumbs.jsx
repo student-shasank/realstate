@@ -1,15 +1,47 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
-const Breadcrumbs = ({ customLabel }) => {
+// Normalize a completion value the same way Listings.jsx does, so
+// "off-plan", "Off Plan", "OFF_PLAN", "offplan" (and similarly
+// "ready" / "Ready" / "READY") are all treated the same, no matter
+// exactly how it's spelled in the URL.
+const normalizeCompletion = (value) =>
+  (value || "").toString().toLowerCase().replace(/[-_\s]+/g, "");
+
+// completionLabel: pass the property's own completion status when rendering
+// the breadcrumb on the /listing/:id detail page, e.g. "Ready" or "Off-Plan".
+// customLabel: pass the property's title for the last crumb (instead of the raw Mongo ID).
+const Breadcrumbs = ({ customLabel, completionLabel }) => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const pathnames = location.pathname.split("/").filter((x) => x);
 
+  // Dynamic label for the "listings" segment — reflects whichever
+  // completion status (Ready / Off-Plan) is currently driving the
+  // results, instead of always showing "All Properties".
+  const normalizedQueryCompletion = normalizeCompletion(searchParams.get("completion"));
+  const normalizedPropCompletion = normalizeCompletion(completionLabel);
+
+  // On /listings, completion comes from the URL query param.
+  // On /listing/:id, completion comes from the property's own data (prop).
+  const effectiveCompletion = normalizedPropCompletion || normalizedQueryCompletion;
+
+  const isReadyCompletion = effectiveCompletion === "ready";
+  const isOffPlanCompletion = effectiveCompletion === "offplan";
+
+  const getListingsLabel = () => {
+    if (isReadyCompletion) return "Ready Properties";
+    if (isOffPlanCompletion) return "Off-Plan Properties";
+    return "All Properties";
+  };
+
   // Map technical URL segments to user-friendly display names
   const routeLabels = {
-    listings: "All Properties",
-    listing: "Property Detail",
+    listings: getListingsLabel(),
+    // "listing" (singular, detail page) also shows the completion-based
+    // label so the trail reads: Home > Ready/Off-Plan Properties > Title
+    listing: getListingsLabel(),
     contact: "Compare Properties",
     about: "About Yupland",
     "terms-of-use": "Terms of Use",
@@ -23,7 +55,7 @@ const Breadcrumbs = ({ customLabel }) => {
     if (routeLabels[value.toLowerCase()]) return routeLabels[value.toLowerCase()];
 
     // 2. Check if the value is a MongoDB ID (24 character hex string)
-    // If so, use a fallback since we don't have the property title here
+    // If so, show the property title if we have it
     if (/^[0-9a-fA-F]{24}$/.test(value)) {
       return customLabel || "Property Detail";
     }

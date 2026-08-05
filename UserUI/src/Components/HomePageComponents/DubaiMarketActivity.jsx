@@ -1,7 +1,28 @@
 import React from 'react';
 import patternBg from "../../assets/Vector (7).png"
+import offPlanReportPdf from "../../assets/Yupland_Dubai_OffPlan_Market_Report_2025.pdf"
+import readyReportPdf from "../../assets/Yupland_Dubai_Ready_Market_Report_2025.pdf"
 
-const MarketActivityCard = ({ percentage, title, transactions, reportLabel }) => {
+// NOTE: adjust this if your app stores the auth token under a different
+// localStorage key, or swap this out for a redux selector (e.g.
+// useSelector((state) => !!state.loginAuth?.user)) if login state lives
+// only in the store and isn't persisted to localStorage.
+const isUserLoggedIn = () => {
+  return Boolean(localStorage.getItem("token"));
+};
+
+const MarketActivityCard = ({ percentage, title, transactions, reportLabel, reportFile }) => {
+  const handleReportClick = (e) => {
+    if (!isUserLoggedIn()) {
+      e.preventDefault();
+      // Same global event ListingCard's onRequireLogin dispatches to pop
+      // open the login modal — keeps this consistent with the rest of
+      // the app instead of introducing a second login trigger.
+      window.dispatchEvent(new CustomEvent("openLogin"));
+    }
+    // If logged in, let the <a> tag's default behavior open the PDF.
+  };
+
   return (
     <div className="relative w-full max-w-[576px] h-auto lg:h-[402px] bg-[#01155E] rounded-[16px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)]">
       {/* Decorative Background Pattern - Absolute Positioned */}
@@ -45,9 +66,15 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel }) =>
 
       {/* Buttons Block - CENTER ALIGNED */}
       <div className="relative z-10 mt-10 lg:mt-0 flex flex-col gap-[20px] w-full max-w-[516px] mx-auto">
-        <button className="w-full font-['Archivo'] h-[50px] bg-[#F8FAFC] hover:bg-white transition-colors text-[#01155E] rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]">
+        <a
+          href={reportFile}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleReportClick}
+          className="w-full font-['Archivo'] h-[50px] bg-[#F8FAFC]  transition-colors text-[#01155E] rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]"
+        >
           {reportLabel}
-        </button>
+        </a>
         <button className="w-full h-[50px] font-['Archivo'] bg-transparent border border-white/30 hover:bg-white/10 transition-colors text-white rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]">
           Delivered via WhatsApp
         </button>
@@ -59,18 +86,25 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel }) =>
 const DubaiMarketActivity = () => {
   const marketData = [
     {
-      percentage: "65.3%",
+      percentage: "63.1%",
       title: "Dubai Off-Plan Transactions 2025",
-      transactions: "131,200",
-      reportLabel: "View 2025 Off-Plan Report"
+      transactions: "134,710",
+      reportLabel: "View 2025 Off-Plan Report",
+      reportFile: offPlanReportPdf
     },
     {
-      percentage: "34.7%",
+      percentage: "36.9%",
       title: "Dubai Ready Property Transactions 2025",
-      transactions: "69,620",
-      reportLabel: "View 2025 Ready Property Report"
+      transactions: "78,943",
+      reportLabel: "View 2025 Ready Property Report",
+      reportFile: readyReportPdf
     }
   ];
+
+  // Sum of both cards' transaction counts, e.g. 134,710 + 78,943 = 213,653
+  const totalTransactions = marketData
+    .reduce((sum, d) => sum + Number(d.transactions.replace(/,/g, "")), 0)
+    .toLocaleString();
 
   return (
     <section className="w-full py-16 lg:py-24 px-4 font-sans">
@@ -84,8 +118,11 @@ const DubaiMarketActivity = () => {
             </h2>
             <div className="flex w-[574px]"><div className="w-[240px] h-[8px] bg-[#01155E]"></div><div className="flex-1 h-[2px] bg-[#01155E]"></div></div>
           </div>
-          <p className="font-['General_Sans'] font-n text-[16px] lg:text-[20px] leading-none text-[#67739E] mt-5">
-            Source: Property Monitor · Dubai Land Department
+          <p className="font-['Archivo'] font-semibold text-[18px] lg:text-[22px] leading-snug text-[#01155E] mt-5">
+            {totalTransactions} residential &amp; commercial transactions
+          </p>
+          <p className="font-['General_Sans'] font-n text-[16px] lg:text-[20px] leading-snug text-[#67739E] mt-2 ">
+            Source: Property Monitor, based on Dubai Land Department data
           </p>
         </div>
 
@@ -98,6 +135,7 @@ const DubaiMarketActivity = () => {
               title={data.title}
               transactions={data.transactions}
               reportLabel={data.reportLabel}
+              reportFile={data.reportFile}
             />
           ))}
         </div>

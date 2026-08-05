@@ -20,7 +20,7 @@ import {
   Map,
   ChevronDown, ChevronUp, Play, Star, Phone, Mail, Heart,
   Share2, Maximize, Download, Wifi, Dumbbell, Car,
-  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image, ChevronLeft, ChevronRight, ArrowLeft,BadgeCheck,
+  ShieldCheck, Dog, Flame, Users, Waves, BanknoteArrowDown, Banknote, X, Image, ChevronLeft, ChevronRight, ArrowLeft, BadgeCheck,
   ShirtIcon
 } from 'lucide-react';
 import Appartmentimage from "../assets/Appartment.png"
@@ -233,18 +233,19 @@ function GalleryModal({
 
           <div className="flex gap-3">
             <button
+              onClick={onCallClick}
+              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors"
+            >
+              <Phone size={16} /> Call
+            </button>
+            <button
               onClick={onEmailClick}
               disabled={isEmailSending}
               className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <Mail size={16} /> {isEmailSending ? "Sending..." : "Email"}
             </button>
-            <button
-              onClick={onCallClick}
-              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors"
-            >
-              <Phone size={16} /> Call
-            </button>
+            
             <button
               onClick={onWhatsAppClick}
               className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[15px] hover:bg-green-50 transition-colors"
@@ -366,7 +367,7 @@ export default function PropertyDetail() {
     "outofstock",
   ];
 
- const getDisplayStatus = (status) => {
+  const getDisplayStatus = (status) => {
     if (!status) return "—";
 
     const key = status.toLowerCase().replace(/\s+/g, "");
@@ -376,8 +377,8 @@ export default function PropertyDetail() {
 
   const isOffPlan = completionStatus
     ? OFFPLAN_STATUSES.includes(
-        completionStatus.toLowerCase().replace(/\s+/g, "")
-      )
+      completionStatus.toLowerCase().replace(/\s+/g, "")
+    )
     : false;
 
   const developerImage =
@@ -390,8 +391,15 @@ export default function PropertyDetail() {
   const currentId = rawListing?._id || rawListing?.id;
 
   const agentName = agent?.name || rawListing?.agent_name || rawListing?.agentName || "Divyansh Chitkara";
-  const agentPhoneRaw =  "+971 505 773767";
+
+  // Primary agent phone
+  const agentPhoneRaw = "+971 505 773767";
   const agentPhoneDial = agentPhoneRaw.replace(/[^\d+]/g, "");
+
+  // Secondary agent phone
+  const agentPhoneRaw2 = "+1 437 328 8508";
+  const agentPhoneDial2 = agentPhoneRaw2.replace(/[^\d+]/g, "");
+
   const agencyName = developer || rawListing?.developer_name || rawListing?.agency_name || "N/A";
 
   // Same behavior as ListingCard's handleCallClick
@@ -401,39 +409,30 @@ export default function PropertyDetail() {
 
   // Same behavior as ListingCard's handleWhatsAppClick
   const handleWhatsAppClick = () => {
-    const whatsappNumber = agentPhoneDial.replace(/^\+/, '');
+  const whatsappNumber = agentPhoneDial.replace(/^\+/, '');
 
-    if (!whatsappNumber) {
-      toast.error("Contact number not available");
-      return;
-    }
+  if (!whatsappNumber) {
+    toast.error("Contact number not available");
+    return;
+  }
 
-    const listingUrl = rawListing?.id
-      ? `${window.location.origin}/listing/${rawListing.id}`
-      : window.location.href;
+  const listingUrl = rawListing?.id
+    ? `${window.location.origin}/listing/${rawListing.id}`
+    : window.location.href;
 
-    const priceText = price
-      ? `${currency?.toUpperCase() || ''} ${Number(price).toLocaleString()}`
-      : 'Price on request';
+  const message =
+    `Hi Divyansh,\n\n` +
+    `I'm reaching out regarding the following property on Yupland.\n\n` +
+    `Project: ${title || 'N/A'}\n` +
+    `Developer: ${developer || 'N/A'}\n\n` +
+    `Listing ID: ${currentId || 'N/A'}\n` +
+    `Listing: ${listingUrl}\n\n` +
+    `I look forward to discussing this property with you.`;
 
-    const locationText = [location?.address, location?.country]
-      .filter(Boolean)
-      .join(', ') || 'N/A';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-    const message =
-      `Hello, I'm interested in this property listed on your platform:\n\n` +
-      `🏠 *${title || 'Property'}*\n` +
-      `📍 Location: ${locationText}\n` +
-      `💰 Price: ${priceText}\n` +
-      `🆔 Ref: Yupland - ${currentId || 'N/A'}\n\n` +
-      `Listing link: ${listingUrl}\n\n` +
-      `Could you please share more details? Thank you.`;
-
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-  };
-
+  window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+};
   // Same behavior as ListingCard's handleConnect
   const handleEmailClick = async () => {
     if (!isLoggedIn) {
@@ -569,12 +568,12 @@ export default function PropertyDetail() {
         rawListing?.project_status ||
         "Vacant",
     },
-   {
-  label: "Service Charges",
-  value: serviceCharges?.value
-    ? `AED ${serviceCharges.value} / Sq Ft`
-    : "—",
-}
+    {
+      label: "Service Charges",
+      value: serviceCharges?.value
+        ? `AED ${serviceCharges.value} / Sq Ft`
+        : "—",
+    }
   ];
 
   const overviewStats = [
@@ -617,19 +616,19 @@ export default function PropertyDetail() {
   ];
   const buildingInfoRow2 = [
     { label: "Total Parking Spaces", value: buildingInfo?.totalParkingSpaces ?? "—" },
-   {
-  label: "Total Building Area",
-  value:
-    buildingInfo?.totalBuildingArea &&
-    buildingInfo.totalBuildingArea !== "—" &&
-    buildingInfo.totalBuildingArea !== "-"
-      ? `${buildingInfo.totalBuildingArea} Sq Ft`
-      : totalBuildingArea &&
-        totalBuildingArea !== "—" &&
-        totalBuildingArea !== "-"
-      ? `${totalBuildingArea} Sq Ft`
-      : "—",
-},
+    {
+      label: "Total Building Area",
+      value:
+        buildingInfo?.totalBuildingArea &&
+          buildingInfo.totalBuildingArea !== "—" &&
+          buildingInfo.totalBuildingArea !== "-"
+          ? `${buildingInfo.totalBuildingArea} Sq Ft`
+          : totalBuildingArea &&
+            totalBuildingArea !== "—" &&
+            totalBuildingArea !== "-"
+            ? `${totalBuildingArea} Sq Ft`
+            : "—",
+    },
     { label: "Elevators", value: buildingInfo?.elevators || "—" },
   ];
 
@@ -651,31 +650,31 @@ export default function PropertyDetail() {
   };
 
   // Single, clean handleSubmit — handles both "brochure" and "availability" popups
- const handleSubmit = async () => {
-  if (!name || !email || !phone) return;
+  const handleSubmit = async () => {
+    if (!name || !email || !phone) return;
 
-  const result = await dispatch(
-    sendListingEnquiry({
-      listingId: rawListing?._id,
-      name,
-      email,
-      phone,
-      requestType: popupType,
-    })
-  );
+    const result = await dispatch(
+      sendListingEnquiry({
+        listingId: rawListing?._id,
+        name,
+        email,
+        phone,
+        requestType: popupType,
+      })
+    );
 
-  if (sendListingEnquiry.fulfilled.match(result)) {
-    if (popupType === "brochure" && brochureUrl) {
-      window.open(brochureUrl, "_blank");
+    if (sendListingEnquiry.fulfilled.match(result)) {
+      if (popupType === "brochure" && brochureUrl) {
+        window.open(brochureUrl, "_blank");
+      }
+
+      setName("");
+      setEmail("");
+      setPhone("");
+      setPopupType(null);
+      dispatch(resetEnquiryState());
     }
-
-    setName("");
-    setEmail("");
-    setPhone("");
-    setPopupType(null);
-    dispatch(resetEnquiryState());
-  }
-};
+  };
 
   return (
     <div className="bg-white min-h-screen mt-25">
@@ -727,18 +726,34 @@ export default function PropertyDetail() {
               </p>
             </div>
 
-            <div className="flex items-center justify-center gap-2.5 pb-5 mb-5 border-b border-[#D9E1F2]">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
-                  <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
-                </svg>
+            <div className="flex flex-col items-center gap-3 pb-5 mb-5 border-b border-[#D9E1F2]">
+              <div className="flex items-center justify-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
+                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                  </svg>
+                </div>
+                <a
+                  href={`tel:${agentPhoneDial}`}
+                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                >
+                  {agentPhoneRaw}
+                </a>
               </div>
-              <a
-                href={`tel:${agentPhoneDial}`}
-                className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
-              >
-                {agentPhoneRaw}
-              </a>
+
+              <div className="flex items-center justify-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
+                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
+                  </svg>
+                </div>
+                <a
+                  href={`tel:${agentPhoneDial2}`}
+                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                >
+                  {agentPhoneRaw2}
+                </a>
+              </div>
             </div>
 
             <div className="text-center pb-5 mb-5 border-b border-[#D9E1F2]">
@@ -1066,36 +1081,36 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-           <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-  {unitTypesList.map((unit, i) => (
-    <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
-     <h3 className="text-[#01155E] font-semibold text-[24px]">
-  {unit.type === 0 || unit.type === "0"
-    ? "Studio"
-    : unit.type === 1 || unit.type === "1"
-    ? "1 Bedroom"
-    : `${unit.type} Bedrooms`}
-</h3>
-      <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
-        <span className="flex items-center gap-2">
-          <Maximize size={20} className="text-[#01155E]" />
-          {unit.sqft}
-        </span>
-        <span className="flex items-center gap-2">
-          <Banknote size={20} className="text-[#01155E]" />
-          Starting at {unit.price}
-        </span>
-      </div>
-      <button
-        onClick={() => setPopupType("availability")}
-        className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
-      >
-        Check Availability
-      </button>
-    </div>
-  ))}
-</div>
+            <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+              {unitTypesList.map((unit, i) => (
+                <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
+                  <h3 className="text-[#01155E] font-semibold text-[24px]">
+                    {unit.type === 0 || unit.type === "0"
+                      ? "Studio"
+                      : unit.type === 1 || unit.type === "1"
+                        ? "1 Bedroom"
+                        : `${unit.type} Bedrooms`}
+                  </h3>
+                  <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
+                    <span className="flex items-center gap-2">
+                      <Maximize size={20} className="text-[#01155E]" />
+                      {unit.sqft}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Banknote size={20} className="text-[#01155E]" />
+                      Starting at {unit.price}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setPopupType("availability")}
+                    className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
+                  >
+                    Check Availability
+                  </button>
+                </div>
+              ))}
+            </div>
 
             <div className="mb-8">
               <h2 className="text-[28px] font-bold text-[#01155E] mb-6">Building Information</h2>
@@ -1122,17 +1137,17 @@ export default function PropertyDetail() {
             <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenites</h2>
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
-  {amenitiesList.map((item, i) => (
-    <div key={i} className="flex items-start gap-4 group">
-      <div className="flex-shrink-0 transition-transform group-hover:scale-110">
-        <AmenityIcon type={item.icon} />
-      </div>
-      <span className="text-[#01155E] font-medium text-[17px] leading-tight">
-        {item.label}
-      </span>
-    </div>
-  ))}
-</div>
+                {amenitiesList.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2 group">
+                    <div className="flex-shrink-0 transition-transform group-hover:scale-110 pt-2px">
+                      <AmenityIcon type={item.icon} />
+                    </div>
+                    <span className="text-[#01155E] font-medium text-[17px] leading-tight">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
               <div className="flex justify-center pt-4 border-t border-gray-50">
                 <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-10 py-3.5 rounded-xl uppercase text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">
@@ -1291,15 +1306,15 @@ export default function PropertyDetail() {
               <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-6">
 
                 <div className="flex items-start gap-2 mb-4">
-  <Star
-    size={18}
-    fill="#0e0d0d"
-    className="mt-1 flex-shrink-0"
-  />
-  <span className="text-[#01155E] font-semibold text-[22px] capitalize leading-[1.3]">
-    {title || "—"}
-  </span>
-</div>
+                  <Star
+                    size={18}
+                    fill="#0e0d0d"
+                    className="mt-1 flex-shrink-0"
+                  />
+                  <span className="text-[#01155E] font-semibold text-[22px] capitalize leading-[1.3]">
+                    {title || "—"}
+                  </span>
+                </div>
 
                 <div className="flex items-center gap-2 mb-4">
                   <span className="bg-[#01155E] text-white text-[12px] px-2.5 py-1.5 rounded-[4px] font-medium uppercase">
@@ -1308,20 +1323,20 @@ export default function PropertyDetail() {
                 </div>
 
                 <div className="flex items-start gap-2 text-[#67739E] text-[18px] mb-4">
-  <MapPin
-    size={19}
-    className="mt-1 flex-shrink-0 text-[#67739E]"
-  />
+                  <MapPin
+                    size={19}
+                    className="mt-1 flex-shrink-0 text-[#67739E]"
+                  />
 
-  <span className="leading-7">
-    {[
-      location?.address,
-      location?.country,
-    ]
-      .filter(Boolean)
-      .join(", ") || "—"}
-  </span>
-</div>
+                  <span className="leading-7">
+                    {[
+                      location?.address,
+                      location?.country,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "—"}
+                  </span>
+                </div>
                 <hr className="border-[#D9E1F2] mb-4" />
 
                 <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
@@ -1363,42 +1378,49 @@ export default function PropertyDetail() {
                 <h4 className="text-[#01155E] font-semibold text-[20px] mb-4">Contact Us Now !</h4>
 
                 <div className="rounded-xl bg-[#F5F8FF] p-4 w-full max-w-[350px]">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img
-  src={Broker}
-  alt="Agent"
-  className="w-14 h-14 rounded-full object-cover object-[center_20%]"
-/>
-                    <div>
-                      {/* <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
-                        {agent?.name || "—"}
-                      </div> */}
-                        <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-2">
-                      Divyansh Chitkara
-                      </div>
-                      <div className="text-[#01155E] flex items-center gap-2 text-[18px]">
-                        <Phone size={18} />
-                        <span>{'+971 505 773767'}</span>
-                      </div>
-                    </div>
-                  </div>
+  <div className="flex items-center gap-4 mb-4">
+    <img
+      src={Broker}
+      alt="Agent"
+      className="w-14 h-14 rounded-full object-cover object-[center_20%] ring-2 ring-white shadow-sm"
+    />
+    <div>
+      <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-1 mt-2">
+        Divyansh Chitkara
+      </div>
+     
+    </div>
+  </div>
 
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={handleCallClick}
-                      className="w-[42px] h-[42px] flex items-center justify-center border border-[#01155E] rounded-[10px]"
-                    >
-                      <Phone size={18} />
-                    </button>
-                    <button
-                      onClick={handleEmailClick}
-                      disabled={isEmailSending}
-                      className="flex-1 h-[42px] border border-[#01155E] text-[#01155E] rounded-[10px] font-semibold text-[18px] hover:bg-[#01155E] hover:text-white transition-all disabled:opacity-50"
-                    >
-                      {isEmailSending ? "Connecting..." : "Request Details"}
-                    </button>
-                  </div>
-                </div>
+  <div className="flex items-center gap-2.5">
+    <button
+      onClick={handleCallClick}
+      className="w-[46px] h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] text-[#01155E] rounded-[12px] shadow-sm hover:bg-[#01155E] hover:border-[#01155E] hover:text-white hover:shadow-md transition-all duration-200"
+      aria-label="Call"
+    >
+      <Phone size={19} />
+    </button>
+
+    <button
+      onClick={handleWhatsAppClick}
+      className="w-[46px] h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] rounded-[12px] shadow-sm hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md transition-all duration-200 group"
+      aria-label="Chat on WhatsApp"
+    >
+      <svg width="19" height="19" viewBox="0 0 24 24" className="fill-[#25D366] group-hover:fill-white transition-colors">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.857L.057 23.571l5.9-1.548A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.939 0-3.756-.523-5.318-1.432l-.381-.226-3.499.918.934-3.408-.249-.394A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+      </svg>
+    </button>
+
+    <button
+      onClick={handleEmailClick}
+      disabled={isEmailSending}
+      className="flex-1 h-[46px] bg-[#01155E] text-white rounded-[12px] font-semibold text-[15px] shadow-sm hover:bg-[#0A2470] hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isEmailSending ? "Connecting..." : "Request Details"}
+    </button>
+  </div>
+</div>
 
               </div>
             </div>
@@ -1438,12 +1460,6 @@ export default function PropertyDetail() {
                     </button>
                   </div>
                 </div>
-
-
-
-
-
-                
               </div>
             ))}
           </div>

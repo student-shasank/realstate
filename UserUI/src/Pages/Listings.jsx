@@ -32,6 +32,13 @@ import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
 import MapCard from "../Components/Card/MapCard"
 
+// Normalize a completion value for robust, case/format-insensitive
+// comparisons. This way "off-plan", "Off Plan", "OFF_PLAN", "offplan"
+// (and similarly "ready" / "Ready" / "READY") are all treated the same,
+// no matter exactly how the nav links or URL params spell them.
+const normalizeCompletion = (value) =>
+  (value || "").toString().toLowerCase().replace(/[-_\s]+/g, "");
+
 const Listings = () => {
   const MAPBOX_TOKEN = VITE_MAPBOX_TOKEN;
   const [viewport, setViewport] = useState({
@@ -144,6 +151,48 @@ const Listings = () => {
   const totalPages = isSortActive ? sortTotalPages : searchTotalPages;
   const currentPage = isSortActive ? sortCurrentPage : searchCurrentPage;
 
+  // Normalized completion value used for all status comparisons below.
+  const normalizedCompletionValue = normalizeCompletion(completion);
+
+  // Whether "Ready" properties are selected — Handover Year and Payment
+  // Plan don't apply to ready (already-completed) properties, so both
+  // filters are disabled whenever this is true.
+  // NOTE: uses a normalized comparison so this keeps working regardless
+  // of exactly how "ready" is cased/formatted in the URL or nav links.
+  const isReadyCompletion = normalizedCompletionValue === "ready";
+
+  // Whether "Off-plan" properties are selected.
+  const isOffPlanCompletion = normalizedCompletionValue === "offplan";
+
+  // Dynamic page heading — reflects whichever completion status (Ready /
+  // Off-plan) is currently driving the results, per client requirement
+  // that the page respond to `completion` instead of always showing the
+  // same generic title.
+  const getHeadingText = () => {
+    if (isReadyCompletion) return "Ready Properties for sale in UAE";
+    if (isOffPlanCompletion) return "Off-Plan Properties for sale in UAE";
+    return "Properties for sale in UAE";
+  };
+
+  // Clear any stale Handover Year selection, close its dropdown, and
+  // strip it from the URL as soon as "Ready" is selected, so a disabled
+  // filter can't silently stay applied to the query.
+  useEffect(() => {
+    if (isReadyCompletion) {
+      setSelectedHandoverYears([]);
+      setIsHandoverOpen(false);
+      updateParams("handoverYear", "");
+    }
+    // Sale Status option set differs between Ready and Off-Plan, so clear
+    // any stale selection and strip it from the URL whenever completion
+    // changes (prevents e.g. a leftover "announced" selection from
+    // silently persisting after switching to Ready).
+    setSelectedSaleStatus([]);
+    setIsSaleStatusOpen(false);
+    updateParams("saleStatus", "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReadyCompletion]);
+
   // FETCH A SPECIFIC PAGE (replaces results — used by pagination controls)
   // Now includes sortBy so paging through results keeps the active sort,
   // and routes through the dedicated sort endpoint when a non-default
@@ -168,7 +217,7 @@ const Listings = () => {
         maxPrice: maxPrice || "",
         developer: selectedDevelopers,
         emirates: selectedEmirates,
-        handoverYear: selectedHandoverYears,
+        handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
         saleStatus: selectedSaleStatus,
         sortBy: selectedSort,
         page: pageNumber,
@@ -198,6 +247,7 @@ const Listings = () => {
       selectedSaleStatus,
       selectedSort,
       isSortActive,
+      isReadyCompletion,
       totalPages,
       currentPage,
     ]
@@ -220,7 +270,9 @@ const Listings = () => {
       : [];
     setSelectedEmirates(emiratesArray);
 
-    const urlHandoverYear = searchParams.get("handoverYear") || "";
+    const urlIsReady = normalizeCompletion(urlCompletion) === "ready";
+
+    const urlHandoverYear = urlIsReady ? "" : (searchParams.get("handoverYear") || "");
     const handoverYearArray = urlHandoverYear
       ? urlHandoverYear.split(",").map((item) => item.toLowerCase()).filter(Boolean)
       : [];
@@ -293,7 +345,7 @@ const Listings = () => {
       maxPrice: maxPrice || "",
       developer: selectedDevelopers,
       emirates: selectedEmirates,
-      handoverYear: selectedHandoverYears,
+      handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
       saleStatus: selectedSaleStatus,
       sortBy: value,
       page: 1,
@@ -468,6 +520,8 @@ const Listings = () => {
   };
 
   const handleHandoverYearChange = (value) => {
+    if (isReadyCompletion) return;
+
     const updatedYears = selectedHandoverYears.includes(value)
       ? selectedHandoverYears.filter((item) => item !== value)
       : [...selectedHandoverYears, value];
@@ -500,13 +554,26 @@ const Listings = () => {
     { label: "Post 2030", value: "post 2030" },
   ];
 
-  const saleStatusOptions = [
+  // Sale status options differ by completion type:
+  // - Off-Plan: Announced, Presale/EOI, Start of Sales, On Sale, Out of Stock
+  // - Ready: On Sale, Exclusive Inventory, Out of Stock
+  const offPlanSaleStatusOptions = [
     { label: "Announced", value: "announced" },
     { label: "Presale/EOI", value: "presale_eoi" },
     { label: "Start of Sales", value: "start_of_sales" },
     { label: "On Sale", value: "on_sale" },
     { label: "Out of Stock", value: "out_of_stock" },
   ];
+
+  const readySaleStatusOptions = [
+    { label: "On Sale", value: "on_sale" },
+    { label: "Exclusive Inventory", value: "exclusive_inventory" },
+    { label: "Out of Stock", value: "out_of_stock" },
+  ];
+
+  const saleStatusOptions = isReadyCompletion
+    ? readySaleStatusOptions
+    : offPlanSaleStatusOptions;
 
   const developerOptions = [
     "Zara Builders",
@@ -623,7 +690,7 @@ const Listings = () => {
                 backgroundSize: "600px 6px",
               }}
             >
-              Properties for sale in UAE
+              {getHeadingText()}
             </h1>
           </div>
 
@@ -756,7 +823,7 @@ const Listings = () => {
                     maxPrice,
                     developer: selectedDevelopers,
                     emirates: selectedEmirates,
-                    handoverYear: selectedHandoverYears,
+                    handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
                     saleStatus: selectedSaleStatus,
                     sortBy: selectedSort,
                     page: 1,
@@ -983,6 +1050,9 @@ const Listings = () => {
                 )}
               </div>
 
+              {/* Sale Status — option list changes depending on whether
+                  Off-Plan or Ready is selected (see saleStatusOptions
+                  above). Always enabled. */}
               <div className="relative w-full font-['General_Sans']" ref={saleStatusRef}>
                 <button
                   type="button"
@@ -1041,16 +1111,26 @@ const Listings = () => {
                 )}
               </div>
 
+              {/* Handover Year — disabled whenever "Ready" completion is
+                  selected, since handover year only applies to off-plan
+                  projects. */}
               <div className="relative w-full font-['General_Sans']" ref={handoverRef}>
                 <button
                   type="button"
+                  disabled={isReadyCompletion}
                   onClick={() => {
+                    if (isReadyCompletion) return;
                     const wasOpen = isHandoverOpen;
                     closeAllDropdowns();
                     setIsHandoverOpen(!wasOpen);
                   }}
-                  className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
-                  style={{ borderRadius: isHandoverOpen ? "16px 16px 0 0" : "16px" }}
+                  title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
+                  className={`w-full h-[48px] px-[12px] flex items-center justify-between border text-[16px] transition-all ${
+                    isReadyCompletion
+                      ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
+                      : "bg-white border-[#D1D5DB] text-[#67739E]"
+                  }`}
+                  style={{ borderRadius: isHandoverOpen && !isReadyCompletion ? "16px 16px 0 0" : "16px" }}
                 >
                   <span className="truncate">
                     {selectedHandoverYears.length > 0
@@ -1059,7 +1139,7 @@ const Listings = () => {
                   </span>
 
                   <svg
-                    className={`w-5 h-5 text-[#01155E] transition-transform duration-200 ${isHandoverOpen ? "rotate-180" : ""}`}
+                    className={`w-5 h-5 ${isReadyCompletion ? "text-gray-400" : "text-[#01155E]"} transition-transform duration-200 ${isHandoverOpen ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1073,7 +1153,7 @@ const Listings = () => {
                   </svg>
                 </button>
 
-                {isHandoverOpen && (
+                {!isReadyCompletion && isHandoverOpen && (
                   <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
                     <div className="p-0">
                       {handoverYears.map((year, index) => (
@@ -1099,7 +1179,18 @@ const Listings = () => {
                 )}
               </div>
 
-              <select className="h-[48px] bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[#6B7280] text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat cursor-pointer">
+              {/* Payment Plan — disabled whenever "Ready" completion is
+                  selected, since payment plans only apply to off-plan
+                  projects. */}
+              <select
+                disabled={isReadyCompletion}
+                title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
+                className={`h-[48px] border rounded-[16px] px-4 text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat ${
+                  isReadyCompletion
+                    ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
+                    : "bg-white border-[#D1D5DB] text-[#6B7280] cursor-pointer"
+                }`}
+              >
                 <option value="">Payment Plan</option>
               </select>
 
