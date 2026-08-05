@@ -1,5 +1,5 @@
 import React from 'react';
-import platformindependent from "../../assets/platformindependent.jpeg"
+import platformindependent from "../../assets/brocker.jpeg"
 
 const PlatformManagement = () => {
   return (

@@ -50,7 +50,7 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
       {/* Card Header Content - CENTER ALIGNED */}
       <div className="relative z-10 flex flex-col items-center text-center">
         <h3 className="font-['General_Sans'] font-medium text-[48px] lg:text-[64px] leading-[120%] text-white tracking-tight">
-          {percentage}
+          {percentage}<span className='text-[52px]'>%</span>
         </h3>
         <p className="font-['General_Sans'] font-medium text-[14px] lg:text-[16px] leading-none text-white mt-2">
           {title}
@@ -86,14 +86,14 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
 const DubaiMarketActivity = () => {
   const marketData = [
     {
-      percentage: "63.1%",
+      percentage: "63.1",
       title: "Dubai Off-Plan Transactions 2025",
       transactions: "134,710",
       reportLabel: "View 2025 Off-Plan Report",
       reportFile: offPlanReportPdf
     },
     {
-      percentage: "36.9%",
+      percentage: "36.9",
       title: "Dubai Ready Property Transactions 2025",
       transactions: "78,943",
       reportLabel: "View 2025 Ready Property Report",
