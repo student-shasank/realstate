@@ -300,7 +300,7 @@ function Navbar() {
                 color: textColor,
               }}
             >
-              About us
+              About 
             </Link>
 
           
@@ -568,7 +568,7 @@ function Navbar() {
                 fontWeight: location.pathname === "/about" ? 700 : 500,
               }}
             >
-              About us
+              About 
             </Link>
 
             <Link

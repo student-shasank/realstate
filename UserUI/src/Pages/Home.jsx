@@ -190,12 +190,12 @@ const Home = () => {
     }
     if (!isReadyCompletion && paymentPlan) params.set('paymentPlan', paymentPlan);
     if (selectedDevelopers.length > 0) {
-  const normalizedDevelopers = selectedDevelopers.map((dev) =>
-    dev.toLowerCase().trim()
-  );
+      const normalizedDevelopers = selectedDevelopers.map((dev) =>
+        dev.toLowerCase().trim()
+      );
 
-  params.set("developer", normalizedDevelopers.join(","));
-}
+      params.set("developer", normalizedDevelopers.join(","));
+    }
     navigate(`/listings?${params.toString()}`);
   };
 
@@ -210,12 +210,12 @@ const Home = () => {
   const [selectedEmirates, setSelectedEmirates] = React.useState([]);
 
   const handoverYears = [
-  { label: "2026", value: "2026" },
-  { label: "2027", value: "2027" },
-  { label: "2028", value: "2028" },
-  { label: "2029", value: "2029" },
-  { label: "Post 2030", value: "post 2030" },
-];
+    { label: "2026", value: "2026" },
+    { label: "2027", value: "2027" },
+    { label: "2028", value: "2028" },
+    { label: "2029", value: "2029" },
+    { label: "Post 2030", value: "post 2030" },
+  ];
 
   // Sale status options differ by completion type:
   // - Off-Plan: Announced, Presale/EOI, Start of Sales, On Sale, Out of Stock
@@ -262,7 +262,7 @@ const Home = () => {
             Dubai Real Estate Investments
           </h1>
           <h3 className="text-white text-[14px] sm:text-[17px] md:text-[21px] lg:text-[24px] font-bold text-center mb-4 sm:mb-5 mt-3 sm:mt-5 drop-shadow-2xl px-2" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '500', letterSpacing: '0%' }}>
-Off-plan (Pre-construction) and Ready properties tailored to your investment goals
+            Off-plan (Pre-construction) and Ready properties tailored to your investment goals
           </h3>
 
           {/* <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
@@ -272,39 +272,73 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
               </button>
             ))}
           </div> */}
-         <div className="flex flex-row items-center bg-transparent mx-auto" style={{ display: 'inline-flex', width: '1192px', height: '70px', padding: '12px', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
-  {['Properties', 'Off-Plan', 'Ready', 'Metro Expansion'].map((tab) => (
+         <div
+  className="flex flex-row items-center bg-transparent mx-auto"
+  style={{
+    display: "inline-flex",
+    width: "1192px",
+    height: "70px",
+    padding: "12px",
+    gap: "16px",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  {[
+    "Off-plan Properties",
+    "Ready Properties",
+    "New Launches",
+    "Metro Expansion",
+  ].map((tab) => (
     <button
       key={tab}
       onClick={() => {
-        if (tab === 'Off-Plan' || tab === 'Ready') {
-          dispatch(setCompletion(tab));
-          const params = new URLSearchParams();
-          params.set('completion', tab);
+        const params = new URLSearchParams();
+
+        if (tab === "Off-plan Properties") {
+          dispatch(setCompletion("Off-Plan"));
+          params.set("completion", "Off-Plan");
           navigate(`/listings?${params.toString()}`);
-        } else if (tab === 'Agent') {
-          navigate('/agents');
-        } else if (tab === 'Metro Expansion') {
+        } 
+        else if (tab === "Ready Properties") {
+          dispatch(setCompletion("Ready"));
+          params.set("completion", "Ready");
+          navigate(`/listings?${params.toString()}`);
+        } 
+        else if (tab === "New Launches") {
+          dispatch(setCompletion("Off-Plan"));
+          params.set("completion", "Off-Plan");
+
+          // Show only these statuses
+          params.set(
+            "saleStatus",
+            "announced,presale_eoi,start_of_sales"
+          );
+
+          navigate(`/listings?${params.toString()}`);
+        } 
+        else if (tab === "Metro Expansion") {
           window.open(
-            'https://www.google.com/maps/d/u/1/edit?mid=193yuyhpEkRom7IC2tBpfgYI2LVShBvo&usp=sharing',
-            '_blank',
-            'noopener,noreferrer'
+            "https://www.google.com/maps/d/u/1/edit?mid=193yuyhpEkRom7IC2tBpfgYI2LVShBvo&usp=sharing",
+            "_blank",
+            "noopener,noreferrer"
           );
         }
-        // 'Properties' tab: no navigation, just stays here and shows the search bar below
       }}
       className="transition-all flex items-center justify-center font-['Archivo']"
       style={{
-        width: '280px',
-        height: '46px',
-        borderRadius: '8px',
-        fontWeight: '600',
-        fontSize: '20px',
-        border: 'none',
-        cursor: 'pointer',
-        backgroundColor: tab === 'Properties' ? '#01155E' : '#FFFFFF',
-        color: tab === 'Properties' ? '#FFFFFF' : '#5d6a92',
-        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.08)'
+        width: "280px",
+        height: "46px",
+        borderRadius: "8px",
+        fontWeight: "600",
+        fontSize: "20px",
+        border: "none",
+        cursor: "pointer",
+        backgroundColor:
+          tab === "Off-plan Properties" ? "#01155E" : "#FFFFFF",
+        color:
+          tab === "Off-plan Properties" ? "#FFFFFF" : "#5d6a92",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.08)",
       }}
     >
       {tab}
@@ -312,7 +346,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
   ))}
 </div>
 
-    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-5">
               <div className="relative flex-grow">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
@@ -324,15 +358,15 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4 ">
-              <div className="flex bg-white/40 py-1 px-2 rounded-full border border-white/30 shadow-inner w-full md:w-fit justify-center md:justify-start -mt-1">
-                {['Off-Plan', 'Ready', ].map((status) => {
+              <div className="flex bg-white/40 py-1 px-2 rounded-lg border border-white/30 shadow-inner w-full md:w-fit justify-center md:justify-start -mt-1">
+                {['Off-Plan', 'Ready',].map((status) => {
                   const isActive = completion === status;
 
                   return (
                     <button
                       key={status}
                       onClick={() => dispatch(setCompletion(status))}
-                      className={`px-5 sm:px-7 md:px-10 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-full flex-1 md:flex-none ${isActive
+                      className={`px-5 sm:px-7 md:px-10 py-2 text-sm font-semibold font-['Archivo'] transition-all  rounded-lg flex-1 md:flex-none ${isActive
                         ? 'bg-[#01155E] text-white shadow-md'
                         : 'text-[#01155E] bg-[#ffff]'
                         }`}
@@ -562,11 +596,10 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                     setHandoverOpen(nextState);
                   }}
                   title={isReadyCompletion ? 'Not applicable for Ready properties' : undefined}
-                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${
-                    isReadyCompletion
+                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${isReadyCompletion
                       ? 'bg-gray-100 !text-gray-400 cursor-not-allowed opacity-70'
                       : 'bg-white'
-                  }`}
+                    }`}
                 >
                   <span className="truncate">
                     {selectedHandoverYears.length > 0
@@ -579,28 +612,28 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 {!isReadyCompletion && handoverOpen && (
                   <div className="absolute top-full left-0 mt-2 w-full z-50 flex flex-col gap-0.5">
                     {handoverYears.map((year) => (
-  <div
-    key={year.value}
-    onClick={() => {
-      setSelectedHandoverYears((prev) =>
-        prev.includes(year.value)
-          ? prev.filter((item) => item !== year.value)
-          : [...prev, year.value]
-      );
-    }}
-    className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
-  >
-    <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
-      {selectedHandoverYears.includes(year.value) && (
-        <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-      )}
-    </div>
+                      <div
+                        key={year.value}
+                        onClick={() => {
+                          setSelectedHandoverYears((prev) =>
+                            prev.includes(year.value)
+                              ? prev.filter((item) => item !== year.value)
+                              : [...prev, year.value]
+                          );
+                        }}
+                        className="flex items-center gap-4 px-4 py-3 bg-white rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors border border-transparent active:border-gray-200"
+                      >
+                        <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                          {selectedHandoverYears.includes(year.value) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
+                        </div>
 
-    <span className={DROPDOWN_OPTION_TEXT_CLASS}>
-      {year.label}
-    </span>
-  </div>
-))}
+                        <span className={DROPDOWN_OPTION_TEXT_CLASS}>
+                          {year.label}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -623,11 +656,10 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                     setPaymentOpen(nextState);
                   }}
                   title={isReadyCompletion ? 'Not applicable for Ready properties' : undefined}
-                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${
-                    isReadyCompletion
+                  className={`w-full flex items-center justify-between rounded-xl px-4 py-2.5 shadow-sm transition-colors ${DROPDOWN_TRIGGER_TEXT_CLASS} ${isReadyCompletion
                       ? 'bg-gray-100 !text-gray-400 cursor-not-allowed opacity-70'
                       : 'bg-white'
-                  }`}
+                    }`}
                 >
                   <span className="truncate">{paymentPlan || 'Payment Plan'}</span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${isReadyCompletion ? 'text-gray-300' : 'text-gray-400'} ${paymentOpen ? 'rotate-180' : ''}`} />
@@ -647,57 +679,56 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
                 )}
               </div>
               <div className="relative w-full font-['Archivo']" ref={emirateRef}>
-  <button
-    type="button"
-    onClick={() => {
-      const next = !isEmirateOpen;
-      closeAll();
-      setIsEmirateOpen(next);
-    }}
-    className={`w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}
-    style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
-  >
-    <span className="truncate">
-      {selectedEmirates.length > 0
-        ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? 's' : ''} Selected`
-        : "Emirates"}
-    </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !isEmirateOpen;
+                    closeAll();
+                    setIsEmirateOpen(next);
+                  }}
+                  className={`w-full h-[41px] px-4 flex items-center justify-between bg-white rounded-xl shadow-sm ${DROPDOWN_TRIGGER_TEXT_CLASS}`}
+                  style={{ borderRadius: isEmirateOpen ? "16px 16px 0 0" : "16px" }}
+                >
+                  <span className="truncate">
+                    {selectedEmirates.length > 0
+                      ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? 's' : ''} Selected`
+                      : "Emirates"}
+                  </span>
 
-    <ChevronDown
-      className={`h-4 w-4 text-gray-400 transition-transform ${isEmirateOpen ? "rotate-180" : ""}`}
-    />
-  </button>
+                  <ChevronDown
+                    className={`h-4 w-4 text-gray-400 transition-transform ${isEmirateOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-  {isEmirateOpen && (
-    <div className="absolute top-full left-0 z-50 w-full bg-white rounded-b-xl shadow-lg border border-[#D9E1F2] border-t-0 overflow-hidden">
-      {emirates.map((emirate, idx) => (
-        <div
-          key={emirate}
-          onClick={() => {
-            setSelectedEmirates((prev) =>
-              prev.includes(emirate)
-                ? prev.filter((item) => item !== emirate)
-                : [...prev, emirate]
-            );
-          }}
-          className={`flex items-center gap-[10px] w-full h-[44px] px-4 cursor-pointer hover:bg-[#F5F7FC] transition-colors ${
-            idx !== emirates.length - 1 ? "border-b border-[#E9EDF7]" : ""
-          }`}
-        >
-          <div className="w-[16px] h-[16px] shrink-0 rounded-full border border-[#67739E] flex items-center justify-center">
-            {selectedEmirates.includes(emirate) && (
-              <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
-            )}
-          </div>
+                {isEmirateOpen && (
+                  <div className="absolute top-full left-0 z-50 w-full bg-white rounded-b-xl shadow-lg border border-[#D9E1F2] border-t-0 overflow-hidden">
+                    {emirates.map((emirate, idx) => (
+                      <div
+                        key={emirate}
+                        onClick={() => {
+                          setSelectedEmirates((prev) =>
+                            prev.includes(emirate)
+                              ? prev.filter((item) => item !== emirate)
+                              : [...prev, emirate]
+                          );
+                        }}
+                        className={`flex items-center gap-[10px] w-full h-[44px] px-4 cursor-pointer hover:bg-[#F5F7FC] transition-colors ${idx !== emirates.length - 1 ? "border-b border-[#E9EDF7]" : ""
+                          }`}
+                      >
+                        <div className="w-[16px] h-[16px] shrink-0 rounded-full border border-[#67739E] flex items-center justify-center">
+                          {selectedEmirates.includes(emirate) && (
+                            <div className="w-[8px] h-[8px] bg-[#01155E] rounded-full" />
+                          )}
+                        </div>
 
-          <span className={`${DROPDOWN_OPTION_TEXT_CLASS} truncate`}>
-            {emirate}
-          </span>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                        <span className={`${DROPDOWN_OPTION_TEXT_CLASS} truncate`}>
+                          {emirate}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -712,7 +743,7 @@ Off-plan (Pre-construction) and Ready properties tailored to your investment goa
         <CommunitiesBrief />
         <UpcomingProjects />
         <FeaturedBlogs />
-        <PropertyFlipbookSection/>
+        <PropertyFlipbookSection />
       </div>
     </>
   );
