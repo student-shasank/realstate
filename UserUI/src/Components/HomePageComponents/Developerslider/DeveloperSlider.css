@@ -87,3 +87,13 @@
     width: 100%;
   }
 }
+
+.slider-wrapper--bordered {
+  border: 1px solid #D1D5DB;
+  border-radius: 10px;
+}
+
+.logo-slide--bordered {
+  border: 1px solid #D1D5DB;
+  border-radius: 16px;
+}

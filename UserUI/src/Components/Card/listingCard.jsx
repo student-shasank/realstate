@@ -26,6 +26,7 @@ import {
   removeFavoriteLocal,
   toggleFavorite,
 } from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
+import { formatNumber } from "../../Components/utils/formatCurrency.js";
 
 const ListingCard = ({ listing, onRequireLogin }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -522,7 +523,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
         {/* Row 3: Features */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
-          <div className="flex items-center gap-2 text-[#67739E]">
+         <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon3} alt="bed" className="w-5 h-5" />
             <span className="text-[16px] sm:text-[18px] font-medium">
               {listing?.beds
@@ -533,7 +534,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                     .join(", ")
                 : "N/A"}
             </span>
-          </div>
+          </div> 
+
 
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
 
@@ -595,8 +597,11 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       <span className="text-[20px] sm:text-[24px] mr-2">
         {listing?.currency?.toUpperCase()}
       </span>
-      <span className="text-[26px] sm:text-[32px]">
+      {/* <span className="text-[26px] sm:text-[32px]">
         {listing.min_price.toLocaleString()}
+      </span> */}
+      <span className="text-[26px] sm:text-[32px]">
+        {formatNumber(listing.min_price)}
       </span>
     </>
   ) : (
@@ -612,8 +617,11 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       <span className="text-[20px] sm:text-[24px] mr-2">
         {listing?.currency?.toUpperCase()}
       </span>
-      <span className="text-[26px] sm:text-[32px]">
+      {/* <span className="text-[26px] sm:text-[32px]">
         {listing?.min_price?.toLocaleString() || "10,00,239"}
+      </span> */}
+      <span className="text-[26px] sm:text-[32px]">
+        {formatNumber(listing?.min_price) || "1,000,239"}
       </span>
     </>
   ) : (

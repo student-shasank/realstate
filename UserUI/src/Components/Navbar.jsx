@@ -11,6 +11,7 @@ import SignupPopup from "../Pages/SignupPopup";
 import Logo2 from "../assets/logo2.png";
 import Logo3 from "../assets/logo3.png";
 
+
 const TOPBAR_HEIGHT = 38; // must match TopBar's height in px
 
 function Navbar() {

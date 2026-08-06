@@ -738,7 +738,7 @@ const Listings = () => {
                         </div>
                         <span
                           className={`text-[13.5px] truncate ${
-                            isSelected ? "text-[#01155E] font-semibold" : "text-[#4B5563]"
+                            isSelected ? "text-[#01155E] font-semibold" : "text-[#67739E]"
                           }`}
                         >
                           {option.label}
@@ -858,7 +858,7 @@ const Listings = () => {
                     closeAllDropdowns();
                     if (!wasOpen) dispatch(toggleBedBath());
                   }}
-                  className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[16px] text-[#6B7280] outline-none cursor-pointer"
+                  className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[14px] font-medium text-[#67739E] outline-none cursor-pointer"
                 >
                   <span className="truncate">{beds || '0'} Beds / {baths || '0'} Baths</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isBedBathOpen ? 'rotate-180' : ''}`} />
@@ -904,7 +904,7 @@ const Listings = () => {
                     closeAllDropdowns();
                     if (!wasOpen) dispatch(togglePrice());
                   }}
-                  className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[16px] text-[#6B7280] outline-none cursor-pointer"
+                  className="w-full h-[48px] flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] px-4 text-[14px] font-medium text-[#67739E] outline-none cursor-pointer"
                 >
                   <span className="truncate">{getPriceLabel()}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
@@ -969,7 +969,7 @@ const Listings = () => {
                     closeAllDropdowns();
                     setPropertyTypeOpen(!wasOpen);
                   }}
-                  className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] text-[#67739E] text-[16px]"
+                  className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D1D5DB] rounded-[16px] text-[#67739E] text-[14px] font-medium"
                 >
                   <span className="truncate">{propertyType || "Residential"}</span>
                   <ChevronDown
@@ -1061,7 +1061,7 @@ const Listings = () => {
                     closeAllDropdowns();
                     setIsSaleStatusOpen(!wasOpen);
                   }}
-                  className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[16px] text-[#67739E] transition-all"
+                  className="w-full h-[48px] px-[12px] flex items-center justify-between bg-white border border-[#D1D5DB] text-[14px] font-medium text-[#67739E] transition-all"
                   style={{ borderRadius: isSaleStatusOpen ? "16px 16px 0 0" : "16px" }}
                 >
                   <span className="truncate">
@@ -1093,7 +1093,7 @@ const Listings = () => {
                           key={status.value}
                           type="button"
                           onClick={() => handleSaleStatusChange(status.value)}
-                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${index === saleStatusOptions.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[14px] font-medium hover:bg-[#F8FAFF] transition-colors ${index === saleStatusOptions.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
                         >
                           <div className="w-[24px] flex justify-center flex-shrink-0">
                             <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
@@ -1125,7 +1125,7 @@ const Listings = () => {
                     setIsHandoverOpen(!wasOpen);
                   }}
                   title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
-                  className={`w-full h-[48px] px-[12px] flex items-center justify-between border text-[16px] transition-all ${
+                  className={`w-full h-[48px] px-[12px] flex items-center justify-between border text-[14px] font-medium transition-all ${
                     isReadyCompletion
                       ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
                       : "bg-white border-[#D1D5DB] text-[#67739E]"
@@ -1161,7 +1161,7 @@ const Listings = () => {
                           key={year.value}
                           type="button"
                           onClick={() => handleHandoverYearChange(year.value)}
-                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[16px] hover:bg-[#F8FAFF] transition-colors ${index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[14px] font-medium hover:bg-[#F8FAFF] transition-colors ${index === handoverYears.length - 1 ? "rounded-b-[16px] border-b-0" : ""}`}
                         >
                           <div className="w-[24px] flex justify-center flex-shrink-0">
                             <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
@@ -1185,10 +1185,10 @@ const Listings = () => {
               <select
                 disabled={isReadyCompletion}
                 title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
-                className={`h-[48px] border rounded-[16px] px-4 text-[16px] outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat ${
+                className={`h-[48px] border rounded-[16px] px-4 text-[14px] font-medium outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat ${
                   isReadyCompletion
                     ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
-                    : "bg-white border-[#D1D5DB] text-[#6B7280] cursor-pointer"
+                    : "bg-white border-[#D1D5DB] text-[#67739E] cursor-pointer"
                 }`}
               >
                 <option value="">Payment Plan</option>
@@ -1202,10 +1202,10 @@ const Listings = () => {
                     closeAllDropdowns();
                     setIsOpen(!wasOpen);
                   }}
-                  className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D9E1F2] text-[16px] transition-all"
+                  className="w-full h-[48px] px-4 flex items-center justify-between bg-white border border-[#D9E1F2] text-[14px] font-medium transition-all"
                   style={{ borderRadius: isOpen ? '16px 16px 0 0' : '16px' }}
                 >
-                  <span className="text-[#67739E] text-[16px] truncate">
+                  <span className="text-[#67739E] text-[14px] font-medium truncate">
                     {selectedEmirates.length > 0
                       ? `${selectedEmirates.length} Emirate${selectedEmirates.length > 1 ? "s" : ""} Selected`
                       : "Emirates"}
@@ -1240,7 +1240,7 @@ const Listings = () => {
                           )}
                         </div>
 
-                        <span className="text-[#67739E] text-[14px] truncate">
+                        <span className="text-[#67739E] text-[14px] font-medium truncate">
                           {emirate}
                         </span>
                       </div>

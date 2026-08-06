@@ -249,7 +249,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="mx-auto w-full h-auto  sm:min-h-[800px] lg:h-[860px] flex flex-col items-center relative  pb-8 sm:pb-10 lg:pb-0">
+      <div className="mx-auto w-full h-auto  sm:min-h-[800px] lg:h-[860px] flex flex-col items-center relative z-20 pb-8 sm:pb-10 lg:pb-0">
         <div className="absolute inset-0 -z-10">
           <video autoPlay loop muted playsInline className="w-full h-full object-cover">
             <source src={backgroundVideo} type="video/mp4" />
@@ -257,7 +257,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-transparent" />
         </div>
 
-        <div className="w-full max-w-[1248px] px-4 sm:px-5 md:px-6 pt-[70px] sm:pt-[90px] md:pt-[180px] lg:pt-[240px]">
+        <div className="w-full max-w-[1248px] px-4 sm:px-5 md:px-6 pt-[70px] sm:pt-[90px] md:pt-[160px] lg:pt-[180px]">
           <h1 className="text-white text-[26px] sm:text-[34px] md:text-[42px] lg:text-[48px] font-bold text-center drop-shadow-2xl" style={{ fontFamily: '"General Sans", sans-serif', fontWeight: '700', lineHeight: '110%', letterSpacing: '0%' }}>
             Dubai Real Estate Investments
           </h1>
@@ -742,8 +742,9 @@ const Home = () => {
         <Services />
         <CommunitiesBrief />
         <UpcomingProjects />
-        <FeaturedBlogs />
+        
         <PropertyFlipbookSection />
+        <FeaturedBlogs />
       </div>
     </>
   );

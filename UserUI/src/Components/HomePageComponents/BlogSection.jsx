@@ -99,7 +99,7 @@ const FeaturedBlogs = () => {
   const [mainBlog, ...sideBlogs] = featured; // featured[0] = big card, baaki 3 = stacked
 
   return (
-    <section className="bg-white flex justify-center py-16 pb-[67px]">
+    <section className="bg-white flex justify-center  pb-[67px]">
       <div className="w-full max-w-[1200px] px-4 sm:px-6 lg:px-0">
         <SectionHeading />
 

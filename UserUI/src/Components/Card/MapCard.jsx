@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import listingimage from '../../assets/ListingCard.jpg'
 import { BedDouble, Bath, Square } from "lucide-react";
 import Icon1 from '../../assets/icon1.png'
@@ -6,15 +6,21 @@ import Icon2 from '../../assets/icon2.png'
 import Icon3 from '../../assets/icon3.png'
 
 // ✅ NEW IMPORTS
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { fetchListingDetail } from "../../features/dashboard/listingDetailSlice";
 import { extractAllImages } from "../../Components/utils/imageExtractor";
+import {
+  addFavoriteLocal,
+  removeFavoriteLocal,
+  toggleFavorite,
+} from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
 
-const MapCard = ({ item }) => {
+const MapCard = ({ item, onRequireLogin }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [currentImg, setCurrentImg] = useState(0);
-  const [wishlisted, setWishlisted] = useState(false);
 
   // ✅ NEW STATES
   const [carouselImages, setCarouselImages] = useState([]);
@@ -23,6 +29,12 @@ const MapCard = ({ item }) => {
 
   // Default image if none provided
   const IMG = listingimage;
+
+  // ✅ Same id + favorite pattern as ListingCard
+  const currentId = item?._id || item?.id;
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const favorites = useSelector((state) => state.favorites.favorites || []);
+  const isFavorite = favorites.includes(currentId);
 
   // ✅ fallback + dynamic images
   const fallbackImages = item?.feature_image
@@ -37,6 +49,33 @@ const MapCard = ({ item }) => {
     if (!img) return IMG;
     if (typeof img === "string") return img;
     return img?.url || img?.secure_url || img?.imageUrl || IMG;
+  };
+
+  // ✅ Same favorite handling as ListingCard (Redux + login check)
+  const handleFavorite = (e) => {
+    e.stopPropagation();
+
+    if (!currentId) return;
+
+    if (!isLoggedIn) {
+      onRequireLogin?.();
+      return;
+    }
+
+    if (isFavorite) {
+      dispatch(removeFavoriteLocal(currentId));
+    } else {
+      dispatch(addFavoriteLocal(currentId));
+    }
+
+    dispatch(toggleFavorite(currentId));
+  };
+
+  // ✅ Same navigation-on-click pattern as ListingCard's openDetails
+  const openDetails = () => {
+    if (item?.id) {
+      navigate(`/listing/${item.id}`);
+    }
   };
 
   // ✅ HOVER FETCH (same as ListingCard)
@@ -62,18 +101,37 @@ const MapCard = ({ item }) => {
     setCurrentImg(0);
   };
 
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImg((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImg((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleDotClick = (e, index) => {
+    e.stopPropagation();
+    setCurrentImg(index);
+  };
+
   return (
-    <div className="w-full bg-white overflow-hidden transition-all duration-300">
-      
+    // ✅ Same "click gets blue" hover/border treatment as ListingCard, plus click-to-open
+    <div
+      onClick={openDetails}
+      className="w-full bg-white overflow-hidden transition-all duration-300 rounded-xl border border-transparent cursor-pointer  hover:shadow-[0_8px_24px_rgba(1,21,94,0.10)]"
+    >
+
       {/* --- Image Section --- */}
-      <div 
+      <div
         className="relative w-full h-[180px] group rounded-xl overflow-hidden"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <img 
+        <img
           src={getSafeImage(images[currentImg])}
-          alt={item?.title} 
+          alt={item?.title}
           className="w-full h-full object-cover"
         />
 
@@ -84,29 +142,29 @@ const MapCard = ({ item }) => {
           </div>
         )}
 
-        {/* TruCheck Badge */}
-        {/* <div className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-black">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <span className="text-[11px] font-bold text-gray-800">TruCheck™</span>
-        </div> */}
-
-        {/* Heart */}
-        <button 
-          onClick={(e) => { e.stopPropagation(); setWishlisted(!wishlisted); }}
-          className="absolute top-3 right-3 text-white drop-shadow-md hover:scale-110 transition-transform"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill={wishlisted ? "#ef4444" : "rgba(0,0,0,0.3)"} stroke="white" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-          </svg>
-        </button>
+        {/* Heart — now Redux-backed, same as ListingCard */}
+       <button
+  onClick={handleFavorite}
+  className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full border-2 border-transparent bg-white/80 flex items-center justify-center transition-all duration-300 hover:border-[#01155E] hover:bg-white"
+>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill={isFavorite ? "#01155E" : "none"}
+    stroke="#01155E"
+    strokeWidth="1.8"
+    className="transition-all duration-200"
+  >
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+  </svg>
+</button>
 
         {/* Arrows */}
         {isHovered && images.length > 1 && (
           <>
-            <button 
-              onClick={(e) => { e.stopPropagation(); setCurrentImg(prev => prev === 0 ? images.length - 1 : prev - 1); }}
+            <button
+              onClick={handlePrevImage}
               className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 rounded-full flex items-center justify-center opacity-100 hover:bg-white"
             >
                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -120,8 +178,8 @@ const MapCard = ({ item }) => {
               </svg>
             </button>
 
-            <button 
-              onClick={(e) => { e.stopPropagation(); setCurrentImg(prev => prev === images.length - 1 ? 0 : prev + 1); }}
+            <button
+              onClick={handleNextImage}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/70 rounded-full flex items-center justify-center opacity-100 hover:bg-white"
             >
                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -140,8 +198,9 @@ const MapCard = ({ item }) => {
         {/* Dots */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
           {images.slice(0, 5).map((_, i) => (
-            <div 
-              key={i} 
+            <button
+              key={i}
+              onClick={(e) => handleDotClick(e, i)}
               className={`h-1.5 rounded-full ${i === currentImg ? "w-1.5 bg-white" : "w-1.5 bg-white/60"}`}
             />
           ))}
@@ -149,8 +208,8 @@ const MapCard = ({ item }) => {
       </div>
 
       {/* --- Details Section --- */}
-      <div className="pt-3 pb-2">
-        
+      <div className="pt-3 pb-2 px-1">
+
         {/* ✅ FIXED PRICE ERROR */}
         <h3 className="text-[18px] font-bold text-[#222222]">
           AED {item?.min_price?.toLocaleString?.() || "N/A"}
@@ -163,9 +222,15 @@ const MapCard = ({ item }) => {
             <span>Studio</span>
           ) : (
             <div className="flex items-center gap-1.5">
-              <img src={Icon3} className="w-4 h-4" />
-              <span>{item?.beds || "N/A"}</span>
-            </div>
+  <img src={Icon3} className="w-4 h-4" />
+  <span>
+    {item?.beds === 0 || item?.beds === "0"
+      ? "S"
+      : typeof item?.beds === "string"
+      ? item.beds.replace(/^0,?/, "S,")
+      : item?.beds ?? "N/A"}
+  </span>
+</div>
           )}
 
           <div className="flex items-center gap-1.5">
@@ -174,7 +239,7 @@ const MapCard = ({ item }) => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <img src={Icon1} className="w-4 h-4" />
+            <img src={Icon1} className="w-4 h-4 flex start " />
             <span>{item?.max_area?.toLocaleString?.()} sqft</span>
           </div>
         </div>
