@@ -483,9 +483,13 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               ? handleWhatsAppClick
               : (e) => e.stopPropagation()
       }
-      className={`group w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-        listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
-      } ${!isLikeBtn ? "hover:bg-[#01155E]" : ""}`}
+    className={`group w-10 h-10 rounded-full border-2 border-transparent flex items-center justify-center transition-all duration-300 ${
+  listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
+} ${
+  isLikeBtn
+    ? "hover:border-[#01155E] hover:bg-white"
+    : "hover:bg-[#01155E]"
+}`}
     >
       {isLikeBtn ? (
         <svg
