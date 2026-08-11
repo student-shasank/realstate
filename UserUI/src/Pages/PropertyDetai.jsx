@@ -740,7 +740,7 @@ export default function PropertyDetail() {
                   {agentPhoneRaw}
                 </a>
               </div>
-
+                
               <div className="flex items-center justify-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
@@ -778,7 +778,9 @@ export default function PropertyDetail() {
         document.body
       )}
 
-      <Breadcrumbs />
+      {/* <Breadcrumbs /> */}
+      {/* <Breadcrumbs customLabel={title} completionLabel={completionStatus} /> */}
+      <Breadcrumbs customLabel={title} completionLabel={isOffPlan ? "Off-Plan" : "Ready"} />
       <div className="max-w-[1290px] mx-auto pt-10 pb-20">
 
         <div className="flex justify-between items-start mb-8">

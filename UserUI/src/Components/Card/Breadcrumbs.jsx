@@ -56,7 +56,13 @@ const Breadcrumbs = ({ customLabel, completionLabel }) => {
 
     // 2. Check if the value is a MongoDB ID (24 character hex string)
     // If so, show the property title if we have it
-    if (/^[0-9a-fA-F]{24}$/.test(value)) {
+    // if (/^[0-9a-fA-F]{24}$/.test(value)) {
+    //   return customLabel || "Property Detail";
+    // }
+    // 2. Check if the value is a MongoDB ID (24 character hex string)
+    // OR a numeric listing ID (e.g. "3071", "1298")
+    // If so, show the property title if we have it
+    if (/^[0-9a-fA-F]{24}$/.test(value) || /^\d+$/.test(value)) {
       return customLabel || "Property Detail";
     }
 

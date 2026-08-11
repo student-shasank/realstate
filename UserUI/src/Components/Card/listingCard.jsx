@@ -520,7 +520,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 })}
           </div>
         </div>
-
+       
         {/* Row 3: Features */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
          <div className="flex items-center gap-2 text-[#67739E]">

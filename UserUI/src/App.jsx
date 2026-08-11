@@ -35,6 +35,7 @@ import Compare from "./Pages/Compare";
 import ScrollToTop from "./Components/Scroll/ScrollTop";
 import Blog from "./Pages/Blog";
 import BlogDetail from "./Pages/BlogDetail";
+import ContactUs from "./Pages/ContactUs";
 // import TopBar from "./Components/Card/Topbar";
 
 
@@ -72,7 +73,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/contact" element={<ContactUs />} />
           <Route path="/compare" element={<Compare />} />
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
