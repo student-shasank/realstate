@@ -352,7 +352,18 @@ const Home = () => {
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-[#01155E]" />
                 </div>
-                <input type="text" placeholder="Enter Location" className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium font-['Archivo'] shadow-sm" value={location} onChange={(e) => dispatch(setLocation(e.target.value))} />
+<input
+  type="text"
+  placeholder="Enter Location"
+  className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium font-['Archivo'] shadow-sm"
+  value={location}
+  onChange={(e) => dispatch(setLocation(e.target.value))}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
+  }}
+/>
               </div>
               <button onClick={handleSearch} className="bg-[#01155E] text-white px-6 sm:px-8 md:px-10 py-2.5 rounded-lg font-['Archivo'] font-semibold text-base sm:text-lg shadow-md w-full md:w-auto md:min-w-[160px]">Search</button>
             </div>

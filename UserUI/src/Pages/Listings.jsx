@@ -674,7 +674,7 @@ const Listings = () => {
   };
 
   return (
-    <div className="pt-5 bg-white min-h-screen mt-20">
+    <div className=" bg-white min-h-screen ">
       <Breadcrumbs />
       <div style={{ padding: "40px 20px", maxWidth: "1340px", margin: "0 auto" }}>
         {/* NEW HEADER SECTION START */}
@@ -803,12 +803,33 @@ const Listings = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </span>
                 <input
-                  type="text"
-                  placeholder="Enter Location"
-                  value={location}
-                  onChange={handleLocationChange}
-                  className="w-full h-[48px] pl-12 pr-4 bg-white border border-[#D1D5DB] rounded-[16px] text-[16px] outline-none placeholder:text-gray-400 focus:ring-1 focus:ring-[#01155E]"
-                />
+  type="text"
+  placeholder="Enter Location"
+  value={location}
+  onChange={handleLocationChange}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      const payload = {
+        location,
+        completion,
+        propertyType,
+        beds,
+        baths,
+        minPrice,
+        maxPrice,
+        developer: selectedDevelopers,
+        emirates: selectedEmirates,
+        handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
+        saleStatus: selectedSaleStatus,
+        sortBy: selectedSort,
+        page: 1,
+        limit: 20,
+      };
+      dispatch(isSortActive ? fetchSortedProjects(payload) : fetchProjects(payload));
+    }
+  }}
+  className="w-full h-[48px] pl-12 pr-4 bg-white border border-[#D1D5DB] rounded-[16px] text-[16px] outline-none placeholder:text-gray-400 focus:ring-1 focus:ring-[#01155E]"
+/>
               </div>
 
               <button
@@ -909,6 +930,94 @@ const Listings = () => {
                   <span className="truncate">{getPriceLabel()}</span>
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 {isPriceOpen && (
                   <div className="absolute top-full right-0 mt-2 w-full md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-5">

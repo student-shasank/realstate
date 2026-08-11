@@ -677,7 +677,7 @@ export default function PropertyDetail() {
   };
 
   return (
-    <div className="bg-white min-h-screen mt-25">
+    <div className="bg-white min-h-screen ">
       {showGallery && (
         <GalleryModal
           images={images}

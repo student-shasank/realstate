@@ -35,8 +35,10 @@ export default function DeveloperDropdown({
     }
   };
 
-  useEffect(() => {
+
+ useEffect(() => {
     if (open) {
+ 
       updateCoords();
       window.addEventListener("scroll", updateCoords, true);
       window.addEventListener("resize", updateCoords);

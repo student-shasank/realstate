@@ -35,7 +35,7 @@ import Compare from "./Pages/Compare";
 import ScrollToTop from "./Components/Scroll/ScrollTop";
 import Blog from "./Pages/Blog";
 import BlogDetail from "./Pages/BlogDetail";
-import TopBar from "./Components/Card/Topbar";
+// import TopBar from "./Components/Card/Topbar";
 
 
 
@@ -66,7 +66,7 @@ function App() {
   return (
     <>
     
-    <TopBar/>
+    {/* <TopBar/> */}
       <Navbar />
       <ScrollToTop/>
       <Routes>

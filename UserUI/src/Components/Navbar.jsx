@@ -1,40 +1,33 @@
-import React, { useEffect, useState } from "react"; // Added useEffect
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Menu, X, Languages, ChevronDown } from "lucide-react";
+import { User, Menu, X, Languages, ChevronDown, Mail, Phone } from "lucide-react";
 
 import { logoutUser } from "../features/Authentation/login";
 import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
-import { fetchNavList } from "../features/communities/communitySlice"; // Added this import
+import { fetchNavList } from "../features/communities/communitySlice";
 import LoginPopup from "../Pages/LoginPopup";
 import SignupPopup from "../Pages/SignupPopup";
 import Logo2 from "../assets/logo2.png";
 import Logo3 from "../assets/logo3.png";
 
-
-const TOPBAR_HEIGHT = 38; // must match TopBar's height in px
-
 function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
-  const [open, setOpen] = React.useState(false); // mobile menu open/close
-  const [profileOpen, setProfileOpen] = React.useState(false);
+  const [open, setOpen] = useState(false); // mobile menu open/close
+  const [profileOpen, setProfileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
-  const [mobileCommunitiesOpen, setMobileCommunitiesOpen] = useState(false);
 
-  // NEW: numeric top offset (px) that tracks scroll position smoothly,
-  // instead of a boolean threshold that caused a jump/gap on scroll.
-  const [navTop, setNavTop] = useState(TOPBAR_HEIGHT);
+  // Single boolean instead of pixel-tracking. TopBar + Navbar now live
+  // inside ONE fixed element, so no more sync/gap issues.
+  const [scrolled, setScrolled] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.loginAuth);
-
-  // Get navList from Redux store
   const { navList } = useSelector((state) => state.community);
 
-  // Fetch communities on load
   useEffect(() => {
     if (navList.length === 0) {
       dispatch(fetchNavList());
@@ -58,25 +51,18 @@ function Navbar() {
   };
 
   useEffect(() => {
-    const handleLoginOpen = () => {
-      setIsLoginOpen(true);
-    };
-
+    const handleLoginOpen = () => setIsLoginOpen(true);
     window.addEventListener("openLogin", handleLoginOpen);
-
-    return () => {
-      window.removeEventListener("openLogin", handleLoginOpen);
-    };
+    return () => window.removeEventListener("openLogin", handleLoginOpen);
   }, []);
 
-  // Close the mobile drawer whenever the route changes
+  // Close mobile drawer on route change
   useEffect(() => {
     setOpen(false);
     setMobileServicesOpen(false);
-    setMobileCommunitiesOpen(false);
   }, [location.pathname, location.search]);
 
-  // Lock body scroll while the mobile drawer is open
+  // Lock body scroll while drawer is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -84,41 +70,13 @@ function Navbar() {
     };
   }, [open]);
 
-  // UPDATED: instead of snapping at a threshold, continuously compute
-  // how much of the TopBar has scrolled out of view and slide the
-  // Navbar up by exactly that amount. This keeps Navbar glued to the
-  // bottom of TopBar the whole time — no gap, no jump.
+  // Just toggles a boolean — no pixel math, no sync issues possible.
   useEffect(() => {
-    let ticking = false;
-
-    const computeOffset = () => {
-      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-      if (!isDesktop) return 0; // TopBar is hidden below lg, so no offset needed
-      return Math.max(0, TOPBAR_HEIGHT - window.scrollY);
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setNavTop(computeOffset());
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    handleScroll(); // run once on mount in case page loads pre-scrolled
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Derived boolean, kept for shadow styling
-  const scrolled = navTop === 0;
 
   const textColor = isHomePage ? "#01155e" : "#FFFFFF";
 
@@ -132,275 +90,318 @@ function Navbar() {
     { to: "/investorVisaAdvisory", label: "Investor Visa Advisory" },
   ];
 
+  // TopBar theme (same logic as old TopBar.jsx)
+  const topBarBg = isHomePage
+    ? "bg-[#01155E] text-white border-white/10"
+    : "bg-white text-[#01155E] border-gray-200";
+  const topBarHover = isHomePage
+    ? "hover:text-gray-300"
+    : "hover:text-[#01155E]/70";
+  const topBarDivider = isHomePage ? "text-white/30" : "text-gray-300";
+
   return (
     <>
-      <nav
-        style={{ top: `${navTop}px` }}
-        className={`fixed left-0 right-0 w-full z-50 h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-[top,box-shadow] duration-300 ease-in-out
-        ${
-          isHomePage
-            ? "bg-white backdrop-blur-md border-b border-white/10"
-            : "bg-[#01155E]"
-        }
-        ${scrolled ? "shadow-md" : ""}
-      `}
+      <header
+        className={`fixed top-0 left-0 right-0 w-full z-50 transition-shadow duration-300 ${
+          scrolled ? "shadow-md" : ""
+        }`}
       >
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 flex items-center justify-between">
-          {/* Brand Logo */}
+        {/* ===== TOP BAR ROW (collapses on scroll, inside same header) ===== */}
+        <div
+          className={`hidden lg:block overflow-hidden border-b transition-all duration-300 ease-in-out ${topBarBg} ${
+            scrolled
+              ? "max-h-0 opacity-0 py-0 border-b-0"
+              : "max-h-12 opacity-100 py-2"
+          }`}
+        >
+          <div className="px-8 xl:px-12 2xl:px-20 flex items-center justify-between text-xs sm:text-sm">
+            <div className="flex items-center gap-4 sm:gap-6 font-medium">
+              <a
+                href="tel:+971505773767"
+                className={`flex items-center gap-2 transition-colors ${topBarHover}`}
+              >
+                <Phone size={14} className="shrink-0" />
+                <span>+971 505 773767</span>
+              </a>
 
-          <Link to="/" className="shrink-0">
-            <img
-              src={isHomePage ? Logo2 : Logo3}
-              alt="Yupland Logo"
-              className="h-9 sm:h-10 lg:h-11 xl:h-13 w-auto"
-            />
-          </Link>
-          {/* Navigation Links - full menu only on lg+ (tablets get the drawer) */}
-          <div className="hidden lg:flex items-center justify-between flex-1 xl:max-w-[750px] mx-auto gap-3 xl:gap-0 xl:pr-5">
-            {/* <Link
-              to="/"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight: location.pathname === "/" ? 600 : 500,
-                color: textColor,
-              }}
-            >
-              Home
-            </Link> */}
-            <Link
-              to="/listings?completion=off-plan"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight:
-                  location.pathname === "/listings" &&
-                  new URLSearchParams(location.search).get("completion") ===
-                    "off-plan"
-                    ? 600
-                    : 500,
-                color: textColor,
-              }}
-            >
-              Off-plan
+              <span className={topBarDivider}>|</span>
+
+              <a
+                href="mailto:info@yupland.ae"
+                className={`flex items-center gap-2 transition-colors ${topBarHover}`}
+              >
+                <Mail size={14} className="shrink-0" />
+                <span>info@yupland.ae</span>
+              </a>
+            </div>
+
+            <div className="flex items-center gap-5 font-semibold">
+              <Link to="/contact" className={`transition-colors ${topBarHover}`}>
+                Contact Us
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== MAIN NAV ROW ===== */}
+        <nav
+          className={`w-full h-[64px] sm:h-[72px] lg:h-[90px] xl:h-[100px] flex justify-center transition-colors duration-300
+          ${isHomePage ? "bg-white backdrop-blur-md border-b border-white/10" : "bg-[#01155E]"}
+        `}
+        >
+          <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-20 flex items-center justify-between">
+            {/* Brand Logo */}
+            <Link to="/" className="shrink-0">
+              <img
+                src={isHomePage ? Logo2 : Logo3}
+                alt="Yupland Logo"
+                className="h-9 sm:h-10 lg:h-11 xl:h-13 w-auto"
+              />
             </Link>
 
-            <Link
-              to="/listings?completion=ready"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight:
-                  location.pathname === "/listings" &&
-                  new URLSearchParams(location.search).get("completion") ===
-                    "ready"
-                    ? 700
-                    : 500,
-                color: textColor,
-              }}
-            >
-              Ready Properties
-            </Link>
-            <div className="relative group flex items-center h-full">
+            {/* Navigation Links - lg+ only */}
+            <div className="hidden lg:flex items-center justify-between flex-1 xl:max-w-[750px] mx-auto gap-3 xl:gap-0 xl:pr-5">
               <Link
-                to="/communities"
-                className="flex items-center gap-1 py-4 transition-all"
+                to="/listings?completion=off-plan"
+                className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
                 style={{
                   ...textStyle,
-                  fontWeight: location.pathname.includes("communities")
-                    ? 600
-                    : 500,
+                  fontWeight:
+                    location.pathname === "/listings" &&
+                    new URLSearchParams(location.search).get("completion") ===
+                      "off-plan"
+                      ? 600
+                      : 500,
                   color: textColor,
                 }}
               >
-                Communities
-                <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
-                  ▼
-                </span>
+                Off-plan
               </Link>
 
-              {/* Dynamic Dropdown Menu based on Redux navList */}
-              <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                  {navList && navList.length > 0 ? (
-                    navList.map((item) => (
+              <Link
+                to="/listings?completion=ready"
+                className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+                style={{
+                  ...textStyle,
+                  fontWeight:
+                    location.pathname === "/listings" &&
+                    new URLSearchParams(location.search).get("completion") ===
+                      "ready"
+                      ? 700
+                      : 500,
+                  color: textColor,
+                }}
+              >
+                Ready Properties
+              </Link>
+
+              <div className="relative group flex items-center h-full">
+                <Link
+                  to="/communities"
+                  className="flex items-center gap-1 py-4 transition-all"
+                  style={{
+                    ...textStyle,
+                    fontWeight: location.pathname.includes("communities")
+                      ? 600
+                      : 500,
+                    color: textColor,
+                  }}
+                >
+                  Communities
+                  <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
+                    ▼
+                  </span>
+                </Link>
+
+                <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+                    {navList && navList.length > 0 ? (
+                      navList.map((item) => (
+                        <Link
+                          key={item._id}
+                          to={`/communities/${item.slug}`}
+                          className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
+                        >
+                          {item.title}
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-400">
+                        Loading...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to="/market-insights"
+                className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+                style={{
+                  ...textStyle,
+                  fontWeight: location.pathname === "/Blogs" ? 600 : 500,
+                  color: textColor,
+                }}
+              >
+                Market Insights
+              </Link>
+
+              <div className="relative group flex items-center h-full">
+                <Link
+                  to="/service"
+                  className="flex items-center gap-1 py-4"
+                  style={{
+                    ...textStyle,
+                    fontWeight: location.pathname.includes("service") ? 600 : 500,
+                    color: textColor,
+                  }}
+                >
+                  Services
+                  <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
+                    ▼
+                  </span>
+                </Link>
+
+                <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
+                    {serviceLinks.map((s, i) => (
                       <Link
-                        key={item._id}
-                        to={`/communities/${item.slug}`}
-                        className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
+                        key={s.to}
+                        to={s.to}
+                        className={`block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 ${
+                          i !== serviceLinks.length - 1
+                            ? "border-b border-gray-50"
+                            : ""
+                        }`}
                       >
-                        {item.title}
+                        {s.label}
                       </Link>
-                    ))
-                  ) : (
-                    <div className="px-4 py-3 text-sm text-gray-400">
-                      Loading...
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to="/about"
+                className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
+                style={{
+                  ...textStyle,
+                  fontWeight: location.pathname === "/about" ? 600 : 500,
+                  color: textColor,
+                }}
+              >
+                About
+              </Link>
+            </div>
+
+            {/* Auth & Language */}
+            <div className="flex items-center gap-x-3 lg:gap-x-5 xl:gap-x-8 2xl:gap-x-10 shrink-0">
+              {!user || !user?.firstName ? (
+                <button
+                  type="button"
+                  onClick={() => setIsLoginOpen(true)}
+                  className="hidden lg:flex items-center gap-2 group"
+                >
+                  <span
+                    style={{
+                      ...textStyle,
+                      color: textColor,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Login
+                  </span>
+                  <div className="bg-[#01155E] p-1.5 rounded-full">
+                    <User size={18} className="text-white fill-current" />
+                  </div>
+                </button>
+              ) : (
+                <div className="relative hidden lg:block">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 group"
+                  >
+                    <span
+                      style={{
+                        ...textStyle,
+                        color: textColor,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {user.firstName}
+                    </span>
+                    <div className="bg-[#01155E] p-1.5 rounded-full">
+                      <User size={18} className="text-white fill-current" />
+                    </div>
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden">
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setProfileOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+                      >
+                        👤 My Profile
+                      </button>
+
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50"
+                      >
+                        Logout
+                      </button>
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
+              )}
 
-            <Link
-              to="/market-insights"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight: location.pathname === "/Blogs" ? 600 : 500,
-                color: textColor,
-              }}
-            >
-              Market Insights
-            </Link>
-
-            <div className="relative group flex items-center h-full">
-              {/* 1. Service Link */}
-              <Link
-                to="/service"
-                className="flex items-center gap-1 py-4"
-                style={{
-                  ...textStyle,
-                  fontWeight: location.pathname.includes("service")
-                    ? 600
-                    : 500,
-                  color: textColor,
-                }}
-              >
-                Services
-                <span className="text-[10px] transition-transform group-hover:rotate-180 mt-1">
-                  ▼
-                </span>
-              </Link>
-
-              {/* 2. Dropdown Menu */}
-              <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                  {serviceLinks.map((s, i) => (
-                    <Link
-                      key={s.to}
-                      to={s.to}
-                      className={`block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 ${
-                        i !== serviceLinks.length - 1
-                          ? "border-b border-gray-50"
-                          : ""
-                      }`}
-                    >
-                      {s.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <Link
-              to="/about"
-              className={`transition-all ${isHomePage ? "" : "hover:font-bold"}`}
-              style={{
-                ...textStyle,
-                fontWeight: location.pathname === "/about" ? 600 : 500,
-                color: textColor,
-              }}
-            >
-              About 
-            </Link>
-
-          
-          </div>
-
-          {/* Auth & Language */}
-          <div className="flex items-center gap-x-3 lg:gap-x-5 xl:gap-x-8 2xl:gap-x-10 shrink-0">
-            {!user || !user?.firstName ? (
-              <button
-                type="button"
-                onClick={() => setIsLoginOpen(true)}
-                className="hidden lg:flex items-center gap-2 group"
-              >
+              {/* Language */}
+              <div className="hidden lg:flex items-center gap-2 cursor-pointer hover:opacity-70 transition-all">
+                <Languages
+                  size={20}
+                  className={isHomePage ? "text-[#01155e] shrink-0" : "text-white shrink-0"}
+                />
                 <span
+                  className="hidden xl:inline"
                   style={{
                     ...textStyle,
                     color: textColor,
                     fontWeight: 500,
                   }}
                 >
-                  Login
+                  Language
                 </span>
-                <div className="bg-[#01155E] p-1.5 rounded-full">
-                  <User size={18} className="text-white fill-current" />
-                </div>
-              </button>
-            ) : (
-              <div className="relative hidden lg:block">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 group"
-                >
-                  <span
-                    style={{
-                      ...textStyle,
-                      color: textColor,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {user.firstName}
-                  </span>
-                  <div className="bg-[#01155E] p-1.5 rounded-full">
-                    <User size={18} className="text-white fill-current" />
-                  </div>
-                </button>
-
-                {profileOpen && (
-                  <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 overflow-hidden">
-                    {/* MY PROFILE */}
-                    <button
-                      onClick={() => {
-                        navigate("/profile");
-                        setProfileOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
-                    >
-                      👤 My Profile
-                    </button>
-
-                    {/* LOGOUT */}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
               </div>
-            )}
 
-            {/* Language */}
-            <div className="hidden lg:flex items-center gap-2 cursor-pointer hover:opacity-70 transition-all">
-              <Languages size={20} className={isHomePage ? "text-[#01155e] shrink-0" : "text-white shrink-0"} />
-              <span
-                className="hidden xl:inline"
-                style={{
-                  ...textStyle,
-                  color: textColor,
-                  fontWeight: 500,
-                }}
+              {/* Menu Button - visible below lg */}
+              <button
+                onClick={() => setOpen(!open)}
+                className="lg:hidden ml-2 sm:ml-4"
+                style={{ color: textColor }}
+                aria-label={open ? "Close menu" : "Open menu"}
+                aria-expanded={open}
               >
-                Language
-              </span>
+                {open ? (
+                  <X size={26} className="sm:w-7 sm:h-7" />
+                ) : (
+                  <Menu size={26} className="sm:w-7 sm:h-7" />
+                )}
+              </button>
             </div>
-
-            {/* Menu Button - visible on mobile AND tablet (below lg) */}
-            <button
-              onClick={() => setOpen(!open)}
-              className="lg:hidden ml-2 sm:ml-4"
-              style={{ color: textColor }}
-              aria-label={open ? "Close menu" : "Open menu"}
-              aria-expanded={open}
-            >
-              {open ? <X size={26} className="sm:w-7 sm:h-7" /> : <Menu size={26} className="sm:w-7 sm:h-7" />}
-            </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
+
+      {/* ===== SPACER — pushes page content below the fixed header, and
+          animates in sync with the collapse so nothing overlaps/gaps ===== */}
+      <div
+        className={`transition-all duration-300 ease-in-out h-[64px] sm:h-[72px] ${
+          scrolled ? "lg:h-[90px] xl:h-[100px]" : "lg:h-[130px] xl:h-[140px]"
+        }`}
+      />
 
       {/* ===================== DRAWER (phones + tablets, below lg) ===================== */}
 
@@ -473,44 +474,16 @@ function Navbar() {
               Ready Properties
             </Link>
 
-            {/* Communities - collapsible */}
-         <div className="relative group flex items-center h-full">
-  <Link
-    to="/communities"
-    className="flex items-center gap-1.5 py-4 leading-none transition-all"
-    style={{
-      ...textStyle,
-      fontWeight: location.pathname.includes("communities") ? 600 : 500,
-      color: textColor,
-    }}
-  >
-    <span>Communities</span>
-    <ChevronDown
-      size={15}
-      strokeWidth={2.5}
-      className="mt-[1px] transition-transform duration-200 group-hover:rotate-180"
-    />
-  </Link>
-
-  {/* Dynamic Dropdown Menu based on Redux navList */}
-  <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-    <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-      {navList && navList.length > 0 ? (
-        navList.map((item) => (
-          <Link
-            key={item._id}
-            to={`/communities/${item.slug}`}
-            className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
-          >
-            {item.title}
-          </Link>
-        ))
-      ) : (
-        <div className="px-4 py-3 text-sm text-gray-400">Loading...</div>
-      )}
-    </div>
-  </div>
-</div>
+            {/* Communities - simple link (dropdown collapsed for mobile simplicity) */}
+            <Link
+              to="/communities"
+              className="py-3.5 text-white text-base flex items-center gap-1.5"
+              style={{
+                fontWeight: location.pathname.includes("communities") ? 700 : 500,
+              }}
+            >
+              Communities
+            </Link>
 
             <Link
               to="/market-insights"
@@ -569,7 +542,7 @@ function Navbar() {
                 fontWeight: location.pathname === "/about" ? 700 : 500,
               }}
             >
-              About 
+              About
             </Link>
 
             <Link
