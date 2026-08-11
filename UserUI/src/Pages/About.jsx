@@ -6,7 +6,7 @@ import DisclaimerSection from '../Components/About/DisclaimerSection'
 
 function About() {
   return (
-    <div className=' pt-[60px] sm:pt-[100px] '>
+    <div className='  '>
       <Hero/>
   <DeveloperAccess/>
   <PlatformManagement/>

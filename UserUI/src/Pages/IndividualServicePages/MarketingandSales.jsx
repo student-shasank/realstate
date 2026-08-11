@@ -9,7 +9,7 @@ import SalesProcess from '../../Components/DetailService/SalesProcess'
 
 function DetailService() {
   return (
-    <div  className='pt-[70px] md:pt-[100px]'>
+    <div  className=''>
 
     
         

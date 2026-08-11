@@ -8,7 +8,7 @@ import Hero from "../../Components/Communities/Hero"
 function Communities() {
   return (
   
-<div className='sm:pt-[100px] pb-10 pt-[60px]'>
+<div className=''>
 <Hero/>
 {/* <CommunitiesOverview/>
 <MarketData/>

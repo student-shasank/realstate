@@ -5,7 +5,7 @@ import LifecycleFramework from '../../Components/ServiceIndividual4/LifecycleFra
 
 function AdvisoryCoordination() {
   return (
-    <div className='pt-[70px] md:pt-[100px]'>
+    <div className=''>
 
       <HeroSection
         title={
