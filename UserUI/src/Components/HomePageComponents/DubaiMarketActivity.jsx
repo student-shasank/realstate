@@ -24,7 +24,7 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
   };
 
   return (
-    <div className="relative w-full max-w-[576px] h-auto lg:h-[352px] bg-[#01155E] rounded-[16px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)]">
+    <div className="relative w-full max-w-[576px] h-auto lg:h-[310px] bg-[#01155E] rounded-[16px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden shadow-[0px_0px_10px_0px_rgba(0,0,0,0.5)]">
       {/* Decorative Background Pattern - Absolute Positioned */}
       <div className="absolute top-0 right-0 w-1/2 h-full pointer-events-none opacity-40">
         <div className="absolute top-[-10%] right-[-10%] w-[307px] h-[347px] bg-[radial-gradient(circle,_#3B82F6_0%,_transparent_70%)] blur-3xl rounded-full"></div>
@@ -50,7 +50,7 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
       {/* Card Header Content - CENTER ALIGNED */}
       <div className="relative z-10 flex flex-col items-center text-center">
         <h3 className="font-['General_Sans'] font-medium text-[48px] lg:text-[64px] leading-[120%] text-white tracking-tight">
-          {percentage}<span className='text-[52px]'>%</span>
+          {percentage}<span className='text-[42px] pl-2.5'>%</span>
         </h3>
         <p className="font-['General_Sans'] font-medium text-[14px] lg:text-[16px] leading-none text-white mt-2">
           {title}

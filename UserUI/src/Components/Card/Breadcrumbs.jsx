@@ -74,7 +74,7 @@ const Breadcrumbs = ({ customLabel, completionLabel }) => {
   };
 
   return (
-    <nav aria-label="Breadcrumb" className="w-full bg-[#E9EDF3] py-3.5 border-b border-[#D9E1F2]/30">
+    <nav aria-label="Breadcrumb" className="w-full bg-[#E9EDF3] py-3.5 border-b border-[#D9E1F2]/30 mt-[-4px]">
       <div className="max-w-[1290px] mx-auto px-4 md:px-6 flex items-center gap-2 text-[14px] font-medium overflow-x-auto whitespace-nowrap no-scrollbar">
         {/* Home */}
         <Link

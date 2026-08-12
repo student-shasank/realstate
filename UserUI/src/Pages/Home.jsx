@@ -369,7 +369,7 @@ const Home = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4 ">
-              <div className="flex bg-white/40 py-1 px-2 rounded-lg border border-white/30 shadow-inner w-full md:w-fit justify-center md:justify-start -mt-1">
+              <div className="flex bg-white/40 py-1 px-2 rounded-lg border border-white/30 shadow-inner w-full md:w-fit justify-center md:justify-start -mt-1 gap-[10px]">
                 {['Off-Plan', 'Ready',].map((status) => {
                   const isActive = completion === status;
 
