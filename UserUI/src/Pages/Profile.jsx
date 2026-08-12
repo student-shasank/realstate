@@ -288,7 +288,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#F4F7FC] font-['General_Sans'] mt-10">
+    <div className="w-full min-h-screen bg-[#F4F7FC] font-['General_Sans'] ">
       <div className="w-full max-w-[1440px] mx-auto px-[120px] py-8">
         {/* ── PROFILE HEADER CARD ── */}
         <div className="bg-white rounded-[16px] border border-[#D9E1F2] shadow-sm overflow-hidden mb-6 mt-30 max-w-[1200px]">
