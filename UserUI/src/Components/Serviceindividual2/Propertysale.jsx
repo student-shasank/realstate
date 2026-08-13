@@ -1,5 +1,9 @@
 import React from 'react'
 import backgroundImage from '../../../src/assets/detailservicebackground.png';
+import {
+ 
+  MapPin,ArrowRight
+} from "lucide-react";
 
 function Propertysale() {
   return (
@@ -36,46 +40,48 @@ function Propertysale() {
             This ensures that projects move forward with the right positioning, the right execution pathway, and a clear structure from day one.
           </p>
         </div>
+
+
+        
       </div>
+<section className="px-5 pb-[70px]">
+        <div className="w-[1200px] mx-auto">
+          <div className="relative overflow-hidden rounded-[18px] bg-[#01155E] px-7 sm:px-10 lg:px-14 py-9 sm:py-11">
+            <div className="absolute -right-[100px] -top-[130px] w-[350px] h-[350px] rounded-full border border-white/10" />
+            <div className="absolute right-[30px] -bottom-[200px] w-[400px] h-[400px] rounded-full border border-white/10" />
 
-      {/* HERO / CTA SECTION */}
-      <section className="relative flex w-full items-center justify-center overflow-hidden pb-10">
-        <div className="relative w-full max-w-[1200px] min-h-[350px] md:min-h-[450px] lg:min-h-[568px] flex items-center px-4 md:px-6 lg:px-8">
-          
-          {/* BACKGROUND BLUR EFFECT */}
-          <div 
-            className="absolute inset-0 z-0 opacity-30 md:opacity-40 blur-[60px] md:blur-[80px]"
-            style={{
-              backgroundImage: `url(${backgroundImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              <div className="flex items-center gap-5">
+                <div className="hidden sm:flex w-[72px] h-[72px] rounded-full bg-white/10 items-center justify-center flex-shrink-0">
+                  <MapPin size={30} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-white text-[26px] sm:text-[32px] font-semibold leading-[120%]">
+                    Ready to find your
+                    <br />
+                    perfect property?
+                  </h2>
+                  <p className="text-white/70 text-[14px] sm:text-[15px] mt-2">
+                    Explore thousands of premium properties
+                    <br className="hidden sm:block" />
+                    across Dubai with Yupland.
+                  </p>
+                </div>
+              </div>
 
-          {/* DECORATIVE CIRCLES (Absolute positions adjusted for mobile) */}
-          <div className="absolute left-0 md:left-3 top-[20%] md:top-[180px] z-10 h-[100px] w-[100px] md:h-[165px] md:w-[165px] rounded-full bg-[#1C4DFF12]" />
-          <div className="absolute right-[8%] sm:right-[19%] top-[31%] lg:right-[23%] lg:top-[40%] z-10 h-[120px] w-[120px] sm:h-[160px] sm:w-[160px] lg:h-[185px] lg:w-[185px] rounded-full bg-[#1C4DFF12]" />
-          
-          {/* CONTENT: TEXT + BUTTON */}
-          <div className="relative z-20 flex flex-col gap-8 md:gap-10 py-10 w-full">
-            <h1 
-              className="font-['General_Sans'] text-[32px] sm:text-[42px] md:text-[54px] lg:text-[64px] font-medium leading-[1.2] tracking-tight text-[#01155E]"
-            >
-              Looking to <br className="hidden sm:block" /> 
-              Property Management <br className="hidden lg:block" /> Structuring?
-            </h1>
-            
-            <button 
-              className="flex h-[56px] md:h-[64px] w-full max-w-[280px] items-center justify-center rounded-lg bg-[#01155E] font-['General_Sans'] text-[16px] md:text-[18px] font-medium text-white transition-all hover:bg-opacity-90 active:scale-95 shadow-lg"
-            >
-              Register Now
-            </button>
+              <a
+                href="/listings"
+                className="w-full lg:w-auto h-[50px] px-7 bg-white rounded-[7px] flex items-center justify-center gap-3 text-[#01155E] text-[14px] font-semibold hover:bg-[#67739E] hover:text-white transition-all duration-300"
+              >
+                Explore Properties
+                <ArrowRight size={17} />
+              </a>
+            </div>
           </div>
-
-          {/* LARGE BLUR CIRCLE (Hidden on small screens for performance) */}
-         <div className="hidden sm:block absolute right-[-20px] sm:right-[-30px] top-0 z-0 h-[280px] w-[280px] sm:h-[276px] sm:w-[276px] lg:h-[400px] lg:w-[400px] rounded-full bg-[#1C4DFF08] backdrop-blur-[12px]" />
         </div>
       </section>
+      {/* HERO / CTA SECTION */}
+      
 
     </div>
   )
