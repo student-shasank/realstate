@@ -37,6 +37,7 @@ import Blog from "./Pages/Blog";
 import BlogDetail from "./Pages/BlogDetail";
 import ContactUs from "./Pages/ContactUs";
 // import TopBar from "./Components/Card/Topbar";
+import WhatsAppFloatButton from "../src/Components/Card/WhatsAppFloatButton";
 
 
 
@@ -66,7 +67,7 @@ function App() {
 
   return (
     <>
-    
+     <WhatsAppFloatButton phone="971505773767" message="Hi, I'm interested in your properties" />
     {/* <TopBar/> */}
       <Navbar />
       <ScrollToTop/>
