@@ -9,7 +9,7 @@ import {
   FaBed, FaBath, FaChartArea, FaUserTie, FaMoneyCheckAlt,
   FaTools, FaCalendarAlt, FaBuilding, FaMapMarkerAlt,
   FaSwimmingPool, FaCheckCircle, FaHome, FaShieldAlt,
-  FaLayerGroup, FaCar, FaTag, FaChartLine
+  FaLayerGroup, FaCar, FaTag, FaChartLine, FaChevronDown
 } from "react-icons/fa";
 
 /* ─────────────────────────────────────────────
@@ -364,7 +364,7 @@ const Compare = () => {
           {[0, 1].map((i) => (
             <div key={i} className="relative w-full max-w-sm mx-auto">
               <select
-                className="w-full appearance-none bg-white px-8 py-5 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none  uppercase tracking-widest cursor-pointer text-left border border-gray-100 transition-all hover:shadow-lg"
+                className="w-full appearance-none bg-white px-8 py-5 pr-12 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none uppercase tracking-widest cursor-pointer text-left border border-gray-100 transition-all hover:shadow-lg"
                 value={getID(selected[i]) || ""}
                 onChange={(e) => handleSelect(i, e.target.value)}
               >
@@ -380,11 +380,14 @@ const Compare = () => {
                     </option>
                   ))}
               </select>
-              {/* Navy underline accent */}
+
+              {/* Dropdown chevron icon */}
               <div
-                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-16 h-1.5 rounded-full"
-                style={{ background: NAVY }}
-              />
+                className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2"
+                style={{ color: NAVY }}
+              >
+                <FaChevronDown className="text-sm" />
+              </div>
             </div>
           ))}
         </div>

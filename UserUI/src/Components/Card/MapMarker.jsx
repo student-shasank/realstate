@@ -162,7 +162,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
       {/* DEFAULT: Purple Home Icon marker with count */}
       <div
         style={{
-          background: "#7B2FBE",
+          background: "#0f2988",
           borderRadius: "20px 20px 20px 4px",
           padding: "6px 10px",
           display: "flex",
@@ -182,7 +182,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
         <span
           style={{
             background: "white",
-            color: "#7B2FBE",
+            color: "#0f2988",
             borderRadius: "50%",
             width: "18px",
             height: "18px",

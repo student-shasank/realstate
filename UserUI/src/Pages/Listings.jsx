@@ -1404,7 +1404,7 @@ const Listings = () => {
                 <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
                   <div className="flex flex-col">
                     <h2 className="text-[16px] font-bold text-[#01155E]">Properties in UAE</h2>
-                    <span className="text-[12px] text-gray-500 font-medium">{projects.length} +  Available Listings</span>
+                    <span className="text-[12px] text-gray-500 font-medium">{projects.length}+  Available Listings</span>
                   </div>
                 </div>
 

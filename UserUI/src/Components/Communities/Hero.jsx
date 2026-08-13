@@ -11,7 +11,7 @@ import Communitiesoverview from "../../../src/assets/detailservicebackground.jpg
 import  {VITE_MAPBOX_TOKEN} from "../../Constant/constant.js"
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-
+import { TrendingUp, MapPin, Home as HomeIcon, Building2 } from "lucide-react";
 
 function CommunityProfile() {
   const { slug } = useParams();
@@ -24,6 +24,15 @@ function CommunityProfile() {
     if (slug) dispatch(fetchCommunityProfile(slug));
     return () => dispatch(clearProfile());
   }, [slug, dispatch]);
+
+  // ✅ Icon picker helper — card ke title ke basis par icon choose karta hai
+  const getCardIcon = (title = "") => {
+    const t = title.toLowerCase();
+    if (t.includes("developer")) return TrendingUp;
+    if (t.includes("area") || t.includes("location")) return MapPin;
+    if (t.includes("property") || t.includes("type")) return HomeIcon;
+    return Building2; // default fallback icon
+  };
 
   // ... existing states
 useEffect(() => {
@@ -127,28 +136,39 @@ useEffect(() => {
 
     {/* Content Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-      {cardData.map((card, index) => (
-        <div key={index} className="w-full max-w-[362px] flex flex-col items-center group">
-          {/* Card Image */}
-          <div className="w-full h-[350px] md:h-[393px] overflow-hidden rounded-[16px]">
-            <img
-              src={card.image}
-              alt={card.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
+      {cardData.map((card, index) => {
+        const Icon = getCardIcon(card.title);
+        return (
+          <div key={index} className="w-full max-w-[362px] flex flex-col items-center group">
+            {/* Card Image */}
+            <div className="w-full h-[350px] md:h-[393px] overflow-hidden rounded-[16px]">
+              <img
+                src={card.image}
+                alt={card.title}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
 
-          {/* Info Section */}
-          <div className="mt-4 w-full min-h-[100px] bg-[#01155E] rounded-[5px] flex flex-col justify-center items-center gap-2 p-4 shadow-lg">
-            <h3 className="text-[#FBFBFB] font-['General_Sans'] font-semibold text-lg md:text-[20px] leading-snug text-center">
-              {card.title}
-            </h3>
-            <p className="text-[#FBFBFB]/90 font-['General_Sans'] font-normal text-base md:text-[18px] leading-snug text-center">
-              {card.subtitle}
-            </p>
+            {/* Info Section - White card with icon, blue text (matches reference design) */}
+            <div className="mt-4 w-full min-h-[80px] bg-white rounded-[12px] flex items-center gap-4 p-4 shadow-[0px_2px_10px_rgba(0,0,0,0.08)] border  border-[#e1e1e1]">
+              {/* Icon Box */}
+              <div className="flex-shrink-0 w-[44px] h-[44px] rounded-[10px] bg-[#01155E] flex items-center justify-center">
+                <Icon className="w-5 h-5 text-[#ffff]" strokeWidth={2} />
+              </div>
+
+              {/* Text */}
+              <div className="flex flex-col items-start text-left">
+                <h3 className="text-[#01155E] font-['General_Sans'] font-bold text-sm md:text-[16px] uppercase leading-snug tracking-wide">
+                  {card.title}
+                </h3>
+                <p className="text-[#67739E] font-['General_Sans'] font-normal text-xs md:text-[14px] leading-snug">
+                  {card.subtitle}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   </div>
 </section>

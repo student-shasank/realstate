@@ -106,13 +106,9 @@ function Navbar() {
           scrolled ? "shadow-md" : ""
         }`}
       >
-        {/* ===== TOP BAR ROW (collapses on scroll, inside same header) ===== */}
+        {/* ===== TOP BAR ROW (now always visible/sticky along with the nav) ===== */}
         <div
-          className={`hidden lg:block overflow-hidden border-b transition-all duration-300 ease-in-out ${topBarBg} ${
-            scrolled
-              ? "max-h-0 opacity-0 py-0 border-b-0"
-              : "max-h-12 opacity-100 py-2"
-          }`}
+          className={`hidden lg:block overflow-hidden border-b ${topBarBg} max-h-12 opacity-100 py-2`}
         >
           <div className="px-8 xl:px-12 2xl:px-20 flex items-center justify-between text-xs sm:text-sm">
             <div className="flex items-center gap-4 sm:gap-6 font-medium">
@@ -395,13 +391,9 @@ function Navbar() {
         </nav>
       </header>
 
-      {/* ===== SPACER — pushes page content below the fixed header, and
-          animates in sync with the collapse so nothing overlaps/gaps ===== */}
-      <div
-        className={`transition-all duration-300 ease-in-out h-[64px] sm:h-[72px] ${
-          scrolled ? "lg:h-[90px] xl:h-[100px]" : "lg:h-[130px] xl:h-[140px]"
-        }`}
-      />
+      {/* ===== SPACER — pushes page content below the fixed header.
+          Topbar no longer collapses, so the spacer height stays constant. ===== */}
+      <div className="h-[64px] sm:h-[72px] lg:h-[130px] xl:h-[140px]" />
 
       {/* ===================== DRAWER (phones + tablets, below lg) ===================== */}
 
