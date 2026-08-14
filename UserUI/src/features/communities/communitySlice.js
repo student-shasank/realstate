@@ -2,18 +2,30 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { COMMUNITIES_URL } from "../../Constant/constant";
 
-// 1. Navigation List Fetch with Pagination
+// ✅ Navbar dropdown — small, fixed list, kabhi search/pagination se affect nahi hoga
 export const fetchNavList = createAsyncThunk(
   "community/fetchNavList",
-  async (page = 1) => {
+  async () => {
     const response = await axios.get(
-      `${COMMUNITIES_URL}/navigation?page=${page}&limit=9`
+      `${COMMUNITIES_URL}/navigation?page=1&limit=20`
     );
     return response.data;
   }
 );
 
-// 2. Profile Details Fetch
+// ✅ AllCommunities page — Blog.jsx jaisa: page + search dono ek call mein
+export const fetchCommunitiesPage = createAsyncThunk(
+  "community/fetchCommunitiesPage",
+  async ({ page = 1, perPage = 9, search = "" } = {}) => {
+    const response = await axios.get(
+      `${COMMUNITIES_URL}/navigation?page=${page}&limit=${perPage}&search=${encodeURIComponent(
+        search
+      )}`
+    );
+    return response.data;
+  }
+);
+
 export const fetchCommunityProfile = createAsyncThunk(
   "community/fetchProfile",
   async (slug) => {
@@ -25,50 +37,54 @@ export const fetchCommunityProfile = createAsyncThunk(
 const communitySlice = createSlice({
   name: "community",
   initialState: {
+    // Navbar dropdown
     navList: [],
+
+    // AllCommunities page (Blog.jsx pattern)
+    items: [],
+    currentPage: 1,
+    totalPages: 1,
+    searchTerm: "",
+
     currentProfile: null,
     loading: false,
-    hasMore: true,
     error: null,
   },
   reducers: {
     clearProfile: (state) => {
       state.currentProfile = null;
     },
-    // ✅ Important: List reset karne ke liye
-    resetNavList: (state) => {
-      state.navList = [];
-      state.hasMore = true;
-      state.loading = false;
-      state.error = null;
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setSearchTerm: (state, action) => {
+      state.searchTerm = action.payload;
+      state.currentPage = 1; // ✅ naya search => page 1 se start
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchNavList.pending, (state) => {
-        state.loading = true;
-      })
+      // ---- Navbar dropdown ----
       .addCase(fetchNavList.fulfilled, (state, action) => {
-        state.loading = false;
-
-        const newData = action.payload?.data || [];
-
-        // ✅ FIXED DUPLICATE CHECK (handles _id as string or {_id: {$oid}})
-        const getId = (x) => x?._id?.$oid || x?._id;
-
-        const filteredData = newData.filter(
-          (newItem) =>
-            !state.navList.some((oldItem) => getId(oldItem) === getId(newItem))
-        );
-
-        state.navList = [...state.navList, ...filteredData];
-        state.hasMore = action.payload?.hasMore ?? false;
+        state.navList = action.payload?.data || [];
       })
-      .addCase(fetchNavList.rejected, (state, action) => {
+
+      // ---- AllCommunities page ----
+      .addCase(fetchCommunitiesPage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCommunitiesPage.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload?.data || [];
+        state.totalPages = action.payload?.totalPages ?? 1;
+      })
+      .addCase(fetchCommunitiesPage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
 
+      // ---- Profile ----
       .addCase(fetchCommunityProfile.pending, (state) => {
         state.loading = true;
       })
@@ -83,5 +99,6 @@ const communitySlice = createSlice({
   },
 });
 
-export const { clearProfile, resetNavList } = communitySlice.actions;
+export const { clearProfile, setCurrentPage, setSearchTerm } =
+  communitySlice.actions;
 export default communitySlice.reducer;

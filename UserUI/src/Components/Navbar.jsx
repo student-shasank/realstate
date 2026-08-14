@@ -27,12 +27,12 @@ function Navbar() {
   const location = useLocation();
   const { user } = useSelector((state) => state.loginAuth);
   const { navList } = useSelector((state) => state.community);
-
-  useEffect(() => {
-    if (navList.length === 0) {
-      dispatch(fetchNavList());
-    }
-  }, [dispatch, navList.length]);
+  
+useEffect(() => {
+  if (navList.length === 0) {
+    dispatch(fetchNavList());   // no args needed now
+  }
+}, [dispatch, navList.length]);
 
   const isHomePage = location.pathname === "/";
 

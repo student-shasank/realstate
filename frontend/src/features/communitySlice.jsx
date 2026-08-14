@@ -12,9 +12,9 @@ export const saveCommunity = createAsyncThunk(
       const fd = new FormData();
       fd.append("data", JSON.stringify(payload));
 
-      // Hero Images
-      heroImages.forEach((file, idx) => {
-        if (file) fd.append(`heroImage_${idx}`, file);
+      // ✅ Same field name "heroImages" 3 baar append — multer isse array collect karta hai
+      heroImages.forEach((file) => {
+        if (file) fd.append("heroImages", file);
       });
 
       if (overviewImage) fd.append("overviewImage", overviewImage);

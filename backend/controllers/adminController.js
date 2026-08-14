@@ -506,13 +506,14 @@ export const getListingById = async (req, res) => {
 export const createCommunity = async (req, res) => {
   try {
     const bodyData = JSON.parse(req.body.data);
-    const files    = req.files;
+    const files = req.files;
 
-    // Hero images
-    if (bodyData.hero?.cards) {
-      bodyData.hero.cards.forEach((card, idx) => {
-        const key = `heroImage_${idx}`;
-        if (files[key]) card.image = files[key][0].path;
+    // ✅ Hero images ab array ke andar hain: files.heroImages = [ {path...}, {path...}, ... ]
+    if (bodyData.hero?.cards && files["heroImages"]) {
+      files["heroImages"].forEach((file, idx) => {
+        if (bodyData.hero.cards[idx]) {
+          bodyData.hero.cards[idx].image = file.path;
+        }
       });
     }
 
@@ -542,7 +543,6 @@ export const createCommunity = async (req, res) => {
     });
   }
 };
-
 // ── GET COMMUNITIES (for dropdown) ──────────────────────────
 export const getCommunities = async (req, res) => {
   try {
