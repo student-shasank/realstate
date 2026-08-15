@@ -67,14 +67,43 @@ const MarketActivityCard = ({ percentage, title, transactions, reportLabel, repo
       {/* Buttons Block - CENTER ALIGNED */}
       <div className="relative z-10 mt-10 lg:mt-0 flex flex-col gap-[20px] w-full max-w-[516px] mx-auto">
         <a
-          href={reportFile}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleReportClick}
-          className="w-full font-['Archivo'] h-[50px] bg-[#F8FAFC]  transition-colors text-[#01155E] rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]"
-        >
-          {reportLabel}
-        </a>
+  href={reportFile}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={handleReportClick}
+  className="
+    w-full
+    font-['Archivo']
+    h-[50px]
+    bg-[#F8FAFC]
+    border border-transparent
+    hover:border-[#2563EB]
+    transition-all duration-300
+    text-[#01155E]
+    rounded-[8px]
+    flex items-center justify-between
+    px-5
+    text-[14px] lg:text-[16px]
+  "
+>
+  <span className="mx-auto">{reportLabel}</span>
+
+  <svg
+    className="w-5 h-5 flex-shrink-0"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+</a>
         {/* <button className="w-full h-[50px] font-['Archivo'] bg-transparent border border-white/30 hover:bg-white/10 transition-colors text-white rounded-[8px] flex items-center justify-center text-[14px] lg:text-[16px]">
           Delivered via WhatsApp
         </button> */}
@@ -146,3 +175,4 @@ const DubaiMarketActivity = () => {
 };
 
 export default DubaiMarketActivity;
+

@@ -76,7 +76,7 @@ function Blog() {
   const isSearchActive = Boolean(searchTerm);
 
   return (
-    <div className="max-w-6xl mx-auto py-16 px-5 mt-20">
+    <div className="max-w-6xl mx-auto py-16 px-5 ">
       <Seo
         title="Blogs | Yupland"
         description="Discover Dubai's newest launches with expert guidance to secure the best prices and the most desirable units."

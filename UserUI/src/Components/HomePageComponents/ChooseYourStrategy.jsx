@@ -17,7 +17,7 @@ const ChooseYourStrategy = () => {
             <div className="flex-1 h-[2px] bg-[#01155E] self-center"></div>
           </div>
           <p className="text-[#67739E] text-[18px] md:text-[20px]   max-w-[1141px] mt-6 font-['General_Sans']">
-            Real estate opportunities generally fall into two categories: offplan and ready properties. Each represents a different stage in the property lifecycle and serves distinct investment and ownership objectives, whether the focus is on long term value creation, structured capital deployment, or immediate asset utilisation.
+            Real estate opportunities in UAE generally  fall into two categories: off-plan and ready properties. Each represents a different stage in the property lifecycle and serves distinct investment and ownership objectives, whether the focus is on long term value creation, structured capital deployment, or immediate asset utilisation.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ const ChooseYourStrategy = () => {
                   </ul>
                 </div>
                 <div>
-                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo']">Best suited for:</span>
+                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] ">Best suited for:</span>
                   <ul className="list-disc pl-5 sm:space-y-2">
                     <li>Investors focused on long term value creation and capital appreciation</li>
                     <li>Buyers seeking to optimise capital deployment through structured payment timelines</li>
@@ -86,7 +86,7 @@ const ChooseYourStrategy = () => {
                   </ul>
                 </div>
                 <div>
-                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo']">Best suited for:</span>
+                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] pt-[20px]">Best suited for:</span>
                   <ul className="list-disc pl-5 sm:space-y-2">
                     <li>Buyers planning personal use within a near-term timeframe</li>
                     <li>Investors prioritising rental income generation and cash flow</li>

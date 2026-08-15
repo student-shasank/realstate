@@ -484,13 +484,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               ? handleWhatsAppClick
               : (e) => e.stopPropagation()
       }
-    className={`group w-10 h-10 rounded-full border-2 border-transparent flex items-center justify-center transition-all duration-300 ${
-  listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
-} ${
-  isLikeBtn
-    ? "hover:border-[#01155E] hover:bg-white"
-    : "hover:bg-[#01155E]"
-}`}
+      className={`group w-10 h-10 rounded-full border-2 border-transparent flex items-center justify-center transition-all duration-300 ${
+        listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
+      } hover:border-[#01155E] hover:bg-white`}
     >
       {isLikeBtn ? (
         <svg
@@ -508,22 +504,19 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         <img
           src={btn.icon}
           alt={btn.alt}
-          className={`w-5 h-5 object-contain transition-all duration-300 ${
-            btn.id !== "whatsapp"
-              ? "group-hover:brightness-0 group-hover:invert"
-              : ""
-          }`}
+          className="w-5 h-5 object-contain transition-all duration-300"
         />
       )}
     </button>
   );
 })}
+        
           </div>
         </div>
-       
+
         {/* Row 3: Features */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-6 mt-3 sm:mt-4">
-         <div className="flex items-center gap-2 text-[#67739E]">
+          <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon3} alt="bed" className="w-5 h-5" />
             <span className="text-[16px] sm:text-[18px] font-medium">
               {listing?.beds
@@ -534,8 +527,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                     .join(", ")
                 : "N/A"}
             </span>
-          </div> 
-
+          </div>
 
           <div className="h-6 w-[1px] bg-[#D9E1F2]"></div>
 
@@ -583,58 +575,58 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-  {listing?.status?.toLowerCase() === "out of stock" ||
-  listing?.status?.toLowerCase() === "outofstock" ? (
-    <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
-      Out of Stock
-    </span>
-  ) : listing?.status?.toLowerCase() === "announced" ? (
-  listing?.min_price && Number(listing.min_price) > 0 ? (
-    <>
-      <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
-        Starting at
-      </span>
-      <span className="text-[20px] sm:text-[24px] mr-2">
-        {listing?.currency?.toUpperCase()}
-      </span>
-      {/* <span className="text-[26px] sm:text-[32px]">
+            {listing?.status?.toLowerCase() === "out of stock" ||
+            listing?.status?.toLowerCase() === "outofstock" ? (
+              <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
+                Out of Stock
+              </span>
+            ) : listing?.status?.toLowerCase() === "announced" ? (
+              listing?.min_price && Number(listing.min_price) > 0 ? (
+                <>
+                  <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
+                    Starting at
+                  </span>
+                  <span className="text-[20px] sm:text-[24px] mr-2">
+                    {listing?.currency?.toUpperCase()}
+                  </span>
+                  {/* <span className="text-[26px] sm:text-[32px]">
         {listing.min_price.toLocaleString()}
       </span> */}
-      <span className="text-[26px] sm:text-[32px]">
-        {formatNumber(listing.min_price)}
-      </span>
-    </>
-  ) : (
-    <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
-      Coming Soon
-    </span>
-  )
-) : listing?.status?.toLowerCase() === "offplan" ? (
-    <>
-      <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
-        Starting at
-      </span>
-      <span className="text-[20px] sm:text-[24px] mr-2">
-        {listing?.currency?.toUpperCase()}
-      </span>
-      {/* <span className="text-[26px] sm:text-[32px]">
+                  <span className="text-[26px] sm:text-[32px]">
+                    {formatNumber(listing.min_price)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
+                  Coming Soon
+                </span>
+              )
+            ) : listing?.status?.toLowerCase() === "offplan" ? (
+              <>
+                <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
+                  Starting at
+                </span>
+                <span className="text-[20px] sm:text-[24px] mr-2">
+                  {listing?.currency?.toUpperCase()}
+                </span>
+                {/* <span className="text-[26px] sm:text-[32px]">
         {listing?.min_price?.toLocaleString() || "10,00,239"}
       </span> */}
-      <span className="text-[26px] sm:text-[32px]">
-        {formatNumber(listing?.min_price) || "1,000,239"}
-      </span>
-    </>
-  ) : (
-    <>
-      <span className="text-[20px] sm:text-[24px] mr-2">
-        {listing?.currency?.toUpperCase()}
-      </span>
-      <span className="text-[26px] sm:text-[32px]">
-        {listing?.min_price?.toLocaleString() || "10,00,239"}
-      </span>
-    </>
-  )}
-</div>
+                <span className="text-[26px] sm:text-[32px]">
+                  {formatNumber(listing?.min_price) || "1,000,239"}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[20px] sm:text-[24px] mr-2">
+                  {listing?.currency?.toUpperCase()}
+                </span>
+                <span className="text-[26px] sm:text-[32px]">
+                  {listing?.min_price?.toLocaleString() || "10,00,239"}
+                </span>
+              </>
+            )}
+          </div>
 
           <div className="flex gap-3 w-full sm:w-auto">
             <button
