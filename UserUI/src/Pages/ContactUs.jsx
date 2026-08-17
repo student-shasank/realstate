@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -7,9 +8,14 @@ import {
   MapPin,
   Phone,
   Send,
+  Loader2,
 } from "lucide-react";
+import { submitContactForm, resetContactState } from "../features/dashboard/contactSlice.jsx";
 
 const ContactUs = () => {
+  const dispatch = useDispatch();
+  const { status, error, successMessage } = useSelector((s) => s.contact);
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -28,8 +34,18 @@ const ContactUs = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Contact Form:", formData);
+    if (!formData.name || !formData.email || !formData.message) return;
+    dispatch(submitContactForm(formData));
   };
+
+  // Reset the form + slice state after a successful submission
+  useEffect(() => {
+    if (status === "succeeded") {
+      setFormData({ name: "", phone: "", email: "", enquiry: "", message: "" });
+      const timer = setTimeout(() => dispatch(resetContactState()), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, dispatch]);
 
   return (
     <div className="min-h-screen bg-white font-['General_Sans'] text-[#01155E]">
@@ -41,12 +57,12 @@ const ContactUs = () => {
             GET IN TOUCH
           </span>
           <h1 className="text-[#01155E] text-[32px] sm:text-[40px] lg:text-[48px] font-semibold tracking-[-2.5px] leading-[1.08]">
-          Let ’s  plan 
+            Let's plan
             <br />
             <span>Your Next Move.</span>
           </h1>
           <p className="max-w-[650px] mx-auto mt-5 text-[#67739E] text-[15px] sm:text-[17px] leading-[160%]">
-           Whether you’re exploring properties, assessing an investment, or seeking clarity on the Dubai property market,
+            Whether you're exploring properties, assessing an investment, or seeking clarity on the Dubai property market,
             Yupland is here to help you make informed decisions.
           </p>
         </div>
@@ -54,7 +70,6 @@ const ContactUs = () => {
 
       {/* MAP & FLOATING FORM WRAPPER */}
       <div className="relative w-full">
-        {/* MAP SECTION */}
         <section className="relative h-[450px] sm:h-[500px] lg:h-[520px] w-full overflow-hidden">
           <iframe
             title="Yupland Dubai Office"
@@ -62,10 +77,7 @@ const ContactUs = () => {
             className="absolute inset-0 w-full h-full border-0"
             loading="lazy"
           />
-
           <div className="absolute inset-0 bg-white/5 pointer-events-none" />
-
-          {/* Office Location Card */}
           <div className="absolute top-7 left-5 sm:left-8 lg:left-10 z-10">
             <div className="bg-white rounded-[14px] px-5 sm:px-6 py-4 shadow-[0_12px_35px_rgba(1,21,94,0.14)] flex items-center gap-4 min-w-[250px]">
               <div className="w-[48px] h-[48px] rounded-full bg-[#01155E] flex items-center justify-center flex-shrink-0">
@@ -105,6 +117,7 @@ const ContactUs = () => {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Your name"
+                    required
                     className="w-full h-[48px] px-4 rounded-[6px] border border-[#D9E1F2] bg-white text-[#01155E] placeholder:text-[#67739E]/60 text-[14px] outline-none focus:border-[#01155E] transition-all"
                   />
                 </div>
@@ -134,13 +147,14 @@ const ContactUs = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
+                  required
                   className="w-full h-[48px] px-4 rounded-[6px] border border-[#D9E1F2] bg-white text-[#01155E] placeholder:text-[#67739E]/60 text-[14px] outline-none focus:border-[#01155E] transition-all"
                 />
               </div>
 
               <div>
                 <label className="block text-[#01155E] text-[14px] font-medium mb-2">
-                 What can we help you with?
+                  What can we help you with?
                 </label>
                 <div className="relative">
                   <select
@@ -173,31 +187,54 @@ const ContactUs = () => {
                   onChange={handleChange}
                   rows={4}
                   placeholder="Share the details of your enquiry"
+                  required
                   className="w-full px-4 py-3 rounded-[6px] border border-[#D9E1F2] bg-white text-[#01155E] placeholder:text-[#67739E]/60 text-[14px] outline-none resize-none focus:border-[#01155E] transition-all"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full h-[49px] rounded-[6px] bg-[#01155E] text-white flex items-center justify-center gap-2 text-[14px] font-semibold hover:bg-[#67739E] transition-all duration-300"
+                disabled={status === "loading"}
+                className="w-full h-[49px] rounded-[6px] bg-[#01155E] text-white flex items-center justify-center gap-2 text-[14px] font-semibold hover:bg-[#67739E] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <Send size={15} />
-                Send Message
+                {status === "loading" ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send size={15} />
+                    Send Message
+                  </>
+                )}
               </button>
 
-             <div className="flex justify-center items-center gap-2 pt-1">
-  <span className="text-[14px] text-[#67739E] text-center">
-    Your privacy matters to us. Your information will be handled securely
-    and in accordance with our{" "}
-    <Link
-      to="/privacy"
-      className="text-[#01155E] font-medium hover:underline transition-all"
-    >
-      Privacy Policy
-    </Link>
-    .
-  </span>
-</div>
+              {/* Success / error feedback */}
+              {status === "succeeded" && successMessage && (
+                <p className="text-center text-[13px] text-green-600 font-medium pt-1">
+                  {successMessage}
+                </p>
+              )}
+              {status === "failed" && error && (
+                <p className="text-center text-[13px] text-red-600 font-medium pt-1">
+                  {error}
+                </p>
+              )}
+
+              <div className="flex justify-center items-center gap-2 pt-1">
+                <span className="text-[14px] text-[#67739E] text-center">
+                  Your privacy matters to us. Your information will be handled securely
+                  and in accordance with our{" "}
+                  <Link
+                    to="/privacy"
+                    className="text-[#01155E] font-medium hover:underline transition-all"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </div>
             </form>
 
           </div>
@@ -206,72 +243,68 @@ const ContactUs = () => {
 
       {/* CONTACT INFORMATION */}
       <section className="px-5 pt-[60px] lg:pt-[80px] pb-[70px]">
-  <div className="max-w-[1200px] mx-auto">
-    <div className="text-center mb-10 sm:mb-12">
-      <span className="text-[#01155E] text-[14px] font-semibold tracking-[1.2px] uppercase">
-        CONTACT INFORMATION
-      </span>
-      <h2 className="text-[#01155E] text-[30px] sm:text-[38px] font-semibold leading-[120%] mt-2">
-        We’re here when you need us
-      </h2>
-      <div className="w-[34px] h-[2px] bg-[#01155E] mx-auto mt-4" />
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 max-w-[800px] mx-auto">
-      
-      {/* Phone Card */}
-      <ContactCard
-        icon={<Phone size={21} />}
-        title="Call Us"
-        description={
-          <div className="space-y-1.5 mt-2">
-            <p className="text-[14px] text-[#01155E] font-medium">
-              <span className="text-[#67739E]">UAE:</span>{" "}
-              <a href="tel:+971505773767" className="hover:underline">
-                +971 50 577 3767
-              </a>
-            </p>
-            <p className="text-[14px] text-[#01155E] font-medium">
-              <span className="text-[#67739E]">Canada:</span>{" "}
-              <a href="tel:+14373288508" className="hover:underline">
-                +1 437 328 8508
-              </a>
-            </p>
-            <p className="text-[14px] text-[#01155E] font-medium">
-              <span className="text-[#67739E]">India:</span>{" "}
-              <a href="tel:+919999995871" className="hover:underline">
-                +91 999 999 5871
-              </a>
-            </p>
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center mb-10 sm:mb-12">
+            <span className="text-[#01155E] text-[14px] font-semibold tracking-[1.2px] uppercase">
+              CONTACT INFORMATION
+            </span>
+            <h2 className="text-[#01155E] text-[30px] sm:text-[38px] font-semibold leading-[120%] mt-2">
+              We're here when you need us
+            </h2>
+            <div className="w-[34px] h-[2px] bg-[#01155E] mx-auto mt-4" />
           </div>
-        }
-      />
 
-      {/* Email Card */}
-      <ContactCard
-        icon={<Mail size={21} />}
-        title="Email Us"
-        description={
-          <div className="space-y-1.5 mt-2">
-            <p className="text-[14px] text-[#01155E] font-medium break-all">
-              <a href="mailto:info@yupland.ae" className="hover:underline">
-                info@yupland.ae
-              </a>
-            </p>
-            <p className="text-[14px] text-[#01155E] font-medium break-all">
-              <a href="mailto:divyansh@aquaproperties.com" className="hover:underline">
-                divyansh@aquaproperties.com
-              </a>
-            </p>
-            <p className="text-[#67739E] text-[14px] pt-1">
-              We usually respond within 24 hours.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 max-w-[800px] mx-auto">
+            <ContactCard
+              icon={<Phone size={21} />}
+              title="Call Us"
+              description={
+                <div className="space-y-1.5 mt-2">
+                  <p className="text-[14px] text-[#01155E] font-medium">
+                    <span className="text-[#67739E]">UAE:</span>{" "}
+                    <a href="tel:+971505773767" className="hover:underline">
+                      +971 50 577 3767
+                    </a>
+                  </p>
+                  <p className="text-[14px] text-[#01155E] font-medium">
+                    <span className="text-[#67739E]">Canada:</span>{" "}
+                    <a href="tel:+14373288508" className="hover:underline">
+                      +1 437 328 8508
+                    </a>
+                  </p>
+                  <p className="text-[14px] text-[#01155E] font-medium">
+                    <span className="text-[#67739E]">India:</span>{" "}
+                    <a href="tel:+919999995871" className="hover:underline">
+                      +91 999 999 5871
+                    </a>
+                  </p>
+                </div>
+              }
+            />
+            <ContactCard
+              icon={<Mail size={21} />}
+              title="Email Us"
+              description={
+                <div className="space-y-1.5 mt-2">
+                  <p className="text-[14px] text-[#01155E] font-medium break-all">
+                    <a href="mailto:info@yupland.ae" className="hover:underline">
+                      info@yupland.ae
+                    </a>
+                  </p>
+                  <p className="text-[14px] text-[#01155E] font-medium break-all">
+                    <a href="mailto:divyansh@aquaproperties.com" className="hover:underline">
+                      divyansh@aquaproperties.com
+                    </a>
+                  </p>
+                  <p className="text-[#67739E] text-[14px] pt-1">
+                    We usually respond within 24 hours.
+                  </p>
+                </div>
+              }
+            />
           </div>
-        }
-      />
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* CTA SECTION */}
       <section className="px-5 pb-[70px]">

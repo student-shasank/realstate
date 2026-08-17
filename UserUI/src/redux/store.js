@@ -18,6 +18,7 @@ import updateUserReducer from "../features/Authentation/updateUserSlice.js";
 import listingByIdReducer from "../features/dashboard/fetchListingById.jsx";
 import blogReducer from "../features/dashboard/Blogslice.jsx"
 import sortReducer from "../features/dashboard/sortSlice";
+import contactReducer from "../features/dashboard/contactSlice.jsx";
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
                  updateUser: updateUserReducer,
                  listingById: listingByIdReducer, 
                  blogs: blogReducer,
+                 contact: contactReducer,
                  sort: sortReducer, 
 
     //  dashboard: dashboardReducer,
