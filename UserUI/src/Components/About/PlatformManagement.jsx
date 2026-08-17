@@ -3,7 +3,7 @@ import platformindependent from "../../assets/brocker.jpeg"
 
 const PlatformManagement = () => {
   return (
-    <div className="flex flex-col items-center justify-center w-full bg-white py-12 md:py-20 px-4">
+    <div className="flex flex-col items-center justify-center w-full bg-white pb-12 md:pb-20 px-4">
       
       {/* Outer Section: Responsive container instead of 1238px */}
       <div className="w-full max-w-[1238px] flex flex-col gap-8 md:gap-10">

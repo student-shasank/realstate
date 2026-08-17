@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   ChevronDown,
@@ -40,20 +41,19 @@ const ContactUs = () => {
             GET IN TOUCH
           </span>
           <h1 className="text-[#01155E] text-[32px] sm:text-[40px] lg:text-[48px] font-semibold tracking-[-2.5px] leading-[1.08]">
-            Let’s Talk About
+          Let ’s  plan 
             <br />
-            <span>Your Next Move</span>
+            <span>Your Next Move.</span>
           </h1>
           <p className="max-w-[650px] mx-auto mt-5 text-[#67739E] text-[15px] sm:text-[17px] leading-[160%]">
-            Whether you’re looking to buy, sell, invest, or simply have
-            questions about the Dubai property market, our team is here to help.
+           Whether you’re exploring properties, assessing an investment, or seeking clarity on the Dubai property market,
+            Yupland is here to help you make informed decisions.
           </p>
         </div>
       </section>
 
       {/* MAP & FLOATING FORM WRAPPER */}
       <div className="relative w-full">
-
         {/* MAP SECTION */}
         <section className="relative h-[450px] sm:h-[500px] lg:h-[520px] w-full overflow-hidden">
           <iframe
@@ -140,7 +140,7 @@ const ContactUs = () => {
 
               <div>
                 <label className="block text-[#01155E] text-[14px] font-medium mb-2">
-                  What can we help with?
+                 What can we help you with?
                 </label>
                 <div className="relative">
                   <select
@@ -172,7 +172,7 @@ const ContactUs = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={4}
-                  placeholder="Tell us a little about what you're looking for..."
+                  placeholder="Share the details of your enquiry"
                   className="w-full px-4 py-3 rounded-[6px] border border-[#D9E1F2] bg-white text-[#01155E] placeholder:text-[#67739E]/60 text-[14px] outline-none resize-none focus:border-[#01155E] transition-all"
                 />
               </div>
@@ -185,11 +185,19 @@ const ContactUs = () => {
                 Send Message
               </button>
 
-              <div className="flex justify-center items-center gap-2 pt-1">
-                <span className="text-[14px] text-[#67739E] text-center">
-                  Your information is safe with us. We never share your details.
-                </span>
-              </div>
+             <div className="flex justify-center items-center gap-2 pt-1">
+  <span className="text-[14px] text-[#67739E] text-center">
+    Your privacy matters to us. Your information will be handled securely
+    and in accordance with our{" "}
+    <Link
+      to="/privacy"
+      className="text-[#01155E] font-medium hover:underline transition-all"
+    >
+      Privacy Policy
+    </Link>
+    .
+  </span>
+</div>
             </form>
 
           </div>
@@ -198,104 +206,72 @@ const ContactUs = () => {
 
       {/* CONTACT INFORMATION */}
       <section className="px-5 pt-[60px] lg:pt-[80px] pb-[70px]">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <span className="text-[#01155E] text-[14px] font-semibold tracking-[1.2px] uppercase">
-              CONTACT INFORMATION
-            </span>
-            <h2 className="text-[#01155E] text-[30px] sm:text-[38px] font-semibold leading-[120%] mt-2">
-              We’re here when you need us
-            </h2>
-            <div className="w-[34px] h-[2px] bg-[#01155E] mx-auto mt-4" />
+  <div className="max-w-[1200px] mx-auto">
+    <div className="text-center mb-10 sm:mb-12">
+      <span className="text-[#01155E] text-[14px] font-semibold tracking-[1.2px] uppercase">
+        CONTACT INFORMATION
+      </span>
+      <h2 className="text-[#01155E] text-[30px] sm:text-[38px] font-semibold leading-[120%] mt-2">
+        We’re here when you need us
+      </h2>
+      <div className="w-[34px] h-[2px] bg-[#01155E] mx-auto mt-4" />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 max-w-[800px] mx-auto">
+      
+      {/* Phone Card */}
+      <ContactCard
+        icon={<Phone size={21} />}
+        title="Call Us"
+        description={
+          <div className="space-y-1.5 mt-2">
+            <p className="text-[14px] text-[#01155E] font-medium">
+              <span className="text-[#67739E]">UAE:</span>{" "}
+              <a href="tel:+971505773767" className="hover:underline">
+                +971 50 577 3767
+              </a>
+            </p>
+            <p className="text-[14px] text-[#01155E] font-medium">
+              <span className="text-[#67739E]">Canada:</span>{" "}
+              <a href="tel:+14373288508" className="hover:underline">
+                +1 437 328 8508
+              </a>
+            </p>
+            <p className="text-[14px] text-[#01155E] font-medium">
+              <span className="text-[#67739E]">India:</span>{" "}
+              <a href="tel:+919999995871" className="hover:underline">
+                +91 999 999 5871
+              </a>
+            </p>
           </div>
+        }
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
-            
-            {/* Phone Card */}
-            <ContactCard
-              icon={<Phone size={21} />}
-              title="Call Us"
-              value={
-                <a
-                  href="tel:+971505773767"
-                  className="hover:underline transition-all"
-                >
-                  +971 50 577 3767
-                </a>
-              }
-              description={
-                <div className="space-y-1.5 mt-2">
-                  <p className="text-[14px] text-[#01155E] font-medium">
-                    <span className="text-[#67739E]">UAE:</span>{" "}
-                    <a href="tel:+971505773767" className="hover:underline">
-                      +971 50 577 3767
-                    </a>
-                  </p>
-                  <p className="text-[14px] text-[#01155E] font-medium">
-                    <span className="text-[#67739E]">Canada:</span>{" "}
-                    <a href="tel:+14373288508" className="hover:underline">
-                      +1 437 328 8508
-                    </a>
-                  </p>
-                  <p className="text-[14px] text-[#01155E] font-medium">
-                    <span className="text-[#67739E]">India:</span>{" "}
-                    <a href="tel:+919999995871" className="hover:underline">
-                      +91 999 999 5871
-                    </a>
-                  </p>
-                </div>
-              }
-            />
-
-            {/* Email Card */}
-            <ContactCard
-              icon={<Mail size={21} />}
-              title="Email Us"
-              value={
-                <a
-                  href="mailto:info@yupland.ae"
-                  className="hover:underline transition-all"
-                >
-                  info@yupland.ae
-                </a>
-              }
-              description={
-                <div className="space-y-1.5 mt-2">
-                  <p className="text-[14px] text-[#01155E] font-medium break-all">
-                    <a href="mailto:info@yupland.ae" className="hover:underline">
-                      info@yupland.ae
-                    </a>
-                  </p>
-                  <p className="text-[14px] text-[#01155E] font-medium break-all">
-                    <a href="mailto:divyansh@aquaproperties.com" className="hover:underline">
-                      divyansh@aquaproperties.com
-                    </a>
-                  </p>
-                  <p className="text-[#67739E] text-[14px] pt-1">
-                    We usually respond within 24 hours.
-                  </p>
-                </div>
-              }
-            />
-
-            {/* Visit Us Card */}
-            <ContactCard
-              icon={<MapPin size={21} />}
-              title="Visit Us"
-              value="Dubai, UAE"
-              description={
-                <div className="text-[14px] text-[#67739E] leading-[160%]">
-                  Office 511, Building 03,
-                  <br />
-                  Dubai Design District (D3)
-                  <br />
-                  PO Box 500043, Dubai, UAE
-                </div>
-              }
-            />
+      {/* Email Card */}
+      <ContactCard
+        icon={<Mail size={21} />}
+        title="Email Us"
+        description={
+          <div className="space-y-1.5 mt-2">
+            <p className="text-[14px] text-[#01155E] font-medium break-all">
+              <a href="mailto:info@yupland.ae" className="hover:underline">
+                info@yupland.ae
+              </a>
+            </p>
+            <p className="text-[14px] text-[#01155E] font-medium break-all">
+              <a href="mailto:divyansh@aquaproperties.com" className="hover:underline">
+                divyansh@aquaproperties.com
+              </a>
+            </p>
+            <p className="text-[#67739E] text-[14px] pt-1">
+              We usually respond within 24 hours.
+            </p>
           </div>
-        </div>
-      </section>
+        }
+      />
+    </div>
+  </div>
+</section>
 
       {/* CTA SECTION */}
       <section className="px-5 pb-[70px]">

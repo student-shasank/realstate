@@ -2,27 +2,27 @@ import React from 'react';
 
 const DataSources = () => {
   return (
-    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 pt-20">
+    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 ">
       
       {/* --- Header Section --- */}
-      <section className="w-full flex justify-center pt-[100px] pb-[30px] px-4">
-        <div className="w-[1213px] text-left">
-          <h1 className="font-['Archivo'] font-semibold text-[56px] leading-[100%] text-[#01155E]   inline-block">
+      <section className="w-full flex justify-center pt-16 sm:pt-20 md:pt-[100px] pb-[30px] px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[1213px] text-left">
+          <h1 className="font-['Archivo'] font-semibold text-[32px] sm:text-[40px] md:text-[48px] lg:text-[56px] leading-[100%] text-[#01155E]   inline-block">
             Data Sources
           </h1>
-          <div className="flex w-[574px] mb-4"><div className="w-[240px] h-[8px]  mb-4 bg-[#01155E]"></div><div className="flex-1 h-[2px] bg-[#01155E]"></div></div>
-          <p className="text-[#67739E] text-[18px] leading-[160%]">
+          <div className="flex w-full max-w-[574px] mb-4"><div className="w-[120px] sm:w-[180px] md:w-[240px] h-[8px]  mb-4 bg-[#01155E]"></div><div className="flex-1 h-[2px] bg-[#01155E]"></div></div>
+          <p className="text-[#67739E] text-[16px] sm:text-[18px] leading-[160%]">
             Last Updated: June 2026
           </p>
         </div>
       </section>
 
       {/* --- Main Background Content Area --- */}
-      <section className="w-full flex justify-center pb-20 px-4">
+      <section className="w-full flex justify-center pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8">
         {/* Figma Dimensions: 1452px Width & Gradient Background */}
-        <div className="w-[1452px] min-h-[1082px] pt-[10px] pb-20 px-[120px] rounded-[24px] ">
+        <div className="w-full max-w-[1452px] min-h-0 md:min-h-[1082px] pt-[10px] pb-12 sm:pb-16 md:pb-20 rounded-[24px] ">
           
-          <div className="max-w-[1213px] mx-auto text-[#67739E] text-[18px] leading-[170%] space-y-10">
+          <div className="max-w-[1213px] mx-auto text-[#67739E] text-[16px] sm:text-[17px] md:text-[18px] leading-[170%] space-y-8 sm:space-y-9 md:space-y-10">
             
             {/* Introductory Section */}
             <section className="space-y-6">
@@ -36,7 +36,7 @@ const DataSources = () => {
 
             {/* Sources List Section */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Sources of Information
               </h2>
               <p className="mb-6">Information published on the platform may be derived from sources including, but not limited to:</p>

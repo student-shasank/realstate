@@ -2,27 +2,27 @@ import React from 'react';
 
 const PrivacyPolicy = () => {
   return (
-    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 pt-20">
+    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 ">
       
       {/* --- Header Section --- */}
-      <section className="w-full flex justify-center pt-[100px] pb-[20px] px-4 ">
-        <div className="w-[1213px] text-left">
-          <h1 className="font-['Archivo'] font-semibold text-[56px] leading-[100%] text-[#01155E]  inline-block">
+      <section className="w-full flex justify-center pt-16 sm:pt-20 md:pt-[100px] pb-[20px] px-4 sm:px-6 lg:px-8 ">
+        <div className="w-full max-w-[1213px] text-left">
+          <h1 className="font-['Archivo'] font-semibold text-[32px] sm:text-[40px] md:text-[48px] lg:text-[56px] leading-[100%] text-[#01155E]  inline-block">
             Privacy Policy
           </h1>
-          <div className="flex w-[574px]"><div className="w-[240px] h-[8px]  mb-4 bg-[#01155E]"></div><div className="flex-1 h-[2px] bg-[#01155E]"></div></div>
-          <p className="text-[#67739E] text-[18px] leading-[160%]">
+          <div className="flex w-full max-w-[574px]"><div className="w-[120px] sm:w-[180px] md:w-[240px] h-[8px]  mb-4 bg-[#01155E]"></div><div className="flex-1 h-[2px] bg-[#01155E]"></div></div>
+          <p className="text-[#67739E] text-[16px] sm:text-[18px] leading-[160%]">
             Last Updated: June 2026
           </p>
         </div>
       </section>
 
       {/* --- Main Background Content Area --- */}
-      <section className="w-full flex justify-center pb-20 px-4">
+      <section className="w-full flex justify-center pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8">
         {/* Figma Dimensions: 1452px Width & Gradient styling */}
-        <div className="w-[1452px] min-h-[1082px] pt-[10px] pb-20 px-[120px] rounded-[24px] ">
+        <div className="w-full max-w-[1452px] min-h-0 md:min-h-[1082px] pt-[10px] pb-12 sm:pb-16 md:pb-20 rounded-[24px] ">
           
-          <div className="max-w-[1213px] mx-auto text-[#67739E] text-[18px] leading-[170%] space-y-10">
+          <div className="max-w-[1213px] mx-auto text-[#67739E] text-[16px] sm:text-[17px] md:text-[18px] leading-[170%] space-y-8 sm:space-y-9 md:space-y-10">
             
             {/* Introductory Section */}
             <section className="space-y-6">
@@ -42,7 +42,7 @@ const PrivacyPolicy = () => {
 
             {/* Information Collected */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Information Collected
               </h2>
               <p>
@@ -50,13 +50,13 @@ const PrivacyPolicy = () => {
               </p>
               <div className="space-y-6 mt-6">
                 <div>
-                  <h3 className="font-['Archivo'] font-semibold text-[24px] text-[#01155E] mb-2">Personal Information</h3>
+                  <h3 className="font-['Archivo'] font-semibold text-[20px] sm:text-[22px] md:text-[24px] text-[#01155E] mb-2">Personal Information</h3>
                   <p>
                     Users may voluntarily provide personal information when submitting forms, sending inquiries, or communicating through the website. This may include information such as name, email address, phone number, or other information voluntarily submitted by the user.
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-['Archivo'] font-semibold text-[24px] text-[#01155E] mb-2">Usage Data</h3>
+                  <h3 className="font-['Archivo'] font-semibold text-[20px] sm:text-[22px] md:text-[24px] text-[#01155E] mb-2">Usage Data</h3>
                   <p>
                     Certain non-personal information may be collected automatically when users visit the website. This may include information such as browser type, device type, pages visited, referring websites, and approximate geographic location based on IP address.
                   </p>
@@ -66,7 +66,7 @@ const PrivacyPolicy = () => {
 
             {/* Cookies */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Cookies and Tracking Technologies
               </h2>
               <p>
@@ -76,7 +76,7 @@ const PrivacyPolicy = () => {
 
             {/* How Information Is Used */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 How Information Is Used
               </h2>
               <p>
@@ -89,7 +89,7 @@ const PrivacyPolicy = () => {
 
             {/* Third-Party Service Providers */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Third-Party Service Providers
               </h2>
               <p>
@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
 
             {/* Data Security */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Data Security
               </h2>
               <p>
@@ -112,7 +112,7 @@ const PrivacyPolicy = () => {
 
             {/* Compliance */}
             <section className="space-y-4">
-              <h2 className="font-['Archivo'] font-semibold text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
+              <h2 className="font-['Archivo'] font-semibold text-[24px] sm:text-[28px] md:text-[32px] text-[#01155E] leading-[120%] underline underline-offset-[12px] decoration-1 mb-8">
                 Compliance With Applicable Laws
               </h2>
               <p>
@@ -122,7 +122,7 @@ const PrivacyPolicy = () => {
 
             {/* Changes Footer */}
             <section className="pt-10 border-t border-[#67739E]/20">
-              <h3 className="font-['Archivo'] font-semibold text-[24px] text-[#01155E] mb-2">Changes to This Privacy Policy</h3>
+              <h3 className="font-['Archivo'] font-semibold text-[20px] sm:text-[22px] md:text-[24px] text-[#01155E] mb-2">Changes to This Privacy Policy</h3>
               <p>
                 Yupland may update this Privacy Policy from time to time. Any changes will be published on this page with an updated “Last Updated” date.
               </p>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const TermsOfUse = () => {
   return (
-    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 pt-20">
+    <div className="w-full bg-white font-sans selection:bg-[#01155E]/10 ">
       
       {/* --- Header Section --- */}
       <section className="w-full flex justify-center pt-[100px] pb-[30px] px-4">

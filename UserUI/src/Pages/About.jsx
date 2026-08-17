@@ -8,7 +8,7 @@ function About() {
   return (
     <div className='  '>
       <Hero/>
-  <DeveloperAccess/>
+  {/* <DeveloperAccess/> */}
   <PlatformManagement/>
   <DisclaimerSection/>
     </div>
