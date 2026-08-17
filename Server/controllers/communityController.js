@@ -55,7 +55,7 @@ export const getCommunityNavigation = async (req, res) => {
 
     const communities = await Community.find(
       filter,
-      "title slug overview marketSupply"
+      "title slug city overview marketSupply"   // ✅ city add kiya
     )
       .sort({ createdAt: -1 })
       .skip(skip)

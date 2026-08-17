@@ -179,6 +179,7 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
 
   const [marketImage, setMarketImage] = useState(null);
   const [marketPreview, setMarketPreview] = useState("");
+  const [city, setCity] = useState("Dubai"); // default Dubai
 
   const rteFileRef = useRef(null);
 
@@ -290,6 +291,7 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
     const payload = {
       title,
       slug,
+        city,
       latitude: Number(latitude),   
        longitude: Number(longitude),
 
@@ -356,6 +358,19 @@ const [longitude, setLongitude] = useState(defaults.longitude || 55.3857);
             onChange={(e) => setSlug(slugify(e.target.value))}
           />
         </div>
+
+        <div>
+    <label className="block mb-2 font-medium">City</label>
+    <select
+      className="w-full border rounded p-2"
+      value={city}
+      onChange={(e) => setCity(e.target.value)}
+    >
+      <option value="Dubai">Dubai</option>
+      <option value="Abu Dhabi">Abu Dhabi</option>
+    </select>
+  </div>
+
       </div>
 
       {/* HERO CARDS SECTION */}
