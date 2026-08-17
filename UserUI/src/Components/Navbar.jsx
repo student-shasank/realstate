@@ -27,7 +27,15 @@ function Navbar() {
   const location = useLocation();
   const { user } = useSelector((state) => state.loginAuth);
   const { navList } = useSelector((state) => state.community);
-  
+
+  // Returns two-letter initials from firstName + lastName (e.g. "Kishan Singh" -> "KS")
+  const getInitials = (u) => {
+    if (!u) return "";
+    const first = u.firstName ? u.firstName.charAt(0).toUpperCase() : "";
+    const last = u.lastName ? u.lastName.charAt(0).toUpperCase() : "";
+    return `${first}${last}`;
+  };
+
 useEffect(() => {
   if (navList.length === 0) {
     dispatch(fetchNavList());   // no args needed now
@@ -317,17 +325,14 @@ useEffect(() => {
                     onClick={() => setProfileOpen(!profileOpen)}
                     className="flex items-center gap-2 group"
                   >
-                    <span
-                      style={{
-                        ...textStyle,
-                        color: textColor,
-                        fontWeight: 700,
-                      }}
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold select-none ${
+                        isHomePage
+                          ? "bg-[#01155E] text-white"
+                          : "bg-white text-[#01155E]"
+                      }`}
                     >
-                      {user.firstName}
-                    </span>
-                    <div className="bg-[#01155E] p-1.5 rounded-full">
-                      <User size={18} className="text-white fill-current" />
+                      {getInitials(user)}
                     </div>
                   </button>
 
@@ -572,10 +577,10 @@ useEffect(() => {
           ) : (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-white font-semibold px-1 pb-2">
-                <div className="bg-white/15 p-1.5 rounded-full">
-                  <User size={18} className="text-white" />
+                <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-white text-sm font-semibold select-none">
+                  {getInitials(user)}
                 </div>
-                {user.firstName}
+                {user.firstName} {user.lastName}
               </div>
               <button
                 onClick={() => {
