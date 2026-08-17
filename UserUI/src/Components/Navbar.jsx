@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Menu, X, Languages, ChevronDown, Mail, Phone } from "lucide-react";
+import {
+  User,
+  Menu,
+  X,
+  Languages,
+  ChevronDown,
+  ChevronRight,
+  Mail,
+  Phone,
+  Building2,
+} from "lucide-react";
 
 import { logoutUser } from "../features/Authentation/login";
 import { clearFavorites } from "../features/dashboard/favoriteligting/favoriteSlice";
@@ -10,6 +20,7 @@ import LoginPopup from "../Pages/LoginPopup";
 import SignupPopup from "../Pages/SignupPopup";
 import Logo2 from "../assets/logo2.png";
 import Logo3 from "../assets/logo3.png";
+
 
 function Navbar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -87,6 +98,13 @@ useEffect(() => {
   }, []);
 
   const textColor = isHomePage ? "#01155e" : "#FFFFFF";
+  // ✅ Split communities by city (backend se ab city aa rahi hai)
+  const dubaiCommunities = navList.filter(
+    (c) => (c.city || "").trim().toLowerCase() === "dubai"
+  );
+  const abuDhabiCommunities = navList.filter(
+    (c) => (c.city || "").trim().toLowerCase() === "abu dhabi"
+  );
 
   const serviceLinks = [
     { to: "/marketingandSales", label: "Marketing & Sales" },
@@ -199,6 +217,7 @@ useEffect(() => {
                 Ready Properties
               </Link>
 
+              {/* ✅ Communities Mega Dropdown */}
               <div className="relative group flex items-center h-full">
                 <Link
                   to="/communities"
@@ -217,23 +236,89 @@ useEffect(() => {
                   </span>
                 </Link>
 
-                <div className="absolute top-[80%] left-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                    {navList && navList.length > 0 ? (
-                      navList.map((item) => (
-                        <Link
-                          key={item._id}
-                          to={`/communities/${item.slug}`}
-                          className="block px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50 last:border-0"
-                        >
-                          {item.title}
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-sm text-gray-400">
-                        Loading...
+                <div className="absolute top-[80%] left-1/2 -translate-x-1/2 w-[680px] pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden p-6">
+                    <div className="grid grid-cols-2 gap-x-10">
+
+                      {/* ===== DUBAI COLUMN ===== */}
+                      <div>
+                        <h4 className="text-[#01155E] font-bold text-sm tracking-wide mb-3">
+                          DUBAI
+                        </h4>
+
+                        <ul>
+                          {dubaiCommunities.length > 0 ? (
+                            dubaiCommunities.map((item) => (
+                              <li key={item._id}>
+                                <Link
+                                  to={`/communities/${item.slug}`}
+                                  className="flex items-center justify-between gap-2 py-2 text-sm text-[#01155E] hover:text-[#01155E] hover:font-semibold transition-all"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <Building2 size={16} className="text-[#01155E] shrink-0" />
+                                    {item.title}
+                                  </span>
+                                  <ChevronRight size={16} className="text-gray-400" />
+                                </Link>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-xs text-gray-400 py-2">
+                              No communities yet
+                            </li>
+                          )}
+                        </ul>
+
+                        <div className="border-t border-gray-100 mt-2 pt-3">
+                          <Link
+                            to="/communities?city=Dubai"
+                            className="inline-flex items-center gap-1 text-sm font-semibold text-[#01155E] hover:underline"
+                          >
+                            View all in Dubai <span aria-hidden>→</span>
+                          </Link>
+                        </div>
                       </div>
-                    )}
+
+                      {/* ===== ABU DHABI COLUMN ===== */}
+                      <div>
+                        <h4 className="text-[#01155E] font-bold text-sm tracking-wide mb-3">
+                          ABU DHABI
+                        </h4>
+
+                        <ul>
+                          {abuDhabiCommunities.length > 0 ? (
+                            abuDhabiCommunities.map((item) => (
+                              <li key={item._id}>
+                                <Link
+                                  to={`/communities/${item.slug}`}
+                                  className="flex items-center justify-between gap-2 py-2 text-sm text-[#01155E] hover:text-[#01155E] hover:font-semibold transition-all"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <Building2 size={16} className="text-[#01155E] shrink-0" />
+                                    {item.title}
+                                  </span>
+                                  <ChevronRight size={16} className="text-gray-400" />
+                                </Link>
+                              </li>
+                            ))
+                          ) : (
+                            <li className="text-xs text-gray-400 py-2">
+                              No communities yet
+                            </li>
+                          )}
+                        </ul>
+
+                        <div className="border-t border-gray-100 mt-2 pt-3">
+                          <Link
+                            to="/communities?city=Abu Dhabi"
+                            className="inline-flex items-center gap-1 text-sm font-semibold text-[#01155E] hover:underline"
+                          >
+                            View all in Abu Dhabi <span aria-hidden>→</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
                 </div>
               </div>
