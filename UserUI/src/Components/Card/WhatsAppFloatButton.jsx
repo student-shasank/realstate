@@ -43,21 +43,7 @@ export default function WhatsAppFloatButton({
       `}</style>
 
       {/* Tooltip bubble */}
-      {showTooltip && (
-        <div className="relative hidden sm:flex items-center bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-lg shadow-lg">
-          Need help? Chat with us
-          <button
-            onClick={() => setShowTooltip(false)}
-            aria-label="Dismiss"
-            className="ml-2 text-gray-400 hover:text-gray-600"
-          >
-            ✕
-          </button>
-          {/* little triangle pointing right */}
-          <span className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45" />
-        </div>
-      )}
-
+     
       {/* Round WhatsApp button with ripple waves */}
       <div className="relative flex items-center justify-center w-14 h-14">
         {/* ripple rings, sit behind the button */}
