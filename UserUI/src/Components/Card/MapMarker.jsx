@@ -14,6 +14,21 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
     return `AED ${Number(price).toLocaleString("en-US")}`;
   };
 
+  // Compact price for the marker pill itself (e.g. "1.4M", "709K")
+  const formatCompactPrice = (min, max) => {
+    const price = Number(min || max);
+    if (!price) return "N/A";
+    if (price >= 1_000_000) {
+      const val = price / 1_000_000;
+      return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}M`;
+    }
+    if (price >= 1_000) {
+      const val = price / 1_000;
+      return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}K`;
+    }
+    return price.toString();
+  };
+
   // Off Plan / Ready decided from expected_delivery_date
   const getBadgeText = () => {
     if (item?.expected_delivery_date) {
@@ -34,12 +49,14 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
     return `Q${quarter} ${date.getFullYear()}`;
   };
 
+  const isHighlighted = showPopup;
+
   return (
     <div
-      className="relative z-100"
+      className="relative"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ cursor: "pointer" }}
+      style={{ cursor: "pointer", zIndex: isHighlighted ? 60 : 10 }}
     >
       {/* HOVER CARD - matches reference design */}
       {showPopup && (
@@ -47,7 +64,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
           className="absolute z-50 bg-white rounded-2xl shadow-2xl overflow-visible"
           style={{
             width: "340px",
-            bottom: "60px",
+            bottom: "56px",
             left: "50%",
             transform: "translateX(-50%)",
             padding: "12px",
@@ -120,7 +137,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
             {/* RIGHT: Details */}
             <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
               <p
-                className="text-[ #01155E ] font-bold truncate"
+                className="text-[#01155E] font-bold truncate"
                 style={{ fontSize: "17px", lineHeight: "1.2" }}
                 title={item?.title}
               >
@@ -128,7 +145,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
               </p>
 
               <p
-                className="text-[ #67739E] truncate"
+                className="text-[#67739E] truncate"
                 style={{ fontSize: "13px", marginTop: "2px" }}
               >
                 {item?.developer_name || "Developer Name"}
@@ -141,11 +158,11 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
                 }}
               />
 
-              <p className="text-[ #67739E]" style={{ fontSize: "13px" }}>
+              <p className="text-[#67739E]" style={{ fontSize: "13px" }}>
                 from:
               </p>
               <p
-                className="font-bold text-[ #01155E]"
+                className="font-bold text-[#01155E]"
                 style={{ fontSize: "22px", marginTop: "2px" }}
               >
                 {formatPrice(item?.min_price, item?.max_price)}
@@ -159,44 +176,68 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
         </div>
       )}
 
-      {/* DEFAULT: Purple Home Icon marker with count */}
+      {/* DEFAULT: Professional price-pill marker with pointer tail */}
       <div
         style={{
-          background: "#0f2988",
-          borderRadius: "20px 20px 20px 4px",
-          padding: "6px 10px",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: "5px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-          transition: "all 0.15s ease",
-          transform: showPopup ? "scale(1.08)" : "scale(1)",
-          border: showPopup ? "2px solid #fff" : "2px solid transparent",
+          transform: isHighlighted ? "scale(1.08) translateY(-2px)" : "scale(1)",
+          transition: "transform 0.15s ease, background 0.15s ease",
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-          <polyline points="9,22 9,12 15,12 15,22" fill="white" />
-        </svg>
-
-        <span
+        {/* Pill body */}
+        <div
           style={{
-            background: "white",
-            color: "#0f2988",
-            borderRadius: "50%",
-            width: "18px",
-            height: "18px",
+            background: isHighlighted ? "#01155E" : "#FFFFFF",
+            color: isHighlighted ? "#FFFFFF" : "#01155E",
+            border: isHighlighted ? "1px solid #01155E" : "1px solid #E2E5EC",
+            borderRadius: "18px",
+            padding: "7px 12px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: "10px",
-            fontWeight: "800",
-            lineHeight: 1,
-           
+            gap: "6px",
+            boxShadow: isHighlighted
+              ? "0 6px 16px rgba(1,21,94,0.35)"
+              : "0 2px 8px rgba(0,0,0,0.15)",
+            whiteSpace: "nowrap",
+            fontFamily: "inherit",
           }}
         >
-          1
-        </span>
+          <span
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
+          >
+            AED {formatCompactPrice(item?.min_price, item?.max_price)}
+          </span>
+
+          {/* Status dot */}
+          <span
+            style={{
+              width: "6px",
+              height: "6px",
+              borderRadius: "50%",
+              background:  "#22C55E" ,
+              flexShrink: 0,
+            }}
+          />
+        </div>
+
+        {/* Pointer tail — points exactly at the coordinate */}
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: "6px solid transparent",
+            borderRight: "6px solid transparent",
+            borderTop: `7px solid ${isHighlighted ? "#01155E" : "#FFFFFF"}`,
+            filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.12))",
+            marginTop: "-1px",
+          }}
+        />
       </div>
     </div>
   );

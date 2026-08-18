@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import imageurl from "../assets/underline.png";
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown";
-import Map, { Marker, NavigationControl } from 'react-map-gl';
-
-import { VITE_MAPBOX_TOKEN } from "../Constant/constant";
+import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
+import { VITE_GOOGLE_MAPS_API_KEY } from "../Constant/constant";
 import MapMarker from "../Components/Card/MapMarker"
 
 import {
@@ -40,7 +39,9 @@ const normalizeCompletion = (value) =>
   (value || "").toString().toLowerCase().replace(/[-_\s]+/g, "");
 
 const Listings = () => {
-  const MAPBOX_TOKEN = VITE_MAPBOX_TOKEN;
+ const { isLoaded: isGoogleMapLoaded } = useJsApiLoader({
+  googleMapsApiKey: VITE_GOOGLE_MAPS_API_KEY,
+});
   const [viewport, setViewport] = useState({
     latitude: 25.2048, // Dubai Default
     longitude: 55.2708,
@@ -1448,7 +1449,7 @@ const Listings = () => {
                 </div>
 
                 {/* Mapbox Implementation */}
-                <Map
+                {/* <Map
                   initialViewState={{
                     longitude:
                       projects?.[0]?.location?.coordinates?.coordinates?.[0] || 55.2708,
@@ -1482,7 +1483,54 @@ const Listings = () => {
                       </Marker>
                     );
                   })}
-                </Map>
+                </Map> */}
+                {/* Google Maps Implementation */}
+{isGoogleMapLoaded ? (
+  <GoogleMap
+    center={{
+      lat:
+        projects?.[0]?.location?.coordinates?.coordinates?.[1] || 25.2048,
+      lng:
+        projects?.[0]?.location?.coordinates?.coordinates?.[0] || 55.2708,
+    }}
+    zoom={8}
+    mapContainerStyle={{ width: "100%", height: "100%" }}
+    options={{
+      zoomControl: true,
+      fullscreenControl: false,
+      streetViewControl: false,
+      mapTypeControl: false,
+    }}
+  >
+  {projects.map((item) => {
+  if (!item?.lat_long) return null;
+
+  const [lat, lng] = item.lat_long.split(",").map(Number);
+  const itemId = item._id?.$oid || item._id;
+
+  return (
+    <OverlayView
+      key={itemId}
+      position={{ lat, lng }}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={(width, height) => ({
+        x: -(width / 2),   // horizontally center
+        y: -height,        // bottom of marker sits on the coordinate
+      })}
+    >
+      <MapMarker
+        item={item}
+        isActive={hoveredListingId === itemId}
+      />
+    </OverlayView>
+  );
+})}
+  </GoogleMap>
+) : (
+  <div className="w-full h-full flex items-center justify-center text-[#01155E] font-semibold">
+    Loading map...
+  </div>
+)}
               </div>
             </div>
           )
