@@ -38,11 +38,33 @@ import BlogDetail from "./Pages/BlogDetail";
 import ContactUs from "./Pages/ContactUs";
 // import TopBar from "./Components/Card/Topbar";
 import WhatsAppFloatButton from "../src/Components/Card/WhatsAppFloatButton";
+import SignupPopup from "./Pages/landingSignuppopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
+import LoginPopup from "./Pages/LoginPopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
 
 
 
 function App() {
   const dispatch = useDispatch();
+
+  // 🔹 Signup popup ke liye state
+  const [isSignupOpen, setIsSignupOpen] = React.useState(false);
+  const [isLoginOpen, setIsLoginOpen] = React.useState(false);
+
+  // 🔹 Landing pe ek baar (per session) popup dikhane ke liye
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem("signupPopupShown");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    // agar user already logged in hai to popup mat dikhao
+    if (!alreadyShown && !user?.token) {
+      const timer = setTimeout(() => {
+        setIsSignupOpen(true);
+        sessionStorage.setItem("signupPopupShown", "true");
+      }, 1500); // 1.5 second baad khulega
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // 🔹 Initial load → localStorage se Redux populate
   useEffect(() => {
@@ -107,6 +129,25 @@ function App() {
 
       <Footer />
       <ToastContainer position="top-right" autoClose={3000} />
+
+      {/* 🔹 Landing pe auto-open hone wala Signup popup */}
+      <SignupPopup
+        isOpen={isSignupOpen}
+        onClose={() => setIsSignupOpen(false)}
+        openLogin={() => {
+          setIsSignupOpen(false);
+          setIsLoginOpen(true); // 👈 ab yeh Login popup khol dega
+        }}
+      />
+
+      <LoginPopup
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        openSignup={() => {
+          setIsLoginOpen(false);
+          setIsSignupOpen(true); // Login se wapas Signup pe jaane ke liye
+        }}
+      />
     </>
   );
 }
