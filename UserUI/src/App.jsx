@@ -50,13 +50,15 @@ function App() {
   const [isSignupOpen, setIsSignupOpen] = React.useState(false);
   const [isLoginOpen, setIsLoginOpen] = React.useState(false);
 
-  // 🔹 Landing pe ek baar (per session) popup dikhane ke liye
+  // 🔹 Landing pe ek baar (per session) popup dikhane ke liye — sirf agar user login NAHI hai
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem("signupPopupShown");
     const user = JSON.parse(localStorage.getItem("user"));
 
-    // agar user already logged in hai to popup mat dikhao
-    if (!alreadyShown && !user?.token) {
+    // agar user already logged in hai (Navbar jaisa hi check: firstName) to popup mat dikhao
+    const isLoggedIn = !!user?.firstName;
+
+    if (!alreadyShown && !isLoggedIn) {
       const timer = setTimeout(() => {
         setIsSignupOpen(true);
         sessionStorage.setItem("signupPopupShown", "true");
@@ -64,6 +66,13 @@ function App() {
 
       return () => clearTimeout(timer);
     }
+  }, []);
+
+  // 🔹 Agar popup khula hai aur usi beech user login kar le (Navbar se), to turant band kar do
+  useEffect(() => {
+    const handleAuthChanged = () => setIsSignupOpen(false);
+    window.addEventListener("auth-changed", handleAuthChanged);
+    return () => window.removeEventListener("auth-changed", handleAuthChanged);
   }, []);
 
   // 🔹 Initial load → localStorage se Redux populate

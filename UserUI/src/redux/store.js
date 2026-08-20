@@ -17,7 +17,7 @@ import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
 import updateUserReducer from "../features/Authentation/updateUserSlice.js";
 import listingByIdReducer from "../features/dashboard/fetchListingById.jsx";
 import blogReducer from "../features/dashboard/Blogslice.jsx"
-import sortReducer from "../features/dashboard/sortSlice";
+import sortReducer from "../features/dashboard/Sortslice.jsx";
 import contactReducer from "../features/dashboard/contactSlice.jsx";
 
 export const store = configureStore({

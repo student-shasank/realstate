@@ -25,7 +25,7 @@ import {
 import {
   fetchSortedProjects, // NEW: fully separate sort slice/endpoint
   setSortBy,
-} from "../features/dashboard/sortSlice";
+} from "../features/dashboard/Sortslice.jsx";
 import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
