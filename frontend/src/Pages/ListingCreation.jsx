@@ -1,112 +1,141 @@
 // ListingCreation.jsx
 import React, { useState, useEffect } from "react";
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import { PhotoIcon, VideoCameraIcon } from "@heroicons/react/24/solid";
 import { useDispatch, useSelector } from "react-redux";
 import { createListing, resetListingState } from "../features/dashboard/listingSlice";
 import { useNavigate } from "react-router-dom";
 import { fetchCommunities } from "../features/communitySlice";
+import { CheckCircle2 } from "lucide-react";
 
+// Every field below is pre-filled with SAMPLE data (based on a real
+// Damac District Tower A style listing) purely so it's obvious what
+// kind of value each field expects. Clear the field / overwrite it
+// with your own data before submitting — this is a guide, not a
+// requirement to use these exact values.
 const initialForm = {
-  title: "",
-  referenceNo: "",
-  price: "",
+  title: "Damac District Tower A",
+  referenceNo: "REF-2520-DXB",
+  price: "1240000",
   currency: "AED",
-  serviceCharges: "",
+  serviceCharges: "18",
   community: "",
 
-  type: "",
-  purpose: "",
-  completionStatus: "",
-  propertyStatus: "",
-  listingStatus: "",
-  availability: "",
-  isFeatured: false,
-  furnishing: "",
+  type: "Apartment",
+  purpose: "sell",
+  // These are locked to "Ready" at submit time — kept here only
+  // so the UI badge / preview has a sane default value to show.
+  completionStatus: "ready",
+  propertyStatus: "active",
+  listingStatus: "new launch",
+  availability: "available",
+  isFeatured: true,
+  furnishing: "Semi-Furnished",
 
-  bedrooms: "",
-  bathrooms: "",
-  garage: "",
-  rooms: "",
-  builtUpArea: "",
-  totalBuildingArea: "",
-  plotArea: "",
+  bedrooms: "1",
+  bathrooms: "2",
+  garage: "1",
+  rooms: "3",
+  builtUpArea: "674",
+  totalBuildingArea: "1623",
+  plotArea: "0",
 
-  developer: "",
-  ownership: "",
+  developer: "DAMAC Properties",
+  ownership: "freehold",
 
-  yearBuilt: "",
-  handoverDate: "",
-  listingDate: "",
-  addedOn: "",
+  yearBuilt: "2026",
+  handoverDate: "Q3 2029",
+  listingDate: "2026-08-20",
+  addedOn: "2026-08-20",
 
-  description: "",
-  features: "",
+  description:
+    "DAMAC District is an exceptional residential project within the iconic DAMAC Hills community, offering 1 and 2 bedroom apartments that blend modern living with refined elegance. Every residence is designed to capture breathtaking views of lush greens, serene waters, and a vibrant world-class community.",
+  features: "Organic Pool, Padel Courts, Gym & AI Training Lab, BBQ Stations, Kids Playground, Indoor Golf Simulator",
 
   youtubeVideoId: "",
-  brochureUrl: "",
+  brochureUrl: "https://files.remapp.ae/rem-offplan-v3/project-files/1770900885069-aab1c003e67ab1b1.pdf",
 
-  agentName: "",
-  agency: "",
-  agentPhone: "",
-  agentWhatsapp: "",
-  agentEmail: "",
-  isResponsiveBroker: false,
+  agentName: "Divyansh Chitkara",
+  agency: "Yupland Real Estate",
+  agentPhone: "+971505773767",
+  agentWhatsapp: "+971505773767",
+  agentEmail: "divyansh@yupland.com",
+  isResponsiveBroker: true,
 
-  internalListingId: "",
-  sourceBrokerageName: "",
-  listingAgentName: "",
-  listingAgentPhone: "",
-  listingAgentEmail: "",
-  listingSourceType: "",
-  listingValidUntil: "",
+  internalListingId: "INT-2520",
+  sourceBrokerageName: "DAMAC Properties",
+  listingAgentName: "Rushana Daminova",
+  listingAgentPhone: "+971551171009",
+  listingAgentEmail: "rushana.daminova@damacgroup.com",
+  listingSourceType: "direct",
+  listingValidUntil: "2027-08-20",
 
-  validatedBuiltUpArea: "",
-  validatedPlotArea: "",
-  usage: "",
+  validatedBuiltUpArea: "674",
+  validatedPlotArea: "0",
+  usage: "residential",
 
-  projectName: "",
-  projectStatus: "",
-  projectCompletion: "",
-  projectDeveloper: "",
-  lastInspected: "",
+  projectName: "Damac District Tower A",
+  projectStatus: "active",
+  projectCompletion: "35%",
+  projectDeveloper: "DAMAC Properties",
+  lastInspected: "2026-08-11",
 
-  location: "",
-  subCommunity: "",
-  city: "",
-  country: "",
-  emirates: "",
+  location: "Damac Hills, Dubai",
+  subCommunity: "Damac District",
+  city: "Dubai",
+  country: "United Arab Emirates",
+  emirates: "Dubai",
+  // 📍 Map coordinates — required for the "Location Map" / "View on Map"
+  // section on the detail page. Without these, the map falls back to
+  // a default [0,0] location.
+  latitude: "25.016215647218267",
+  longitude: "55.25445375316675",
 
-  buildingName: "",
-  yearOfCompletion: "",
-  totalFloors: "",
-  swimmingPools: "",
-  totalParkingSpaces: "",
-  elevators: "",
+  buildingName: "Damac District Tower A",
+  yearOfCompletion: "2029",
+  totalFloors: "25",
+  swimmingPools: "available",
+  totalParkingSpaces: "1",
+  elevators: "available",
 
-  paymentPlanName: "",
-  downPayment: "",
+  // 🛡️ Regulatory Information — shown on the detail page's
+  // "Regulatory Information" card (Permit Number / Zone / RERA / BRN / QR).
+  permitNumber: "DAMAC-2520-DXB",
+  zoneName: "Damac Hills",
+  rera: "Approved",
+  brn: "Approved",
+  registeredAgency: "Yupland Real Estate",
 
-  rentalYield: "",
-  priceTrend: "",
-  pricePerSqFt: "",
+  paymentPlanName: "5/55/40 Payment Plan",
+  downPayment: "62000",
+
+  rentalYield: "good",
+  priceTrend: "increasing",
+  pricePerSqFt: "1840",
 
   unitTypes: [
-    { bedrooms: "", sqFt: "", startingPrice: "", availability: "available" }
+    { bedrooms: "1", sqFt: "674", startingPrice: "1222000", availability: "available" },
+    { bedrooms: "2", sqFt: "1017", startingPrice: "1797000", availability: "available" }
   ],
 
   floorPlans: [
-    { bedrooms: "", sqFt: "", startingPrice: "", description: "" }
+    { bedrooms: "1 Bedroom", sqFt: "674", startingPrice: "1222000", description: "Open-plan living with balcony and built-in wardrobes" },
+    { bedrooms: "2 Bedroom", sqFt: "1017", startingPrice: "1797000", description: "Corner unit with dual balconies and community views" }
   ],
 
   installmentPlan: [
-    { month: "", percent: "" }
+    { month: "On Booking", percent: "5" },
+    { month: "1 month after booking", percent: "10" },
+    { month: "On Completion", percent: "40" }
   ],
 
   paymentPlanSteps: [
-    { label: "", percent: "" }
+    { label: "On Booking", percent: "5" },
+    { label: "During Construction", percent: "55" },
+    { label: "On Completion", percent: "40" }
   ],
 
-  images: []
+  images: [],
+  videos: [],
 };
 
 // ── Reusable Input & Select ───────────────────────────────────
@@ -158,16 +187,18 @@ function ListingCreation() {
 
   const [formData, setFormData] = useState(initialForm);
   const [images, setImages] = useState([]);
-const { communities } = useSelector((state) => state.community);
-console.log("communities", communities);
+  const [videoFiles, setVideoFiles] = useState([]);
+  const [agentProfileImage, setAgentProfileImage] = useState(null);
+  const [communityImage, setCommunityImage] = useState(null);
+  const { communities } = useSelector((state) => state.community);
 
-useEffect(() => {
-  dispatch(fetchCommunities());
-}, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchCommunities());
+  }, [dispatch]);
 
   useEffect(() => {
     if (success) {
-      alert("Listing created successfully!");
+      alert("Listing created successfully! It is now live as a Ready listing.");
       dispatch(resetListingState());
       navigate("/dashboard");
     }
@@ -193,6 +224,35 @@ useEffect(() => {
     setImages((prev) => prev.filter((_, i) => i !== index));
     setFormData((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
+
+  // 🎬 Video uploads (actual video files — separate from youtubeVideoId)
+  const handleVideoUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const mapped = files.map((file) => ({ file, preview: URL.createObjectURL(file) }));
+    setVideoFiles((prev) => [...prev, ...mapped]);
+    setFormData((prev) => ({ ...prev, videos: [...(prev.videos || []), ...files] }));
+  };
+
+  const removeVideo = (index) => {
+    setVideoFiles((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => ({ ...prev, videos: prev.videos.filter((_, i) => i !== index) }));
+  };
+
+  // 👤 Agent profile photo (single file)
+  const handleAgentProfileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAgentProfileImage({ file, preview: URL.createObjectURL(file) });
+  };
+  const removeAgentProfileImage = () => setAgentProfileImage(null);
+
+  // 🏘️ Community image (single file)
+  const handleCommunityImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setCommunityImage({ file, preview: URL.createObjectURL(file) });
+  };
+  const removeCommunityImage = () => setCommunityImage(null);
 
   // Installment Plan
   const handleInstallmentChange = (index, field, value) => {
@@ -239,127 +299,280 @@ useEffect(() => {
     setFormData((prev) => ({ ...prev, floorPlans: prev.floorPlans.filter((_, idx) => idx !== i) }));
 
   // ── Submit ────────────────────────────────────────────────────
-const handleSubmit = (e) => {
-  e.preventDefault();
-  const fd = new FormData();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const fd = new FormData();
 
-  const payload = {
-    title: formData.title,
-    referenceNo: formData.referenceNo,
-    price: formData.price,
-    currency: formData.currency,
-    serviceCharges: formData.serviceCharges,
-    community: formData.community,
+    // 🔒 IMPORTANT: Every listing created from this page is forced to
+    // "Ready" status, regardless of any UI value, so it always shows
+    // up as a Ready listing on the storefront / detail page.
+    //
+    // ⚠️ THE ACTUAL BADGE ON THE DETAIL PAGE IS DRIVEN BY `project_status`,
+    // NOT `completionStatus` — mapPropertyDetailData.js reads:
+    //     const completionStatus = apiData.project_status || "Off-Plan";
+    // so `project_status` MUST be sent, or every listing silently renders
+    // as "Off-Plan" no matter what completionStatus/propertyStatus say.
+    const FORCED_STATUS = {
+      project_status: "Ready",      // <-- what the detail page actually reads
+      completionStatus: "ready",
+      propertyStatus: "active",
+      availability: "available",
+    };
 
-    type: formData.type,
-    purpose: formData.purpose,
-    completionStatus: formData.completionStatus,
-    propertyStatus: formData.propertyStatus,
-    listingStatus: formData.listingStatus,
-    availability: formData.availability,
-    isFeatured: formData.isFeatured,
-    furnishing: formData.furnishing,
+    // Derive the off-plan-schema "beds" comma list (e.g. "1,2") from the
+    // unit types the user entered, so search/filter code that expects the
+    // off-plan `beds` string format also works for Ready listings.
+    const bedsString =
+      formData.unitTypes && formData.unitTypes.length > 0
+        ? [...new Set(formData.unitTypes.map((u) => u.bedrooms).filter(Boolean))].join(",")
+        : formData.bedrooms;
 
-    bedrooms: formData.bedrooms,
-    bathrooms: formData.bathrooms,
-    garage: formData.garage,
-    rooms: formData.rooms,
-    builtUpArea: formData.builtUpArea,
-    totalBuildingArea: formData.totalBuildingArea,
-    plotArea: formData.plotArea,
+    const combinedProjectLocation = [formData.subCommunity, formData.city]
+      .filter(Boolean)
+      .join(", ");
 
-    developer: formData.developer,
-    ownership: formData.ownership,
+    const payload = {
+      // ── Basic info (kept as-is) ──────────────────────────────
+      title: formData.title,
+      referenceNo: formData.referenceNo,
+      slug: formData.referenceNo
+        ? formData.referenceNo.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        : undefined,
+      price: formData.price,
+      currency: formData.currency,
+      serviceCharges: formData.serviceCharges,
+      community: formData.community,
 
-    yearBuilt: formData.yearBuilt,
-    handoverDate: formData.handoverDate,
-    listingDate: formData.listingDate,
-    addedOn: formData.addedOn,
+      type: formData.type,
+      purpose: formData.purpose, // buy/sell — NOT the same as detail page's usage-based "purpose"
 
-    description: formData.description,
-    features: formData.features?.split(","),
+      // forced values win over whatever was in formData
+      project_status: FORCED_STATUS.project_status,
+      completionStatus: FORCED_STATUS.completionStatus,
+      propertyStatus: FORCED_STATUS.propertyStatus,
+      listingStatus: formData.listingStatus,
+      availability: FORCED_STATUS.availability,
 
-    youtubeVideoId: formData.youtubeVideoId,
-    brochureUrl: formData.brochureUrl,
+      isFeatured: formData.isFeatured,
+      furnishing: formData.furnishing,
 
-    agent: {
-      name: formData.agentName,
-      agency: formData.agency,
-      phone: formData.agentPhone,
-      whatsapp: formData.agentWhatsapp,
-      email: formData.agentEmail,
-      isResponsiveBroker: formData.isResponsiveBroker,
-    },
-
-    internal: {
-      internalListingId: formData.internalListingId,
-      sourceBrokerageName: formData.sourceBrokerageName,
-      listingAgentName: formData.listingAgentName,
-      listingAgentPhone: formData.listingAgentPhone,
-      listingAgentEmail: formData.listingAgentEmail,
-      listingSourceType: formData.listingSourceType,
-      listingValidUntil: formData.listingValidUntil,
-    },
-
-    validatedInfo: {
-      ownership: formData.ownership,
-      builtUpArea: formData.validatedBuiltUpArea,
-      plotArea: formData.validatedPlotArea,
-      usage: formData.usage,
-      developer: formData.developer,
-    },
-
-    projectInfo: {
-      name: formData.projectName,
-      status: formData.projectStatus,
-      completion: formData.projectCompletion,
-      developer: formData.projectDeveloper,
-      lastInspected: formData.lastInspected,
-    },
-
-    location: {
-      address: formData.location,
-      subCommunity: formData.subCommunity,
-      city: formData.city,
-      country: formData.country,
-      emirates: formData.emirates,
-    },
-
-    buildingInfo: {
-      buildingName: formData.buildingName,
-      yearOfCompletion: formData.yearOfCompletion,
-      totalFloors: formData.totalFloors,
-      swimmingPools: formData.swimmingPools,
-      totalParkingSpaces: formData.totalParkingSpaces,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms,
+      garage: formData.garage,
+      rooms: formData.rooms,
+      builtUpArea: formData.builtUpArea,
       totalBuildingArea: formData.totalBuildingArea,
-      elevators: formData.elevators,
-    },
+      plotArea: formData.plotArea,
 
-    unitTypes: formData.unitTypes,
-    floorPlans: formData.floorPlans,
+      developer: formData.developer,
+      developer_name: formData.developer, // off-plan-schema alias
+      ownership: formData.ownership,
+      usage: formData.usage,
 
-    paymentPlan: {
-      planName: formData.paymentPlanName,
-      downPayment: formData.downPayment,
-      installmentPlan: formData.installmentPlan,
-      steps: formData.paymentPlanSteps,
-    },
+      yearBuilt: formData.yearBuilt,
+      handoverDate: formData.handoverDate,
+      expected_completion_date: formData.handoverDate, // off-plan-schema alias
+      listingDate: formData.listingDate,
+      addedOn: formData.addedOn,
+      created_at: formData.listingDate, // off-plan-schema alias
 
-    investmentInsights: {
-      rentalYield: formData.rentalYield,
-      priceTrend: formData.priceTrend,
-      pricePerSqFt: formData.pricePerSqFt,
-    },
+      description: formData.description,
+      features: formData.features ? formData.features.split(",").map((f) => f.trim()).filter(Boolean) : [],
+
+      youtubeVideoId: formData.youtubeVideoId,
+      brochureUrl: formData.brochureUrl,
+
+      // ── Off-plan-schema flat fields ──────────────────────────
+      // These exist so search/filter/listing-grid code that queries the
+      // off-plan document shape (beds, price_start, area_start, city_name,
+      // district_name, latlong, adm_number ...) also finds Ready listings,
+      // and so the mapper's fallback branches have real data even if the
+      // structured objects below were ever stripped by the backend.
+      beds: bedsString,
+      baths: formData.bathrooms,
+      price_start: formData.price,
+      price_end: formData.price,
+      area_start: formData.builtUpArea,
+      area_end: formData.totalBuildingArea,
+      is_featured: formData.isFeatured,
+      adm_number: formData.permitNumber,
+      latlong: formData.latitude && formData.longitude ? `${formData.latitude},${formData.longitude}` : undefined,
+      project_location: combinedProjectLocation,
+      district_name: formData.subCommunity || formData.location,
+      district_data: [{ name: formData.subCommunity || formData.location }],
+      city_name: formData.city,
+      city_data: { name: formData.city },
+      country_data: { name: formData.country },
+      total_properties: formData.unitTypes.length,
+      types: formData.type,
+      property_types: [formData.type],
+
+      // typical_units / new_payment_plans / parkings / sales_executives / attachments
+      // mirror the off-plan doc shape 1:1 so the mapper's derive-from-raw
+      // fallback path works even without the structured objects below.
+      typical_units: formData.unitTypes.map((ut) => ({
+        bedroom: ut.bedrooms,
+        lowest_area: ut.sqFt,
+        highest_area: ut.sqFt,
+        lowest_price: ut.startingPrice,
+      })),
+      new_payment_plans: [
+        {
+          title: formData.paymentPlanName,
+          milestones: formData.paymentPlanSteps.map((s) => ({
+            milestone_title: s.label,
+            percentage: `${s.percent}%`,
+          })),
+        },
+      ],
+      parkings: [
+        {
+          title: "parkings",
+          data: [{ [`${formData.bedrooms} BR`]: `${formData.totalParkingSpaces} parking` }],
+        },
+      ],
+      sales_executives: [
+        {
+          name: formData.agentName,
+          email: formData.agentEmail,
+          phone: formData.agentPhone,
+          // image is filled in by the backend from the uploaded "agentProfile" file
+        },
+      ],
+      attachments: formData.brochureUrl
+        ? [{ attachment_title: "Brochure", attachment_url: formData.brochureUrl, file_type: "other" }]
+        : [],
+
+      // ── Structured objects (richer than off-plan schema) ────
+      // The mapper prefers these when present, so all the extra detail
+      // this form collects (agency, whatsapp, totalFloors, elevators,
+      // rentalYield, priceTrend, pricePerSqFt, availability per unit, etc.)
+      // actually shows up on the detail page instead of being dropped.
+      agent: {
+        name: formData.agentName,
+        agency: formData.agency,
+        phone: formData.agentPhone,
+        whatsapp: formData.agentWhatsapp,
+        email: formData.agentEmail,
+        isResponsiveBroker: formData.isResponsiveBroker,
+        // profileImage itself is sent as a file (see fd.append below);
+        // backend falls back to this if no file is uploaded.
+      },
+
+      internal: {
+        internalListingId: formData.internalListingId,
+        sourceBrokerageName: formData.sourceBrokerageName,
+        listingAgentName: formData.listingAgentName,
+        listingAgentPhone: formData.listingAgentPhone,
+        listingAgentEmail: formData.listingAgentEmail,
+        listingSourceType: formData.listingSourceType,
+        listingValidUntil: formData.listingValidUntil,
+      },
+
+      validatedInfo: {
+        ownership: formData.ownership,
+        builtUpArea: formData.validatedBuiltUpArea,
+        plotArea: formData.validatedPlotArea,
+        usage: formData.usage,
+        developer: formData.developer,
+      },
+
+      projectInfo: {
+        name: formData.projectName,
+        status: formData.projectStatus,
+        completion: formData.projectCompletion,
+        developer: formData.projectDeveloper,
+        lastInspected: formData.lastInspected,
+      },
+
+      location: {
+        address: formData.location,
+        subCommunity: formData.subCommunity,
+        city: formData.city,
+        country: formData.country,
+        emirates: formData.emirates,
+        // 📍 GeoJSON coordinates for the map — [longitude, latitude] order.
+        // Without this, the detail page's map defaults to [0,0].
+        coordinates:
+          formData.latitude && formData.longitude
+            ? {
+                type: "Point",
+                coordinates: [Number(formData.longitude), Number(formData.latitude)],
+              }
+            : undefined,
+        // communityImage itself is sent as a file (see fd.append below);
+        // backend falls back to this if no file is uploaded.
+      },
+
+      // 🛡️ Regulatory Information — shown in the detail page's
+      // "Regulatory Information" card (Permit Number / Zone / RERA / BRN / QR code).
+      regulatoryInfo: {
+        permitNumber: formData.permitNumber,
+        zoneName: formData.zoneName,
+        rera: formData.rera,
+        brn: formData.brn,
+        registeredAgency: formData.registeredAgency,
+      },
+
+      buildingInfo: {
+        buildingName: formData.buildingName,
+        yearOfCompletion: formData.yearOfCompletion,
+        totalFloors: formData.totalFloors,
+        swimmingPools: formData.swimmingPools,
+        totalParkingSpaces: formData.totalParkingSpaces,
+        totalBuildingArea: formData.totalBuildingArea,
+        elevators: formData.elevators,
+      },
+
+      unitTypes: formData.unitTypes,
+      floorPlans: formData.floorPlans,
+
+      paymentPlan: {
+        planName: formData.paymentPlanName,
+        downPayment: formData.downPayment,
+        installmentPlan: formData.installmentPlan,
+        steps: formData.paymentPlanSteps,
+      },
+
+      investmentInsights: {
+        rentalYield: formData.rentalYield,
+        priceTrend: formData.priceTrend,
+        pricePerSqFt: formData.pricePerSqFt,
+      },
+    };
+
+    fd.append("data", JSON.stringify(payload));
+
+    // Gallery images
+    // ⚠️ IMPORTANT (backend contract): after these files are uploaded, the
+    // resulting URLs must be saved on the listing under `all_images`
+    // (flat array of URL strings) — the SAME field name off-plan projects
+    // use. Both the listings grid card (photo-count badge + carousel) and
+    // the detail page mapper read `all_images` directly. If the backend
+    // instead saves them only under something like `images`/`gallery`,
+    // Ready listings will publish with no visible photos even though the
+    // upload itself succeeded.
+    (formData.images || []).forEach((file) => {
+      fd.append("images", file);
+    });
+
+    // Gallery videos
+    (formData.videos || []).forEach((file) => {
+      fd.append("videos", file);
+    });
+
+    // Single agent profile photo
+    if (agentProfileImage?.file) {
+      fd.append("agentProfile", agentProfileImage.file);
+    }
+
+    // Single community image
+    if (communityImage?.file) {
+      fd.append("communityImage", communityImage.file);
+    }
+
+    dispatch(createListing(fd));
   };
-
-  fd.append("data", JSON.stringify(payload));
-
-  (formData.images || []).forEach((file) => {
-    fd.append("images", file);
-  });
-
-  dispatch(createListing(fd));
-};
 
   const isApartment = formData.type.toLowerCase() === "apartment";
 
@@ -367,6 +580,24 @@ const handleSubmit = (e) => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex justify-center">
       <form onSubmit={handleSubmit} className="space-y-12 w-full max-w-5xl bg-white p-8 rounded-2xl shadow-lg">
+
+        {/* ── HEADER / STATUS BANNER ── */}
+        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="text-emerald-600" size={22} />
+            <div>
+              <p className="text-sm font-semibold text-emerald-800">
+                This listing will be published with status: Ready
+              </p>
+              <p className="text-xs text-emerald-700/80 mt-0.5">
+                Every listing created here goes live automatically as an active, available "Ready" listing.
+              </p>
+            </div>
+          </div>
+          <span className="bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wide">
+            Ready
+          </span>
+        </div>
 
         {/* ── PROPERTY DETAILS ── */}
         <section>
@@ -383,26 +614,23 @@ const handleSubmit = (e) => {
             <Select label="Purpose" name="purpose" value={formData.purpose} onChange={handleChange}
               options={[{ value:"buy", label:"Buy" }, { value:"sell", label:"Sell" }]} className="sm:col-span-3" />
 
-            <Select label="Completion Status" name="completionStatus" value={formData.completionStatus} onChange={handleChange}
-              options={[{ value:"off-plan", label:"Off Plan" }, { value:"ready", label:"Ready" },{ value:"preconstruction", label:"Preconstruction" }]} className="sm:col-span-2" />
-
             <Select label="Listing Status" name="listingStatus" value={formData.listingStatus} onChange={handleChange}
               options={[{ value:"resale", label:"Resale" }, { value:"new launch", label:"New Launch" }, { value:"secondary", label:"Secondary" }]} className="sm:col-span-2" />
-
-            <Select label="Property Status" name="propertyStatus" value={formData.propertyStatus} onChange={handleChange}
-              options={[{ value:"pending", label:"Pending" }, { value:"active", label:"Active" }, { value:"rejected", label:"Rejected" }, { value:"sold", label:"Sold" }]} className="sm:col-span-2" />
-
-            <Select label="Availability" name="availability" value={formData.availability} onChange={handleChange}
-              options={[{ value:"available", label:"Available" }, { value:"unavailable", label:"Unavailable" }]} className="sm:col-span-2" />
 
             <Select label="Furnishing" name="furnishing" value={formData.furnishing} onChange={handleChange}
               options={["Furnished","Unfurnished","Semi-Furnished"]} className="sm:col-span-2" />
 
             <Input label="Service Charges (AED/sqft)" name="serviceCharges" value={formData.serviceCharges} onChange={handleChange} type="number" className="sm:col-span-2" />
 
-            <div className="sm:col-span-6 flex items-center gap-3">
-              <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} className="h-4 w-4 rounded border-gray-300" />
-              <label className="text-sm font-medium text-gray-700">Mark as Featured</label>
+            <div className="sm:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-3">
+                <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleChange} className="h-4 w-4 rounded border-gray-300" />
+                <label className="text-sm font-medium text-gray-700">Mark as Featured</label>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <CheckCircle2 size={14} className="text-emerald-600" />
+                Completion status, property status &amp; availability are auto-set to "Ready" / "Active" / "Available" on publish.
+              </div>
             </div>
           </div>
         </section>
@@ -453,27 +681,54 @@ const handleSubmit = (e) => {
 
         {/* ── LOCATION ── */}
         <section>
-          <SectionTitle title="Location" />
+          <SectionTitle title="Location" subtitle="Coordinates are used for the Location Map / View on Map feature" />
           <div className="grid grid-cols-1 sm:grid-cols-6 gap-5">
             <Input label="Address / Area"  name="location"     value={formData.location}     onChange={handleChange} placeholder="Palm Jumeirah" className="sm:col-span-6" />
-      <select
-  name="community"
-  value={formData.community}
-  onChange={handleChange}
-  className="border p-2 w-full sm:col-span-3"
->
-  <option value="">Select Community</option>
 
-  {communities?.map((c) => (
-    <option key={c._id} value={c._id}>
-      {c.slug}
-    </option>
-  ))}
-</select>
+            <div className="sm:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Community</label>
+              <select
+                name="community"
+                value={formData.community}
+                onChange={handleChange}
+                className="block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Select Community</option>
+                {communities?.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.slug}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <Input label="Sub Community"   name="subCommunity" value={formData.subCommunity} onChange={handleChange} placeholder="West Crescent" className="sm:col-span-3" />
             <Input label="City"            name="city"         value={formData.city}         onChange={handleChange} placeholder="Dubai" className="sm:col-span-2" />
             <Input label="Country"         name="country"      value={formData.country}      onChange={handleChange} placeholder="UAE" className="sm:col-span-2" />
             <Input label="Emirates"        name="emirates"     value={formData.emirates}     onChange={handleChange} placeholder="Dubai" className="sm:col-span-2" />
+
+            {/* 📍 Map coordinates */}
+            <Input label="Latitude"  name="latitude"  value={formData.latitude}  onChange={handleChange} placeholder="25.016215" className="sm:col-span-3" />
+            <Input label="Longitude" name="longitude" value={formData.longitude} onChange={handleChange} placeholder="55.254453" className="sm:col-span-3" />
+
+            {/* 🏘️ Community image */}
+            <div className="sm:col-span-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Community Image</label>
+              {communityImage ? (
+                <div className="relative w-48">
+                  <img src={communityImage.preview} className="w-full h-32 object-cover rounded-lg shadow" alt="Community" />
+                  <button type="button" onClick={removeCommunityImage}
+                    className="absolute top-2 right-2 bg-black/60 text-white rounded px-2 py-1 text-xs">
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center w-48 h-32 border border-dashed border-gray-400 rounded-lg cursor-pointer text-sm text-indigo-600 bg-gray-50 hover:bg-gray-100">
+                  Upload Community Image
+                  <input type="file" className="hidden" onChange={handleCommunityImageUpload} accept="image/*" />
+                </label>
+              )}
+            </div>
           </div>
         </section>
 
@@ -487,6 +742,20 @@ const handleSubmit = (e) => {
             <Select label="Project Status" name="projectStatus" value={formData.projectStatus} onChange={handleChange}
               options={[{ value:"active", label:"Active" }, { value:"completed", label:"Completed" }]} />
             <Input label="Last Inspected" name="lastInspected" value={formData.lastInspected} onChange={handleChange} type="date" />
+          </div>
+        </section>
+
+        {/* ── REGULATORY INFORMATION ── */}
+        <section>
+          <SectionTitle title="Regulatory Information" subtitle="Shown on the detail page as Permit / Zone / RERA / BRN card + QR code" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <Input label="Permit Number"      name="permitNumber"      value={formData.permitNumber}      onChange={handleChange} placeholder="DAMAC-2520-DXB" />
+            <Input label="Zone Name"          name="zoneName"          value={formData.zoneName}          onChange={handleChange} placeholder="Damac Hills" />
+            <Select label="RERA"              name="rera"              value={formData.rera}              onChange={handleChange}
+              options={[{ value:"Approved", label:"Approved" }, { value:"Pending", label:"Pending" }]} />
+            <Select label="BRN"               name="brn"               value={formData.brn}               onChange={handleChange}
+              options={[{ value:"Approved", label:"Approved" }, { value:"Pending", label:"Pending" }]} />
+            <Input label="Registered Agency"  name="registeredAgency"  value={formData.registeredAgency}  onChange={handleChange} placeholder="Yupland Real Estate" className="sm:col-span-1" />
           </div>
         </section>
 
@@ -623,6 +892,25 @@ const handleSubmit = (e) => {
               <input type="checkbox" name="isResponsiveBroker" checked={formData.isResponsiveBroker} onChange={handleChange} className="h-4 w-4" />
               <label className="text-sm font-medium text-gray-700">Responsive Broker</label>
             </div>
+
+            {/* 👤 Agent profile photo */}
+            <div className="sm:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Agent Profile Photo</label>
+              {agentProfileImage ? (
+                <div className="relative w-28">
+                  <img src={agentProfileImage.preview} className="w-28 h-28 object-cover rounded-full shadow" alt="Agent" />
+                  <button type="button" onClick={removeAgentProfileImage}
+                    className="absolute -top-1 -right-1 bg-black/60 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center">
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <label className="flex items-center justify-center w-28 h-28 border border-dashed border-gray-400 rounded-full cursor-pointer text-xs text-indigo-600 bg-gray-50 hover:bg-gray-100 text-center px-2">
+                  Upload Photo
+                  <input type="file" className="hidden" onChange={handleAgentProfileUpload} accept="image/*" />
+                </label>
+              )}
+            </div>
           </div>
         </section>
 
@@ -635,7 +923,8 @@ const handleSubmit = (e) => {
           </div>
 
           {/* Image Upload */}
-          <div className="mt-3 flex justify-center rounded-lg border border-dashed border-gray-400 px-6 py-10 bg-gray-50">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images</label>
+          <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-400 px-6 py-10 bg-gray-50">
             <div className="text-center">
               <PhotoIcon className="mx-auto h-12 w-12 text-gray-300" />
               <label className="mt-4 text-sm text-indigo-600 cursor-pointer font-medium">
@@ -652,6 +941,33 @@ const handleSubmit = (e) => {
                 <div key={index} className="relative">
                   <img src={img.preview} className="w-full h-32 object-cover rounded-lg shadow" alt="" />
                   <button type="button" onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-black/60 text-white rounded px-2 py-1 text-xs">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Video Upload */}
+          <label className="block text-sm font-medium text-gray-700 mb-2 mt-8">Gallery Videos (optional)</label>
+          <div className="mt-1 flex justify-center rounded-lg border border-dashed border-gray-400 px-6 py-10 bg-gray-50">
+            <div className="text-center">
+              <VideoCameraIcon className="mx-auto h-12 w-12 text-gray-300" />
+              <label className="mt-4 text-sm text-indigo-600 cursor-pointer font-medium">
+                Upload Videos
+                <input type="file" multiple className="hidden" onChange={handleVideoUpload} accept="video/*" />
+              </label>
+              <p className="text-xs text-gray-400 mt-1">MP4, MOV up to 100MB each</p>
+            </div>
+          </div>
+
+          {videoFiles.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+              {videoFiles.map((vid, index) => (
+                <div key={index} className="relative">
+                  <video src={vid.preview} className="w-full h-32 object-cover rounded-lg shadow" controls />
+                  <button type="button" onClick={() => removeVideo(index)}
                     className="absolute top-2 right-2 bg-black/60 text-white rounded px-2 py-1 text-xs">
                     Remove
                   </button>
@@ -685,7 +1001,7 @@ const handleSubmit = (e) => {
           </button>
           <button type="submit" disabled={loading}
             className="px-6 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-60">
-            {loading ? "Saving..." : "Create Listing"}
+            {loading ? "Saving..." : "Create Listing (Ready)"}
           </button>
         </div>
 

@@ -138,24 +138,24 @@ if (saleStatusArray.length > 0) {
 }
 } else {
   // Agar Sale Status nahi hai tab Completion use karo
-  const completionRaw = completion || propertyStatus;
+  // Completion normalize karo hyphen/space hata ke
+const completionRaw = (completion || propertyStatus)?.toLowerCase().replace(/[\s-]/g, "");
 
-  if (completionRaw?.toLowerCase() === "offplan") {
-    query.status = {
-      $in: [
-        "Announced",
-        "EOI",
-        "Start of Sales",
-        "On Sale",
-       
-      ],
-    };
-  } else {
-    const mappedStatus = normalizeCompletion(completionRaw);
-    if (mappedStatus) {
-      query.status = mappedStatus;
-    }
+if (completionRaw === "offplan") {
+  addAndCondition(query, {
+    $or: [
+      { status: { $in: ["Announced", "EOI", "Start of Sales", "On Sale"] } },
+      { project_status: { $in: ["Announced", "EOI", "Start of Sales", "On Sale"] } },
+    ],
+  });
+} else {
+  const mappedStatus = normalizeCompletion(completion || propertyStatus);
+  if (mappedStatus) {
+    addAndCondition(query, {
+      $or: [{ status: mappedStatus }, { project_status: mappedStatus }],
+    });
   }
+}
 }
     // ───── Property Type ─────
     const pType = (propertyType || property_type)?.trim();

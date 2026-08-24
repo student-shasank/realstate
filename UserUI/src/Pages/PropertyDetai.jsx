@@ -278,14 +278,14 @@ export default function PropertyDetail() {
   );
 
   useEffect(() => {
-    if (id) {
-      dispatch(fetchListingDetail(Number(id)));
-    }
+  if (id) {
+    dispatch(fetchListingDetail(id)); // MongoDB _id string hai, Number() mat lagao
+  }
 
-    return () => {
-      dispatch(resetListingDetailState());
-    };
-  }, [dispatch, id]);
+  return () => {
+    dispatch(resetListingDetailState());
+  };
+}, [dispatch, id]);
 
   const rawListing = listing || {};
   const PROPERTY = mapPropertyDetailData(rawListing);
@@ -366,7 +366,20 @@ export default function PropertyDetail() {
     "onsale",
     "outofstock",
   ];
+const getBedroomsDisplay = (val) => {
+  if (val === null || val === undefined || val === "") return "—";
 
+  const values = String(val)
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => v !== "");
+
+  if (values.length === 0) return "—";
+
+  return values
+    .map((v) => (v === "0" ? "Studio" : v))
+    .join(", ");
+};
   const getDisplayStatus = (status) => {
     if (!status) return "—";
 
@@ -416,9 +429,9 @@ export default function PropertyDetail() {
     return;
   }
 
-  const listingUrl = rawListing?.id
-    ? `${window.location.origin}/listing/${rawListing.id}`
-    : window.location.href;
+ const listingUrl = rawListing?._id
+  ? `${window.location.origin}/listing/${rawListing._id}`
+  : window.location.href;
 
   const message =
     `Hi Divyansh,\n\n` +
@@ -577,7 +590,7 @@ export default function PropertyDetail() {
   ];
 
   const overviewStats = [
-    { icon: <Bed size={24} className="text-[#67739E]" />, val: overview?.bedrooms ?? bedrooms ?? "—", label: "Bedrooms" },
+{ icon: <Bed size={24} className="text-[#67739E]" />, val: getBedroomsDisplay(overview?.bedrooms ?? bedrooms), label: "Bedrooms" },
     { icon: <Bath size={24} className="text-[#67739E]" />, val: overview?.bathrooms ?? bathrooms ?? "—", label: "Bathrooms" },
     { icon: <Car size={24} className="text-[#67739E]" />, val: overview?.garage ?? garage ?? "—", label: "Parking" },
     { icon: <Calendar size={24} className="text-[#67739E]" />, val: overview?.yearBuilt ?? yearBuilt ?? "—", label: "Year Built" },
@@ -740,8 +753,7 @@ export default function PropertyDetail() {
                   {agentPhoneRaw}
                 </a>
               </div>
-                
-              <div className="flex items-center justify-center gap-2.5">
+ <div className="flex items-center justify-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
                     <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
@@ -931,12 +943,12 @@ export default function PropertyDetail() {
             </div>
 
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
-              <div className="flex justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8">
+                           <div className="flex justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8 flex-wrap gap-y-4">
                 {overviewStats.map((item, i) => (
-                  <div key={i} className="flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-2">
+                  <div key={i} className="flex flex-col items-start gap-1 min-w-[110px]">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {item.icon}
-                      <span className="text-[24px] font-semibold text-[#01155E]">{item.val}</span>
+                      <span className="text-[24px] font-semibold text-[#01155E] break-words">{item.val}</span>
                     </div>
                     <span className="text-[#67739E] text-[15px]">{item.label}</span>
                   </div>

@@ -128,32 +128,150 @@ export const dashboard = async (req, res) => {
 // ── CREATE LISTING ────────────────────────────────────────────
 // ── CREATE LISTING ────────────────────────────────────────────
 // ── CREATE LISTING ────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Helpers: derive the legacy/search-compatible mirror fields
+// (status, city_name, district_name, developer_name, min_price,
+// max_price, beds, baths, property_category, expected_delivery_date,
+// created_date) from the structured payload, so the existing
+// searchListings/sortListings controller keeps working unmodified.
+// ─────────────────────────────────────────────────────────────────
+
+const STATUS_FROM_COMPLETION = {
+  ready: "Ready",
+  "off-plan": "On Sale",
+  preconstruction: "Pre-Construction",
+};
+
+/**
+ * Comma-separated distinct bedroom counts, e.g. "0,1,2".
+ * Prefers unitTypes (multiple configs); falls back to the single
+ * top-level `bedrooms` field when there are no unit types.
+ */
+const buildBedsString = (unitTypes, fallbackBedrooms) => {
+  const values = new Set();
+
+  if (Array.isArray(unitTypes)) {
+    unitTypes.forEach((u) => {
+      const raw = u?.bedrooms;
+      if (raw === undefined || raw === null || raw === "") return;
+      const num = Number(raw);
+      values.add(Number.isNaN(num) ? String(raw).trim() : num);
+    });
+  }
+
+  if (
+    values.size === 0 &&
+    fallbackBedrooms !== undefined &&
+    fallbackBedrooms !== null &&
+    fallbackBedrooms !== ""
+  ) {
+    const num = Number(fallbackBedrooms);
+    values.add(Number.isNaN(num) ? fallbackBedrooms : num);
+  }
+
+  return Array.from(values).join(",");
+};
+
+/**
+ * { min_price, max_price } across unitTypes.startingPrice, falling
+ * back to the single top-level `price` for both bounds.
+ */
+const buildPriceRange = (unitTypes, fallbackPrice) => {
+  const prices = Array.isArray(unitTypes)
+    ? unitTypes
+        .map((u) => Number(u?.startingPrice))
+        .filter((n) => !Number.isNaN(n) && n > 0)
+    : [];
+
+  if (prices.length === 0) {
+    const p = fallbackPrice ? Number(fallbackPrice) : undefined;
+    return { min_price: p, max_price: p };
+  }
+
+  return {
+    min_price: Math.min(...prices),
+    max_price: Math.max(...prices),
+  };
+};
+
+const QUARTER_END_MONTH_DAY = { 1: "03-31", 2: "06-30", 3: "09-30", 4: "12-31" };
+
+/**
+ * Converts things like "Q3 2029" into "2029-09-30" so the search
+ * controller's `handoverYear` regex (`^${year}-`) still matches.
+ * Leaves already-ISO strings untouched; bare years become Dec 31.
+ */
+const buildExpectedDeliveryDate = (handoverDate) => {
+  if (!handoverDate) return undefined;
+  const str = String(handoverDate).trim();
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str;
+
+  const qMatch = str.match(/Q([1-4])\D*(\d{4})/i);
+  if (qMatch) {
+    const [, q, year] = qMatch;
+    return `${year}-${QUARTER_END_MONTH_DAY[q]}`;
+  }
+
+  const yearMatch = str.match(/^(\d{4})$/);
+  if (yearMatch) return `${yearMatch[1]}-12-31`;
+
+  return undefined;
+};
+
 export const createListing = async (req, res) => {
   try {
-    const b = req.body;
+    // ─────────────────────────────────────────────────────────────
+    // The frontend sends the ENTIRE payload as one JSON string under
+    // the "data" field (fd.append("data", JSON.stringify(payload))),
+    // with files sent as separate multipart fields (images, videos,
+    // agentProfile, communityImage). We parse "data" once here, so
+    // every nested object/array below (agent, location, paymentPlan,
+    // unitTypes, floorPlans, features, etc.) is already a real JS
+    // object/array — no need to JSON.parse each field individually.
+    //
+    // Legacy support: if "data" isn't present, fall back to treating
+    // req.body directly as the payload (flat body, no wrapper).
+    // ─────────────────────────────────────────────────────────────
+    let b;
+    if (req.body?.data) {
+      try {
+        b = JSON.parse(req.body.data);
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid JSON in 'data' field",
+        });
+      }
+    } else {
+      b = req.body;
+    }
 
-    // Images: files OR JSON array
-    const files = req.files || {}; // Pehle files object ko handle karo
+    const files = req.files || {};
 
-// 1. Main Gallery Images (Multiple)
-const imageUrls = files['images'] 
-  ? files['images'].map((f) => f.path) 
-  : (typeof b.images === "string" ? JSON.parse(b.images) : b.images || []);
+    // 1. Main Gallery Images (Multiple)
+    const imageUrls = files["images"]
+      ? files["images"].map((f) => f.path)
+      : Array.isArray(b.images)
+      ? b.images
+      : [];
 
-// 2. Videos (Multiple) - Cloudinary videos array
-const videoUrls = files['videos'] 
-  ? files['videos'].map((f) => f.path) 
-  : (typeof b.videos === "string" ? JSON.parse(b.videos) : b.videos || []);
+    // 2. Videos (Multiple) - Cloudinary videos array
+    const videoUrls = files["videos"]
+      ? files["videos"].map((f) => f.path)
+      : Array.isArray(b.videos)
+      ? b.videos
+      : [];
 
-// 3. Agent Profile (Single)
-const agentProfileUrl = files['agentProfile'] 
-  ? files['agentProfile'][0].path 
-  : (typeof b.agent === "string" ? JSON.parse(b.agent).profileImage : b.agent?.profileImage);
+    // 3. Agent Profile (Single)
+    const agentProfileUrl = files["agentProfile"]
+      ? files["agentProfile"][0].path
+      : b.agent?.profileImage;
 
-// 4. Community Image (Single)
-const communityImageUrl = files['communityImage'] 
-  ? files['communityImage'][0].path 
-  : (typeof b.location === "string" ? JSON.parse(b.location).communityImage : b.location?.communityImage);
+    // 4. Community Image (Single)
+    const communityImageUrl = files["communityImage"]
+      ? files["communityImage"][0].path
+      : b.location?.communityImage;
 
     // Required fields
     if (!b.title || !b.price) {
@@ -164,41 +282,46 @@ const communityImageUrl = files['communityImage']
 
     // Slug
     const uniqueSlug = generateSlug(b.title);
-    // ✅ validate community
-// community required
-if (!b.community) {
-  return res.status(400).json({
-    success: false,
-    message: "Community is required",
-  });
-}
 
-// validate community
-let communityId;
+    // community required
+    if (!b.community) {
+      return res.status(400).json({
+        success: false,
+        message: "Community is required",
+      });
+    }
 
-const communityExists = await Community.findById(b.community);
+    // validate community
+    const communityExists = await Community.findById(b.community);
 
-if (!communityExists) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid community selected",
-  });
-}
+    if (!communityExists) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid community selected",
+      });
+    }
 
-communityId = communityExists._id;
-    // Parse arrays safely
-    const parseJSONSafe = (val) => {
-      if (!val) return [];
-      if (typeof val === "string") return JSON.parse(val);
-      if (Array.isArray(val)) return val;
-      return [];
+    const communityId = communityExists._id;
+
+    // Arrays are already parsed (see note above) — just guard against
+    // missing/malformed values instead of re-parsing strings.
+    const installmentPlan = Array.isArray(b.paymentPlan?.installmentPlan)
+      ? b.paymentPlan.installmentPlan
+      : [];
+    const steps = Array.isArray(b.paymentPlan?.steps) ? b.paymentPlan.steps : [];
+    const unitTypes = Array.isArray(b.unitTypes) ? b.unitTypes : [];
+    const floorPlans = Array.isArray(b.floorPlans) ? b.floorPlans : [];
+    const features = Array.isArray(b.features) ? b.features : [];
+
+    // 🔒 IMPORTANT: every listing created through this endpoint is
+    // forced to "Ready" status — active, available, ready — no matter
+    // what the client sends. This guarantees anything that gets
+    // created here immediately shows up as a live Ready listing.
+    const FORCED_STATUS = {
+      completionStatus: "ready",
+      propertyStatus: "active",
+      availability: "available",
     };
-
-    const installmentPlan = parseJSONSafe(b.installmentPlan);
-    const steps = parseJSONSafe(b.paymentPlan?.steps);
-    const unitTypes = parseJSONSafe(b.unitTypes);
-    const floorPlans = parseJSONSafe(b.floorPlans);
-    const features = parseJSONSafe(b.features);
 
     const listingPayload = {
       title: b.title,
@@ -209,11 +332,13 @@ communityId = communityExists._id;
       serviceCharges: b.serviceCharges ? Number(b.serviceCharges) : undefined,
       type: b.type,
       purpose: b.purpose || "sell",
-      completionStatus: b.completionStatus,
-       community: communityId,
-      propertyStatus: b.propertyStatus || "pending",
+      community: communityId,
+
+      completionStatus: FORCED_STATUS.completionStatus,
+      propertyStatus: FORCED_STATUS.propertyStatus,
       listingStatus: b.listingStatus,
-      availability: b.availability || "available",
+      availability: FORCED_STATUS.availability,
+
       isFeatured: b.isFeatured === true || b.isFeatured === "true",
       furnishing: b.furnishing,
       bedrooms: b.bedrooms ? Number(b.bedrooms) : undefined,
@@ -221,7 +346,9 @@ communityId = communityExists._id;
       garage: b.garage ? Number(b.garage) : undefined,
       rooms: b.rooms ? Number(b.rooms) : undefined,
       builtUpArea: b.builtUpArea ? Number(b.builtUpArea) : undefined,
-      totalBuildingArea: b.totalBuildingArea ? Number(b.totalBuildingArea) : undefined,
+      totalBuildingArea: b.totalBuildingArea
+        ? Number(b.totalBuildingArea)
+        : undefined,
       plotArea: b.plotArea ? Number(b.plotArea) : undefined,
       developer: b.developer,
       ownership: b.ownership,
@@ -232,99 +359,147 @@ communityId = communityExists._id;
       description: b.description,
       features,
       images: imageUrls,
-      videos:videoUrls,
+      videos: videoUrls,
       youtubeVideoId: b.youtubeVideoId,
       brochureUrl: b.brochureUrl,
 
       // Agent
-      agent: b.agent ? {
-        name: b.agent.name,
-        agency: b.agent.agency,
-        phone: b.agent.phone,
-        whatsapp: b.agent.whatsapp,
-        email: b.agent.email,
-        profileImage: agentProfileUrl,
-        isResponsiveBroker: b.agent.isResponsiveBroker === true || b.agent.isResponsiveBroker === "true"
-      } : undefined,
+      agent: b.agent
+        ? {
+            name: b.agent.name,
+            agency: b.agent.agency,
+            phone: b.agent.phone,
+            whatsapp: b.agent.whatsapp,
+            email: b.agent.email,
+            profileImage: agentProfileUrl,
+            isResponsiveBroker:
+              b.agent.isResponsiveBroker === true ||
+              b.agent.isResponsiveBroker === "true",
+          }
+        : undefined,
 
       // Internal
-      internal: b.internal ? {
-        internalListingId: b.internal.internalListingId,
-        sourceBrokerageName: b.internal.sourceBrokerageName,
-        listingAgentName: b.internal.listingAgentName,
-        listingAgentPhone: b.internal.listingAgentPhone,
-        listingAgentEmail: b.internal.listingAgentEmail,
-        listingSourceType: b.internal.listingSourceType || "direct",
-        listingValidUntil: b.internal.listingValidUntil ? new Date(b.internal.listingValidUntil) : undefined
-      } : undefined,
+      internal: b.internal
+        ? {
+            internalListingId: b.internal.internalListingId,
+            sourceBrokerageName: b.internal.sourceBrokerageName,
+            listingAgentName: b.internal.listingAgentName,
+            listingAgentPhone: b.internal.listingAgentPhone,
+            listingAgentEmail: b.internal.listingAgentEmail,
+            listingSourceType: b.internal.listingSourceType || "direct",
+            listingValidUntil: b.internal.listingValidUntil
+              ? new Date(b.internal.listingValidUntil)
+              : undefined,
+          }
+        : undefined,
 
       // Validated info
-      validatedInfo: b.validatedInfo ? {
-        ownership: b.validatedInfo.ownership,
-        builtUpArea: b.validatedInfo.builtUpArea ? Number(b.validatedInfo.builtUpArea) : undefined,
-        plotArea: b.validatedInfo.plotArea ? Number(b.validatedInfo.plotArea) : undefined,
-        usage: b.validatedInfo.usage,
-        developer: b.validatedInfo.developer
-      } : undefined,
+      validatedInfo: b.validatedInfo
+        ? {
+            ownership: b.validatedInfo.ownership,
+            builtUpArea: b.validatedInfo.builtUpArea
+              ? Number(b.validatedInfo.builtUpArea)
+              : undefined,
+            plotArea: b.validatedInfo.plotArea
+              ? Number(b.validatedInfo.plotArea)
+              : undefined,
+            usage: b.validatedInfo.usage,
+            developer: b.validatedInfo.developer,
+          }
+        : undefined,
 
       // Project info
-      projectInfo: b.projectInfo ? {
-        name: b.projectInfo.name,
-        status: b.projectInfo.status,
-        completion: b.projectInfo.completion,
-        handoverDate: b.projectInfo.handoverDate,
-        developer: b.projectInfo.developer,
-        lastInspected: b.projectInfo.lastInspected
-      } : undefined,
+      projectInfo: b.projectInfo
+        ? {
+            name: b.projectInfo.name,
+            status: b.projectInfo.status,
+            completion: b.projectInfo.completion,
+            handoverDate: b.projectInfo.handoverDate,
+            developer: b.projectInfo.developer,
+            lastInspected: b.projectInfo.lastInspected,
+          }
+        : undefined,
 
-      regulatoryInfo: b.regulatoryInfo ? {
-        permitNumber: b.regulatoryInfo.permitNumber,
-        zoneName: b.regulatoryInfo.zoneName,
-        rera: b.regulatoryInfo.rera || "Approved",
-        brn: b.regulatoryInfo.brn || "Approved",
-        registeredAgency: b.regulatoryInfo.registeredAgency || "RTO"
-      } : undefined,
+      regulatoryInfo: b.regulatoryInfo
+        ? {
+            permitNumber: b.regulatoryInfo.permitNumber,
+            zoneName: b.regulatoryInfo.zoneName,
+            rera: b.regulatoryInfo.rera || "Approved",
+            brn: b.regulatoryInfo.brn || "Approved",
+            registeredAgency: b.regulatoryInfo.registeredAgency || "RTO",
+          }
+        : undefined,
 
       // Location
-      location: b.location ? {
-        address: b.location.address,
-        community: b.location.community,
-        subCommunity: b.location.subCommunity,
-        city: b.location.city,
-        country: b.location.country,
-        emirates: b.location.emirates,
-        communityImage:communityImageUrl,
-        coordinates: b.location.coordinates || { type: "Point", coordinates: [0, 0] }
-      } : undefined,
+      location: b.location
+        ? {
+            address: b.location.address,
+            community: b.location.community,
+            subCommunity: b.location.subCommunity,
+            city: b.location.city,
+            country: b.location.country,
+            emirates: b.location.emirates,
+            communityImage: communityImageUrl,
+            coordinates: b.location.coordinates || {
+              type: "Point",
+              coordinates: [0, 0],
+            },
+          }
+        : undefined,
 
       // Building info
-      buildingInfo: b.buildingInfo ? {
-        buildingName: b.buildingInfo.buildingName,
-        yearOfCompletion: b.buildingInfo.yearOfCompletion,
-        totalFloors: b.buildingInfo.totalFloors,
-        swimmingPools: b.buildingInfo.swimmingPools,
-        totalParkingSpaces: b.buildingInfo.totalParkingSpaces,
-        totalBuildingArea: b.buildingInfo.totalBuildingArea,
-        elevators: b.buildingInfo.elevators
-      } : undefined,
+      buildingInfo: b.buildingInfo
+        ? {
+            buildingName: b.buildingInfo.buildingName,
+            yearOfCompletion: b.buildingInfo.yearOfCompletion,
+            totalFloors: b.buildingInfo.totalFloors,
+            swimmingPools: b.buildingInfo.swimmingPools,
+            totalParkingSpaces: b.buildingInfo.totalParkingSpaces,
+            totalBuildingArea: b.buildingInfo.totalBuildingArea,
+            elevators: b.buildingInfo.elevators,
+          }
+        : undefined,
 
       unitTypes,
       floorPlans,
 
       // Payment plan
-      paymentPlan: b.paymentPlan ? {
-        planName: b.paymentPlan.planName,
-        downPayment: b.paymentPlan.downPayment ? Number(b.paymentPlan.downPayment) : undefined,
-        installmentPlan,
-        steps
-      } : undefined,
+      paymentPlan: b.paymentPlan
+        ? {
+            planName: b.paymentPlan.planName,
+            downPayment: b.paymentPlan.downPayment
+              ? Number(b.paymentPlan.downPayment)
+              : undefined,
+            installmentPlan,
+            steps,
+          }
+        : undefined,
 
       // Investment insights
-      investmentInsights: b.investmentInsights ? {
-        rentalYield: b.investmentInsights.rentalYield,
-        priceTrend: b.investmentInsights.priceTrend,
-        pricePerSqFt: b.investmentInsights.pricePerSqFt ? Number(b.investmentInsights.pricePerSqFt) : undefined
-      } : undefined,
+      investmentInsights: b.investmentInsights
+        ? {
+            rentalYield: b.investmentInsights.rentalYield,
+            priceTrend: b.investmentInsights.priceTrend,
+            pricePerSqFt: b.investmentInsights.pricePerSqFt
+              ? Number(b.investmentInsights.pricePerSqFt)
+              : undefined,
+          }
+        : undefined,
+
+      // ── Legacy / search-compatible mirror fields ──────────────
+      // Auto-derived from the fields above — never set by the admin
+      // form directly. Keeps the existing searchListings/sortListings
+      // controller working without touching it.
+      status: STATUS_FROM_COMPLETION[FORCED_STATUS.completionStatus] || "Ready",
+      city_name: b.location?.city,
+      district_name: b.location?.subCommunity || b.location?.address,
+      developer_name: b.developer,
+      beds: buildBedsString(unitTypes, b.bedrooms),
+      baths: b.bathrooms ? Number(b.bathrooms) : undefined,
+      property_category: b.type ? [b.type] : [],
+      expected_delivery_date: buildExpectedDeliveryDate(b.handoverDate),
+      created_date: new Date(),
+      ...buildPriceRange(unitTypes, b.price),
     };
 
     const listing = await Listing.create(listingPayload);
@@ -336,7 +511,9 @@ communityId = communityExists._id;
     });
   } catch (error) {
     console.error("CREATE LISTING ERROR:", error);
-    return res.status(500).json({ success: false, error: error.message || "Server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: error.message || "Server error" });
   }
 };
 

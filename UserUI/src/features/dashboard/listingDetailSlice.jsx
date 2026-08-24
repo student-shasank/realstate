@@ -1,44 +1,33 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { fetchListingDetailAPI, Token } from "../../Constant/constant.js";
+import { fetchListingById } from "../../Constant/constant.js";
 
 // ----------------------
-// Async Thunk
+// Async Thunk — MongoDB se _id ke basis par listing detail fetch karta hai
+// Route: GET {BASE_URL}/listing/detail/:id
 // ----------------------
 export const fetchListingDetail = createAsyncThunk(
   "listingDetail/fetchListingDetail",
   async (id, thunkAPI) => {
     try {
-      const token = localStorage.getItem("token");
+      const response = await axios.get(`${fetchListingById}/${id}`);
 
-      const response = await axios.post(
-        fetchListingDetailAPI,
-        {},
-        {
-          params: {
-            fk_project_id: id,
-          },
-          headers: {
-            Authorization: `Bearer ${"c137153e7594e1388278ce6fb5ed80b88b86bb09f8fdf8ee2e834dea59383dd1"}`,
-          },
-        }
-      );
+      const data = response.data?.data || response.data;
 
-      const data = response.data?.data;
-      console.log(data)
-
-     return {
-  ...data,
-  id: data?.id || id,     // 👈 ensure id always ho
-  _id: data?._id || id,   // 👈 fallback (important)
-};
+      return {
+        ...data,
+        id: data?.id || id, // fallback ensure
+        _id: data?._id || id, // fallback ensure
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || error.message
       );
     }
   }
-)
+);
+
+// ----------------------
 // Slice
 // ----------------------
 const listingDetailSlice = createSlice({
@@ -61,27 +50,21 @@ const listingDetailSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      // ----------------------
       // Pending
-      // ----------------------
       .addCase(fetchListingDetail.pending, (state) => {
         state.loading = true;
         state.success = false;
         state.error = null;
       })
 
-      // ----------------------
       // Fulfilled
-      // ----------------------
       .addCase(fetchListingDetail.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.listing = action.payload;
       })
 
-      // ----------------------
       // Rejected
-      // ----------------------
       .addCase(fetchListingDetail.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
@@ -90,7 +73,7 @@ const listingDetailSlice = createSlice({
   },
 });
 
-export const { resetListingDetailState } =
-  listingDetailSlice.actions;
+export const { resetListingDetailState } = listingDetailSlice.actions;
 
+// ✅ Fix: .reducer (pehle .reduce likha tha jo galat hai)
 export default listingDetailSlice.reducer;

@@ -18,9 +18,6 @@ import {
   resetEnquiryState,
 } from "../../features/Enquiery/enquirySlice.js";
 import { toast } from "react-toastify";
-import { fetchListingDetail } from "../../features/dashboard/listingDetailSlice";
-import { extractAllImages } from "../../Components/utils/imageExtractor";
-
 import {
   addFavoriteLocal,
   removeFavoriteLocal,
@@ -41,7 +38,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const [isImageHovered, setIsImageHovered] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [carouselImages, setCarouselImages] = useState([]);
-  const [isLoadingImages, setIsLoadingImages] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -51,9 +47,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     loading: pdfLoading,
     error: pdfError,
   } = useSelector((state) => state.pdf);
-  const { listing: detailedListing } = useSelector(
-    (state) => state.listingDetail,
-  );
 
   const currentUser = useSelector((state) => state.auth?.user);
 
@@ -109,13 +102,25 @@ const ListingCard = ({ listing, onRequireLogin }) => {
 
   const agencyName = listing?.developer_name || listing?.agency_name || "N/A";
 
-  // Fallback gallery images
+  // Fallback gallery images (agar all_images khali ho)
   const fallbackGalleryImages = listing?.feature_image
     ? [listing.feature_image]
-    : [listingimage];
+    : listing?.images?.length > 0
+      ? listing.images
+      : [listingimage];
+
+  // ============================================================
+  // Ab images MongoDB se listing object ke saath hi aa jaati hain
+  // (listing.all_images), isliye hover par detail API call karne
+  // ki zaroorat nahi — seedha yahin se le lete hain.
+  // ============================================================
+  const galleryImages =
+    Array.isArray(listing?.all_images) && listing.all_images.length > 0
+      ? listing.all_images
+      : fallbackGalleryImages;
 
   const displayImages =
-    carouselImages.length > 0 ? carouselImages : fallbackGalleryImages;
+    carouselImages.length > 0 ? carouselImages : galleryImages;
 
   const getSafeImageUrl = (url) => {
     if (!url) return listingimage;
@@ -128,28 +133,13 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     return url;
   };
 
-  const handleImageMouseEnter = async () => {
+  const handleImageMouseEnter = () => {
     setIsImageHovered(true);
 
-    if (carouselImages.length === 0 && !isLoadingImages && cardId) {
-      setIsLoadingImages(true);
-      try {
-        const result = await dispatch(
-          fetchListingDetail(Number(cardId)),
-        ).unwrap();
+    if (carouselImages.length > 0) return;
 
-        if (result) {
-          const imageData = extractAllImages(result);
-          setCarouselImages(imageData.allImages);
-        }
-      } catch (error) {
-        console.error("Error fetching listing images:", error);
-        setCarouselImages(fallbackGalleryImages);
-        toast.error("Failed to load images");
-      } finally {
-        setIsLoadingImages(false);
-      }
-    }
+    // Images already listing object me maujood hain, bas set kar do
+    setCarouselImages(galleryImages);
   };
 
   const handleImageMouseLeave = () => {
@@ -240,8 +230,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
       return;
     }
 
-    const listingUrl = listing?.id
-      ? `${window.location.origin}/listing/${listing.id}`
+    const listingUrl = listing?._id
+      ? `${window.location.origin}/listing/${listing._id}`
       : window.location.href;
 
     const message =
@@ -276,8 +266,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   }, [currentId]);
 
   const openDetails = () => {
-    if (listing?.id) {
-      navigate(`/listing/${listing.id}`);
+    if (listing?._id) {
+      navigate(`/listing/${listing._id}`);
     }
   };
 
@@ -326,8 +316,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               ? "Off-plan"
               : listing?.status}
           </span>
-          {/* <span className="mx-1 text-gray-300">|</span>
-          <span className="font-normal">Sell</span> */}
         </div>
         {listing?.isFeatured && (
           <div className="absolute top-4 right-4 bg-[#FFC107] text-[#01155E] px-3 py-1 rounded-[6px] text-[14px] font-semibold z-20 shadow-sm">
@@ -335,15 +323,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           </div>
         )}
 
-        {/* Loading Spinner */}
-        {isLoadingImages && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-30">
-            <div className="w-8 h-8 border-3 border-white border-t-[#01155E] rounded-full animate-spin"></div>
-          </div>
-        )}
-
         {/* Carousel Arrows on Hover */}
-        {isImageHovered && displayImages.length > 1 && !isLoadingImages && (
+        {isImageHovered && displayImages.length > 1 && (
           <>
             <button
               onClick={handlePrevImage}
@@ -535,7 +516,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
             <img src={Icon2} alt="bath" className="w-5 h-5" />
             <span className="text-[16px] sm:text-[18px] font-medium">
               Enquire
-              {/* {listing?.baths || ""} */}
             </span>
           </div>
 
@@ -589,9 +569,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   <span className="text-[20px] sm:text-[24px] mr-2">
                     {listing?.currency?.toUpperCase()}
                   </span>
-                  {/* <span className="text-[26px] sm:text-[32px]">
-        {listing.min_price.toLocaleString()}
-      </span> */}
                   <span className="text-[26px] sm:text-[32px]">
                     {formatNumber(listing.min_price)}
                   </span>
@@ -609,9 +586,6 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                 <span className="text-[20px] sm:text-[24px] mr-2">
                   {listing?.currency?.toUpperCase()}
                 </span>
-                {/* <span className="text-[26px] sm:text-[32px]">
-        {listing?.min_price?.toLocaleString() || "10,00,239"}
-      </span> */}
                 <span className="text-[26px] sm:text-[32px]">
                   {formatNumber(listing?.min_price) || "1,000,239"}
                 </span>

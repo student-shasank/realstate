@@ -1,7 +1,6 @@
 // listingModel.js
 import mongoose from "mongoose";
 
-
 const agentSchema = new mongoose.Schema({
   name: { type: String },
   agency: { type: String },
@@ -20,8 +19,6 @@ const internalSchema = new mongoose.Schema({
   listingAgentEmail: { type: String },
   listingSourceType: {
     type: String,
-
-    
     enum: ["direct", "shared", "api"],
     default: "direct",
   },
@@ -91,15 +88,15 @@ const unitTypeSchema = new mongoose.Schema({
 const regulatoryInfoSchema = new mongoose.Schema({
   permitNumber: { type: String },
   zoneName: { type: String },
-  rera: { 
-    type: String, 
-    enum: ["Approved", "Pending", "Rejected"], 
-    default: "Approved" 
+  rera: {
+    type: String,
+    enum: ["Approved", "Pending", "Rejected"],
+    default: "Approved",
   },
-  brn: { 
-    type: String, 
-    enum: ["Approved", "Pending", "Rejected"], 
-    default: "Approved" 
+  brn: {
+    type: String,
+    enum: ["Approved", "Pending", "Rejected"],
+    default: "Approved",
   },
   registeredAgency: { type: String, default: "RTO" },
 });
@@ -139,10 +136,9 @@ const ListingSchema = new mongoose.Schema(
     serviceCharges: { type: Number },
 
     community: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "Community",
-},
-
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Community",
+    },
 
     type: { type: String },
     purpose: {
@@ -152,18 +148,17 @@ const ListingSchema = new mongoose.Schema(
     },
     completionStatus: {
       type: String,
-      enum: ["off-plan", "ready" ,"preconstruction"],    // physical state of property
+      enum: ["off-plan", "ready", "preconstruction"], // physical state of property
+      default: "ready",
     },
     propertyStatus: {
       type: String,
       enum: ["pending", "active", "rejected", "sold"],
-      default: "pending",             // admin approval status--
-    },   
+      default: "active", // admin approval status
+    },
     listingStatus: {
       type: String,
       enum: ["resale", "new launch", "secondary"],
-
-
     },
     availability: {
       type: String,
@@ -208,11 +203,78 @@ const ListingSchema = new mongoose.Schema(
     paymentPlan: paymentPlanSchema,
     investmentInsights: investmentInsightsSchema,
     regulatoryInfo: regulatoryInfoSchema,
+
+    // ── Legacy / search-compatible mirror fields ──────────────────
+    // These exist ONLY so the existing searchListings/sortListings
+    // controller (which was written for an older, flatter data shape)
+    // keeps working without being modified. They are auto-populated
+    // from the structured fields above at creation time — never edited
+    // directly by the admin form. Do not remove without also checking
+    // the search controller's field usage.
+    status: {
+      type: String,
+      enum: [
+        "Announced",
+        "EOI",
+        "Start of Sales",
+        "On Sale",
+        "Out Of Stock",
+        "Sold Out",
+        "Ready",
+        "Pre-Construction",
+      ],
+    },
+    city_name: { type: String },
+    district_name: { type: String },
+    developer_name: { type: String },
+    min_price: { type: Number },
+    max_price: { type: Number },
+    beds: { type: String }, // comma-separated, e.g. "0,1,2"
+    baths: { type: Number },
+    property_category: [{ type: String }],
+    expected_delivery_date: { type: String }, // "YYYY-MM-DD" so `$regex: "^YYYY-"` matches
+    created_date: { type: Date },
   },
   { timestamps: true }
 );
 
+// ── Indexes ──────────────────────────────────────────────────────
+// NOTE: indexes must be declared on the schema BEFORE the model is
+// compiled with mongoose.model(). Declaring them after export (as
+// before) still "worked" by accident, but it's the wrong place and
+// makes it easy to reference stale/incorrect field names — which is
+// exactly what happened below (city_name/district_name/developer_name
+// don't exist anywhere in this schema).
+
+// Fast lookups for the "Ready listings" queries (status + availability
+// + newest first) used by the admin dashboard / public listing pages.
+ListingSchema.index({
+  completionStatus: 1,
+  propertyStatus: 1,
+  availability: 1,
+  createdAt: -1,
+});
+
+// Supports the legacy searchListings/sortListings controller, which
+// filters/sorts on these mirror fields instead of the structured ones.
+ListingSchema.index({
+  status: 1,
+  city_name: 1,
+  min_price: 1,
+  max_price: 1,
+  created_date: -1,
+});
+
+// Text search across the fields that actually exist on this schema.
+ListingSchema.index({
+  title: "text",
+  description: "text",
+  developer: "text",
+  "location.address": "text",
+  "location.city": "text",
+  "location.subCommunity": "text",
+  "projectInfo.name": "text",
+  "buildingInfo.buildingName": "text",
+});
+
 export default mongoose.model("Listing", ListingSchema);
-// models/Listing.js ke schema mein ya connection ke baad ek baar
-ListingSchema.index({ propertyStatus: 1, createdAt: -1 });
-ListingSchema.index({ title: "text", city_name: "text", district_name: "text", developer_name: "text" });

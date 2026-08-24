@@ -9,16 +9,16 @@ export const createListing = createAsyncThunk(
     try {
       const token = localStorage.getItem("token");
 
-      const response = await axios.post(
-      ADMIN_LISTINGS_URL ,
-        formData, // FormData object
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(ADMIN_LISTINGS_URL, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          // ⚠️ Do NOT set "Content-Type": "multipart/form-data" manually.
+          // When you pass a FormData object, axios/the browser automatically
+          // sets the correct Content-Type *with the boundary* it generated.
+          // Overriding it here drops that boundary and can silently break
+          // image uploads / body parsing on the backend.
+        },
+      });
 
       return response.data;
     } catch (error) {
@@ -35,12 +35,18 @@ const listingSlice = createSlice({
     loading: false,
     success: false,
     error: null,
+    // Holds the listing object returned by the API right after creation
+    // (status will always be "ready" / "active" since the create form
+    // forces that on submit). Useful for redirecting straight to the
+    // detail page or showing a confirmation summary without refetching.
+    createdListing: null,
   },
   reducers: {
     resetListingState: (state) => {
       state.loading = false;
       state.success = false;
       state.error = null;
+      state.createdListing = null;
     },
   },
   extraReducers: (builder) => {
@@ -50,12 +56,14 @@ const listingSlice = createSlice({
         state.success = false;
         state.error = null;
       })
-      .addCase(createListing.fulfilled, (state) => {
+      .addCase(createListing.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
+        state.createdListing = action.payload?.data || action.payload || null;
       })
       .addCase(createListing.rejected, (state, action) => {
         state.loading = false;
+        state.success = false;
         state.error = action.payload;
       });
   },

@@ -8,8 +8,6 @@ import Icon3 from '../../assets/icon3.png'
 // ✅ NEW IMPORTS
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchListingDetail } from "../../features/dashboard/listingDetailSlice";
-import { extractAllImages } from "../../Components/utils/imageExtractor";
 import {
   addFavoriteLocal,
   removeFavoriteLocal,
@@ -25,7 +23,6 @@ const MapCard = ({ item, onRequireLogin }) => {
   // ✅ NEW STATES
   const [carouselImages, setCarouselImages] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Default image if none provided
   const IMG = listingimage;
@@ -36,13 +33,25 @@ const MapCard = ({ item, onRequireLogin }) => {
   const favorites = useSelector((state) => state.favorites.favorites || []);
   const isFavorite = favorites.includes(currentId);
 
-  // ✅ fallback + dynamic images
+  // ✅ fallback images (agar all_images khali ho)
   const fallbackImages = item?.feature_image
     ? [item.feature_image]
-    : [IMG];
+    : item?.images?.length > 0
+      ? item.images
+      : [IMG];
+
+  // ============================================================
+  // Ab images MongoDB se listing/map item object ke saath hi
+  // aa jaati hain (item.all_images), isliye hover par detail
+  // API call karne ki zaroorat nahi — seedha yahin se le lete hain.
+  // ============================================================
+  const galleryImages =
+    Array.isArray(item?.all_images) && item.all_images.length > 0
+      ? item.all_images
+      : fallbackImages;
 
   const images =
-    carouselImages.length > 0 ? carouselImages : fallbackImages;
+    carouselImages.length > 0 ? carouselImages : galleryImages;
 
   // ✅ SAFE IMAGE HANDLER
   const getSafeImage = (img) => {
@@ -78,21 +87,12 @@ const MapCard = ({ item, onRequireLogin }) => {
     }
   };
 
-  // ✅ HOVER FETCH (same as ListingCard)
-  const handleMouseEnter = async () => {
+  // ✅ HOVER — images already present in item, bas set kar do
+  const handleMouseEnter = () => {
     setIsHovered(true);
 
-    if (carouselImages.length === 0 && !isLoading) {
-      setIsLoading(true);
-      try {
-        const res = await dispatch(fetchListingDetail(item.id)).unwrap();
-        const imageData = extractAllImages(res);
-        setCarouselImages(imageData.allImages);
-      } catch (err) {
-        console.log("Image fetch error", err);
-      } finally {
-        setIsLoading(false);
-      }
+    if (carouselImages.length === 0) {
+      setCarouselImages(galleryImages);
     }
   };
 
@@ -116,6 +116,13 @@ const MapCard = ({ item, onRequireLogin }) => {
     setCurrentImg(index);
   };
 
+  // ✅ item change hone par reset (jaise ListingCard me hota hai)
+  useEffect(() => {
+    setCurrentImg(0);
+    setCarouselImages([]);
+    setIsHovered(false);
+  }, [currentId]);
+
   return (
     // ✅ Elevated card shell — rounded corners, soft shadow, subtle lift on hover
     <div
@@ -137,13 +144,6 @@ const MapCard = ({ item, onRequireLogin }) => {
 
         {/* Subtle bottom gradient so dots/price always readable */}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-
-        {/* 🔄 Loader */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-white border-t-black rounded-full animate-spin" />
-          </div>
-        )}
 
         {/* Status / off-plan badge (optional, shows if present) */}
         {item?.completion_status && (
@@ -255,9 +255,6 @@ const MapCard = ({ item, onRequireLogin }) => {
                 : typeof item?.beds === "string"
                 ? item.beds.replace(/^0,?/, "Studio,")
                 : item?.beds ?? "N/A"}{" "}
-              {typeof item?.beds !== "undefined" && item?.beds !== null
-                ? ""
-                : ""}
             </span>
           </div>
 
