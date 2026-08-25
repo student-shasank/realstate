@@ -689,6 +689,21 @@ const getBedroomsDisplay = (val) => {
     }
   };
 
+  // 🔧 NEW: derived flag — true only if at least one real investment-insight
+  // value came back from the API. Used to hide the whole "Investment
+  // Insights" block instead of always rendering it with "—" placeholders.
+  const hasInvestmentInsights = Boolean(
+    investmentInsights?.rentalYield ||
+    investmentInsights?.priceTrend ||
+    investmentInsights?.pricePerSqFt
+  );
+
+  // 🔧 NEW: derived flag — true only if a real community image URL exists
+  // (mapper now returns null instead of "—" when there is none).
+  const hasCommunityImage = Boolean(
+    community?.marketSupply?.image || location?.communityImage
+  );
+
   return (
     <div className="bg-white min-h-screen ">
       {showGallery && (
@@ -1244,44 +1259,57 @@ const getBedroomsDisplay = (val) => {
               </button>
             </div>
 
-            <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
-              <img
-                src={getSafeImageUrl(
-                  community?.marketSupply?.image ||
-                  location?.communityImage ||
-                  propertycommunity
-                )}
-                className="w-full h-full object-cover"
-                alt="Community"
-              />
-            </div>
+            {/* 🔧 FIX: was `{(community?.marketSupply?.image || location?.communityImage) && (...)}`.
+                That check is unchanged, but it now works correctly because the mapper
+                no longer feeds it a truthy "—" placeholder string when there's no
+                real image — it feeds `null`, so this block genuinely hides when
+                there is no community image. Using the `hasCommunityImage` flag here
+                for clarity. */}
+            {hasCommunityImage && (
+              <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
+                <img
+                  src={getSafeImageUrl(
+                    community?.marketSupply?.image || location?.communityImage
+                  )}
+                  className="w-full h-full object-cover"
+                  alt="Community"
+                />
+              </div>
+            )}
 
-            <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
-              <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
-                <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
-                <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[15px] font-semibold">
-                  Unlock Investment Insights
-                </button>
+            {/* 🔧 FIX: Investment Insights section was rendering unconditionally,
+                showing "Unlock Investment Insights" + three "—" rows even when
+                the listing had no investment data at all. Now wrapped in
+                `hasInvestmentInsights` so it only renders when at least one of
+                rentalYield / priceTrend / pricePerSqFt actually came back from
+                the API (mapper now returns null instead of "—" for these when
+                missing, so the flag is accurate). */}
+            {hasInvestmentInsights && (
+              <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
+                  <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
+                  <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[15px] font-semibold">
+                    Unlock Investment Insights
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 px-6 py-5">
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Rental Yield</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Price Trends</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">
+                      {investmentInsights?.pricePerSqFt || "—"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 px-6 py-5">
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Rental Yield</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Price Trends</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">
-                    {investmentInsights?.pricePerSqFt
-                      ? `${investmentInsights.pricePerSqFt}`
-                      : pricePerSqFt || "—"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
 
             <div className="mt-10">
               <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>

@@ -22,6 +22,120 @@ const AVAILABILITY = {
   NOT_AVAILABLE: "unavailable",
 };
 
+// ─── Data Normalizer ──────────────────────────────────────────────────────────
+// Bridges the gap between raw Mongo documents (off-plan projects, resale
+// listings, etc.) and the flat shape the UI expects. Every lookup falls back
+// to null/derived values so mixed document shapes never crash the card.
+
+const normalizeListing = (raw) => {
+  if (!raw) return null;
+
+  const id =
+    (raw._id && (raw._id.toString ? raw._id.toString() : raw._id)) ||
+    raw.id ||
+    null;
+
+  // ── Location ──
+  const districtName =
+    raw.district_name ||
+    raw.district_data?.[0]?.name ||
+    raw.project_location ||
+    null;
+
+  const cityName =
+    raw.city_name ||
+    raw.city_data?.name ||
+    raw.project_city ||
+    null;
+
+  // ── Beds — handles both a plain count and a "0,1,2" style string ──
+  let bedsDisplay = raw.beds ?? raw.bedrooms ?? null;
+  if (typeof bedsDisplay === "string" && bedsDisplay.includes(",")) {
+    const nums = bedsDisplay
+      .split(",")
+      .map((n) => Number(n.trim()))
+      .filter((n) => !isNaN(n))
+      .sort((a, b) => a - b);
+    bedsDisplay = nums.length
+      ? nums.map((n) => (n === 0 ? "Studio" : n)).join(", ")
+      : null;
+  }
+
+  // ── Baths — frequently absent on off-plan project documents ──
+  const bathsDisplay = raw.baths ?? raw.bathrooms ?? null;
+
+  // ── Area ──
+  const areaStart = raw.area_start != null ? Number(raw.area_start) : null;
+  const areaEnd =
+    raw.area_end != null
+      ? Number(raw.area_end)
+      : raw.max_area != null
+      ? Number(raw.max_area)
+      : null;
+  const areaUnit = raw.area_size || raw.areaUnit || "sqft";
+
+  // ── Price ──
+  const priceStart =
+    raw.price_start != null
+      ? Number(raw.price_start)
+      : raw.min_price ?? raw.price ?? null;
+  const priceEnd = raw.price_end != null ? Number(raw.price_end) : null;
+  const isRange = !!(priceEnd && priceStart && priceEnd !== priceStart);
+  const isMultiUnit = (raw.typical_units?.length || 0) > 1 || isRange;
+
+  // ── Image ──
+  const featureImage =
+    raw.feature_image ||
+    raw.images?.feature ||
+    (Array.isArray(raw.images) ? raw.images[0] : null) ||
+    raw.all_images?.[0] ||
+    null;
+
+  // ── Delivery / handover date ──
+  const deliveryDate =
+    raw.expected_delivery_date || raw.expected_completion_date || null;
+
+  // ── Featured — snake_case flag, camelCase flag, or nested sub-flags ──
+  const isFeatured =
+    typeof raw.isFeatured === "boolean"
+      ? raw.isFeatured
+      : Boolean(
+          raw.is_featured ||
+            raw.featured?.top_listing ||
+            raw.featured?.search ||
+            raw.featured?.banner
+        );
+
+  // ── Availability — not a native field on off-plan docs; derive it ──
+  const availability =
+    raw.availability ||
+    (raw.inventory_status || Number(raw.total_properties) > 0
+      ? AVAILABILITY.AVAILABLE
+      : AVAILABILITY.NOT_AVAILABLE);
+
+  return {
+    id,
+    title: raw.title || "Untitled Listing",
+    propertyStatus: raw.propertyStatus || "pending",
+    currency: (raw.currency || "AED").toUpperCase(),
+    priceStart,
+    priceEnd,
+    isMultiUnit,
+    districtName,
+    cityName,
+    developerName: raw.developer_name || null,
+    bedsDisplay,
+    bathsDisplay,
+    areaStart,
+    areaEnd,
+    areaUnit,
+    featureImage,
+    deliveryDate,
+    isFeatured,
+    availability,
+  };
+};
+
 // ─── Small reusable badge ─────────────────────────────────────────────────────
 
 const Badge = ({ label, color }) => {
@@ -89,31 +203,41 @@ const InlineSelect = ({ options, value, onChange, onSave, onCancel, accent }) =>
 // ─── Listing Row Card ─────────────────────────────────────────────────────────
 
 const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit }) => {
+  const n = useMemo(() => normalizeListing(item), [item]);
+  if (!n) return null;
+
   const statusColor =
-    item.propertyStatus === "active" ? "green"
-    : item.propertyStatus === "rejected" ? "red"
+    n.propertyStatus === "active" ? "green"
+    : n.propertyStatus === "rejected" ? "red"
     : "yellow";
 
-  const availColor = item.availability === AVAILABILITY.AVAILABLE ? "blue" : "gray";
+  const availColor = n.availability === AVAILABILITY.AVAILABLE ? "blue" : "gray";
 
   const getHandover = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A";
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const quarter = month <= 3 ? "Q1" : month <= 6 ? "Q2" : month <= 9 ? "Q3" : "Q4";
     return `${quarter} ${year}`;
   };
 
-  const image = item.feature_image || (item.images?.[0]) || null;
+  const statusLabel = n.propertyStatus.charAt(0).toUpperCase() + n.propertyStatus.slice(1);
+
+  const areaLabel = n.areaEnd
+    ? n.areaStart && n.areaStart !== n.areaEnd
+      ? `${n.areaStart.toLocaleString()}–${n.areaEnd.toLocaleString()}`
+      : n.areaEnd.toLocaleString()
+    : null;
 
   return (
     <div className="bg-white border border-[#D9E1F2] rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-[#2F6BFF] transition-all duration-300 flex flex-col">
 
       {/* Image */}
       <div className="relative h-44 bg-[#F0F4FB] flex-shrink-0 overflow-hidden">
-        {image ? (
-          <img src={image} alt={item.title} className="w-full h-full object-cover" />
+        {n.featureImage ? (
+          <img src={n.featureImage} alt={n.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#C5CEDF]">
             <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
@@ -125,13 +249,10 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
 
         {/* Status overlay badge */}
         <div className="absolute top-3 left-3">
-          <Badge
-            label={item.propertyStatus?.charAt(0).toUpperCase() + item.propertyStatus?.slice(1) || "Pending"}
-            color={statusColor}
-          />
+          <Badge label={statusLabel} color={statusColor} />
         </div>
 
-        {item.isFeatured && (
+        {n.isFeatured && (
           <div className="absolute top-3 right-3 bg-[#FFC107] text-[#01155E] px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-sm">
             ⭐ Featured
           </div>
@@ -144,86 +265,86 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
         {/* Title + Price */}
         <div className="flex justify-between items-start gap-2">
           <h3 className="text-[#01155E] font-bold text-[16px] leading-snug line-clamp-2 flex-1">
-            {item.title || "Untitled Listing"}
+            {n.title}
           </h3>
           <div className="text-right flex-shrink-0">
             <p className="text-[11px] text-[#67739E] font-medium">
-              {item.propertyStatus?.toLowerCase() === "offplan" ? "Starting at" : "Price"}
+              {n.isMultiUnit ? "Starting at" : "Price"}
             </p>
             <p className="text-[#01155E] font-bold text-[15px]">
-              {item.currency?.toUpperCase() || "AED"}{" "}
-              {item.min_price?.toLocaleString() || item.price?.toLocaleString() || "N/A"}
+              {n.currency}{" "}
+              {n.priceStart != null ? n.priceStart.toLocaleString() : "N/A"}
             </p>
           </div>
         </div>
 
         {/* Location + Developer */}
         <div className="flex flex-col gap-1">
-          {(item.district_name || item.city_name) && (
+          {(n.districtName || n.cityName) && (
             <div className="flex items-center gap-1.5 text-[#67739E] text-[13px]">
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{[item.district_name, item.city_name].filter(Boolean).join(", ")}</span>
+              <span>{[n.districtName, n.cityName].filter(Boolean).join(", ")}</span>
             </div>
           )}
-          {item.developer_name && (
+          {n.developerName && (
             <div className="flex items-center gap-1.5 text-[#67739E] text-[13px]">
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              <span>{item.developer_name}</span>
+              <span>{n.developerName}</span>
             </div>
           )}
         </div>
 
         {/* Stats Row */}
-        <div className="flex items-center gap-3 text-[#67739E] text-[13px] border-t border-[#D9E1F2] pt-3">
-          {(item.beds || item.bedrooms) && (
+        <div className="flex items-center gap-3 text-[#67739E] text-[13px] border-t border-[#D9E1F2] pt-3 flex-wrap">
+          {n.bedsDisplay && (
             <span className="flex items-center gap-1">
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="font-semibold text-[#01155E]">{item.beds || item.bedrooms}</span> Beds
+              <span className="font-semibold text-[#01155E]">{n.bedsDisplay}</span> Beds
             </span>
           )}
-          {(item.baths || item.bathrooms) && (
+          {n.bathsDisplay && (
             <>
               <span className="text-[#D9E1F2]">|</span>
               <span className="flex items-center gap-1">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                 </svg>
-                <span className="font-semibold text-[#01155E]">{item.baths || item.bathrooms}</span> Baths
+                <span className="font-semibold text-[#01155E]">{n.bathsDisplay}</span> Baths
               </span>
             </>
           )}
-          {item.max_area && (
+          {areaLabel && (
             <>
               <span className="text-[#D9E1F2]">|</span>
-              <span><span className="font-semibold text-[#01155E]">{item.max_area?.toLocaleString()}</span> sqft</span>
+              <span><span className="font-semibold text-[#01155E]">{areaLabel}</span> {n.areaUnit}</span>
             </>
           )}
-          {item.expected_delivery_date && (
+          {n.deliveryDate && (
             <>
               <span className="text-[#D9E1F2] ml-auto">|</span>
-              <span className="ml-auto">🗓 {getHandover(item.expected_delivery_date)}</span>
+              <span className="ml-auto">🗓 {getHandover(n.deliveryDate)}</span>
             </>
           )}
         </div>
 
         {/* Badges Row */}
         <div className="flex flex-wrap gap-2">
-          <Badge label={item.propertyStatus?.charAt(0).toUpperCase() + item.propertyStatus?.slice(1) || "Pending"} color={statusColor} />
-          <Badge label={item.availability || AVAILABILITY.NOT_AVAILABLE} color={availColor} />
-          {item.isFeatured && <Badge label="Featured" color="purple" />}
+          <Badge label={statusLabel} color={statusColor} />
+          <Badge label={n.availability} color={availColor} />
+          {n.isFeatured && <Badge label="Featured" color="purple" />}
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 pt-1 border-t border-[#D9E1F2] mt-auto">
           <button
-            onClick={() => onStatusEdit(item._id, item.propertyStatus)}
+            onClick={() => onStatusEdit(n.id, n.propertyStatus)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#01155E] text-[#01155E] text-[12px] font-semibold hover:bg-[#01155E] hover:text-white transition-colors"
           >
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -232,7 +353,7 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
             Status
           </button>
           <button
-            onClick={() => onAvailabilityEdit(item._id, item.availability)}
+            onClick={() => onAvailabilityEdit(n.id, n.availability)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-violet-400 text-violet-600 text-[12px] font-semibold hover:bg-violet-600 hover:text-white transition-colors"
           >
             <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -241,7 +362,7 @@ const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit
             Availability
           </button>
           <button
-            onClick={() => onFeaturedEdit(item._id, item.isFeatured)}
+            onClick={() => onFeaturedEdit(n.id, n.isFeatured)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-600 text-[12px] font-semibold hover:bg-amber-400 hover:text-white transition-colors"
           >
             ⭐ Featured
@@ -400,6 +521,15 @@ function Dashboard() {
     }
   };
 
+  // ── Normalize the raw listing documents once per fetch ─────────
+  // This means every consumer downstream (cards, edit panels) works
+  // off a consistent shape regardless of whether a doc came from the
+  // off-plan projects collection or a resale-listings collection.
+  const normalizedListings = useMemo(
+    () => (listings || []).map((item) => ({ raw: item, n: normalizeListing(item) })),
+    [listings]
+  );
+
   // ── Stats from backend ────────────────────────────────────────
   const stats = useMemo(() => ({
     total:    data?.stats?.totalListings    || 0,
@@ -522,7 +652,7 @@ function Dashboard() {
               <p className="text-[#67739E] font-medium">Loading...</p>
             </div>
           </div>
-        ) : listings.length === 0 ? (
+        ) : normalizedListings.length === 0 ? (
           <div className="text-center py-20 text-[#67739E]">
             <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -532,17 +662,17 @@ function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {listings.map((item) => (
-              <div key={item._id} className="flex flex-col">
+            {normalizedListings.map(({ raw, n }) => (
+              <div key={n.id} className="flex flex-col">
                 <ListingRowCard
-                  item={item}
+                  item={raw}
                   onStatusEdit={(id, current) => { setEditStatusId(id); setNewStatus(current); setEditAvailabilityId(null); setEditFeaturedId(null); }}
                   onAvailabilityEdit={(id, current) => { setEditAvailabilityId(id); setNewAvailability(current); setEditStatusId(null); setEditFeaturedId(null); }}
                   onFeaturedEdit={(id, current) => { setEditFeaturedId(id); setNewFeatured(current ? "true" : "false"); setEditStatusId(null); setEditAvailabilityId(null); }}
                 />
 
                 {/* ── Inline edit panels (below card) ── */}
-                {editStatusId === item._id && (
+                {editStatusId === n.id && (
                   <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
                     <p className="text-[#01155E] text-[13px] font-semibold mb-2">Update Status</p>
                     <InlineSelect
@@ -554,7 +684,7 @@ function Dashboard() {
                       value={newStatus}
                       onChange={setNewStatus}
                       onSave={() => {
-                        dispatch(updateListingStatus({ id: item._id, status: newStatus }));
+                        dispatch(updateListingStatus({ id: n.id, status: newStatus }));
                         setEditStatusId(null);
                       }}
                       onCancel={() => setEditStatusId(null)}
@@ -563,7 +693,7 @@ function Dashboard() {
                   </div>
                 )}
 
-                {editAvailabilityId === item._id && (
+                {editAvailabilityId === n.id && (
                   <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
                     <p className="text-[#01155E] text-[13px] font-semibold mb-2">Update Availability</p>
                     <InlineSelect
@@ -574,7 +704,7 @@ function Dashboard() {
                       value={newAvailability}
                       onChange={setNewAvailability}
                       onSave={() => {
-                        dispatch(updateListingAvailability({ id: item._id, availability: newAvailability }));
+                        dispatch(updateListingAvailability({ id: n.id, availability: newAvailability }));
                         setEditAvailabilityId(null);
                       }}
                       onCancel={() => setEditAvailabilityId(null)}
@@ -583,7 +713,7 @@ function Dashboard() {
                   </div>
                 )}
 
-                {editFeaturedId === item._id && (
+                {editFeaturedId === n.id && (
                   <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
                     <p className="text-[#01155E] text-[13px] font-semibold mb-2">Mark as Featured</p>
                     <InlineSelect
@@ -594,7 +724,7 @@ function Dashboard() {
                       value={newFeatured}
                       onChange={setNewFeatured}
                       onSave={() => {
-                        dispatch(updateListingFeatured({ id: item._id, isFeatured: newFeatured === "true" }));
+                        dispatch(updateListingFeatured({ id: n.id, isFeatured: newFeatured === "true" }));
                         setEditFeaturedId(null);
                       }}
                       onCancel={() => setEditFeaturedId(null)}
@@ -608,7 +738,7 @@ function Dashboard() {
         )}
 
         {/* ── Pagination ── */}
-        {!loading && listings.length > 0 && (
+        {!loading && normalizedListings.length > 0 && (
           <PaginationBar
             currentPage={currentPage}
             totalPages={totalPages}

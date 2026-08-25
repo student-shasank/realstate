@@ -134,6 +134,11 @@ const Home = () => {
     setSaleStatusOpen(false);
 
   };
+  useEffect(() => {
+  if (!completion) {
+    dispatch(setCompletion("Off-Plan"));
+  }
+}, [completion, dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

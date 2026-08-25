@@ -153,34 +153,101 @@ const Compare = () => {
       return <div className="text-center py-12 text-gray-400">No data available</div>;
     }
 
+    /* ── Raw fields (both schema variants) ── */
     const {
       title,
+      // price (normal listing schema)
       min_price,
       max_price,
+      // price (off-plan project schema)
+      price_start,
+      price_end,
       currency = "AED",
+      // beds/baths
       beds,
       baths,
+      // area (normal listing schema)
       min_area,
       max_area,
+      // area (off-plan project schema)
+      area_start,
+      area_end,
+      area_size,
+      // status / category
       status,
+      project_status,
       purpose,
       property_category = [],
+      property_types = [],
+      // developer
       developer_name,
+      // images
       feature_image,
+      images,
+      // location (normal listing schema)
       city_name,
       district_name,
+      // location (off-plan project schema)
+      city_data,
+      district_data = [],
+      // delivery date
       expected_delivery_date,
+      expected_completion_date,
+      // amenities (normal listing schema)
       features = [],
+      // amenities (off-plan project schema)
+      amenities_and_features,
+      // meta
       isFeatured,
+      is_featured,
       created_date,
+      created_at,
       _id
     } = rawData;
 
-    const featureImage = feature_image || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800";
-    
-    const bedArray = beds ? beds.split(",").map(b => b.trim()) : [];
-    const areaRange = min_area && max_area ? `${min_area} - ${max_area}` : (min_area || max_area || "—");
-    const priceRange = min_price && max_price ? `${currency} ${Number(min_price).toLocaleString()} - ${Number(max_price).toLocaleString()}` : `${currency} ${Number(min_price || 0).toLocaleString()}`;
+    /* ── Normalized values so both schemas render correctly ── */
+    const featureImage =
+  feature_image ||
+  images?.feature ||
+  images?.interior?.[0] ||
+  images?.exterior?.[0] ||
+  images?.general?.[0] ||
+  rawData?.all_images?.[0] ||
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800";
+
+    const cityName = city_name || city_data?.name;
+    const districtName = district_name || district_data?.[0]?.name;
+
+    const finalMinPrice = min_price ?? price_start;
+    const finalMaxPrice = max_price ?? price_end;
+
+    const finalMinArea = min_area ?? area_start;
+    const finalMaxArea = max_area ?? area_end;
+    const areaUnit = area_size || "SqFt";
+
+    const finalStatus = status || project_status;
+    const finalCategory = property_category?.[0] || property_types?.[0];
+
+    const finalExpectedDate = expected_delivery_date || expected_completion_date;
+
+    const finalFeatures = features?.length
+      ? features
+      : (amenities_and_features?.features_names || []);
+
+    const finalFeatured = isFeatured ?? is_featured;
+    const finalCreatedDate = created_date || created_at;
+
+    const bedArray = beds ? String(beds).split(",").map(b => b.trim()) : [];
+
+    const areaRange =
+      finalMinArea && finalMaxArea
+        ? `${finalMinArea} - ${finalMaxArea}`
+        : (finalMinArea || finalMaxArea || "—");
+
+    const priceRange =
+      finalMinPrice && finalMaxPrice
+        ? `${currency} ${Number(finalMinPrice).toLocaleString()} - ${Number(finalMaxPrice).toLocaleString()}`
+        : `${currency} ${Number(finalMinPrice || 0).toLocaleString()}`;
 
     const paySteps = [
       { label: "Min Price", percent: 50 },
@@ -213,7 +280,7 @@ const Compare = () => {
                   color: GOLD,
                 }}
               >
-                {property_category?.[0] || "Property"}
+                {finalCategory || "Property"}
               </span>
               <span
                 className="text-[16px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
@@ -223,7 +290,7 @@ const Compare = () => {
                   color: GREEN,
                 }}
               >
-                {/* {status || "On Sale"} */}
+                {/* {finalStatus || "On Sale"} */}
                  { "Off Plan"}
               </span>
             </div>
@@ -232,7 +299,7 @@ const Compare = () => {
               <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
               <p className="font-black leading-none mb-4" style={{ color: GOLD, fontSize: 28 }}>
                 <span className="text-[18px] font-bold mr-1">{currency}</span>
-                {min_price ? Number(min_price).toLocaleString() : "—"}
+                {finalMinPrice ? Number(finalMinPrice).toLocaleString() : "—"}
               </p>
               <div className="flex gap-3">
                 <button
@@ -259,30 +326,30 @@ const Compare = () => {
         <div className="flex gap-3 mb-1">
           <StatBox icon={<FaBed />} value={bedArray?.[0] || "—"} label="Beds" />
           <StatBox icon={<FaBath />} value={baths || "—"} label="Baths" />
-          <StatBox icon={<FaChartArea />} value={min_area ? `${min_area}` : null} label="SqFt" />
+          <StatBox icon={<FaChartArea />} value={finalMinArea ? `${finalMinArea}` : null} label="SqFt" />
           <StatBox icon={<FaCar />} value="—" label="Garage" />
         </div>
 
         {/* ── Core Specifications ── */}
         <SectionCard title="Core Specifications">
-          <InfoRow label="Category" value={property_category?.[0] || "—"} />
+          <InfoRow label="Category" value={finalCategory || "—"} />
           <InfoRow label="Purpose" value={purpose || "—"} />
-          <InfoRow label="Status" value={status || "—"} />
+          <InfoRow label="Status" value={finalStatus || "—"} />
           <InfoRow label="Developer" value={developer_name || "—"} />
-          <InfoRow label="Expected Delivery" value={expected_delivery_date || "—"} accent />
+          <InfoRow label="Expected Delivery" value={finalExpectedDate || "—"} accent />
         </SectionCard>
 
         {/* ── Area Details ── */}
         <SectionCard title="Area Details">
-          <InfoRow label="Min Area" value={min_area ? `${min_area} SqFt` : "—"} />
-          <InfoRow label="Max Area" value={max_area ? `${max_area} SqFt` : "—"} />
+          <InfoRow label="Min Area" value={finalMinArea ? `${finalMinArea} ${areaUnit}` : "—"} />
+          <InfoRow label="Max Area" value={finalMaxArea ? `${finalMaxArea} ${areaUnit}` : "—"} />
           <InfoRow label="Area Range" value={areaRange} />
         </SectionCard>
 
         {/* ── Price Details ── */}
         <SectionCard title="Price Details">
-          <InfoRow label="Min Price" value={min_price ? `${currency} ${Number(min_price).toLocaleString()}` : "—"} accent />
-          <InfoRow label="Max Price" value={max_price ? `${currency} ${Number(max_price).toLocaleString()}` : "—"} accent />
+          <InfoRow label="Min Price" value={finalMinPrice ? `${currency} ${Number(finalMinPrice).toLocaleString()}` : "—"} accent />
+          <InfoRow label="Max Price" value={finalMaxPrice ? `${currency} ${Number(finalMaxPrice).toLocaleString()}` : "—"} accent />
           <InfoRow label="Currency" value={currency} />
           <div className="mt-4">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Price Range</p>
@@ -307,9 +374,9 @@ const Compare = () => {
               <FaMapMarkerAlt className="text-white text-sm" />
             </div>
             <div>
-              <p className="font-black text-gray-900 text-sm">{city_name || "—"}</p>
+              <p className="font-black text-gray-900 text-sm">{cityName || "—"}</p>
               <p className="text-xs font-bold uppercase tracking-wide mt-0.5 text-[#67739E]">
-                {district_name || "—"}
+                {districtName || "—"}
               </p>
             </div>
           </div>
@@ -318,8 +385,8 @@ const Compare = () => {
         {/* ── Amenities ── */}
         <SectionCard title="Amenities & Features">
           <div className="flex flex-wrap gap-2 mt-1">
-            {features?.length
-              ? features.map((f, idx) => <AmenityPill key={idx} label={f} />)
+            {finalFeatures?.length
+              ? finalFeatures.map((f, idx) => <AmenityPill key={idx} label={f} />)
               : <p className="text-xs text-gray-400">No amenities listed</p>
             }
           </div>
@@ -327,9 +394,9 @@ const Compare = () => {
 
         {/* ── Additional Info ── */}
         <SectionCard title="Additional Information">
-          <InfoRow label="Availability" value={status || "—"} />
-          <InfoRow label="Featured" value={isFeatured ? "Yes" : "No"} />
-          <InfoRow label="Created Date" value={created_date ? new Date(created_date).toLocaleDateString() : "—"} />
+          <InfoRow label="Availability" value={finalStatus || "—"} />
+          <InfoRow label="Featured" value={finalFeatured ? "Yes" : "No"} />
+          <InfoRow label="Created Date" value={finalCreatedDate ? new Date(finalCreatedDate).toLocaleDateString() : "—"} />
         </SectionCard>
       </div>
     );

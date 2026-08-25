@@ -54,8 +54,72 @@ const normalizeCompletion = (value) => {
   return COMPLETION_MAP[value.toLowerCase().trim()] || null;
 };
 
+/**
+ * Sale status normalization (frontend value → DB value)
+ * Shared by searchListings & sortListings so both stay in sync.
+ *
+ * NOTE: "out_of_stock" from the frontend filter is intentionally mapped
+ * to "Sold Out" — that's the actual value stored in project_status for
+ * out-of-stock properties. There is no separate "Out Of Stock" value in
+ * the DB, so both out_of_stock and sold_out resolve to "Sold Out".
+ */
+const SALE_STATUS_MAP = {
+  on_sale: "On Sale",
+  announced: "Announced",
+  presale_eoi: "EOI",
+  eoi: "EOI",
+  start_of_sales: "Start of Sales",
+  out_of_stock: "Sold Out",
+  sold_out: "Sold Out",
+  ready: "Ready",
+};
+
+/**
+ * Build the mapped saleStatus array from raw query param
+ */
+const buildSaleStatusArray = (saleStatus) => {
+  if (!saleStatus) return [];
+  return saleStatus
+    .split(",")
+    .map((s) => SALE_STATUS_MAP[s.trim().toLowerCase()])
+    .filter(Boolean);
+};
+
+/**
+ * Apply saleStatus / completion filtering onto the query.
+ * Only checks `project_status` — whatever value comes in for saleStatus
+ * (or completion/propertyStatus) is searched against project_status only.
+ */
+const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) => {
+  const saleStatusArray = buildSaleStatusArray(saleStatus);
+
+  if (saleStatusArray.length > 0) {
+    addAndCondition(query, {
+      project_status: { $in: saleStatusArray },
+    });
+    return;
+  }
+
+  // No saleStatus → fall back to completion/propertyStatus
+  const completionRaw = (completion || propertyStatus)
+    ?.toLowerCase()
+    .replace(/[\s-]/g, "");
+
+  if (completionRaw === "offplan") {
+    addAndCondition(query, {
+      project_status: { $in: ["Announced", "EOI", "Start of Sales", "On Sale"] },
+    });
+    return;
+  }
+
+  const mappedStatus = normalizeCompletion(completion || propertyStatus);
+  if (mappedStatus) {
+    addAndCondition(query, { project_status: mappedStatus });
+  }
+};
+
 // ─────────────────────────────────────────────
-// CONTROLLER: EXISTING SEARCH ENDPOINT (bilkul unchanged — aapka wahi code)
+// CONTROLLER: EXISTING SEARCH ENDPOINT
 // ─────────────────────────────────────────────
 
 export const searchListings = async (req, res) => {
@@ -74,7 +138,7 @@ export const searchListings = async (req, res) => {
       developer,
       emirates,
       handoverYear,
-       saleStatus,
+      saleStatus,
       location,
       page = 1,
       limit = 20,
@@ -111,52 +175,9 @@ export const searchListings = async (req, res) => {
       }
     }
 
-    // ───── Completion Status ─────
- // ───── Status Filter ─────
+    // ───── Status Filter (checks status AND project_status) ─────
+    applyStatusFilter(query, { saleStatus, completion, propertyStatus });
 
-// Agar Sale Status aaya hai to wahi use hoga
-if (saleStatus) {
-  const SALE_STATUS_MAP = {
-    on_sale: "On Sale",
-    announced: "Announced",
-    presale_eoi: "EOI",
-    eoi: "EOI",
-    start_of_sales: "Start of Sales",
-    out_of_stock: "Out Of Stock",
-    sold_out: "Sold Out",
-    ready: "Ready",
-  };
-
- 
- const saleStatusArray = saleStatus
-  .split(",")
-  .map((s) => SALE_STATUS_MAP[s.trim().toLowerCase()])
-  .filter(Boolean);
-
-if (saleStatusArray.length > 0) {
-  query.status = { $in: saleStatusArray };
-}
-} else {
-  // Agar Sale Status nahi hai tab Completion use karo
-  // Completion normalize karo hyphen/space hata ke
-const completionRaw = (completion || propertyStatus)?.toLowerCase().replace(/[\s-]/g, "");
-
-if (completionRaw === "offplan") {
-  addAndCondition(query, {
-    $or: [
-      { status: { $in: ["Announced", "EOI", "Start of Sales", "On Sale"] } },
-      { project_status: { $in: ["Announced", "EOI", "Start of Sales", "On Sale"] } },
-    ],
-  });
-} else {
-  const mappedStatus = normalizeCompletion(completion || propertyStatus);
-  if (mappedStatus) {
-    addAndCondition(query, {
-      $or: [{ status: mappedStatus }, { project_status: mappedStatus }],
-    });
-  }
-}
-}
     // ───── Property Type ─────
     const pType = (propertyType || property_type)?.trim();
     if (pType && pType.toLowerCase() !== "all") {
@@ -174,10 +195,7 @@ if (completionRaw === "offplan") {
 
       if (bedsCondition) {
         addAndCondition(query, {
-          $or: [
-            bedsCondition,
-           
-          ],
+          $or: [bedsCondition],
         });
       }
     }
@@ -240,8 +258,6 @@ if (completionRaw === "offplan") {
       }
     }
 
-
-
     console.log("📥 REQ QUERY:", req.query);
     console.log("🔍 MONGO QUERY:", JSON.stringify(query, null, 2));
 
@@ -249,7 +265,6 @@ if (completionRaw === "offplan") {
     const limitNum = Math.min(100, Math.max(1, Number(limit)));
     const skip = (pageNum - 1) * limitNum;
 
-    // 🔍 PAGINATION DEBUG
     console.log("📄 PAGINATION DEBUG:", {
       requestedPage: Number(page),
       pageNum,
@@ -267,7 +282,6 @@ if (completionRaw === "offplan") {
         .lean(),
     ]);
 
-    // 📊 RESPONSE DEBUG
     console.log("📊 RESPONSE DEBUG:", {
       totalDocuments: total,
       returnedCount: listings.length,
@@ -295,11 +309,10 @@ if (completionRaw === "offplan") {
 };
 
 // ─────────────────────────────────────────────
-// CONTROLLER: NEW SORT ENDPOINT (isi file me, alag function)
+// CONTROLLER: SORT ENDPOINT
 // GET /api/projects/sort
-// Filters bilkul same hain jaise searchListings me — bas neeche
-// ek extra `sortOption` decide hota hai `sortBy` query param se,
-// aur Mongo `.sort()` usi ke hisaab se lagta hai.
+// Same filters as searchListings — plus a `sortBy` query param
+// that decides Mongo `.sort()`.
 // ─────────────────────────────────────────────
 
 const SORT_MAP = {
@@ -366,41 +379,8 @@ export const sortListings = async (req, res) => {
       }
     }
 
-    // ───── Status Filter ─────
-    if (saleStatus) {
-      const SALE_STATUS_MAP = {
-        on_sale: "On Sale",
-        announced: "Announced",
-        presale_eoi: "EOI",
-        eoi: "EOI",
-        start_of_sales: "Start of Sales",
-        out_of_stock: "Out Of Stock",
-        sold_out: "Sold Out",
-        ready: "Ready",
-      };
-
-      const saleStatusArray = saleStatus
-        .split(",")
-        .map((s) => SALE_STATUS_MAP[s.trim().toLowerCase()])
-        .filter(Boolean);
-
-      if (saleStatusArray.length > 0) {
-        query.status = { $in: saleStatusArray };
-      }
-    } else {
-      const completionRaw = completion || propertyStatus;
-
-      if (completionRaw?.toLowerCase() === "offplan") {
-        query.status = {
-          $in: ["Announced", "EOI", "Start of Sales", "On Sale"],
-        };
-      } else {
-        const mappedStatus = normalizeCompletion(completionRaw);
-        if (mappedStatus) {
-          query.status = mappedStatus;
-        }
-      }
-    }
+    // ───── Status Filter (checks status AND project_status) ─────
+    applyStatusFilter(query, { saleStatus, completion, propertyStatus });
 
     // ───── Property Type ─────
     const pType = (propertyType || property_type)?.trim();

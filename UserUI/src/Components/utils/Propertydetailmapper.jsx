@@ -79,11 +79,55 @@ export const mapPropertyDetailData = (apiData) => {
       : apiData.floor_plans || [];
 
   // ── Amenities / features ───────────────────────────────────
-  const amenitiesArray =
-    apiData.amenities ||
-    apiData.features ||
-    apiData.amenities_and_features?.features_names ||
-    [];
+  // FIX: plain `||` chaining is unsafe here — an empty array `[]` is
+  // truthy in JS, so `apiData.amenities || apiData.features || ...`
+  // would stop at the FIRST field that exists, even if it's `[]`,
+  // and never fall through to the field that actually has data
+  // (e.g. Ready listings that save `amenities: []` by default, or
+  // off-plan docs where `amenities_and_features.amenities` is `[]`
+  // but `features_names` has the real list). Each candidate is now
+  // checked explicitly for "is an array AND has items" before use —
+  // same pattern already used below for `all_images`/`images`.
+  const pickNonEmptyArray = (...candidates) => {
+    for (const arr of candidates) {
+      if (Array.isArray(arr) && arr.length > 0) return arr;
+    }
+    return [];
+  };
+
+  const amenitiesArray = pickNonEmptyArray(
+    apiData.amenities,
+    apiData.features,
+    apiData.amenities_and_features?.features_names,
+    apiData.amenities_and_features?.amenities,
+  );
+
+  // ── Facilities (amenities WITH icon/image) ─────────────────
+  // Off-plan docs also send `facilities: [{ id, name, description, image }]`
+  // which is what the UI needs when it renders amenity cards/icons instead
+  // of a plain text list. The old mapper never surfaced this field at all,
+  // so any component reading `mapped.facilities` got nothing even when the
+  // API clearly had icons available. Ready listings may eventually send
+  // their own `facilities` array in the same shape — prefer that if present,
+  // otherwise use the off-plan `facilities`, and as a last resort build a
+  // facilities-shaped list from the plain amenity names (no image).
+  const facilitiesArray = (() => {
+    const rawFacilities = pickNonEmptyArray(apiData.facilities);
+    if (rawFacilities.length > 0) {
+      return rawFacilities.map((f) => ({
+        id: f.id,
+        name: f.name,
+        description: f.description || null,
+        image: f.image || null,
+      }));
+    }
+    return amenitiesArray.map((name, idx) => ({
+      id: `amenity-${idx}`,
+      name,
+      description: null,
+      image: null,
+    }));
+  })();
 
   // ── Agent / sales contact ──────────────────────────────────
   // Ready listing: apiData.agent (name, agency, phone, whatsapp, email, profileImage).
@@ -133,7 +177,12 @@ export const mapPropertyDetailData = (apiData) => {
       apiData.district_data?.[0]?.name ||
       apiData.district_name ||
       "Dubai Industrial City",
-    communityImage: apiData.images?.general?.[0] || apiData.location?.communityImage || "—",
+    // 🔧 FIX: was `|| "—"` — a placeholder string is truthy, so the
+    // component's `{(community?.marketSupply?.image || location?.communityImage) && (...)}`
+    // check always passed and rendered a broken/placeholder image block
+    // even when no real community image existed. Now falls through to
+    // `null` so the section can genuinely detect "no image" and hide.
+    communityImage: apiData.images?.general?.[0] || apiData.location?.communityImage || null,
     coordinates: readyCoords || offPlanCoords,
   };
 
@@ -160,7 +209,15 @@ export const mapPropertyDetailData = (apiData) => {
           ? new Date(apiData.expected_completion_date).getFullYear()
           : "—",
         totalFloors: "—",
-        swimmingPools: amenitiesArray.includes("Swimming Pool") ? "Yes" : "—",
+        // FIX: was checking `amenitiesArray.includes("Swimming Pool")` which
+        // needed an exact-case match against whatever `amenitiesArray` ended
+        // up being. Now checks the same case-insensitively against BOTH the
+        // plain amenity names and the facility names so it isn't silently
+        // wrong just because the source used different casing/wording.
+        swimmingPools: [...amenitiesArray, ...facilitiesArray.map((f) => f.name)]
+          .some((n) => String(n).toLowerCase().includes("pool"))
+          ? "Yes"
+          : "—",
         totalParkingSpaces: apiData.parkings?.[0]?.data?.[0]
           ? Object.values(apiData.parkings[0].data[0])[0]
           : "1 parking",
@@ -188,10 +245,17 @@ export const mapPropertyDetailData = (apiData) => {
       };
 
   // ── Investment insights ─────────────────────────────────────
+  // 🔧 FIX: fallbacks changed from "—" to null. A placeholder string is
+  // truthy in JS, so the component's section-level check
+  // `{(investmentInsights?.rentalYield || investmentInsights?.priceTrend || investmentInsights?.pricePerSqFt) && (...)}`
+  // would always be true and the whole "Investment Insights" block would
+  // render even when the API sent nothing for it. With `null` here, the
+  // component can correctly detect "no insights data at all" and hide the
+  // entire section instead of showing three empty "—" rows.
   const investmentInsights = {
-    rentalYield: apiData.investmentInsights?.rentalYield || "—",
-    priceTrend: apiData.investmentInsights?.priceTrend || "—",
-    pricePerSqFt: apiData.investmentInsights?.pricePerSqFt || apiData.pricePerSqFt || "—",
+    rentalYield: apiData.investmentInsights?.rentalYield || null,
+    priceTrend: apiData.investmentInsights?.priceTrend || null,
+    pricePerSqFt: apiData.investmentInsights?.pricePerSqFt || apiData.pricePerSqFt || null,
   };
 
   // ── Community block ─────────────────────────────────────────
@@ -202,7 +266,9 @@ export const mapPropertyDetailData = (apiData) => {
       "Dubai Industrial City",
     slug: apiData.slug,
     marketSupply: {
-      image: apiData.images?.general?.[0] || location.communityImage || "—",
+      // 🔧 FIX: same reasoning as location.communityImage above — no more
+      // "—" placeholder leaking through as a truthy fallback.
+      image: apiData.images?.general?.[0] || location.communityImage || null,
     },
   };
 
@@ -294,8 +360,11 @@ export const mapPropertyDetailData = (apiData) => {
     sqft: apiData.builtUpArea || apiData.area_start,
 
     furnishing: apiData.furnishing || "Modern",
+    // Plain name list (e.g. for a comma/tag list UI):
     features: amenitiesArray,
     amenities: amenitiesArray,
+    // Name + image/icon list (e.g. for amenity cards with icons):
+    facilities: facilitiesArray,
 
     images: images,
     videos: apiData.videos || [],

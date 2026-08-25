@@ -60,6 +60,45 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const currentId = listing?._id || listing?.id;
   const cardId = listing?.id;
 
+  // ============================================================
+  // NORMALIZATION LAYER
+  // Backend documents come in two different shapes:
+  //   Type A (aggregated project docs) -> project_status, price_start,
+  //   district_data/city_data, area_end, expected_completion_date
+  //   Type B (flattened listing docs)  -> status, min_price,
+  //   district_name/city_name, max_area, expected_delivery_date
+  // Normalize both here once so the rest of the component always
+  // reads from a single consistent set of values. Nothing else in
+  // the component (design, handlers, popups) has been changed.
+  // ============================================================
+  const rawStatus = listing?.status || listing?.project_status || "";
+  const listingStatus = rawStatus.toString().toLowerCase();
+
+  // Out of Stock should ONLY be driven by project_status specifically
+  // (not the merged status/rawStatus used elsewhere).
+  // project_status === "Sold Out" is what actually marks it out of stock.
+  const isOutOfStock =
+    (listing?.project_status || "").toString().trim().toLowerCase() ===
+    "sold out";
+
+  const listingPrice =
+    listing?.min_price !== undefined && listing?.min_price !== null
+      ? listing.min_price
+      : listing?.price_start;
+
+  const listingArea =
+    listing?.max_area !== undefined && listing?.max_area !== null
+      ? listing.max_area
+      : listing?.area_end;
+
+  const listingDistrict =
+    listing?.district_name || listing?.district_data?.[0]?.name || "";
+
+  const listingCity = listing?.city_name || listing?.city_data?.name || "";
+
+  const listingHandoverDate =
+    listing?.expected_delivery_date || listing?.expected_completion_date;
+
   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   const favorites = useSelector((state) => state.favorites.favorites || []);
@@ -107,7 +146,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     ? [listing.feature_image]
     : listing?.images?.length > 0
       ? listing.images
-      : [listingimage];
+      : listing?.images?.feature
+        ? [listing.images.feature]
+        : [listingimage];
 
   // ============================================================
   // Ab images MongoDB se listing object ke saath hi aa jaati hain
@@ -312,9 +353,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
               "start of sales",
               "on sale",
               "out of stock",
-            ].includes(listing?.status?.toLowerCase())
+            ].includes(listingStatus)
               ? "Off-plan"
-              : listing?.status}
+              : rawStatus || "N/A"}
           </span>
         </div>
         {listing?.isFeatured && (
@@ -427,9 +468,8 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   className="w-4 h-4 sm:w-5 sm:h-5 object-contain flex-shrink-0 mt-0.5"
                 />
                 <span className="break-words">
-                  {[listing?.district_name, listing?.city_name]
-                    .filter(Boolean)
-                    .join(", ") || "N/A"}
+                  {[listingDistrict, listingCity].filter(Boolean).join(", ") ||
+                    "N/A"}
                 </span>
               </div>
 
@@ -524,7 +564,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon1} alt="area" className="w-5 h-5" />
             <span className="text-[16px] sm:text-[18px] font-medium">
-              {listing?.max_area?.toLocaleString() || "N/A"} sqft
+              {listingArea ? Number(listingArea).toLocaleString() : "N/A"} sqft
             </span>
           </div>
 
@@ -533,7 +573,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
           <div className="flex items-center gap-2 text-[#67739E]">
             <img src={Icon4} alt="handover" className="w-5 h-5" />
             <span className="text-[16px] sm:text-[18px] font-medium">
-              {getHandover(listing?.expected_delivery_date)}
+              {getHandover(listingHandoverDate)}
             </span>
           </div>
 
@@ -555,13 +595,12 @@ const ListingCard = ({ listing, onRequireLogin }) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-            {listing?.status?.toLowerCase() === "out of stock" ||
-            listing?.status?.toLowerCase() === "outofstock" ? (
+            {isOutOfStock ? (
               <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
                 Out of Stock
               </span>
-            ) : listing?.status?.toLowerCase() === "announced" ? (
-              listing?.min_price && Number(listing.min_price) > 0 ? (
+            ) : listingStatus === "announced" ? (
+              listingPrice && Number(listingPrice) > 0 ? (
                 <>
                   <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
                     Starting at
@@ -570,7 +609,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                     {listing?.currency?.toUpperCase()}
                   </span>
                   <span className="text-[26px] sm:text-[32px]">
-                    {formatNumber(listing.min_price)}
+                    {formatNumber(listingPrice)}
                   </span>
                 </>
               ) : (
@@ -578,7 +617,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   Coming Soon
                 </span>
               )
-            ) : listing?.status?.toLowerCase() === "offplan" ? (
+            ) : ["offplan", "on sale", "eoi", "start of sales"].includes(
+                listingStatus,
+              ) ? (
               <>
                 <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
                   Starting at
@@ -587,7 +628,7 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   {listing?.currency?.toUpperCase()}
                 </span>
                 <span className="text-[26px] sm:text-[32px]">
-                  {formatNumber(listing?.min_price) || "1,000,239"}
+                  {formatNumber(listingPrice) || "1,000,239"}
                 </span>
               </>
             ) : (
@@ -596,7 +637,9 @@ const ListingCard = ({ listing, onRequireLogin }) => {
                   {listing?.currency?.toUpperCase()}
                 </span>
                 <span className="text-[26px] sm:text-[32px]">
-                  {listing?.min_price?.toLocaleString() || "10,00,239"}
+                  {listingPrice
+                    ? Number(listingPrice).toLocaleString()
+                    : "10,00,239"}
                 </span>
               </>
             )}

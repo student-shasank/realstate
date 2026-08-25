@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import listingimage from '../../assets/ListingCard.jpg'
 import { BedDouble, Bath, Square } from "lucide-react";
 import Icon1 from '../../assets/icon1.png'
@@ -13,6 +13,27 @@ import {
   removeFavoriteLocal,
   toggleFavorite,
 } from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
+
+// ============================================================
+// 🔧 FIX: MapCard was reading ONLY the raw off-plan field names
+// directly off `item` (item.min_price, item.beds, item.baths,
+// item.max_area, item.district_name, item.city_name,
+// item.completion_status, item.all_images / item.feature_image).
+// That works for off-plan project docs, but the DB also has
+// manually-created "Ready" listings (ListingCreation.jsx) which
+// store the SAME information under structured fields instead
+// (location.address/city, overview.bedrooms/bathrooms, unitTypes,
+// price_start, completionStatus, etc.) — so those listings showed
+// "N/A" everywhere on the card even though the data exists.
+//
+// `mapPropertyDetailData` (used on the detail page) already knows
+// how to reconcile BOTH shapes field-by-field. Reusing it here
+// means the card and the detail page always agree on what a given
+// listing's price/beds/baths/area/location/image actually is,
+// instead of maintaining two separate (and now diverging) mapping
+// rules.
+// ============================================================
+import { mapPropertyDetailData } from "../utils/Propertydetailmapper.jsx";
 
 const MapCard = ({ item, onRequireLogin }) => {
   const dispatch = useDispatch();
@@ -33,7 +54,103 @@ const MapCard = ({ item, onRequireLogin }) => {
   const favorites = useSelector((state) => state.favorites.favorites || []);
   const isFavorite = favorites.includes(currentId);
 
-  // ✅ fallback images (agar all_images khali ho)
+  // ── Normalize the raw item through the SAME mapper the detail
+  // page uses, so off-plan docs AND Ready listings both resolve
+  // to the correct value instead of falling back to "N/A".
+  // Recomputed only when the underlying item actually changes.
+  const mapped = useMemo(() => mapPropertyDetailData(item) || {}, [item]);
+
+  // ── Price ───────────────────────────────────────────────────
+  // Off-plan: item.min_price. Ready listing / mapper: price_start
+  // (apiData.price_start || apiData.price). Also fall back to the
+  // lowest unitTypes.startingPrice if neither top-level field is set.
+  const lowestUnitPrice = Array.isArray(mapped?.unitTypes) && mapped.unitTypes.length > 0
+    ? mapped.unitTypes.reduce((min, u) => {
+        const p = Number(u?.startingPrice ?? u?.price);
+        if (!p || isNaN(p)) return min;
+        return min === null ? p : Math.min(min, p);
+      }, null)
+    : null;
+
+  const displayPrice =
+    item?.min_price ??
+    mapped?.price_start ??
+    mapped?.price ??
+    lowestUnitPrice ??
+    null;
+
+  // ── Title ───────────────────────────────────────────────────
+  const displayTitle = item?.title || mapped?.title || "—";
+
+  // ── Location (district/city) ───────────────────────────────
+  // Off-plan: item.district_name / item.city_name.
+  // Ready listing: mapped.location.address / mapped.location.city
+  // (mapper already resolves district_data / district_name / etc.
+  // into location.address, and city_data / city_name into location.city).
+  const displayDistrict =
+    item?.district_name ||
+    mapped?.location?.address ||
+    mapped?.location?.community ||
+    null;
+
+  const displayCity =
+    item?.city_name ||
+    mapped?.location?.city ||
+    null;
+
+  // ── Bedrooms ────────────────────────────────────────────────
+  // Off-plan: item.beds is a comma string like "0,1,1.5,2" (or
+  // item.bedrooms for a single value). Ready listing: mapper's
+  // `bedrooms` field (apiData.bedrooms || apiData.beds), which for
+  // Ready listings comes from the form's bedrooms field. Fall back
+  // to the lowest unitTypes bedrooms if nothing else is set.
+  const lowestUnitBedrooms = Array.isArray(mapped?.unitTypes) && mapped.unitTypes.length > 0
+    ? mapped.unitTypes[0]?.bedrooms
+    : null;
+
+  const bedsRaw =
+    item?.beds ??
+    item?.bedrooms ??
+    mapped?.bedrooms ??
+    lowestUnitBedrooms ??
+    null;
+
+  const formatBeds = (val) => {
+    if (val === null || val === undefined || val === "" || val === "—") return "N/A";
+    if (val === 0 || val === "0" || val === "Studio") return "Studio";
+    if (typeof val === "string") return val.replace(/^0,?/, "Studio,");
+    return val;
+  };
+
+  // ── Bathrooms ───────────────────────────────────────────────
+  const bathsRaw = item?.baths ?? mapped?.bathrooms ?? null;
+  const displayBaths =
+    bathsRaw && Number(bathsRaw) !== 0 && bathsRaw !== "—" ? bathsRaw : "Inquire";
+
+  // ── Area ────────────────────────────────────────────────────
+  // Off-plan: item.max_area. Ready listing / mapper: builtUpArea
+  // (apiData.builtUpArea || apiData.area_start), else totalBuildingArea,
+  // else the highest unitTypes.sqFt as a last resort.
+  const largestUnitArea = Array.isArray(mapped?.unitTypes) && mapped.unitTypes.length > 0
+    ? mapped.unitTypes.reduce((max, u) => {
+        const a = Number(u?.sqFt);
+        if (!a || isNaN(a)) return max;
+        return max === null ? a : Math.max(max, a);
+      }, null)
+    : null;
+
+  const displayArea =
+    item?.max_area ??
+    mapped?.builtUpArea ??
+    mapped?.totalBuildingArea ??
+    largestUnitArea ??
+    null;
+
+  // ── Status badge ────────────────────────────────────────────
+  const displayStatus = item?.completion_status || mapped?.completionStatus || null;
+
+  // ── Images ──────────────────────────────────────────────────
+  // fallback images (agar all_images khali ho)
   const fallbackImages = item?.feature_image
     ? [item.feature_image]
     : item?.images?.length > 0
@@ -41,13 +158,18 @@ const MapCard = ({ item, onRequireLogin }) => {
       : [IMG];
 
   // ============================================================
-  // Ab images MongoDB se listing/map item object ke saath hi
-  // aa jaati hain (item.all_images), isliye hover par detail
-  // API call karne ki zaroorat nahi — seedha yahin se le lete hain.
+  // Off-plan docs keep gallery URLs under item.all_images.
+  // Ready listings save the same photos, but the mapper already
+  // knows to fall back through all_images → images → feature/cover
+  // (mapped.images), so use that as an additional fallback instead_id 
+  // of showing the placeholder for Ready listings whose photos
+  // aren't under `all_images` specifically.
   // ============================================================
   const galleryImages =
     Array.isArray(item?.all_images) && item.all_images.length > 0
       ? item.all_images
+      : Array.isArray(mapped?.images) && mapped.images.length > 0
+      ? mapped.images
       : fallbackImages;
 
   const images =
@@ -82,8 +204,8 @@ const MapCard = ({ item, onRequireLogin }) => {
 
   // ✅ Same navigation-on-click pattern as ListingCard's openDetails
   const openDetails = () => {
-    if (item?.id) {
-      navigate(`/listing/${item.id}`);
+    if (item?._id) {
+      navigate(`/listing/${item._id}`);
     }
   };
 
@@ -138,7 +260,7 @@ const MapCard = ({ item, onRequireLogin }) => {
       >
         <img
           src={getSafeImage(images[currentImg])}
-          alt={item?.title}
+          alt={displayTitle}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
@@ -146,9 +268,9 @@ const MapCard = ({ item, onRequireLogin }) => {
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
         {/* Status / off-plan badge (optional, shows if present) */}
-        {item?.completion_status && (
+        {displayStatus && (
           <span className="absolute top-3 left-3 z-20 bg-white/90 text-[ #01155E] text-[11px] font-semibold px-2.5 py-1 rounded-full">
-            {item.completion_status}
+            {displayStatus}
           </span>
         )}
 
@@ -226,17 +348,17 @@ const MapCard = ({ item, onRequireLogin }) => {
 
         {/* Price */}
         <h3 className="text-[20px] leading-tight font-bold text-[#01155E]">
-          AED {item?.min_price?.toLocaleString?.() || "N/A"}
+          AED {displayPrice != null ? Number(displayPrice).toLocaleString() : "N/A"}
         </h3>
 
         {/* Title */}
         <p className="mt-1.5 text-[16px] text-[#222222] font-semibold truncate">
-          {item?.title}
+          {displayTitle}
         </p>
 
         {/* Location */}
         <p className="text-[14px] text-[#67739E] mt-0.5 truncate">
-          {[item?.district_name, item?.city_name].filter(Boolean).join(", ") || "N/A"}
+          {[displayDistrict, displayCity].filter(Boolean).join(", ") || "N/A"}
         </p>
 
         {/* Divider */}
@@ -248,27 +370,21 @@ const MapCard = ({ item, onRequireLogin }) => {
           <div className="flex items-center gap-2">
             <img src={Icon3} className="w-4 h-4 shrink-0" alt="beds" />
             <span className="font-medium  text-[#67739e]">
-              {item?.bedrooms === 0 || item?.bedrooms === "Studio"
-                ? "Studio"
-                : item?.beds === 0 || item?.beds === "0"
-                ? "Studio"
-                : typeof item?.beds === "string"
-                ? item.beds.replace(/^0,?/, "Studio,")
-                : item?.beds ?? "N/A"}{" "}
+              {formatBeds(bedsRaw)}{" "}
             </span>
           </div>
 
           <div className="flex items-center gap-2 ">
             <img src={Icon2} className="w-4 h-4 shrink-0" alt="baths" />
-           <span className="font-medium text-[#67739e]">
-  {item?.baths && Number(item.baths) !== 0 ? item.baths : "Inquire"}
-</span>
+            <span className="font-medium text-[#67739e]">
+              {displayBaths}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <img src={Icon1} className="w-4 h-4 shrink-0" alt="area" />
             <span className="font-medium  text-[#67739e]">
-              {item?.max_area?.toLocaleString?.() || "N/A"} sqft
+              {displayArea != null ? Number(displayArea).toLocaleString() : "N/A"} sqft
             </span>
           </div>
         </div>
