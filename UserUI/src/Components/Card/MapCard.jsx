@@ -60,22 +60,37 @@ const MapCard = ({ item, onRequireLogin }) => {
   // Recomputed only when the underlying item actually changes.
   const mapped = useMemo(() => mapPropertyDetailData(item) || {}, [item]);
 
+  // ============================================================
+  // 🔧 FIX: helper that treats null / undefined / NaN / <= 0 as
+  // "no price". Off-plan docs frequently store price_start /
+  // price_end as the STRING '0.00' when the developer hasn't set
+  // a real price yet (price is "on request"). Number('0.00') is
+  // 0, which is falsy-looking but NOT null/undefined, so the old
+  // `??` chain happily accepted it and rendered "AED 0" instead of
+  // moving on to the next fallback (or finally showing "N/A").
+  // ============================================================
+  const toValidPrice = (val) => {
+    if (val === null || val === undefined || val === "") return null;
+    const n = Number(val);
+    return !isNaN(n) && n > 0 ? n : null;
+  };
+
   // ── Price ───────────────────────────────────────────────────
   // Off-plan: item.min_price. Ready listing / mapper: price_start
   // (apiData.price_start || apiData.price). Also fall back to the
   // lowest unitTypes.startingPrice if neither top-level field is set.
   const lowestUnitPrice = Array.isArray(mapped?.unitTypes) && mapped.unitTypes.length > 0
     ? mapped.unitTypes.reduce((min, u) => {
-        const p = Number(u?.startingPrice ?? u?.price);
-        if (!p || isNaN(p)) return min;
+        const p = toValidPrice(u?.startingPrice ?? u?.price);
+        if (p === null) return min;
         return min === null ? p : Math.min(min, p);
       }, null)
     : null;
 
   const displayPrice =
-    item?.min_price ??
-    mapped?.price_start ??
-    mapped?.price ??
+    toValidPrice(item?.min_price) ??
+    toValidPrice(mapped?.price_start) ??
+    toValidPrice(mapped?.price) ??
     lowestUnitPrice ??
     null;
 
@@ -348,7 +363,7 @@ const MapCard = ({ item, onRequireLogin }) => {
 
         {/* Price */}
         <h3 className="text-[20px] leading-tight font-bold text-[#01155E]">
-          AED {displayPrice != null ? Number(displayPrice).toLocaleString() : "N/A"}
+          {displayPrice != null ? `AED ${Number(displayPrice).toLocaleString()}` : "Price on request"}
         </h3>
 
         {/* Title */}

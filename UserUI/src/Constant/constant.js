@@ -38,3 +38,6 @@ export const UPDATE_USER_API = `${BASE_URL}/update`;
 export const PROJECTS_SORT_API = `${BASE_URL}/sort`;
 export const Contact_Api =  `${BASE_URL}/contact`;
 export const Token = import.meta.env.VITE_TOKEN;
+
+export const Similar_Listings_Api = `${BASE_URL}/listing/similar`;
+// apna actual base URL + path yahan daal dena
