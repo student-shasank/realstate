@@ -25,7 +25,7 @@ import {
 import {
   fetchSortedProjects, // NEW: fully separate sort slice/endpoint
   setSortBy,
-} from "../features/dashboard/sortSlice";
+} from "../features/dashboard/Sortslice.jsx";
 import ListingCard from "../Components/Card/ListingCard";
 import { ChevronDown } from 'lucide-react';
 import Breadcrumbs from "../Components/Card/Breadcrumbs";
@@ -37,6 +37,39 @@ import MapCard from "../Components/Card/MapCard"
 // no matter exactly how the nav links or URL params spell them.
 const normalizeCompletion = (value) =>
   (value || "").toString().toLowerCase().replace(/[-_\s]+/g, "");
+
+// ────────────────────────────────────────────────────────────
+// Coordinate extraction — same fallback pattern used across the
+// app (mapPropertyDetailData.js / MapSection.jsx).
+//
+// Ready listings: item.location.coordinates.coordinates -> GeoJSON [lng, lat]
+// Off-plan docs:   item.latlong -> string "lat,lng"
+//
+// NOTE: the Google Maps marker code below previously read
+// `item.lat_long` (with an underscore). That field never existed on
+// ANY doc shape — the real field is `latlong` — so `!item?.lat_long`
+// was always true and every marker silently returned null. That's
+// why the map rendered with zero pins.
+//
+// Returns { lat, lng } or null if neither shape is present.
+// ────────────────────────────────────────────────────────────
+const getLatLng = (item) => {
+  const readyCoords = item?.location?.coordinates?.coordinates;
+  if (Array.isArray(readyCoords) && readyCoords.length === 2) {
+    const [lng, lat] = readyCoords;
+    return { lat, lng };
+  }
+
+  if (item?.latlong && typeof item.latlong === "string") {
+    const parts = item.latlong.split(",").map((c) => parseFloat(c.trim()));
+    if (parts.length === 2 && !parts.some(isNaN)) {
+      const [lat, lng] = parts;
+      return { lat, lng };
+    }
+  }
+
+  return null;
+};
 
 const Listings = () => {
  const { isLoaded: isGoogleMapLoaded } = useJsApiLoader({
@@ -932,94 +965,6 @@ const Listings = () => {
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 {isPriceOpen && (
                   <div className="absolute top-full right-0 mt-2 w-full md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-5">
                     <div className="grid grid-cols-2 gap-4 mb-6">
@@ -1487,12 +1432,12 @@ const Listings = () => {
                 {/* Google Maps Implementation */}
 {isGoogleMapLoaded ? (
   <GoogleMap
-    center={{
-      lat:
-        projects?.[0]?.location?.coordinates?.coordinates?.[1] || 25.2048,
-      lng:
-        projects?.[0]?.location?.coordinates?.coordinates?.[0] || 55.2708,
-    }}
+    center={(() => {
+      const firstCoords = getLatLng(projects?.[0]);
+      return firstCoords
+        ? { lat: firstCoords.lat, lng: firstCoords.lng }
+        : { lat: 25.2048, lng: 55.2708 };
+    })()}
     zoom={8}
     mapContainerStyle={{ width: "100%", height: "100%" }}
     options={{
@@ -1503,9 +1448,10 @@ const Listings = () => {
     }}
   >
   {projects.map((item) => {
-  if (!item?.lat_long) return null;
+  const coords = getLatLng(item);
+  if (!coords) return null;
 
-  const [lat, lng] = item.lat_long.split(",").map(Number);
+  const { lat, lng } = coords;
   const itemId = item._id?.$oid || item._id;
 
   return (

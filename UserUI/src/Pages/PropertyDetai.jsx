@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import PropertyMap from '../Components/Card/PropertyMap.jsx';
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { extractAllImages, getSafeImageUrl, getImageByIndex } from '../Component
 import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
 import { sendListingEnquiry, resetEnquiryState } from "../features/Enquiery/enquirySlice.js";
 import { toast } from 'react-toastify';
+import { fetchSimilarListings, resetSimilarListingsState } from "../features/dashboard/similarPropertiesSlice.jsx";
 
 import {
   fetchListingDetail,
@@ -28,17 +29,6 @@ import floorplan1 from "../assets/floorplan.png"
 import propertycommunity from "../assets/propertydetailcommunity.jpg"
 import Breadcrumbs from '../Components/Card/Breadcrumbs';
 import Broker from '../assets/brocker.jpeg';
-
-const SIMILAR = [1, 2, 3].map((i) => ({
-  id: i,
-  title: "High-Rise Townhouse",
-  location: "Southwestern Ontario, Canada",
-  price: "AED 2,500,000",
-  sqft: "122,280 sqft",
-  beds: 41,
-  baths: 32,
-  image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800",
-}));
 
 const AMENITY_MAP = {
   bbq: { label: "BBQ Area", icon: "bbq" },
@@ -263,6 +253,257 @@ function GalleryModal({
   );
 }
 
+// ============================================================
+// 🆕 SimilarPropertyCard — each card gets its OWN image carousel
+// (hover-triggered prev/next arrows + dot indicators), matching
+// the pattern used on the map/search cards. No extra libraries —
+// pure React state per card, so cards don't interfere with each
+// other's image index.
+// ============================================================
+function SimilarPropertyCard({
+  item,
+  getDisplayStatus,
+  getBedroomsDisplay,
+  navigate,
+}) {
+  const mappedItem = mapPropertyDetailData(item);
+  const itemImages = extractAllImages(item);
+
+  const galleryImages =
+    itemImages.allImages?.length > 0
+      ? itemImages.allImages
+      : [itemImages.featureImage];
+
+  const [currentImg, setCurrentImg] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    setCurrentImg((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation();
+    setCurrentImg((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleDot = (e, i) => {
+    e.stopPropagation();
+    setCurrentImg(i);
+  };
+
+  return (
+    <div
+      onClick={() => navigate(`/listing/${item._id}`)}
+      className="bg-white border border-[#D9E1F2] rounded-[10px] overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-[0_12px_28px_rgba(1,21,94,0.16)] hover:-translate-y-1"
+    >
+      <div
+        className="relative h-[240px] overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setCurrentImg(0);
+        }}
+      >
+        <img
+          src={getSafeImageUrl(galleryImages[currentImg])}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          alt={mappedItem.title}
+        />
+
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+
+        <div className="absolute top-3 left-3 bg-[#01155E]/80 backdrop-blur-md text-white text-[12px] px-3 py-1 rounded z-10">
+          {getDisplayStatus(mappedItem.completionStatus)}
+        </div>
+
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-3 right-3 bg-white p-2 rounded-full shadow z-10 hover:bg-gray-50 transition-colors"
+        >
+          <Heart size={16} className="text-[#01155E]" />
+        </button>
+
+        {isHovered && galleryImages.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/85 rounded-full flex items-center justify-center hover:bg-white shadow-sm z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={18} className="text-[#01155E]" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/85 rounded-full flex items-center justify-center hover:bg-white shadow-sm z-10"
+              aria-label="Next image"
+            >
+              <ChevronRight size={18} className="text-[#01155E]" />
+            </button>
+          </>
+        )}
+
+        {galleryImages.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {galleryImages.slice(0, 6).map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => handleDot(e, i)}
+                className={`h-1.5 rounded-full transition-all duration-200 ${
+                  i === currentImg ? "w-4 bg-white" : "w-1.5 bg-white/60"
+                }`}
+                aria-label={`Go to image ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="p-5">
+        <h3 className="text-[20px] font-semibold text-[#01155E] mb-2 capitalize truncate">
+          {mappedItem.title || "—"}
+        </h3>
+        <div className="flex items-center text-[#67739E] text-[16px] mb-4 truncate">
+          <MapPin size={14} className="mr-1 text-[#01155E] flex-shrink-0" />
+          <span className="truncate">
+            {[mappedItem.location?.address, mappedItem.location?.country]
+              .filter(Boolean)
+              .join(", ") ||
+              item.project_location ||
+              item.location ||
+              "—"}
+          </span>
+        </div>
+        <div className="flex justify-between border-y border-[#D9E1F2] py-3 mb-4">
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+            <Bed size={16} /> {getBedroomsDisplay(mappedItem.bedrooms) || item.beds || "—"}
+          </div>
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+            <Bath size={16} /> {mappedItem.bathrooms ?? item.baths ?? "—"}
+          </div>
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+            <Square size={16} />{" "}
+            {mappedItem.builtUpArea
+              ? `${mappedItem.builtUpArea} Sq Ft`
+              : item.area_start
+              ? `${item.area_start} Sq Ft`
+              : "—"}
+          </div>
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="text-[22px] font-semibold text-[#01155E]">
+            {mappedItem.price_start || item.price_start
+              ? `AED ${Number(
+                  mappedItem.price_start || item.price_start
+                ).toLocaleString()}`
+              : "Price on request"}
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/listing/${item._id}`);
+            }}
+            className="border border-[#D9E1F2] px-4 py-2 rounded-lg font-semibold text-[#01155E] text-[13px] hover:bg-[#01155E] hover:text-white transition-all"
+          >
+            View Detail
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// 🆕 SimilarPropertiesCarousel — professional horizontal
+// scroll-snap carousel (prev/next arrow buttons that fade
+// out at the ends, smooth scroll). No external carousel
+// library required. Renders 1 card on mobile scaling up to a
+// partial 4th-card "peek" on wide screens, matching the pattern
+// used on real estate sites like Bayut/Property Finder.
+// ============================================================
+function SimilarPropertiesCarousel({ listings, getDisplayStatus, getBedroomsDisplay, navigate }) {
+  const scrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateScrollState();
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleResize = () => updateScrollState();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [listings]);
+
+  const scrollByDirection = (direction) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const card = el.querySelector("[data-similar-card]");
+    const cardWidth = card ? card.getBoundingClientRect().width : 380;
+    el.scrollBy({ left: direction * (cardWidth + 24), behavior: "smooth" });
+  };
+
+  if (!listings || listings.length === 0) return null;
+
+  return (
+    <div className="relative">
+      <style>{`
+        .similar-carousel-track::-webkit-scrollbar { display: none; }
+        .similar-carousel-track { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      <div
+        ref={scrollRef}
+        onScroll={updateScrollState}
+        className="similar-carousel-track flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2"
+      >
+        {listings.map((item) => (
+          <div
+            key={item._id}
+            data-similar-card
+            className="snap-start shrink-0 w-[320px] sm:w-[360px] lg:w-[380px]"
+          >
+            <SimilarPropertyCard
+              item={item}
+              getDisplayStatus={getDisplayStatus}
+              getBedroomsDisplay={getBedroomsDisplay}
+              navigate={navigate}
+            />
+          </div>
+        ))}
+      </div>
+
+      {canScrollLeft && (
+        <button
+          onClick={() => scrollByDirection(-1)}
+          className="hidden sm:flex absolute -left-5 top-[42%] -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white text-[#01155E] shadow-[0_4px_16px_rgba(1,21,94,0.25)] hover:bg-[#01155E] hover:text-white transition-all z-20"
+          aria-label="Previous properties"
+        >
+          <ChevronLeft size={22} />
+        </button>
+      )}
+
+      {canScrollRight && (
+        <button
+          onClick={() => scrollByDirection(1)}
+          className="hidden sm:flex absolute -right-5 top-[42%] -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white text-[#01155E] shadow-[0_4px_16px_rgba(1,21,94,0.25)] hover:bg-[#01155E] hover:text-white transition-all z-20"
+          aria-label="Next properties"
+        >
+          <ChevronRight size={22} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function PropertyDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -277,15 +518,21 @@ export default function PropertyDetail() {
     (state) => state.enquiry
   );
 
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchListingDetail(Number(id)));
-    }
+  // Similar listings redux state — top-level hook, NOT inside any function
+  const { listings: similarListings, status: similarStatus } = useSelector(
+    (state) => state.similarListings
+  );
+  const similarLoading = similarStatus === "loading";
 
-    return () => {
-      dispatch(resetListingDetailState());
-    };
-  }, [dispatch, id]);
+  useEffect(() => {
+  if (id) {
+    dispatch(fetchListingDetail(id)); // MongoDB _id string hai, Number() mat lagao
+  }
+
+  return () => {
+    dispatch(resetListingDetailState());
+  };
+}, [dispatch, id]);
 
   const rawListing = listing || {};
   const PROPERTY = mapPropertyDetailData(rawListing);
@@ -366,7 +613,20 @@ export default function PropertyDetail() {
     "onsale",
     "outofstock",
   ];
+const getBedroomsDisplay = (val) => {
+  if (val === null || val === undefined || val === "") return "—";
 
+  const values = String(val)
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => v !== "");
+
+  if (values.length === 0) return "—";
+
+  return values
+    .map((v) => (v === "0" ? "Studio" : v))
+    .join(", ");
+};
   const getDisplayStatus = (status) => {
     if (!status) return "—";
 
@@ -416,9 +676,9 @@ export default function PropertyDetail() {
     return;
   }
 
-  const listingUrl = rawListing?.id
-    ? `${window.location.origin}/listing/${rawListing.id}`
-    : window.location.href;
+ const listingUrl = rawListing?._id
+  ? `${window.location.origin}/listing/${rawListing._id}`
+  : window.location.href;
 
   const message =
     `Hi Divyansh,\n\n` +
@@ -472,6 +732,30 @@ export default function PropertyDetail() {
       dispatch(resetEnquiryState());
     }
   };
+
+  // Fetch similar listings once we know the current property's location
+  // Community/City directly rawListing se nikalo — mapper pe depend nahi karte
+  // taaki agar mapper mein location.community/city set nahi ho raha ho tab bhi fetch chale.
+  const communityForSimilar =
+    rawListing?.district_data?.[0]?.name || location?.community;
+  const cityForSimilar =
+    rawListing?.city_data?.name || rawListing?.project_city || location?.city;
+
+  useEffect(() => {
+    if (communityForSimilar || cityForSimilar) {
+      dispatch(
+        fetchSimilarListings({
+          community: communityForSimilar,
+          city: cityForSimilar,
+          excludeId: rawListing?._id,
+        })
+      );
+    }
+
+    return () => {
+      dispatch(resetSimilarListingsState());
+    };
+  }, [dispatch, communityForSimilar, cityForSimilar, rawListing?._id]);
 
   if (loading) {
     return (
@@ -577,7 +861,7 @@ export default function PropertyDetail() {
   ];
 
   const overviewStats = [
-    { icon: <Bed size={24} className="text-[#67739E]" />, val: overview?.bedrooms ?? bedrooms ?? "—", label: "Bedrooms" },
+{ icon: <Bed size={24} className="text-[#67739E]" />, val: getBedroomsDisplay(overview?.bedrooms ?? bedrooms), label: "Bedrooms" },
     { icon: <Bath size={24} className="text-[#67739E]" />, val: overview?.bathrooms ?? bathrooms ?? "—", label: "Bathrooms" },
     { icon: <Car size={24} className="text-[#67739E]" />, val: overview?.garage ?? garage ?? "—", label: "Parking" },
     { icon: <Calendar size={24} className="text-[#67739E]" />, val: overview?.yearBuilt ?? yearBuilt ?? "—", label: "Year Built" },
@@ -676,6 +960,21 @@ export default function PropertyDetail() {
     }
   };
 
+  // 🔧 NEW: derived flag — true only if at least one real investment-insight
+  // value came back from the API. Used to hide the whole "Investment
+  // Insights" block instead of always rendering it with "—" placeholders.
+  const hasInvestmentInsights = Boolean(
+    investmentInsights?.rentalYield ||
+    investmentInsights?.priceTrend ||
+    investmentInsights?.pricePerSqFt
+  );
+
+  // 🔧 NEW: derived flag — true only if a real community image URL exists
+  // (mapper now returns null instead of "—" when there is none).
+  const hasCommunityImage = Boolean(
+    community?.marketSupply?.image || location?.communityImage
+  );
+
   return (
     <div className="bg-white min-h-screen ">
       {showGallery && (
@@ -740,8 +1039,7 @@ export default function PropertyDetail() {
                   {agentPhoneRaw}
                 </a>
               </div>
-                
-              <div className="flex items-center justify-center gap-2.5">
+ <div className="flex items-center justify-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
                     <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
@@ -931,12 +1229,12 @@ export default function PropertyDetail() {
             </div>
 
             <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
-              <div className="flex justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8">
+                           <div className="flex justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8 flex-wrap gap-y-4">
                 {overviewStats.map((item, i) => (
-                  <div key={i} className="flex flex-col items-start gap-1">
-                    <div className="flex items-center gap-2">
+                  <div key={i} className="flex flex-col items-start gap-1 min-w-[110px]">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {item.icon}
-                      <span className="text-[24px] font-semibold text-[#01155E]">{item.val}</span>
+                      <span className="text-[24px] font-semibold text-[#01155E] break-words">{item.val}</span>
                     </div>
                     <span className="text-[#67739E] text-[15px]">{item.label}</span>
                   </div>
@@ -1232,44 +1530,57 @@ export default function PropertyDetail() {
               </button>
             </div>
 
-            <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
-              <img
-                src={getSafeImageUrl(
-                  community?.marketSupply?.image ||
-                  location?.communityImage ||
-                  propertycommunity
-                )}
-                className="w-full h-full object-cover"
-                alt="Community"
-              />
-            </div>
+            {/* 🔧 FIX: was `{(community?.marketSupply?.image || location?.communityImage) && (...)}`.
+                That check is unchanged, but it now works correctly because the mapper
+                no longer feeds it a truthy "—" placeholder string when there's no
+                real image — it feeds `null`, so this block genuinely hides when
+                there is no community image. Using the `hasCommunityImage` flag here
+                for clarity. */}
+            {hasCommunityImage && (
+              <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
+                <img
+                  src={getSafeImageUrl(
+                    community?.marketSupply?.image || location?.communityImage
+                  )}
+                  className="w-full h-full object-cover"
+                  alt="Community"
+                />
+              </div>
+            )}
 
-            <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
-              <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
-                <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
-                <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[15px] font-semibold">
-                  Unlock Investment Insights
-                </button>
+            {/* 🔧 FIX: Investment Insights section was rendering unconditionally,
+                showing "Unlock Investment Insights" + three "—" rows even when
+                the listing had no investment data at all. Now wrapped in
+                `hasInvestmentInsights` so it only renders when at least one of
+                rentalYield / priceTrend / pricePerSqFt actually came back from
+                the API (mapper now returns null instead of "—" for these when
+                missing, so the flag is accurate). */}
+            {hasInvestmentInsights && (
+              <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
+                  <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
+                  <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[15px] font-semibold">
+                    Unlock Investment Insights
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 px-6 py-5">
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Rental Yield</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Price Trends</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
+                    <p className="text-[#01155E] font-bold text-[17px]">
+                      {investmentInsights?.pricePerSqFt || "—"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-3 px-6 py-5">
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Rental Yield</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Price Trends</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
-                  <p className="text-[#01155E] font-bold text-[17px]">
-                    {investmentInsights?.pricePerSqFt
-                      ? `${investmentInsights.pricePerSqFt}`
-                      : pricePerSqFt || "—"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            )}
 
             <div className="mt-10">
               <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
@@ -1431,40 +1742,21 @@ export default function PropertyDetail() {
 
         <div className="mt-16">
           <h2 className="text-[30px] font-semibold text-[#01155E] text-center mb-10">
-            Similar Properties In {location?.community || "Expo City"}
+            Similar Properties In {location?.community || "this area"}
           </h2>
-          <div className="grid grid-cols-3 gap-[26px]">
-            {SIMILAR.map((item) => (
-              <div key={item.id} className="bg-white border border-[#D9E1F2] rounded-[10px] overflow-hidden group">
-                <div className="relative h-[240px]">
-                  <img src={item.image} className="w-full h-full object-cover" alt="similar" />
-                  <div className="absolute top-3 left-3 bg-[#01155E]/80 backdrop-blur-md text-white text-[12px] px-3 py-1 rounded">
-                    Off-Plan | Resale
-                  </div>
-                  <button className="absolute top-3 right-3 bg-white p-2 rounded-full shadow">
-                    <Heart size={16} className="text-[#01155E]" />
-                  </button>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-[20px] font-semibold text-[#01155E] mb-2">{item.title}</h3>
-                  <div className="flex items-center text-[#67739E] text-[18px] mb-4">
-                    <MapPin size={14} className="mr-1 text-[#01155E]" /> {item.location}
-                  </div>
-                  <div className="flex justify-between border-y border-[#D9E1F2] py-3 mb-4">
-                    <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[18px]"><Bed size={16} /> {item.beds}</div>
-                    <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[18px]"><Bath size={16} /> {item.baths}</div>
-                    <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[18px]"><Square size={16} /> {item.sqft}</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-[24px] font-semibold text-[#01155E]">{item.price}</div>
-                    <button className="border border-[#D9E1F2] px-4 py-2 rounded-lg font-semibold text-[#01155E] text-[13px] hover:bg-[#01155E] hover:text-white transition-all">
-                      View Detail
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+
+          {similarLoading ? (
+            <p className="text-center text-[#67739E]">Loading similar properties...</p>
+          ) : similarListings.length === 0 ? (
+            <p className="text-center text-[#67739E]">No similar properties found nearby.</p>
+          ) : (
+            <SimilarPropertiesCarousel
+              listings={similarListings}
+              getDisplayStatus={getDisplayStatus}
+              getBedroomsDisplay={getBedroomsDisplay}
+              navigate={navigate}
+            />
+          )}
         </div>
 
       </div>

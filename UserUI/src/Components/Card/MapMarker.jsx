@@ -7,16 +7,45 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
 
   const showPopup = (hovered || isActive) && !closed;
 
+  // ============================================================
+  // 🔧 FIX (price): real off-plan docs don't have `min_price` /
+  // `max_price` — price lives under `price_start` / `price_end`.
+  // Those are also often the STRING '0.00' when a developer
+  // hasn't set a real price (i.e. "price on request"), so
+  // Number('0.00') = 0 must be treated as "no price".
+  // getPrice() checks min/max_price first (other sources may use
+  // these), falls back to price_start/price_end, and only
+  // accepts values > 0.
+  // ============================================================
+  const getPrice = (item) => {
+    if (item?.price_upon_request) return null;
+
+    const candidates = [
+      item?.min_price,
+      item?.max_price,
+      item?.price_start,
+      item?.price_end,
+    ];
+
+    for (const raw of candidates) {
+      if (raw === null || raw === undefined || raw === "") continue;
+      const n = Number(raw);
+      if (!isNaN(n) && n > 0) return n;
+    }
+
+    return null;
+  };
+
   // Format price range or single price
-  const formatPrice = (min, max) => {
-    const price = min || max;
+  const formatPrice = (item) => {
+    const price = getPrice(item);
     if (!price) return "Price on request";
-    return `AED ${Number(price).toLocaleString("en-US")}`;
+    return `AED ${price.toLocaleString("en-US")}`;
   };
 
   // Compact price for the marker pill itself (e.g. "1.4M", "709K")
-  const formatCompactPrice = (min, max) => {
-    const price = Number(min || max);
+  const formatCompactPrice = (item) => {
+    const price = getPrice(item);
     if (!price) return "N/A";
     if (price >= 1_000_000) {
       const val = price / 1_000_000;
@@ -29,26 +58,65 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
     return price.toString();
   };
 
-  // Off Plan / Ready decided from expected_delivery_date
-  const getBadgeText = () => {
-    if (item?.expected_delivery_date) {
-      const delivery = new Date(item.expected_delivery_date);
+  // ============================================================
+  // 🔧 FIX (badge/date): the real document doesn't have
+  // `expected_delivery_date` at all — the actual field is
+  // `expected_completion_date` (e.g. '2026-03-31'). The old code
+  // only ever checked expected_delivery_date, so it was always
+  // undefined → badge always fell back to "Off Plan" and quarter
+  // always fell back to "Ready", regardless of the real status.
+  // getDeliveryDate() checks both field names; project_completed
+  // (explicit boolean on the doc) takes priority when present.
+  // ============================================================
+  const getDeliveryDate = (item) =>
+    item?.expected_delivery_date || item?.expected_completion_date || null;
+
+  const getBadgeText = (item) => {
+    if (item?.project_completed) return "Ready";
+    const raw = getDeliveryDate(item);
+    if (raw) {
+      const delivery = new Date(raw);
       const today = new Date();
-      return delivery > today ? "Off Plan" : "Ready";
+      if (!isNaN(delivery.getTime())) {
+        return delivery > today ? "Off Plan" : "Ready";
+      }
     }
     return "Off Plan";
   };
 
-  const badgeText = getBadgeText();
-
   // Format delivery date as "Q3 2027" style
-  const formatDeliveryQuarter = (dateStr) => {
+  const formatDeliveryQuarter = (item) => {
+    if (item?.project_completed) return "Ready";
+    const dateStr = getDeliveryDate(item);
     if (!dateStr) return "Ready";
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "Ready";
     const quarter = Math.floor(date.getMonth() / 3) + 1;
     return `Q${quarter} ${date.getFullYear()}`;
   };
 
+  // ============================================================
+  // 🔧 FIX (image): `item.feature_image` doesn't exist as a flat
+  // string on the real document. The photo actually lives under
+  // `item.images.feature` (off-plan shape) or inside
+  // `item.all_images[0]` (gallery array). getMarkerImage() checks
+  // every shape we know about so the popup thumbnail isn't stuck
+  // on the placeholder.
+  // ============================================================
+  const getMarkerImage = (item) => {
+    const candidate =
+      item?.feature_image ||
+      item?.images?.feature ||
+      (Array.isArray(item?.all_images) && item.all_images[0]) ||
+      (Array.isArray(item?.images) && item.images[0]) ||
+      null;
+
+    if (!candidate) return listingimage;
+    if (typeof candidate === "string") return candidate;
+    return candidate?.url || candidate?.secure_url || candidate?.imageUrl || listingimage;
+  };
+
+  const badgeText = getBadgeText(item);
   const isHighlighted = showPopup;
 
   return (
@@ -107,7 +175,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
               style={{ width: "130px", height: "160px" }}
             >
               <img
-                src={item?.feature_image || listingimage}
+                src={getMarkerImage(item)}
                 alt={item?.feature_image_alt_text || item?.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -165,11 +233,11 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
                 className="font-bold text-[#01155E]"
                 style={{ fontSize: "22px", marginTop: "2px" }}
               >
-                {formatPrice(item?.min_price, item?.max_price)}
+                {formatPrice(item)}
               </p>
 
               <p className="text-gray-400" style={{ fontSize: "13px", marginTop: "8px" }}>
-                {formatDeliveryQuarter(item?.expected_delivery_date)}
+                {formatDeliveryQuarter(item)}
               </p>
             </div>
           </div>
@@ -211,7 +279,7 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
               lineHeight: 1,
             }}
           >
-            AED {formatCompactPrice(item?.min_price, item?.max_price)}
+            AED {formatCompactPrice(item)}
           </span>
 
           {/* Status dot */}

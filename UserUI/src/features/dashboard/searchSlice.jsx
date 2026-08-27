@@ -69,7 +69,7 @@ export const fetchProjects = createAsyncThunk(
 // ----------------------
 const initialState = {
   completion: "Off-Plan",
-  propertyType: "Apartment",
+  propertyType: "",
   location: "",
   beds: "",
   baths: "",

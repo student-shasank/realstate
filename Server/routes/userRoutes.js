@@ -11,6 +11,7 @@ import {
   getCommunityPublicProfile 
 } from "../controllers/communityController.js";
 import { getDevelopers }  from "../controllers/getDevlopers.js"
+import {getSimilarListings}  from "../controllers/Similarlistingcontroller.js"
 
 const router = Router();
 
@@ -31,6 +32,7 @@ router.get("/navigation", getCommunityNavigation); // Dropdown ke liye
 router.get("/profile/:slug", getCommunityPublicProfile);
 router.get("/developers", getDevelopers);
 router.get("/sort", sortListings);
+router.get("/similar",getSimilarListings)
 
 
 export default router;

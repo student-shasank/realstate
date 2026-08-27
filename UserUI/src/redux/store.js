@@ -17,9 +17,10 @@ import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
 import updateUserReducer from "../features/Authentation/updateUserSlice.js";
 import listingByIdReducer from "../features/dashboard/fetchListingById.jsx";
 import blogReducer from "../features/dashboard/Blogslice.jsx"
-import sortReducer from "../features/dashboard/sortSlice";
+import sortReducer from "../features/dashboard/Sortslice.jsx";
 import contactReducer from "../features/dashboard/contactSlice.jsx";
 
+import similarListingsReducer from "../features/dashboard/similarPropertiesSlice.jsx";
 export const store = configureStore({
   reducer: {
     // existing counter slice
@@ -39,7 +40,7 @@ export const store = configureStore({
                  blogs: blogReducer,
                  contact: contactReducer,
                  sort: sortReducer, 
-
+               similarListings: similarListingsReducer,
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,
   },
