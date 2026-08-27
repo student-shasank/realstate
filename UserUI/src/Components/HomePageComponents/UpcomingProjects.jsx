@@ -24,11 +24,37 @@ const UpcomingProjects = () => {
     );
   }, [dispatch]);
 
+  // ----------------------------------------
+  // SAFE LOCATION FORMATTER
+  // ----------------------------------------
+  const getProjectLocation = (location, district, city) => {
+    if (typeof location === "string" && location.trim()) {
+      return location;
+    }
+
+    if (location && typeof location === "object") {
+      return (
+        [
+          location?.subCommunity,
+          location?.city,
+          location?.emirates,
+        ]
+          .filter(Boolean)
+          .join(", ") ||
+        location?.address ||
+        district ||
+        city ||
+        "Dubai"
+      );
+    }
+
+    return district || city || "Dubai";
+  };
+
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft } = scrollRef.current;
 
-      // DESKTOP SAME
       const scrollAmount =
         window.innerWidth >= 1024 ? 362.4 : window.innerWidth * 0.9;
 
@@ -59,7 +85,6 @@ const UpcomingProjects = () => {
           }}
         >
           New Launches
-          
         </h2>
 
         <p className="text-[#67739E] text-[16px] md:text-[18px] leading-relaxed max-w-[1200px]">
@@ -97,8 +122,8 @@ const UpcomingProjects = () => {
                 Loading Off-Plan Projects...
               </p>
             </div>
-          ) : (
-            projects?.map((project) => (
+          ) : projects?.length > 0 ? (
+            projects.map((project) => (
               <div
                 key={project._id}
                 className="
@@ -117,57 +142,71 @@ const UpcomingProjects = () => {
                 }}
               >
                 {/* IMAGE */}
-               <div className="w-full h-[220px] md:h-[250px] lg:h-[280px] rounded-[20px] overflow-hidden shrink-0">
-  <img
-    src={project.feature_image || upcommingproject1}
-    alt={project.feature_image_alt_text || project.title}
-    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-  />
-</div>
+                <div className="w-full h-[220px] md:h-[250px] lg:h-[280px] rounded-[20px] overflow-hidden shrink-0">
+                  <img
+                    src={project.feature_image || upcommingproject1}
+                    alt={
+                      project.feature_image_alt_text ||
+                      project.title ||
+                      "Upcoming Project"
+                    }
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
 
-{/* CONTENT */}
-<div className="flex flex-col px-3 h-full justify-between pb-3">
-  <div className="flex flex-col gap-2">
-    
-    {/* LOCATION */}
-    <div className="flex items-center gap-1 text-[#01155E] text-[16px] md:text-[18px]">
-      <MapPin size={14} />
-      <span className="  text-[ #03144e99]   truncate ">
-        {project.location ||
-          project.district_name ||
-          project.city_name ||
-          "Dubai"}
-      </span>
-    </div>
+                {/* CONTENT */}
+                <div className="flex flex-col px-3 h-full justify-between pb-3">
+                  <div className="flex flex-col gap-2">
+                    {/* LOCATION */}
+                    <div className="flex items-center gap-1 text-[#01155E] text-[16px] md:text-[18px]">
+                      <MapPin size={14} />
 
-    {/* PROPERTY CATEGORY */}
-    <p className="text-[#001A54] text-[15px] md:text-[16px] font-medium">
-      {project.property_category?.join(", ") || "Property"}
-    </p>
+                      <span className="text-[#03144e99] truncate">
+                        {getProjectLocation(
+                          project?.location,
+                          project?.district_name,
+                          project?.city_name
+                        )}
+                      </span>
+                    </div>
 
-    {/* TITLE */}
-    <h3 className="text-[#001A54] text-[18px] md:text-[20px] font-medium leading-tight line-clamp-2">
-      {project.title}
-    </h3>
-  </div>
+                    {/* PROPERTY CATEGORY */}
+                    <p className="text-[#001A54] text-[15px] md:text-[16px] font-medium">
+                      {Array.isArray(project?.property_category)
+                        ? project.property_category.join(", ")
+                        : project?.property_category || "Property"}
+                    </p>
 
-  {/* FOOTER */}
-  <div className="flex justify-between items-center  gap-3">
-    
-    {/* PRICE */}
-    <span className="text-[#001A54] text-[16px] md:text-[20px] font-bold">
-      {project.min_price
-        ? `${project.currency || "AED"} ${project.min_price.toLocaleString()}`
-        : "Price on Request"}
-    </span>
+                    {/* TITLE */}
+                    <h3 className="text-[#001A54] text-[18px] md:text-[20px] font-medium leading-tight line-clamp-2">
+                      {project?.title || "Upcoming Project"}
+                    </h3>
+                  </div>
 
-    <button className="bg-[#001A54] text-white px-4 md:px-6 py-2 rounded-[8px] font-bold text-[13px] md:text-sm whitespace-nowrap">
-      Discover
-    </button>
-  </div>
-</div>
+                  {/* FOOTER */}
+                  <div className="flex justify-between items-center gap-3">
+                    {/* PRICE */}
+                    <span className="text-[#001A54] text-[16px] md:text-[20px] font-bold">
+                      {project?.min_price
+                        ? `${project?.currency || "AED"} ${Number(
+                            project.min_price
+                          ).toLocaleString()}`
+                        : "Price on Request"}
+                    </span>
+
+                    <button className="bg-[#001A54] text-white px-4 md:px-6 py-2 rounded-[8px] font-bold text-[13px] md:text-sm whitespace-nowrap">
+                      Discover
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
+          ) : (
+            <div className="flex items-center justify-center w-full py-20">
+              <p className="text-[#001A54] font-medium">
+                No upcoming projects found.
+              </p>
+            </div>
           )}
         </div>
 

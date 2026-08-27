@@ -42,7 +42,7 @@ function BlogDetail() {
   if (!post) return null;
 
   return (
-    <div className="max-w-3xl mx-auto py-16 px-5 mt-20">
+    <div className="max-w-3xl mx-auto py-16 px-5 ">
       <Seo
         title={`${post.title} | Yupland`}
         description={post.title}

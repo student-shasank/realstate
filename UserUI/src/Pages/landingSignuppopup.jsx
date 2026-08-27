@@ -69,7 +69,7 @@ function landingSignuppopup({ isOpen, onClose, openLogin }) {
           </span>
 
           <div className="flex flex-col gap-2 -mt-2">
-            <h2 className="font-['General_Sans'] font-bold text-[28px] leading-tight text-[#01155E]">
+            <h2 className="font-['General_Sans'] font-semibold text-[28px] leading-tight text-[#01155E]">
               Create your account
             </h2>
             <p className="text-[14px] text-[#6B7280] leading-snug">
@@ -219,7 +219,7 @@ function landingSignuppopup({ isOpen, onClose, openLogin }) {
                 <path d="M9 9h.01M9 13h.01M9 17h.01" />
               </svg>
             </div>
-            <h3 className="text-[22px] font-bold leading-tight">
+            <h3 className="text-[22px] font-semibold leading-tight">
               Your journey to the perfect property starts here.
             </h3>
             <p className="text-[13px] text-white/80 leading-snug">
