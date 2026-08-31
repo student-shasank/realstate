@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTNomads – Wave Background</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const waves = [
+  { amp: 0.045, freq: 1.2, speed: 0.014, yFrac: 0.40, alpha: 0.08, colorL: '#D8B4FE', colorR: '#FBCFE8' },
+  { amp: 0.055, freq: 1.5, speed: 0.020, yFrac: 0.52, alpha: 0.11, colorL: '#C084FC', colorR: '#F472B6' },
+  { amp: 0.060, freq: 1.8, speed: 0.025, yFrac: 0.63, alpha: 0.14, colorL: '#A855F7', colorR: '#EC4899' },
+  { amp: 0.065, freq: 1.4, speed: 0.030, yFrac: 0.75, alpha: 0.18, colorL: '#8B5CF6', colorR: '#DB2777' },
+  { amp: 0.070, freq: 1.9, speed: 0.022, yFrac: 0.88, alpha: 0.24, colorL: '#7B2FBE', colorR: '#C71585' },
+];
+
+function hexAlpha(a) {
+  return Math.round(a * 255).toString(16).padStart(2, '0');
+}
+
+function draw(tick) {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const gr = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.5);
+  gr.addColorStop(0, 'rgba(168,85,247,0.07)');
+  gr.addColorStop(1, 'rgba(168,85,247,0)');
+  ctx.fillStyle = gr;
+  ctx.fillRect(0, 0, W, H);
+
+  waves.forEach(w => {
+    const baseY = H * w.yFrac;
+    const amp   = H * w.amp;
+    const grad  = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0,   w.colorL + hexAlpha(w.alpha));
+    grad.addColorStop(0.5, w.colorR + hexAlpha(w.alpha * 0.8));
+    grad.addColorStop(1,   w.colorL + hexAlpha(w.alpha * 0.5));
+
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 4) {
+      const p = x / W;
+      const y = baseY
+        + Math.sin(p * Math.PI * 2 * w.freq + tick * w.speed) * amp
+        + Math.sin(p * Math.PI * 2 * w.freq * 0.5 + tick * w.speed * 0.6 + 1) * amp * 0.35;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  });
+}
+
+let tick = 0;
+function animate() {
+  tick += 0.3;
+  draw(tick);
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

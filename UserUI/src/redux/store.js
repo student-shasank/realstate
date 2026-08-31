@@ -11,7 +11,16 @@ import searchReducer from "../features/dashboard/searchSlice"
 import listingDetailReducer from "../features/dashboard/listingDetailSlice"
 import favoriteReducer from "../features/dashboard/favoriteligting/favoriteSlice"
 import communityReducer from  "../features/communities/communitySlice"
+import enquiryReducer from "../features/Enquiery/enquirySlice.js";
+import developerReducer from "../features/dashboard/developerSlice.jsx";
+import sellerLeadReducer from "../features/dashboard/sellerLeadSlice.jsx";
+import updateUserReducer from "../features/Authentation/updateUserSlice.js";
+import listingByIdReducer from "../features/dashboard/fetchListingById.jsx";
+import blogReducer from "../features/dashboard/Blogslice.jsx"
+import sortReducer from "../features/dashboard/Sortslice.jsx";
+import contactReducer from "../features/dashboard/contactSlice.jsx";
 
+import similarListingsReducer from "../features/dashboard/similarPropertiesSlice.jsx";
 export const store = configureStore({
   reducer: {
     // existing counter slice
@@ -23,7 +32,15 @@ export const store = configureStore({
         listingDetail: listingDetailReducer,
           favorites: favoriteReducer,
           community: communityReducer,
-
+              enquiry: enquiryReducer,
+              developer: developerReducer,
+                 sellerLead: sellerLeadReducer,
+                 updateUser: updateUserReducer,
+                 listingById: listingByIdReducer, 
+                 blogs: blogReducer,
+                 contact: contactReducer,
+                 sort: sortReducer, 
+               similarListings: similarListingsReducer,
     //  dashboard: dashboardReducer,
     //    listing: listingReducer,
   },

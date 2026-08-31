@@ -9,6 +9,7 @@ import Register from "./Pages/Register";
 import Dashboard from "./Pages/Dashboard";
 import ListingCreation from "./Pages/ListingCreation";
 import Communities from "./Pages/Communities";
+import SellerLeadsPage from "./Pages/SellerLeadsPage";
 
 function App() {
 
@@ -18,7 +19,7 @@ function App() {
       <Navbar onOpenLogin={() => setShowLogin(true)} />
 
       <Routes>
-        <Route path="/" element={<Home />}/>
+        <Route path="/" element={<Dashboard/>}/>
         <Route path="/about" element={<About />}/>
        <Route path="/communities" element={<Communities />}/>
         <Route path="/contact" element={<Contact />}/>
@@ -26,6 +27,8 @@ function App() {
           <Route path="/register" element={<Register />}/>
             <Route path="/dashboard" element={<Dashboard/>}/>
           <Route path="/listingcreation" element={<ListingCreation/>}/>
+
+<Route path="/seller-leads" element={<SellerLeadsPage />} />
 
       </Routes>
 

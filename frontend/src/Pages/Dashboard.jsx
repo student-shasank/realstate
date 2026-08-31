@@ -1,282 +1,751 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   fetchDashboard,
   updateListingStatus,
   updateListingAvailability,
+  updateListingFeatured,
 } from "../features/dashboard/dashboardSlice";
-import { Link } from "react-router-dom";
 
-// Filter tabs
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const TABS = {
   ALL: "All",
   PENDING: "Pending",
-  APPROVED: "Approved",
-  REJECTED: "Rejected",
+  ACTIVE: "active",
+  REJECTED: "rejected",
 };
 
-// Availability options
 const AVAILABILITY = {
-  AVAILABLE: "Available",
-  NOT_AVAILABLE: "Unavailable",
+  AVAILABLE: "available",
+  NOT_AVAILABLE: "unavailable",
 };
+
+// ─── Data Normalizer ──────────────────────────────────────────────────────────
+// Bridges the gap between raw Mongo documents (off-plan projects, resale
+// listings, etc.) and the flat shape the UI expects. Every lookup falls back
+// to null/derived values so mixed document shapes never crash the card.
+
+const normalizeListing = (raw) => {
+  if (!raw) return null;
+
+  const id =
+    (raw._id && (raw._id.toString ? raw._id.toString() : raw._id)) ||
+    raw.id ||
+    null;
+
+  // ── Location ──
+  const districtName =
+    raw.district_name ||
+    raw.district_data?.[0]?.name ||
+    raw.project_location ||
+    null;
+
+  const cityName =
+    raw.city_name ||
+    raw.city_data?.name ||
+    raw.project_city ||
+    null;
+
+  // ── Beds — handles both a plain count and a "0,1,2" style string ──
+  let bedsDisplay = raw.beds ?? raw.bedrooms ?? null;
+  if (typeof bedsDisplay === "string" && bedsDisplay.includes(",")) {
+    const nums = bedsDisplay
+      .split(",")
+      .map((n) => Number(n.trim()))
+      .filter((n) => !isNaN(n))
+      .sort((a, b) => a - b);
+    bedsDisplay = nums.length
+      ? nums.map((n) => (n === 0 ? "Studio" : n)).join(", ")
+      : null;
+  }
+
+  // ── Baths — frequently absent on off-plan project documents ──
+  const bathsDisplay = raw.baths ?? raw.bathrooms ?? null;
+
+  // ── Area ──
+  const areaStart = raw.area_start != null ? Number(raw.area_start) : null;
+  const areaEnd =
+    raw.area_end != null
+      ? Number(raw.area_end)
+      : raw.max_area != null
+      ? Number(raw.max_area)
+      : null;
+  const areaUnit = raw.area_size || raw.areaUnit || "sqft";
+
+  // ── Price ──
+  const priceStart =
+    raw.price_start != null
+      ? Number(raw.price_start)
+      : raw.min_price ?? raw.price ?? null;
+  const priceEnd = raw.price_end != null ? Number(raw.price_end) : null;
+  const isRange = !!(priceEnd && priceStart && priceEnd !== priceStart);
+  const isMultiUnit = (raw.typical_units?.length || 0) > 1 || isRange;
+
+  // ── Image ──
+  const featureImage =
+    raw.feature_image ||
+    raw.images?.feature ||
+    (Array.isArray(raw.images) ? raw.images[0] : null) ||
+    raw.all_images?.[0] ||
+    null;
+
+  // ── Delivery / handover date ──
+  const deliveryDate =
+    raw.expected_delivery_date || raw.expected_completion_date || null;
+
+  // ── Featured — snake_case flag, camelCase flag, or nested sub-flags ──
+  const isFeatured =
+    typeof raw.isFeatured === "boolean"
+      ? raw.isFeatured
+      : Boolean(
+          raw.is_featured ||
+            raw.featured?.top_listing ||
+            raw.featured?.search ||
+            raw.featured?.banner
+        );
+
+  // ── Availability — not a native field on off-plan docs; derive it ──
+  const availability =
+    raw.availability ||
+    (raw.inventory_status || Number(raw.total_properties) > 0
+      ? AVAILABILITY.AVAILABLE
+      : AVAILABILITY.NOT_AVAILABLE);
+
+  return {
+    id,
+    title: raw.title || "Untitled Listing",
+    propertyStatus: raw.propertyStatus || "pending",
+    currency: (raw.currency || "AED").toUpperCase(),
+    priceStart,
+    priceEnd,
+    isMultiUnit,
+    districtName,
+    cityName,
+    developerName: raw.developer_name || null,
+    bedsDisplay,
+    bathsDisplay,
+    areaStart,
+    areaEnd,
+    areaUnit,
+    featureImage,
+    deliveryDate,
+    isFeatured,
+    availability,
+  };
+};
+
+// ─── Small reusable badge ─────────────────────────────────────────────────────
+
+const Badge = ({ label, color }) => {
+  const colors = {
+    green: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    red: "bg-red-50 text-red-600 border border-red-200",
+    yellow: "bg-amber-50 text-amber-700 border border-amber-200",
+    blue: "bg-blue-50 text-blue-700 border border-blue-200",
+    purple: "bg-violet-50 text-violet-700 border border-violet-200",
+    gray: "bg-gray-100 text-gray-500 border border-gray-200",
+  };
+  return (
+    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide ${colors[color] || colors.gray}`}>
+      {label}
+    </span>
+  );
+};
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+const StatCard = ({ label, value, icon, accent }) => (
+  <div className="bg-white rounded-2xl border border-[#D9E1F2] p-5 flex items-center gap-4 shadow-sm">
+    <div
+      className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl flex-shrink-0"
+      style={{ background: accent }}
+    >
+      {icon}
+    </div>
+    <div>
+      <p className="text-[#67739E] text-[13px] font-medium">{label}</p>
+      <p className="text-[#01155E] text-[26px] font-bold leading-tight">{value}</p>
+    </div>
+  </div>
+);
+
+// ─── Inline Select + Save ─────────────────────────────────────────────────────
+
+const InlineSelect = ({ options, value, onChange, onSave, onCancel, accent }) => (
+  <div className="flex gap-2 items-center mt-2">
+    <select
+      className="border border-[#D9E1F2] text-[#01155E] text-sm px-3 py-1.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#01155E]/20"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+    <button
+      onClick={onSave}
+      className="px-3 py-1.5 rounded-lg text-white text-sm font-semibold transition-opacity hover:opacity-90"
+      style={{ background: accent }}
+    >
+      Save
+    </button>
+    <button
+      onClick={onCancel}
+      className="px-3 py-1.5 rounded-lg text-[#67739E] text-sm border border-[#D9E1F2] hover:bg-gray-50"
+    >
+      Cancel
+    </button>
+  </div>
+);
+
+// ─── Listing Row Card ─────────────────────────────────────────────────────────
+
+const ListingRowCard = ({ item, onStatusEdit, onAvailabilityEdit, onFeaturedEdit }) => {
+  const n = useMemo(() => normalizeListing(item), [item]);
+  if (!n) return null;
+
+  const statusColor =
+    n.propertyStatus === "active" ? "green"
+    : n.propertyStatus === "rejected" ? "red"
+    : "yellow";
+
+  const availColor = n.availability === AVAILABILITY.AVAILABLE ? "blue" : "gray";
+
+  const getHandover = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A";
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const quarter = month <= 3 ? "Q1" : month <= 6 ? "Q2" : month <= 9 ? "Q3" : "Q4";
+    return `${quarter} ${year}`;
+  };
+
+  const statusLabel = n.propertyStatus.charAt(0).toUpperCase() + n.propertyStatus.slice(1);
+
+  const areaLabel = n.areaEnd
+    ? n.areaStart && n.areaStart !== n.areaEnd
+      ? `${n.areaStart.toLocaleString()}–${n.areaEnd.toLocaleString()}`
+      : n.areaEnd.toLocaleString()
+    : null;
+
+  return (
+    <div className="bg-white border border-[#D9E1F2] rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-[#2F6BFF] transition-all duration-300 flex flex-col">
+
+      {/* Image */}
+      <div className="relative h-44 bg-[#F0F4FB] flex-shrink-0 overflow-hidden">
+        {n.featureImage ? (
+          <img src={n.featureImage} alt={n.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[#C5CEDF]">
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+        )}
+
+        {/* Status overlay badge */}
+        <div className="absolute top-3 left-3">
+          <Badge label={statusLabel} color={statusColor} />
+        </div>
+
+        {n.isFeatured && (
+          <div className="absolute top-3 right-3 bg-[#FFC107] text-[#01155E] px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-sm">
+            ⭐ Featured
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-5 flex flex-col gap-3 flex-1">
+
+        {/* Title + Price */}
+        <div className="flex justify-between items-start gap-2">
+          <h3 className="text-[#01155E] font-bold text-[16px] leading-snug line-clamp-2 flex-1">
+            {n.title}
+          </h3>
+          <div className="text-right flex-shrink-0">
+            <p className="text-[11px] text-[#67739E] font-medium">
+              {n.isMultiUnit ? "Starting at" : "Price"}
+            </p>
+            <p className="text-[#01155E] font-bold text-[15px]">
+              {n.currency}{" "}
+              {n.priceStart != null ? n.priceStart.toLocaleString() : "N/A"}
+            </p>
+          </div>
+        </div>
+
+        {/* Location + Developer */}
+        <div className="flex flex-col gap-1">
+          {(n.districtName || n.cityName) && (
+            <div className="flex items-center gap-1.5 text-[#67739E] text-[13px]">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>{[n.districtName, n.cityName].filter(Boolean).join(", ")}</span>
+            </div>
+          )}
+          {n.developerName && (
+            <div className="flex items-center gap-1.5 text-[#67739E] text-[13px]">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <span>{n.developerName}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Stats Row */}
+        <div className="flex items-center gap-3 text-[#67739E] text-[13px] border-t border-[#D9E1F2] pt-3 flex-wrap">
+          {n.bedsDisplay && (
+            <span className="flex items-center gap-1">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span className="font-semibold text-[#01155E]">{n.bedsDisplay}</span> Beds
+            </span>
+          )}
+          {n.bathsDisplay && (
+            <>
+              <span className="text-[#D9E1F2]">|</span>
+              <span className="flex items-center gap-1">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                </svg>
+                <span className="font-semibold text-[#01155E]">{n.bathsDisplay}</span> Baths
+              </span>
+            </>
+          )}
+          {areaLabel && (
+            <>
+              <span className="text-[#D9E1F2]">|</span>
+              <span><span className="font-semibold text-[#01155E]">{areaLabel}</span> {n.areaUnit}</span>
+            </>
+          )}
+          {n.deliveryDate && (
+            <>
+              <span className="text-[#D9E1F2] ml-auto">|</span>
+              <span className="ml-auto">🗓 {getHandover(n.deliveryDate)}</span>
+            </>
+          )}
+        </div>
+
+        {/* Badges Row */}
+        <div className="flex flex-wrap gap-2">
+          <Badge label={statusLabel} color={statusColor} />
+          <Badge label={n.availability} color={availColor} />
+          {n.isFeatured && <Badge label="Featured" color="purple" />}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-[#D9E1F2] mt-auto">
+          <button
+            onClick={() => onStatusEdit(n.id, n.propertyStatus)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#01155E] text-[#01155E] text-[12px] font-semibold hover:bg-[#01155E] hover:text-white transition-colors"
+          >
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Status
+          </button>
+          <button
+            onClick={() => onAvailabilityEdit(n.id, n.availability)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-violet-400 text-violet-600 text-[12px] font-semibold hover:bg-violet-600 hover:text-white transition-colors"
+          >
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Availability
+          </button>
+          <button
+            onClick={() => onFeaturedEdit(n.id, n.isFeatured)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-amber-400 text-amber-600 text-[12px] font-semibold hover:bg-amber-400 hover:text-white transition-colors"
+          >
+            ⭐ Featured
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Pagination Bar ───────────────────────────────────────────────────────────
+
+const PaginationBar = ({ currentPage, totalPages, onPageChange }) => {
+  if (!totalPages || totalPages <= 1) return null;
+
+  const maxButtons = 5;
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, start + maxButtons - 1);
+  if (end - start < maxButtons - 1) {
+    start = Math.max(1, end - maxButtons + 1);
+  }
+
+  const pageNumbers = [];
+  for (let i = start; i <= end; i++) pageNumbers.push(i);
+
+  const baseBtn =
+    "min-w-[40px] h-[40px] px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center";
+
+  return (
+    <div className="flex items-center justify-center gap-2 py-8 flex-wrap">
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage <= 1}
+        className={`${baseBtn} ${
+          currentPage <= 1
+            ? "text-gray-300 cursor-not-allowed border border-gray-200"
+            : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+        }`}
+      >
+        Prev
+      </button>
+
+      {start > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => onPageChange(1)}
+            className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+          >
+            1
+          </button>
+          {start > 2 && <span className="px-1 text-[#67739E]">...</span>}
+        </>
+      )}
+
+      {pageNumbers.map((page) => (
+        <button
+          key={page}
+          type="button"
+          onClick={() => onPageChange(page)}
+          className={`${baseBtn} ${
+            page === currentPage
+              ? "bg-[#01155E] text-white border border-[#01155E]"
+              : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+          }`}
+        >
+          {page}
+        </button>
+      ))}
+
+      {end < totalPages && (
+        <>
+          {end < totalPages - 1 && <span className="px-1 text-[#67739E]">...</span>}
+          <button
+            type="button"
+            onClick={() => onPageChange(totalPages)}
+            className={`${baseBtn} text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white`}
+          >
+            {totalPages}
+          </button>
+        </>
+      )}
+
+      <button
+        type="button"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage >= totalPages}
+        className={`${baseBtn} ${
+          currentPage >= totalPages
+            ? "text-gray-300 cursor-not-allowed border border-gray-200"
+            : "text-[#01155E] border border-[#D1D5DB] hover:bg-[#01155E] hover:text-white"
+        }`}
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const { data, loading, error } = useSelector((state) => state.dashboard);
 
-  // Status update state
+  // ── listings + pagination from slice ─────────────────
+  const { data, listings, loading, error, currentPage, totalPages } =
+    useSelector((state) => state.dashboard);
+
   const [editStatusId, setEditStatusId] = useState(null);
   const [newStatus, setNewStatus] = useState("");
 
-  // Availability update state
   const [editAvailabilityId, setEditAvailabilityId] = useState(null);
   const [newAvailability, setNewAvailability] = useState("");
 
-  const [activeTab, setActiveTab] = useState(TABS.ALL);
+  const [editFeaturedId, setEditFeaturedId] = useState(null);
+  const [newFeatured, setNewFeatured] = useState("");
 
+  const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+
+  // ── Ref to scroll back to the grid top on page change ─────────
+  const gridTopRef = React.useRef(null);
+
+  // ── Debounce search 500ms ─────────────────────────────────────
   useEffect(() => {
-    dispatch(fetchDashboard());
-  }, [dispatch]);
+    const t = setTimeout(() => setDebouncedQ(searchQuery), 500);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
-  const filteredListings = useMemo(() => {
-    if (!data || !Array.isArray(data.listings)) return [];
-    if (activeTab === TABS.ALL) return data.listings;
-    return data.listings.filter(
-      (item) => item.completionStatus === activeTab
+  // ── Fetch on tab / search change — always page 1 ──────────────
+  useEffect(() => {
+    dispatch(fetchDashboard({ page: 1, limit: 20, search: debouncedQ, status: activeTab }));
+  }, [dispatch, debouncedQ, activeTab]);
+
+  // ── Go to a specific page (used by pagination controls) ────────
+  const goToPage = (pageNumber) => {
+    if (
+      pageNumber < 1 ||
+      (totalPages && pageNumber > totalPages) ||
+      pageNumber === currentPage
+    ) {
+      return;
+    }
+
+    dispatch(fetchDashboard({
+      page: pageNumber,
+      limit: 20,
+      search: debouncedQ,
+      status: activeTab,
+    }));
+
+    if (gridTopRef.current) {
+      gridTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // ── Normalize the raw listing documents once per fetch ─────────
+  // This means every consumer downstream (cards, edit panels) works
+  // off a consistent shape regardless of whether a doc came from the
+  // off-plan projects collection or a resale-listings collection.
+  const normalizedListings = useMemo(
+    () => (listings || []).map((item) => ({ raw: item, n: normalizeListing(item) })),
+    [listings]
+  );
+
+  // ── Stats from backend ────────────────────────────────────────
+  const stats = useMemo(() => ({
+    total:    data?.stats?.totalListings    || 0,
+    active:   data?.stats?.activeListings   || 0,
+    pending:  data?.stats?.pendingListings  || 0,
+    featured: data?.stats?.featuredListings || 0,
+  }), [data]);
+
+  const tabs = ["All", "active", "pending", "rejected"];
+
+  const tabLabel = (t) =>
+    t === "All" ? "All" : t.charAt(0).toUpperCase() + t.slice(1);
+
+  // ── Tab counts from backend stats ────────────────────────────
+  const tabCount = (t) => {
+    if (t === "All")      return stats.total;
+    if (t === "active")   return stats.active;
+    if (t === "pending")  return stats.pending;
+    if (t === "rejected") return data?.stats?.rejectedListings || 0;
+    return 0;
+  };
+
+  if (error)
+    return (
+      <div className="min-h-screen bg-[#F5F7FC] flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center max-w-sm">
+          <p className="text-red-600 font-semibold text-lg">Error loading data</p>
+          <p className="text-red-400 text-sm mt-1">{error}</p>
+        </div>
+      </div>
     );
-  }, [data, activeTab]);
-
-  const getStatusColor = (status) => {
-    if (status === TABS.APPROVED) return "bg-green-100 text-green-700";
-    if (status === TABS.REJECTED) return "bg-red-100 text-red-700";
-    return "bg-yellow-100 text-yellow-700";
-  };
-
-  const getAvailabilityColor = (availability) => {
-    if (availability === AVAILABILITY.AVAILABLE)
-      return "bg-blue-100 text-blue-700";
-    return "bg-gray-200 text-gray-700";
-  };
-
-  if (loading) return <h2 className="text-center">Loading...</h2>;
-  if (error) return <h3 className="text-red-500 text-center">{error}</h3>;
-  if (!data?.listings)
-    return <p className="text-center mt-6">No listings found</p>;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Admin Dashboard</h2>
-        <Link
-          to="/listingcreation"
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg"
-        >
-          + Create Listing
-        </Link>
-      </div>
+    <div className="min-h-screen bg-[#F5F7FC] font-['General_Sans',sans-serif]">
 
-      {/* Tabs */}
-      <div className="flex space-x-4 mb-8 border-b">
-        {Object.values(TABS).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 ${
-              activeTab === tab
-                ? "text-blue-600 border-b-4 border-blue-600"
-                : "text-gray-600"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Listings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {filteredListings.map((item) => (
-          <div
-            key={item._id}
-            className="bg-white p-6 rounded-2xl shadow-lg"
-          >
-            {/* Image */}
-            {item.images?.length > 0 && (
-              <img
-                src={item.images[0]}
-                className="w-full h-56 object-cover rounded-lg mb-4"
-                alt=""
-              />
-            )}
-
-            {/* Title & Price */}
-            <div className="flex justify-between">
-              <h3 className="font-bold text-xl">{item.title}</h3>
-              <span className="text-green-600 font-bold">
-                {item.currency} {item.price.toLocaleString()}
-              </span>
-            </div>
-
-            {/* Status & Availability */}
-            <div className="flex flex-wrap items-center gap-3 mt-2">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                  item.completionStatus
-                )}`}
-              >
-                {item.completionStatus}
-              </span>
-
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${getAvailabilityColor(
-                  item.availability
-                )}`}
-              >
-                {item.availability || AVAILABILITY.NOT_AVAILABLE}
-              </span>
-
-              <button
-                className="text-blue-600 text-sm"
-                onClick={() => {
-                  setEditStatusId(item._id);
-                  setNewStatus(item.completionStatus);
-                }}
-              >
-                Update Status
-              </button>
-
-              <button
-                className="text-purple-600 text-sm"
-                onClick={() => {
-                  setEditAvailabilityId(item._id);
-                  setNewAvailability(item.availability);
-                }}
-              >
-                Update Availability
-              </button>
-            </div>
-
-            {/* Status Update */}
-            {editStatusId === item._id && (
-              <div className="mt-3 flex gap-3">
-                <select
-                  className="border px-3 py-2 rounded"
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                >
-                  <option value={TABS.PENDING}>Pending</option>
-                  <option value={TABS.APPROVED}>Approved</option>
-                  <option value={TABS.REJECTED}>Rejected</option>
-                </select>
-                <button
-                  className="bg-blue-600 text-white px-4 rounded"
-                  onClick={() => {
-                    dispatch(
-                      updateListingStatus({
-                        id: item._id,
-                        status: newStatus,
-                      })
-                    );
-                    setEditStatusId(null);
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            )}
-
-            {/* Availability Update */}
-            {editAvailabilityId === item._id && (
-              <div className="mt-3 flex gap-3">
-                <select
-                  className="border px-3 py-2 rounded"
-                  value={newAvailability}
-                  onChange={(e) => setNewAvailability(e.target.value)}
-                >
-                  <option value={AVAILABILITY.AVAILABLE}>Available</option>
-                  <option value={AVAILABILITY.NOT_AVAILABLE}>
-                    Not Available
-                  </option>
-                </select>
-                <button
-                  className="bg-purple-600 text-white px-4 rounded"
-                  onClick={() => {
-                    dispatch(
-                      updateListingAvailability({
-                        id: item._id,
-                        availability: newAvailability,
-                      })
-                    );
-                    setEditAvailabilityId(null);
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            )}
-
-            {/* Rooms */}
-            <p className="mt-3 text-gray-600">
-              Bedrooms: <b>{item.bedrooms}</b> | Bathrooms:{" "}
-              <b>{item.bathrooms}</b>
-            </p>
-
-            {/* Features */}
-            {item.features?.length > 0 && (
-              <>
-                <h4 className="mt-3 font-semibold">Features:</h4>
-                <ul className="list-disc pl-5">
-                  {item.features.map((f, i) => (
-                    <li key={i}>{f}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            {/* Payment Plan */}
-            {item.paymentPlan && (
-              <>
-                <h4 className="mt-3 font-semibold">Payment Plan:</h4>
-                {item.paymentPlan.downPayment && (
-                  <p>Down Payment: {item.paymentPlan.downPayment}%</p>
-                )}
-                {item.paymentPlan.installmentPlan?.length > 0 && (
-                  <ul className="list-disc pl-5">
-                    {item.paymentPlan.installmentPlan.map((p, i) => (
-                      <li key={i}>
-                        {p.month} – <b>{p.percent}%</b>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-
-            {/* Agent */}
-            {item.agent && (
-              <>
-                <h4 className="mt-3 font-semibold">Agent:</h4>
-                <p>
-                  {item.agent.name} ({item.agent.agency})
-                </p>
-                <p>Phone: {item.agent.phone}</p>
-              </>
-            )}
-
-            {/* Location */}
-            {item.location && (
-              <>
-                <h4 className="mt-3 font-semibold">Location:</h4>
-                <p>City: {item.location.city}</p>
-                <p>Community: {item.location.community}</p>
-                {item.location.subCommunity && (
-                  <p>Sub-Community: {item.location.subCommunity}</p>
-                )}
-              </>
-            )}
+      {/* ── Top Nav Bar ── */}
+      <div className="bg-white border-b border-[#D9E1F2] sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-6 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-[#01155E] text-[22px] font-bold leading-tight">Admin Dashboard</h1>
+            <p className="text-[#67739E] text-[13px]">Manage your property listings</p>
           </div>
-        ))}
+          <div className="flex items-center gap-3">
+            <Link
+              to="/seller-leads"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#01155E] text-[#01155E] text-[14px] font-semibold hover:bg-[#01155E] hover:text-white transition-colors"
+            >
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Seller Leads
+            </Link>
+            <Link
+              to="/listingcreation"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#01155E] text-white text-[14px] font-semibold hover:opacity-90 transition-opacity shadow-sm"
+            >
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Create Listing
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-6 py-8 space-y-8">
+
+        {/* ── Stats Row ── */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="Total Listings" value={stats.total} icon="🏠" accent="#01155E" />
+          <StatCard label="Active" value={stats.active} icon="✅" accent="#10b981" />
+          <StatCard label="Pending Review" value={stats.pending} icon="⏳" accent="#f59e0b" />
+          <StatCard label="Featured" value={stats.featured} icon="⭐" accent="#8b5cf6" />
+        </div>
+
+        {/* ── Search + Tabs ── */}
+        <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center shadow-sm">
+          {/* Search */}
+          <div className="relative flex-1 min-w-0">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#67739E]" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by title, city, developer..."
+              className="w-full pl-9 pr-4 py-2 border border-[#D9E1F2] rounded-xl text-[14px] text-[#01155E] placeholder-[#A0AABF] focus:outline-none focus:ring-2 focus:ring-[#01155E]/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-1 flex-shrink-0 bg-[#F5F7FC] p-1 rounded-xl border border-[#D9E1F2]">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-1.5 rounded-lg text-[13px] font-semibold transition-all ${
+                  activeTab === tab
+                    ? "bg-[#01155E] text-white shadow-sm"
+                    : "text-[#67739E] hover:text-[#01155E]"
+                }`}
+              >
+                {tabLabel(tab)}
+                <span className={`ml-1.5 text-[11px] ${activeTab === tab ? "text-white/70" : "text-[#A0AABF]"}`}>
+                  ({tabCount(tab)})
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div ref={gridTopRef} />
+
+        {/* ── Listings Grid ── */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-4 border-[#01155E] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-[#67739E] font-medium">Loading...</p>
+            </div>
+          </div>
+        ) : normalizedListings.length === 0 ? (
+          <div className="text-center py-20 text-[#67739E]">
+            <svg className="mx-auto mb-4 text-[#C5CEDF]" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <p className="font-semibold text-[16px]">No listings found</p>
+            <p className="text-sm mt-1">Try adjusting your search or tab filter.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {normalizedListings.map(({ raw, n }) => (
+              <div key={n.id} className="flex flex-col">
+                <ListingRowCard
+                  item={raw}
+                  onStatusEdit={(id, current) => { setEditStatusId(id); setNewStatus(current); setEditAvailabilityId(null); setEditFeaturedId(null); }}
+                  onAvailabilityEdit={(id, current) => { setEditAvailabilityId(id); setNewAvailability(current); setEditStatusId(null); setEditFeaturedId(null); }}
+                  onFeaturedEdit={(id, current) => { setEditFeaturedId(id); setNewFeatured(current ? "true" : "false"); setEditStatusId(null); setEditAvailabilityId(null); }}
+                />
+
+                {/* ── Inline edit panels (below card) ── */}
+                {editStatusId === n.id && (
+                  <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
+                    <p className="text-[#01155E] text-[13px] font-semibold mb-2">Update Status</p>
+                    <InlineSelect
+                      options={[
+                        { value: "pending", label: "Pending" },
+                        { value: "active", label: "Active" },
+                        { value: "rejected", label: "Rejected" },
+                      ]}
+                      value={newStatus}
+                      onChange={setNewStatus}
+                      onSave={() => {
+                        dispatch(updateListingStatus({ id: n.id, status: newStatus }));
+                        setEditStatusId(null);
+                      }}
+                      onCancel={() => setEditStatusId(null)}
+                      accent="#01155E"
+                    />
+                  </div>
+                )}
+
+                {editAvailabilityId === n.id && (
+                  <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
+                    <p className="text-[#01155E] text-[13px] font-semibold mb-2">Update Availability</p>
+                    <InlineSelect
+                      options={[
+                        { value: AVAILABILITY.AVAILABLE, label: "Available" },
+                        { value: AVAILABILITY.NOT_AVAILABLE, label: "Not Available" },
+                      ]}
+                      value={newAvailability}
+                      onChange={setNewAvailability}
+                      onSave={() => {
+                        dispatch(updateListingAvailability({ id: n.id, availability: newAvailability }));
+                        setEditAvailabilityId(null);
+                      }}
+                      onCancel={() => setEditAvailabilityId(null)}
+                      accent="#7c3aed"
+                    />
+                  </div>
+                )}
+
+                {editFeaturedId === n.id && (
+                  <div className="bg-white border border-[#D9E1F2] rounded-2xl p-4 mt-2 shadow-sm">
+                    <p className="text-[#01155E] text-[13px] font-semibold mb-2">Mark as Featured</p>
+                    <InlineSelect
+                      options={[
+                        { value: "true", label: "Featured" },
+                        { value: "false", label: "Not Featured" },
+                      ]}
+                      value={newFeatured}
+                      onChange={setNewFeatured}
+                      onSave={() => {
+                        dispatch(updateListingFeatured({ id: n.id, isFeatured: newFeatured === "true" }));
+                        setEditFeaturedId(null);
+                      }}
+                      onCancel={() => setEditFeaturedId(null)}
+                      accent="#d97706"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── Pagination ── */}
+        {!loading && normalizedListings.length > 0 && (
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
+        )}
+
       </div>
     </div>
   );

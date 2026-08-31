@@ -1,52 +1,19 @@
-// import { Router } from "express";
-// import { protect } from "../middleware/authMiddleware.js";
-// import { adminOnly } from "../middleware/roleMiddleware.js";
-// import upload from "../middleware/upload.js";
-
-// import { 
-//   dashboard,
-//   createListing, 
-//   deleteListing,
-//    updateListingStatus,
-//    updateAvailability
-
-//  } from "../controllers/adminController.js";
-
-// const router = Router();
-
-// router.get("/dashboard", protect, adminOnly, dashboard);
-
-// // Create Listing
-// //  router.post("/listing", protect, adminOnly, createListing);
-//  router.post("/listing",  protect, adminOnly, upload.array("images", 10), createListing);
-
-// // Delete Listing
-// router.delete("/listing/:id", protect, adminOnly, deleteListing);
-// router.put(
-//   "/listings/:id/status",
-//   protect,
-//   adminOnly,
-//   updateListingStatus
-// );
-
-// router.put("/listings/:id/availability", protect,adminOnly, updateAvailability);
-
-
-// export default router;
-
 import { Router } from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/roleMiddleware.js";
 import upload from "../middleware/upload.js";
 
-import { 
+import {
   dashboard,
-  createListing, 
+  createListing,
   deleteListing,
   updateListingStatus,
   updateAvailability,
-  // Naya Controller Import karein
-  createCommunity 
+  getAllListings,
+  getListingById,
+  createCommunity,
+  updateListingFeatured,
+  getCommunities,
 } from "../controllers/adminController.js";
 
 const router = Router();
@@ -55,49 +22,37 @@ const router = Router();
 router.get("/dashboard", protect, adminOnly, dashboard);
 
 // --- Listings ---
-router.post("/listing", protect, adminOnly, upload.array("images", 10), createListing);
-router.delete("/listing/:id", protect, adminOnly, deleteListing);
-router.put("/listings/:id/status", protect, adminOnly, updateListingStatus);
-router.put("/listings/:id/availability", protect, adminOnly, updateAvailability);
+//
+// ⚠️ Using upload.any() here instead of upload.fields([...]) because the
+// new createListing controller expects DYNAMIC field names for per-row
+// images: facilities_image_0, facilities_image_1, ... and
+// unitType_image_0, unitType_image_1, ... — multer's .fields() needs every
+// field name declared upfront, which doesn't work for an arbitrary number
+// of rows. upload.any() accepts any field name; the controller groups
+// req.files back into a { fieldname: [file] } map itself.
+//
+// Fixed field names the controller also expects (still fine under
+// upload.any()): images_feature, images_interior, images_exterior,
+// images_general, images_lobby, agentProfile, communityImage,
+// developerImage, videos.
+const listingUpload = upload.any();
 
-// --- Communities (Naya Route) ---
-// Yahan hum .fields() use karenge kyunki frontend se alag-alag key names aa rahe hain
+router.post("/listings", protect, adminOnly, listingUpload, createListing);
+router.get("/listings", protect, adminOnly, getAllListings);
+router.get("/listings/:id", protect, adminOnly, getListingById);
+router.delete("/listings/:id", protect, adminOnly, deleteListing);
+router.patch("/listings/:id/status", protect, adminOnly, updateListingStatus);
+router.patch("/listings/:id/availability", protect, adminOnly, updateAvailability);
+router.patch("/listings/:id/featured", protect, adminOnly, updateListingFeatured);
+
+// --- Communities ---
 const communityUpload = upload.fields([
-  { name: "heroImage_0", maxCount: 1 },
-  { name: "heroImage_1", maxCount: 1 },
-  { name: "heroImage_2", maxCount: 1 },
+  { name: "heroImages", maxCount: 3 },
   { name: "overviewImage", maxCount: 1 },
-  { name: "marketImage", maxCount: 1 }
+  { name: "marketImage", maxCount: 1 },
 ]);
 
-router.post(
-  "/communities", 
-
-  communityUpload, 
-  createCommunity
-);
+router.post("/communities", protect, adminOnly, communityUpload, createCommunity);
+router.get("/communities", getCommunities);
 
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

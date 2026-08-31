@@ -1,6 +1,6 @@
 // Base API URL
-export const BASE_URL = "http://localhost:5000/api/user";
-
+//  export const BASE_URL = "https://realstate-1-8kv8.onrender.com/api/user";
+ export const BASE_URL = "http://localhost:5000/api/user";
 // -----------------------
 // Auth Endpoints
 // -----------------------
@@ -21,9 +21,23 @@ export const PROJECTS_API = `${BASE_URL}/listing/search`
 
 export const fetchListingsAPI  = `${BASE_URL}/show/listings`;
 
-export const fetchListingDetailAPI =
-  "http://localhost:5000/api/user/listing/detail";
+
+
+ export const fetchListingById = `${BASE_URL}/listing/detail`
 
  export const COMMUNITIES_URL= `${BASE_URL}/communities`;
+ export const DEVELOPERS_API = `${BASE_URL}/listing/developers`;
 
+export const VITE_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_MAPBOX_TOKEN;
 export const VITE_MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+export const FAVORITS_LISTINGS_API = `${BASE_URL}/listing/favorites`; 
+export const ENQUIRY_API = `${BASE_URL}/enquiry/listing`;
+export const SELLER_LEAD_API = `${BASE_URL}/seller-leads`;
+export const SELLER_LEAD_UPDATE_API = `${BASE_URL}/seller-leads`;
+export const UPDATE_USER_API = `${BASE_URL}/update`;
+export const PROJECTS_SORT_API = `${BASE_URL}/sort`;
+export const Contact_Api =  `${BASE_URL}/contact`;
+export const Token = import.meta.env.VITE_TOKEN;
+
+export const Similar_Listings_Api = `${BASE_URL}/listing/similar`;
+// apna actual base URL + path yahan daal dena

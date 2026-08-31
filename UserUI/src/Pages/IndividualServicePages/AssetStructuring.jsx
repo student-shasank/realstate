@@ -9,7 +9,7 @@ import LookingforAsset from '../../Components/ServiceIndividual3/LookingforAsset
 
 function AssetStructuring() {
   return (
-    <div className='pt-[100px] pb-10'>
+    <div className=''>
       <HeroSection
         title={
           <>

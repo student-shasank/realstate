@@ -5,58 +5,57 @@ import Serviceimage from '../../assets/servicepage.png';
 
 const HeroSection = () => {
   return (
-    <section className="w-full bg-white overflow-hidden relative   pb-10">
+    <section className="w-full bg-white overflow-hidden relative  sm:pb-12 lg:pb-0">
 
-      {/* Container to center content at 1200px */}
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-0 min-h-[500px] flex flex-col lg:flex-row items-center relative">
+      {/* Main Container */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-0 min-h-[auto] lg:min-h-[500px] flex flex-col lg:flex-row items-center relative">
 
         {/* Left Column: Text Content */}
-        <div className="w-full lg:w-1/2 py-6 pt-5 z-10">
-          <div className="mb-10">
+        <div className="w-full lg:w-1/2 py-8 sm:py-10 lg:py-6 lg:pt-5 z-10">
+
+          {/* Heading + Subtitle */}
+          <div className="mb-8 sm:mb-10">
             <h2
-              className="text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-6"
+              className="text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-4 sm:pb-6"
               style={{
                 fontFamily: "Archivo, sans-serif",
                 backgroundImage: `url(${imageurl})`,
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "left 90%",
-                backgroundSize: "427px 6px",
+                backgroundSize: "clamp(200px, 80%, 427px) 6px",
               }}
             >
               All Services
             </h2>
-            <p className="font-archivo font-normal text-[20px] leading-[100%] text-[#475569] w-[700px] text-[#01155E99]">
+
+            <p className="text-[16px] sm:text-[18px] lg:text-[20px] leading-[1.5] text-[#01155E] w-full max-w-[600px] lg:max-w-[700px]">
               Are you looking for the perfect neighborhood in Dubai? Discover the unique characteristics of diverse communities, catering to various preferences from luxury to family-friendly environments.
             </p>
-
           </div>
 
-          <div className="space-y-5 text-[#64748b] text-lg leading-relaxed max-w-xl">
-
-
-            <p className="font-archivo font-normal text-[16px] leading-[20px] tracking-normal   text-[#01155E99]">
+          {/* Body Paragraphs */}
+          <div className="space-y-4 sm:space-y-5 max-w-xl">
+            <p className=" font-normal text-[14px] sm:text-[15px] lg:text-[16px] leading-[1.6] tracking-normal text-[#01155E99]">
               We support property owners and investors by structuring access to professional property management services delivered through appointed, RERA-licensed property management teams operating in the UAE market.
             </p>
 
-
-            <p className="font-archivo font-normal text-[16px] leading-[20px] text-[#01155E99]">
+            <p className="font-normal text-[14px] sm:text-[15px] lg:text-[16px] leading-[1.6] text-[#01155E99]">
               Our role is to act as the initial engagement and access point, helping owners define management requirements, align expectations, and transition their assets into an appropriate licensed property management execution structure.
             </p>
 
-
-            <p className="font-archivo font-normal  text-[16px] leading-[20px] text-[#01155E99]">
+            <p className="font-normal text-[14px] sm:text-[15px] lg:text-[16px] leading-[1.6] text-[#01155E99]">
               We do not perform property management activities directly. Execution is delivered by appointed, RERA-licensed property management teams with established operational experience in the UAE market.
             </p>
-
           </div>
 
-          <button className="mt-10 px-8 py-3 bg-[#01155E] text-white font-semibold rounded-md hover:bg-opacity-90 transition-all duration-300">
+          {/* CTA Button */}
+          <button className="mt-8 sm:mt-10 px-6 sm:px-19 py-3 font-[Archivo] bg-[#01155E] text-white text-[14px] sm:text-[20px] font-semibold rounded-md hover:bg-opacity-90 transition-all duration-300  w-full sm:w-auto">
             Discover More details
           </button>
         </div>
 
-        {/* Floating Decorative Service Image */}
-        <div className="absolute -top-10 right-24 w-[395.94px] h-[240.06px] z-20 hidden lg:block">
+        {/* Floating Decorative Service Image — hidden on mobile/tablet */}
+        <div className="absolute -top-10 right-16 xl:right-24 w-[280px] h-[170px] lg:w-[340px] lg:h-[206px] xl:w-[395.94px] xl:h-[240.06px] z-20 hidden lg:block">
           <img
             src={Serviceimage}
             alt="Decorative Pattern"
@@ -65,10 +64,10 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Right Image – Pinned to the absolute bottom and right edge of the screen */}
-      <div className="absolute right-0 bottom-0 w-[541.14px] h-[458.98px] hidden lg:block">
+      {/* Right Hero Image — hidden on mobile, visible lg+ */}
+      <div className="hidden lg:block absolute right-0 bottom-0 w-[380px] h-[320px] xl:w-[541.14px] xl:h-[458.98px] ml-[10]">
         <div className="relative w-full h-full">
-          <div className="absolute inset-0 lg:clip-path-custom">
+          <div className="absolute inset-0">
             <img
               src={Servicehero}
               alt="Modern Luxury Villa"
@@ -78,12 +77,17 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Bottom Bar: Touches bottom of section */}
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[#01155E] h-[7px] w-full"
+      {/* Mobile Hero Image — shown only on small/medium screens */}
+      <div className="block lg:hidden w-full mt-6  sm:pl-[24px] ">
+        <img
+          src={Servicehero}
+          alt="Modern Luxury Villa"
+          className="w-full max-h-[380px] sm:max-h-[460px]  rounded-lg"
+        />
+      </div>
 
-      />
-
+      {/* Bottom Blue Bar */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-[#01155E] h-[7px] w-full" />
     </section>
   );
 };

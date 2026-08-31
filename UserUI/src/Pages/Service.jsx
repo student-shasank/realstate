@@ -5,7 +5,7 @@ import SellProperty from '../Components/ServicePageComponents/SellProperty'
 
 function Service() {
   return (
-    <div className='pt-[160px] pb-10'>
+    <div class="pb-10 pt-[80px] md:pt-[80px]">
         <HeroSection/>
         <ServiceCard/>
         <SellProperty/>

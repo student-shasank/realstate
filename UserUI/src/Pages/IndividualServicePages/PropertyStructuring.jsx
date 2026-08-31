@@ -8,7 +8,7 @@ import Propertysale from '../../Components/Serviceindividual2/Propertysale.jsx'
 
 function PropertyStructuring() {
   return (
-    <div className='pt-[100px] pb-10'>
+    <div className=''>
 
 
       <HeroSection 

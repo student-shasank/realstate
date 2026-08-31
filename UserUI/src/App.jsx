@@ -4,9 +4,7 @@ import Navbar from "./Components/Navbar";
 import Home from "./Pages/Home";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
-import Login from "./Pages/Login";
 import React, { useEffect } from "react";
-import Register from "./Pages/Register";
 import Listings from "./Pages/Listings";
 import ListingDetail from "./Pages/ListingDetail/ListingDetail";
 import { setFavorites } from "./features/dashboard/favoriteligting/favoriteSlice";
@@ -19,12 +17,63 @@ import AdvisoryCoordination from "./Pages/IndividualServicePages/AdvisoryCoordin
 import HandoverSnagging from "./Pages/IndividualServicePages/HandoverSnagging";
 import MortgageCoordination from "./Pages/IndividualServicePages/MortgageCoordination";
 import InvestorVisaAdvisory from "./Pages/IndividualServicePages/InvestorVisaAdvisory";
+
 import Communities from "./Pages/CommunitiesPage/Communities";
 import AllCommunities from "./Pages/CommunitiesPage/AllCommunities";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import TermsOfUse from "./Pages/TermsOfUse";
+import Disclaimer from "./Pages/Disclamer";
+import PrivacyPolicy from "./Pages/PrivacyPolicy";
+import DataSources from "./Pages/DataSources";
+
+import PropertyDetail from "../src/Pages/PropertyDetai";
+
+import SellPropertyPage from "./Pages/SellPropertyPage";
+import Profile from "./Pages/Profile";
+import Compare from "./Pages/Compare";
+import ScrollToTop from "./Components/Scroll/ScrollTop";
+import Blog from "./Pages/Blog";
+import BlogDetail from "./Pages/BlogDetail";
+import ContactUs from "./Pages/ContactUs";
+// import TopBar from "./Components/Card/Topbar";
+import WhatsAppFloatButton from "../src/Components/Card/WhatsAppFloatButton";
+import SignupPopup from "./Pages/landingSignuppopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
+import LoginPopup from "./Pages/LoginPopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
+
 
 
 function App() {
   const dispatch = useDispatch();
+
+  // 🔹 Signup popup ke liye state
+  const [isSignupOpen, setIsSignupOpen] = React.useState(false);
+  const [isLoginOpen, setIsLoginOpen] = React.useState(false);
+
+  // 🔹 Landing pe ek baar (per session) popup dikhane ke liye — sirf agar user login NAHI hai
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem("signupPopupShown");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    // agar user already logged in hai (Navbar jaisa hi check: firstName) to popup mat dikhao
+    const isLoggedIn = !!user?.firstName;
+
+    if (!alreadyShown && !isLoggedIn) {
+      const timer = setTimeout(() => {
+        setIsSignupOpen(true);
+        sessionStorage.setItem("signupPopupShown", "true");
+      }, 1500); // 1.5 second baad khulega
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // 🔹 Agar popup khula hai aur usi beech user login kar le (Navbar se), to turant band kar do
+  useEffect(() => {
+    const handleAuthChanged = () => setIsSignupOpen(false);
+    window.addEventListener("auth-changed", handleAuthChanged);
+    return () => window.removeEventListener("auth-changed", handleAuthChanged);
+  }, []);
 
   // 🔹 Initial load → localStorage se Redux populate
   useEffect(() => {
@@ -49,18 +98,29 @@ function App() {
 
   return (
     <>
+     <WhatsAppFloatButton phone="971505773767" message="Hi, I'm interested in your properties" />
+    {/* <TopBar/> */}
       <Navbar />
+      <ScrollToTop/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/contact" element={<ContactUs />} />
+          <Route path="/compare" element={<Compare />} />
         <Route path="/communities/:slug" element={<Communities/>} />
         <Route path="/communities" element={<AllCommunities/>} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile/>} />
+          <Route path="/sell-property" element={<SellPropertyPage/>} />
+  
+         <Route path="/termsofuse" element={<TermsOfUse />} />
+          <Route path="/disclamer" element={<Disclaimer/>} />
+          <Route path="/privacy" element={<PrivacyPolicy/>} />
+          <Route path="/datascource" element={<DataSources/>} />     
         <Route path="/service" element={<Service />} />
         <Route path="/listings" element={<Listings />} />
-        <Route path="/listing/:id" element={<ListingDetail />} />
+     <Route path="/listing/:id" element={< PropertyDetail/>} /> 
+        {/* <Route path="/listing/detail-:id" element={<PropertyDetail />} /> */}
+         <Route path="/propertyDetail" element ={<PropertyDetail/>} />
 
         {/* Individual Service Pages */}
         <Route path="/marketingandSales" element={<MarketingandSales />} />
@@ -70,10 +130,33 @@ function App() {
         <Route path="/handoverSnagging" element={<HandoverSnagging />} />
         <Route path="/mortgageCoordination" element={<MortgageCoordination />} />
         <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
+          <Route path="/market-insights" element={<Blog />} />
+<Route path="/market-insights/:slug" element={<BlogDetail />} />
+        
       </Routes>
    
 
       <Footer />
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      {/* 🔹 Landing pe auto-open hone wala Signup popup */}
+      <SignupPopup
+        isOpen={isSignupOpen}
+        onClose={() => setIsSignupOpen(false)}
+        openLogin={() => {
+          setIsSignupOpen(false);
+          setIsLoginOpen(true); // 👈 ab yeh Login popup khol dega
+        }}
+      />
+
+      <LoginPopup
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        openSignup={() => {
+          setIsLoginOpen(false);
+          setIsSignupOpen(true); // Login se wapas Signup pe jaane ke liye
+        }}
+      />
     </>
   );
 }

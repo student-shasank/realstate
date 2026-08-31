@@ -6,11 +6,12 @@ import MortgageApplicability from '../../Components/Serviceindividual6/MortgageA
 function MortgageCoordination() {
   return (
    <>
-   <div className='pt-[100px] pb-10'>
+   <div className=''>
 
     <HeroSection
         title={
           <>
+            <span></span>
           Mortgage 
           <br />Coordination
 

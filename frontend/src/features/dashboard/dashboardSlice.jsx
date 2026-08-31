@@ -4,21 +4,20 @@ import {
   ADMIN_DASHBOARD_URL,
   ADMIN_LISTING_STATUS_URL,
   ADMIN_LISTING_AVAILABILITY_URL,
+  ADMIN_LISTING_FEATURED_URL,
 } from "../../Constant/constant.js";
 
-// -------------------------------------------
-// Fetch Dashboard Listings
-// -------------------------------------------
+// ── Fetch Dashboard (paginated + search) ──────────────────────
 export const fetchDashboard = createAsyncThunk(
   "dashboard/fetchDashboard",
-  async (_, thunkAPI) => {
+  async ({ page = 1, limit = 20, search = "", status = "All" } = {}, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
+      const params = new URLSearchParams({ page, limit, search, status });
 
-      const response = await axios.get(ADMIN_DASHBOARD_URL, {
+      const response = await axios.get(`${ADMIN_DASHBOARD_URL}?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -28,114 +27,161 @@ export const fetchDashboard = createAsyncThunk(
   }
 );
 
-// -------------------------------------------
-// Update Listing Status
-// -------------------------------------------
+// ── Update Status ─────────────────────────────────────────────
 export const updateListingStatus = createAsyncThunk(
   "dashboard/updateListingStatus",
   async ({ id, status }, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
-
-      const response = await axios.put(
-        ADMIN_LISTING_STATUS_URL(id),
+      const response = await axios.patch(
+        ADMIN_LISTING_STATUS_URL(id), 
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      return response.data; // Updated listing from backend
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update listing status"
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Failed");
     }
   }
 );
 
-// -------------------------------------------
-// Update Listing Availability
-// -------------------------------------------
+// ── Update Availability ───────────────────────────────────────
 export const updateListingAvailability = createAsyncThunk(
   "dashboard/updateListingAvailability",
   async ({ id, availability }, thunkAPI) => {
     try {
       const token = localStorage.getItem("token");
-
-      const response = await axios.put(
-        ADMIN_LISTING_AVAILABILITY_URL(id),
+      const response = await axios.patch(
+        ADMIN_LISTING_AVAILABILITY_URL(id), 
         { availability },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      return response.data; // Updated listing from backend
+      return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to update availability"
-      );
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Failed");
     }
   }
 );
 
-// -------------------------------------------
-// SLICE
-// -------------------------------------------
+// ── Update Featured ───────────────────────────────────────────
+export const updateListingFeatured = createAsyncThunk(
+  "dashboard/updateListingFeatured",
+  async ({ id, isFeatured }, thunkAPI) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        ADMIN_LISTING_FEATURED_URL(id), 
+        { isFeatured },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || "Failed");
+    }
+  }
+);
+
+// ── Slice ─────────────────────────────────────────────────────
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState: {
-    data: [], // Holds dashboard response
+    data: null,
+    listings: [],
     loading: false,
     error: null,
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
     statusUpdating: false,
     availabilityUpdating: false,
+    featuredUpdating: false,
   },
-  reducers: {},
+  reducers: {
+    // Optimistic update
+    patchListing(state, action) {
+      const updated = action.payload;
+      state.listings = state.listings.map((l) =>
+        l._id === updated._id ? { ...l, ...updated } : l
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
-      // Fetch Dashboard
+      // ✅ Fetch Dashboard
       .addCase(fetchDashboard.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchDashboard.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
+        state.loading     = false;
+        state.data        = action.payload;
+        state.currentPage = action.payload.currentPage;
+        state.totalPages  = action.payload.totalPages;
+        state.totalCount  = action.payload.totalCount;
+
+        // ✅ ALWAYS REPLACE - NOT APPEND (pagination ke liye)
+        // Ab har page mein sirf 20 listings hongi, pehle ke listings remove honge
+        state.listings = action.payload.listings;
       })
       .addCase(fetchDashboard.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error   = action.payload;
       })
 
-      // Update Listing Status
+      // ✅ Update Status
       .addCase(updateListingStatus.pending, (state) => {
         state.statusUpdating = true;
       })
       .addCase(updateListingStatus.fulfilled, (state, action) => {
         state.statusUpdating = false;
-        const updated = action.payload;
-        state.data.listings = state.data.listings.map((listing) =>
-          listing._id === updated._id ? updated : listing
-        );
+        const updated = action.payload?.listing || action.payload;
+        if (updated?._id) {
+          state.listings = state.listings.map((l) =>
+            l._id === updated._id ? { ...l, ...updated } : l
+          );
+        }
       })
       .addCase(updateListingStatus.rejected, (state, action) => {
         state.statusUpdating = false;
         state.error = action.payload;
       })
 
-      // Update Listing Availability
+      // ✅ Update Availability
       .addCase(updateListingAvailability.pending, (state) => {
         state.availabilityUpdating = true;
       })
       .addCase(updateListingAvailability.fulfilled, (state, action) => {
         state.availabilityUpdating = false;
-        const updated = action.payload;
-        state.data.listings = state.data.listings.map((listing) =>
-          listing._id === updated._id ? updated : listing
-        );
+        const updated = action.payload?.listing || action.payload;
+        if (updated?._id) {
+          state.listings = state.listings.map((l) =>
+            l._id === updated._id ? { ...l, ...updated } : l
+          );
+        }
       })
       .addCase(updateListingAvailability.rejected, (state, action) => {
         state.availabilityUpdating = false;
+        state.error = action.payload;
+      })
+
+      // ✅ Update Featured
+      .addCase(updateListingFeatured.pending, (state) => {
+        state.featuredUpdating = true;
+      })
+      .addCase(updateListingFeatured.fulfilled, (state, action) => {
+        state.featuredUpdating = false;
+        const updated = action.payload?.listing || action.payload;
+        if (updated?._id) {
+          state.listings = state.listings.map((l) =>
+            l._id === updated._id ? { ...l, ...updated } : l
+          );
+        }
+      })
+      .addCase(updateListingFeatured.rejected, (state, action) => {
+        state.featuredUpdating = false;
         state.error = action.payload;
       });
   },
 });
 
+export const { patchListing } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

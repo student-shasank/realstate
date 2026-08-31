@@ -5,12 +5,12 @@ import LifecycleFramework from '../../Components/ServiceIndividual4/LifecycleFra
 
 function AdvisoryCoordination() {
   return (
-    <div className='pt-[100px] pb-10'>
+    <div className=''>
 
       <HeroSection
         title={
           <>
-           Development 
+           Development
  <br />
             Advisory and  <br />
            Project 

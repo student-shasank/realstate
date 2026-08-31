@@ -8,6 +8,12 @@ const communitySchema = new mongoose.Schema(
       required: [true, "Title is required"],
       trim: true,
     },
+    city: {
+  type: String,
+  required: [true, "City is required"],
+  enum: ["Dubai", "Abu Dhabi"],
+  trim: true,
+},
     slug: {
       type: String,
       required: true,

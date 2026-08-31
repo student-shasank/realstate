@@ -23,15 +23,16 @@ function Navbar() {
 
         {/* Logo */}
         <Link to="/">
-          <h3>Xyz</h3>
+          <h3>Yupland</h3>
         </Link>
 
         {/* Desktop Menu */}
         <div className="hidden sm:flex items-center gap-8">
-          <Link to="/">Home</Link>
+         
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
            <Link to="/communities" className="block">Communities</Link>
+               <Link to="/dashboard" className="block">Dashboard</Link>
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">
@@ -70,7 +71,7 @@ function Navbar() {
 
               {/* Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md border p-2">
+                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md border p-2 z-100">
                   <p className="text-sm px-2 py-1">{user.name}</p>
                   <p className="text-xs px-2 pb-2 text-gray-500">{user.email}</p>
 

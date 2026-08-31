@@ -1,26 +1,27 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { fetchListingDetailAPI } from "../../Constant/constant.js";
+import { fetchListingById } from "../../Constant/constant.js";
 
 // ----------------------
-// Async Thunk
+// Async Thunk — MongoDB se _id ke basis par listing detail fetch karta hai
+// Route: GET {BASE_URL}/listing/detail/:id
 // ----------------------
 export const fetchListingDetail = createAsyncThunk(
   "listingDetail/fetchListingDetail",
   async (id, thunkAPI) => {
     try {
-      const response = await axios.get(
-        `${fetchListingDetailAPI}/${id}`
-      );
+      const response = await axios.get(`${fetchListingById}/${id}`);
 
-      return response.data.data;
+      const data = response.data?.data || response.data;
+
+      return {
+        ...data,
+        id: data?.id || id, // fallback ensure
+        _id: data?._id || id, // fallback ensure
+      };
     } catch (error) {
-      console.error("FETCH LISTING DETAIL ERROR:", error);
-
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch listing detail"
+        error.response?.data?.message || error.message
       );
     }
   }
@@ -49,27 +50,21 @@ const listingDetailSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-      // ----------------------
       // Pending
-      // ----------------------
       .addCase(fetchListingDetail.pending, (state) => {
         state.loading = true;
         state.success = false;
         state.error = null;
       })
 
-      // ----------------------
       // Fulfilled
-      // ----------------------
       .addCase(fetchListingDetail.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.listing = action.payload;
       })
 
-      // ----------------------
       // Rejected
-      // ----------------------
       .addCase(fetchListingDetail.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
@@ -78,7 +73,7 @@ const listingDetailSlice = createSlice({
   },
 });
 
-export const { resetListingDetailState } =
-  listingDetailSlice.actions;
+export const { resetListingDetailState } = listingDetailSlice.actions;
 
+// ✅ Fix: .reducer (pehle .reduce likha tha jo galat hai)
 export default listingDetailSlice.reducer;

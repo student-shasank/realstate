@@ -1,100 +1,131 @@
 import React from "react";
-import imageurl from '../../assets/underline.png';
-import { Link } from "react-router-dom"; 
+import imageurl from "../../assets/underline.png";
+import { Link } from "react-router-dom";
+
+// 👉 Add images (matching files in assets/services)
+import ProjectMarketing from "../../assets/services/Project Marketing1.png";
+import PropertyManagement from "../../assets/services/Property Management1.png";
+import AssetManagement from "../../assets/services/Asset management 11.png";
+import DevelopmentAdvisory from "../../assets/services/Development Advisory1.png";
+import HandoverSnagging from "../../assets/services/Handover and snagging1.png";
+import Mortgage from "../../assets/services/mortgage1.png";
+import ResidencyImage from "../../assets/services/Residency image1.png";
 
 const ServicesSection = () => {
   const services = [
-    // Row 1
-    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
-    { title: "Project Marketing And Sales Structuring", path: "/marketingandSales" },
-    { title: "Property Management Structuring", path: "/propertyStructuring" },
-    { title: "Asset Management Structuring", path: "/assetStructuring" },
-    // Row 2
-    { title: "Development Advisory And Project Coordination", path: "/advisoryCoordination" },
-    { title: "Handover & Snagging Representation", path: "/handoverSnagging" },
-    { title: "Mortgage Coordination", path: "/mortgageCoordination" },
-    { title: "Residency & Investor Visa Advisory (UAE)", path: "/investorVisaAdvisory" },
+    {
+      title: "Project Marketing ",
+      description: "We work with developers and landowners to structure and position real estate projects for market",
+      image: ProjectMarketing,
+      path: "/marketingandSales",
+    },
+    {
+      title: "Property Management",
+      description: "We help manage properties efficiently for better ROI and operations",
+      image: PropertyManagement,
+      path: "/propertyStructuring",
+    },
+    {
+      title: "Asset Management",
+      description: "Optimize your real estate portfolio with expert asset management",
+      image: AssetManagement,
+      path: "/assetStructuring",
+    },
+    {
+      title: "Development Advisory",
+      description: "End-to-end support for project development and execution",
+      image: DevelopmentAdvisory,
+      path: "/advisoryCoordination",
+    },
+    {
+      title: "Handover & Snagging",
+      description: "Ensure quality and compliance during handover process",
+      image: HandoverSnagging,
+      path: "/handoverSnagging",
+    },
+    {
+      title: "Mortgage Coordination",
+      description: "Seamless mortgage assistance for buyers and investors",
+      image: Mortgage,
+      path: "/mortgageCoordination",
+    },
+    {
+      title: "Investor Visa Advisory",
+      description: "Assess eligibility, investment needs, and program suitability before starting your immigration process.",
+      image: ResidencyImage,
+      path: "/investorVisaAdvisory",
+    },
+    // {
+    //   title: "Residency & Investor Visa Advisory (UAE)",
+    //   description: "Guidance for UAE residency and investor visa process",
+    //   image: ResidencyImage,
+    //   path: "/investorVisaAdvisory",
+    // },
   ];
-
   return (
-    <section className="w-full bg-white py-[120px]">
-      <div className="max-w-[1200px] mx-auto  py-16  ">
-        <div className="max-w-2xl">
-          <h2
-            className="text-[48px] font-bold text-[#001A54] mb-2 inline-block pb-6"
-            style={{
-              fontFamily: "Archivo, sans-serif",
-              backgroundImage: `url(${imageurl})`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "left 90%",
-              backgroundSize: "257px 6px",
-            }}
-          >
-            Services
-          </h2>
+    <section className="w-full bg-white px-4 sm:px-6 lg:px-8 py-12 lg:py-[120px]">
 
-          <p className="text-gray-500 text-lg mb-8 font-medium">
-            Discover the unique characteristics of diverse communities, catering
-            to various preferences from luxury to family-friendly environments.
+      {/* Heading (same as before) */}
+      <div className="max-w-[1200px] mx-auto mb-10">
+        <h2
+          className="inline-block pb-6 mb-4 text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
+          style={{
+            fontFamily: "Archivo, sans-serif",
+            backgroundImage: `url(${imageurl})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "left 95%",
+            backgroundSize: "200px 6px",
+          }}
+        >
+          Services
+        </h2>
+
+        <div className="text-[#01155E99] text-[15px] sm:text-[17px] lg:text-[20px] leading-[1.2] max-w-[1000px] space-y-4">
+          <p>
+            Yupland functions as a marketing and information platform designed to support buyers, investors, and property owners.
+          </p>
+          <p>
+            All service enquiries are submitted through the platform and facilitated via trusted partners.
           </p>
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-[36px]">
-        {/* ROW 1 */}
-        <div className="flex justify-between gap-[21px]">
-          {services.slice(0, 4).map((service, index) => (
-            <div
+      {/* Card Layout */}
+      <div className="max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+
+          {services.map((service, index) => (
+            <Link
+              to={service.path}
               key={index}
-              className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px] pt-[29px] px-[25px] pb-[14px] flex flex-col"
+              className="w-full flex justify-center"
             >
-              <div className="flex flex-col">
-                <h3 className="w-[226px] h-[90px] text-white text-[24px] font-medium leading-[30px] underline underline-offset-4 decoration-white">
-                  {service.title}
-                </h3>
-                <p className="w-[226px] mt-[47px] text-[#D9D9D9] text-[16px] leading-[22px]">
-                  Having your dedicated property manager can turn your investment
-                  into a lucrative cash flow opportunity.
-                </p>
+              <div className="flex flex-col max-w-[390px] w-full cursor-pointer">
+
+                {/* Image */}
+                <div className="relative h-[267px] rounded-lg overflow-hidden group">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                    style={{ backgroundImage: `url(${service.image})` }}
+                  />
+                </div>
+
+                {/* Title */}
+                <div className="flex items-center border-l-4 border-[#01155E] pl-4 mt-4 h-[62px]">
+                  <h3 className="text-[#01155E99] font-semibold text-lg">
+                    {service.title}
+                  </h3>
+                </div>
+
               </div>
-              <Link
-                to={service.path}
-                className="mt-auto w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[15px] text-center"
-              >
-                View Details
-              </Link>
-            </div>
+            </Link>
           ))}
+
         </div>
 
-        {/* ROW 2 */}
-        <div className="flex justify-between gap-[21px]">
-          {services.slice(4).map((service, index) => (
-            <div
-              key={index}
-              className="w-[273px] h-[366px] bg-[#01155E] rounded-[16px] pt-[29px] px-[25px] pb-[14px] flex flex-col"
-            >
-              <div className="flex flex-col">
-                <h3 className="w-[226px] h-[90px] text-white text-[24px] font-medium leading-[30px] underline underline-offset-4 decoration-white">
-                  {service.title}
-                </h3>
-                <p className="w-[226px] mt-[47px] text-[#D9D9D9] text-[16px] leading-[22px]">
-                  Having your dedicated property manager can turn your investment
-                  into a lucrative cash flow opportunity.
-                </p>
-              </div>
-              <Link
-                to={service.path || "/"}
-                className="mt-auto w-full py-3 bg-white text-[#01155E] rounded-[8px] font-bold text-[15px] text-center"
-              >
-                View Details
-              </Link>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-end">
-          <div className="font-medium text-[24px] leading-[100%] tracking-[0%] text-center text-[#01155E] underline decoration-solid decoration-auto decoration-0 underline-offset-0 cursor-pointer transition-colors duration-200 hover:text-blue-700">
+        {/* View All */}
+        <div className="flex justify-center md:justify-end mt-10">
+          <div className="font-medium text-[20px] lg:text-[24px] text-[#01155E] underline cursor-pointer hover:text-blue-700 transition">
             View All
           </div>
         </div>

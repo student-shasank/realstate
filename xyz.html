@@ -1,297 +1,322 @@
-{% assign animation_class = '' %}
-
-{% if settings.animations_reveal_on_scroll and section.settings.animation != 'none' %}
-  {% assign animation_class = 'scroll-trigger animate--' | append: section.settings.animation | append: ' scroll-trigger--offscreen' %}
-{% endif %}
-
-<section class="section our-categories page-width {{ animation_class }}">
-  <div class="teevoque-container">
-    
-    <!-- Image Column -->
-    <div class="category-image">
-      <!-- Default image -->
-      <img
-          src="{{ section.settings.left_img | image_url }}"
-          width="{{ section.settings.left_img.width }}"
-          height="{{ section.settings.left_img.height }}"
-          alt="Main"
-          class="main-category-image active"
-      />
-
-      <!-- Category-specific images -->
-      {% for block in section.blocks %}
-        {% if block.settings.category_img %}
-        <img
-            src="{{ block.settings.category_img | image_url }}"
-            width="{{ block.settings.category_img.width }}"
-            height="{{ block.settings.category_img.height }}"
-            alt="{{ block.settings.anchor_text }}"
-            class="cat-img"
-            data-block-id="{{ block.id }}"
-        />
-        {% endif %}
-      {% endfor %}
-    </div>
-
-    <!-- Content Column -->
-    <div class="categories-content">
-      <div class="category-heading">
-        <h1 style="color:{{ section.settings.catogory_heading_color }};">
-          {{ section.settings.catogory_heading }}
-        </h1>
-        <p style="color:{{ section.settings.catogory_text_color }};">
-          {{ section.settings.catogory_text }}
-        </p>
-      </div>
-      <div class="categories-list">
-        {% for block in section.blocks %}
-          <a href="{{ block.settings.anchor_link }}" class="category-item" data-block-id="{{ block.id }}">
-            {{ block.settings.anchor_text }}
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-
-  </div>
-</section>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yupikand Estates</title>
 <style>
-.our-categories {
-  padding-top: 75px;
-  padding-bottom: var(--section-vertical-spacing);
-}
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500&display=swap');
 
-.teevoque-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 100px;
-  align-items: center;
-}
+  *{ margin:0; padding:0; box-sizing:border-box; }
 
-/* Image column */
-.category-image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  {% comment %} overflow: hidden; {% endcomment %}
-  display: flex;
-}
-
-.category-image img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  max-width: 475px;
-  {% comment %} height: 100%; {% endcomment %}
-  height: auto;
-  {% comment %} aspect-ratio: 4/5; {% endcomment %}
-  {% comment %} object-fit: cover; {% endcomment %}
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.category-image img.active {
-  opacity: 1;
-}
-
-/* Content column */
-.categories-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 20px;
-  text-align: right;
-}
-
-.category-heading h1 {
-  {% comment %} font-size: clamp(28px, 4vw, 69px); {% endcomment %}
-  font-size: clamp(3rem, 4.362vw + 0.619rem, 6rem);
-  color: var(--color-foreground);
-  margin: 0;
-  line-height: 100%;
-}
-
-.category-heading p {
-  font-size: clamp(14px, 1.2vw, 18px);
-  color: rgba(var(--color-foreground_rgb), 0.8);
-  {% comment %} margin: 10px 0 0; {% endcomment %}
-   margin: 8px 0 0 0;
-}
-
-/* Category list links */
-.categories-list {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.categories-list a {
-  font-family: 'DM Sans';
-  font-weight: 300;
-  text-decoration: none;
-  transition: color 0.3s ease;
-  color: rgba(87, 94, 180, 0.5);
-  font-size: clamp(20px, 4vw, 32px);
-}
-
-.categories-list a:hover {
-  color: rgba(55, 61, 131, 1);
-  text-decoration:underline;
-}
-
-/* Tablet */
-@media (max-width: 1024px) {
-  .teevoque-container {
-    /* future adjustment placeholder */
-  }
-  .categories-content {
-    order: 2;
-  }
-  .category-image {
-    order: 1;
-  }
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .our-categories {
-    padding-top: 75px;
-    {% comment %} padding-top: calc(var(--section-vertical-spacing)/1.5);
-    padding-bottom: calc(var(--section-vertical-spacing)/1.5); {% endcomment %}
-  }
-  .category-heading h1 {
-    {% comment %} font-size: clamp(28px, 7vw, 48px); {% endcomment %}
-  }
-  .categories-list a {
-    font-size: clamp(18px, 4vw, 24px);
-  }
-}
-
-/* Small Mobile Fix */
-@media (max-width: 500px) {
-  .our-categories {
-    padding-top: 60px;
-  }
-  .teevoque-container {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  html,body{
+    height:100%;
+    background:#000;
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
   }
 
-  .category-image {
-    position: relative;
-    aspect-ratio: 1/1.2;
+  /* ============================================================
+     PRELOADER — solid black, single circular emblem, 3 loading dots
+     Exactly mirrors the Royal Enfield reference: no photos, no
+     background pattern, no progress bar. Just badge + dots on black,
+     then the whole thing fades to reveal the real page underneath.
+  ============================================================ */
+  #preloader{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    transition:opacity .8s ease;
+  }
+  #preloader.hide{
+    opacity:0;
+    pointer-events:none;
   }
 
-  .category-image img {
-    position: absolute; /* keep absolute for correct overlay */
-    inset: 0;
+  /* ---- circular emblem badge ---- */
+  .badge{
+    width:104px;
+    height:104px;
+    margin-bottom:18px;
+  }
+  .badge .ring-outer{
+    fill:none;
+    stroke:#f5f5f2;
+    stroke-width:1.4;
+  }
+  .badge .ring-inner{
+    fill:none;
+    stroke:#f5f5f2;
+    stroke-width:.7;
+  }
+  .badge text{
+    fill:#f5f5f2;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:6.6px;
+    letter-spacing:1.6px;
+  }
+  .badge .sep{
+    fill:#f5f5f2;
+  }
+  .badge .art-slide{
+    opacity:0;
+    transform:scale(.92);
+    transform-origin:60px 60px;
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .badge .art-slide.active{
+    opacity:1;
+    transform:scale(1);
+  }
+  .badge .art-slide path,
+  .badge .art-slide rect,
+  .badge .art-slide circle,
+  .badge .art-slide line{
+    stroke:#f5f5f2;
+  }
+  .badge .art-slide .fill{
+    fill:#f5f5f2;
+    stroke:none;
+  }
+  .badge .art-slide text{
+    fill:#f5f5f2;
+    font-weight:600;
+    letter-spacing:2px;
   }
 
-  .categories-content {
-    text-align: center;
+  /* ---- 6 loading dots — one per slide, active dot advances with the carousel ---- */
+  .loader-dots{
+    display:flex;
+    gap:7px;
+  }
+  .loader-dots span{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#f5f5f2;
+    opacity:.25;
+    transition:opacity .4s ease, transform .4s ease, background .4s ease;
+  }
+  .loader-dots span.active{
+    opacity:1;
+    background:#ffffff;
+    transform:scale(1.4);
   }
 
-  .categories-list {
-    text-align: center;
+  /* ============================================================
+     ACTUAL SITE CONTENT — replace with your real homepage markup
+  ============================================================ */
+  #page{
+    min-height:100%;
+    background:#0b0d10;
+    color:#f6f4ef;
   }
-}
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    background:#111316;
+  }
+  .nav .logo{
+    font-family:'Playfair Display', serif;
+    font-weight:600;
+    font-size:18px;
+    letter-spacing:1px;
+  }
+  .nav .links{
+    display:flex;
+    gap:18px;
+    font-size:13px;
+    color:#cfcdc7;
+  }
+  .hero{
+    position:relative;
+    height:60vh;
+    min-height:320px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.75) 100%),
+      url('https://picsum.photos/id/1040/1200/900') center/cover no-repeat;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    padding-bottom:36px;
+    text-align:center;
+  }
+  .hero h1{
+    font-family:'Playfair Display', serif;
+    font-weight:600;
+    font-size:clamp(22px,4vw,30px);
+    margin-bottom:14px;
+  }
+  .hero button{
+    background:#b3452e;
+    color:#fff;
+    border:none;
+    padding:10px 22px;
+    font-size:13px;
+    letter-spacing:.5px;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .hero-row{
+    display:flex;
+    height:40vh;
+    min-height:220px;
+  }
+  .hero-row .hero{ flex:1; height:100%; min-height:0; }
 </style>
+</head>
+<body>
 
-{% javascript %}
-document.addEventListener('DOMContentLoaded', function() {
-  const items = document.querySelectorAll('.category-item');
-  const defaultImg = document.querySelector('.main-category-image');
-  const catImgs = document.querySelectorAll('.cat-img');
+  <!-- PRELOADER -->
+  <div id="preloader">
+    <svg class="badge" viewBox="0 0 120 120">
+      <circle class="ring-outer" cx="60" cy="60" r="54"></circle>
+      <circle class="ring-inner" cx="60" cy="60" r="47"></circle>
 
-  items.forEach(item => {
-    const id = item.dataset.blockId;
-    const imgToShow = document.querySelector(`.cat-img[data-block-id="${id}"]`);
+      <!-- top arc text -->
+      <path id="arcTop" d="M13,60 A47,47 0 0,1 107,60" fill="none"></path>
+      <text>
+        <textPath href="#arcTop" startOffset="50%" text-anchor="middle">YUPIKAND ESTATES</textPath>
+      </text>
 
-    // Hover effect for desktop
-    item.addEventListener('mouseenter', () => {
-      defaultImg.classList.remove('active');
-      catImgs.forEach(img => img.classList.remove('active'));
-      if (imgToShow) imgToShow.classList.add('active');
-    });
+      <!-- bottom arc text -->
+      <path id="arcBottom" d="M14,63 A47,47 0 0,0 106,63" fill="none"></path>
+      <text>
+        <textPath href="#arcBottom" startOffset="50%" text-anchor="middle">VILLAS · RESIDENCES</textPath>
+      </text>
 
-    item.addEventListener('mouseleave', () => {
-      catImgs.forEach(img => img.classList.remove('active'));
-      defaultImg.classList.add('active');
-    });
+      <!-- center: 6 villa-silhouette slides, cycled one by one -->
+      <g id="iconSlides">
 
-    // Click effect for mobile
-    item.addEventListener('click', (e) => {
-      if (window.innerWidth <= 768) e.preventDefault(); // Prevent redirect on small screens
-      defaultImg.classList.remove('active');
-      catImgs.forEach(img => img.classList.remove('active'));
-      if (imgToShow) imgToShow.classList.add('active');
-    });
-  });
-});
-{% endjavascript %}
+        <!-- 1: modern flat-roof villa with palm trees -->
+        <g class="art-slide active">
+          <path d="M22 74 Q20 62 24 52 M24 52 Q28 54 26 46 M24 52 Q20 54 22 46" fill="none" stroke-width="1.3"/>
+          <path d="M98 74 Q100 62 96 52 M96 52 Q92 54 94 46 M96 52 Q100 54 98 46" fill="none" stroke-width="1.3"/>
+          <path class="fill" d="M34 74 L34 60 L64 60 L64 50 L86 50 L86 74 Z"/>
+          <rect x="40" y="64" width="6" height="6"/>
+          <rect x="50" y="64" width="6" height="6"/>
+          <rect x="70" y="55" width="6" height="6"/>
+        </g>
 
+        <!-- 2: classic villa, pediment + columns -->
+        <g class="art-slide">
+          <path class="fill" d="M28 50 L60 34 L92 50 L86 50 L86 74 L34 74 L34 50 Z"/>
+          <rect x="40" y="56" width="4" height="18" fill="#000"/>
+          <rect x="50" y="56" width="4" height="18" fill="#000"/>
+          <rect x="66" y="56" width="4" height="18" fill="#000"/>
+          <rect x="76" y="56" width="4" height="18" fill="#000"/>
+          <rect x="56" y="60" width="8" height="14" fill="#000"/>
+        </g>
 
-{% comment %} {% schema %}
-{
-  "name": "Custom Categories",
-  "settings": [
-    { "type": "header", "content": "Image" },
-    { "type": "image_picker", "id": "left_img", "label": "Left Image" },
-    { "type": "text", "id": "catogory_heading", "label": "Heading", "default": "Our Categories" },
-    { "type": "color", "id": "catogory_heading_color", "label": "Heading Color", "default": "#000000" },
-    { "type": "text", "id": "catogory_text", "label": "Text", "default": "Explore curated collections to match every mood and style" },
-    { "type": "color", "id": "catogory_text_color", "label": "Text Color", "default": "rgba(0,0,0,0.7)" }
-  ],
-  "blocks": [
-    {
-      "type": "items_list",
-      "name": "Category Items",
-      "settings": [
-        { "type": "text", "id": "anchor_text", "label": "Categories Text", "default": "Items" },
-        { "type": "url", "id": "anchor_link", "label": "Categories Link" },
-        { "type": "image_picker", "id": "category_img", "label": "Category Image" }
-      ]
+        <!-- 3: contemporary staircase villa -->
+        <g class="art-slide">
+          <path class="fill" d="M26 74 L26 62 L46 62 L46 50 L70 50 L70 60 L94 60 L94 74 Z"/>
+          <rect x="32" y="66" width="8" height="8" fill="#000"/>
+          <rect x="52" y="54" width="8" height="8" fill="#000"/>
+          <rect x="76" y="64" width="8" height="8" fill="#000"/>
+          <line x1="26" y1="78" x2="94" y2="78" stroke-width="1.2" fill="none"/>
+        </g>
+
+        <!-- 4: mediterranean mansion, dome + palms -->
+        <g class="art-slide">
+          <path d="M20 74 Q18 60 23 48 M23 48 Q27 50 25 42 M23 48 Q19 50 21 42" fill="none" stroke-width="1.2"/>
+          <path d="M100 74 Q102 60 97 48 M97 48 Q93 50 95 42 M97 48 Q101 50 99 42" fill="none" stroke-width="1.2"/>
+          <path class="fill" d="M32 74 L32 56 L88 56 L88 74 Z"/>
+          <circle cx="60" cy="50" r="8" class="fill"/>
+          <rect x="58" y="42" width="4" height="8" class="fill"/>
+          <path d="M40 64 A4 4 0 0 1 48 64" fill="none" stroke-width="1.1"/>
+          <path d="M72 64 A4 4 0 0 1 80 64" fill="none" stroke-width="1.1"/>
+        </g>
+
+        <!-- 5: minimalist abstract black blocks -->
+        <g class="art-slide">
+          <path class="fill" d="M24 74 L24 58 L52 46 L52 74 Z"/>
+          <path class="fill" d="M52 74 L52 52 L90 40 L90 74 Z"/>
+          <path d="M52 52 L90 40" stroke-width="1.2" fill="none"/>
+        </g>
+
+        <!-- 6: minimalist outline villa (blueprint style) -->
+        <g class="art-slide">
+          <rect x="30" y="52" width="60" height="22" fill="none" stroke-width="1.3"/>
+          <line x1="30" y1="60" x2="90" y2="60" stroke-width="1"/>
+          <line x1="48" y1="52" x2="48" y2="74" stroke-width="1"/>
+          <line x1="68" y1="52" x2="68" y2="74" stroke-width="1"/>
+          <text x="60" y="86" text-anchor="middle" font-size="8" letter-spacing="2" style="font-family:'Playfair Display',serif;">VILLA</text>
+        </g>
+
+      </g>
+    </svg>
+
+    <div class="loader-dots" id="loaderDots">
+      <span class="active"></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- ACTUAL SITE CONTENT GOES HERE -->
+  <div id="page">
+    <div class="nav">
+      <div class="logo">Yupikand</div>
+      <div class="links">Villas &nbsp; Amenities &nbsp; Gallery &nbsp; Contact</div>
+    </div>
+
+    <div class="hero">
+      <h1>Sea View Villa</h1>
+      <button>Know More &rsaquo;</button>
+    </div>
+
+    <div class="hero-row">
+      <div class="hero" style="background-image:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.75) 100%), url('https://picsum.photos/id/1067/800/600')"></div>
+      <div class="hero" style="background-image:linear-gradient(180deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.75) 100%), url('https://picsum.photos/id/1080/800/600')"></div>
+    </div>
+  </div>
+
+<script>
+  (function(){
+    var pre = document.getElementById('preloader');
+
+    // -------- cycle the 6 villa-icon slides, one at a time, dots stay in sync --------
+    (function runSlideCarousel(){
+      var slides = document.querySelectorAll('#iconSlides .art-slide');
+      var dots   = document.querySelectorAll('#loaderDots span');
+      if (!slides.length) return;
+      var idx = 0;
+      setInterval(function(){
+        slides[idx].classList.remove('active');
+        dots[idx] && dots[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+        dots[idx] && dots[idx].classList.add('active');
+      }, 1500);
+    })();
+
+    // Simulated minimum loading time — replace with real asset-loading logic if needed
+    var MIN_VISIBLE_MS = 9500; // gives all 6 slides a full turn (6 x 1.5s carousel)
+    var start = Date.now();
+
+    function finish(){
+      pre.classList.add('hide');
+      pre.addEventListener('transitionend', function(){ pre.remove(); }, { once:true });
     }
-  ],
-  "presets": [{ "name": "Custom Categories" }]
-}
-{% endschema %} {% endcomment %}
- {% schema %} 
-{
-  "name": "Custom Categories",
-  "settings": [
-    { "type": "header", "content": "Image" },
-    { "type": "image_picker", "id": "left_img", "label": "Left Image" },
 
-     {
-      "type": "select",
-      "id": "animation",
-      "label": "Animation",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "fade-in", "label": "Fade in" },
-        { "value": "slide-in", "label": "Slide in" }
-      ],
-      "default": "slide-in"
-    },
+    window.addEventListener('load', function(){
+      var elapsed = Date.now() - start;
+      var wait = Math.max(0, MIN_VISIBLE_MS - elapsed);
+      setTimeout(finish, wait);
+    });
 
-    { "type": "text", "id": "catogory_heading", "label": "Heading", "default": "Our Categories" },
-    { "type": "color", "id": "catogory_heading_color", "label": "Heading Color", "default": "#000000" },
-    { "type": "text", "id": "catogory_text", "label": "Text", "default": "Explore curated collections to match every mood and style" },
-    { "type": "color", "id": "catogory_text_color", "label": "Text Color", "default": "rgba(0,0,0,0.7)" }
-  ],
-  "blocks": [
-    {
-      "type": "items_list",
-      "name": "Category Items",
-      "settings": [
-        { "type": "text", "id": "anchor_text", "label": "Categories Text", "default": "Items" },
-        { "type": "url", "id": "anchor_link", "label": "Categories Link" },
-        { "type": "image_picker", "id": "category_img", "label": "Category Image" }
-      ]
-    }
-  ],
-  "presets": [{ "name": "Custom Categories" }]
-}
-{% endschema %}
+    // fallback in case 'load' never fires (e.g. slow/blocked assets)
+    setTimeout(finish, 11000);
+  })();
+</script>
 
+</body>
+</html>

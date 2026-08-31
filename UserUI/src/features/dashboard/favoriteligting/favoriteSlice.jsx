@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { FAVORITS_LISTINGS_API } from "../../../Constant/constant.js"
 
 export const toggleFavorite = createAsyncThunk(
   "favorites/toggle",
@@ -8,7 +9,7 @@ export const toggleFavorite = createAsyncThunk(
       const token = localStorage.getItem("token");
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/user/listing/favorites",
+FAVORITS_LISTINGS_API,
         { listingId },
         {
           headers: {

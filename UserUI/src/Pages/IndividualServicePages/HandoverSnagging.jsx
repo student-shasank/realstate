@@ -7,7 +7,7 @@ function HandoverSnagging() {
   return (
     <div>
 
-       <div className='pt-[100px] pb-10'>
+       <div className=''>
 
       <HeroSection
         title={

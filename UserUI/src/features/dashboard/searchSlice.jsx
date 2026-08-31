@@ -3,6 +3,18 @@ import axios from "axios";
 import { PROJECTS_API } from "../../Constant/constant.js";
 
 // ----------------------
+// Status Mapping
+// frontend value -> backend value
+// ----------------------
+const statusMap = {
+  All: "",
+  Ready: "ready",
+  "Off-Plan": "offplan",
+  Preconstruction: "preconstruction",
+  "Pre-Construction": "preconstruction",
+};
+
+// ----------------------
 // Async Thunk (GET + params)
 // ----------------------
 export const fetchProjects = createAsyncThunk(
@@ -11,38 +23,42 @@ export const fetchProjects = createAsyncThunk(
     try {
       const response = await axios.get(PROJECTS_API, {
         params: {
-          // limit: params.limit || 20,
-          // full_description: true,
-          // job_details: true,
-          // local_details: true,
-          // location_details: true,
-          // upgrade_details: true,
-          // owner_info: true,
-          // sort_field: "submitdate",
-          // webapp: 1,
-          // compact: true,
-          // new_errors: true,
-          // new_pools: true,
+          location: params.location || "",
+          beds: params.beds || "",
+          baths: params.baths || "",
+          min_price: params.minPrice || "",
+          max_price: params.maxPrice || "",
+          property_type: params.propertyType || "",
+          propertyStatus: statusMap[params.completion] ?? params.completion ?? "",
+          developer: Array.isArray(params.developer)
+            ? params.developer.map((item) => item.toLowerCase().trim()).join(",")
+            : params.developer || "",
 
-          // 🔽 dynamic params (optional)
-          location: params.location,
-          beds: params.beds,
-          baths: params.baths,
-          min_price: params.minPrice,
-          max_price: params.maxPrice,
-          property_type: params.propertyType,
-          completion: params.completion,
+          emirates: Array.isArray(params.emirates)
+            ? params.emirates.map((item) => item.toLowerCase().trim()).join(",")
+            : params.emirates || "",
+          handoverYear: Array.isArray(params.handoverYear)
+            ? params.handoverYear.map((item) => item.toLowerCase().trim()).join(",")
+            : params.handoverYear?.toLowerCase().trim() || "",
+
+          saleStatus: Array.isArray(params.saleStatus)
+            ? params.saleStatus.map((item) => item.toLowerCase().trim()).join(",")
+            : params.saleStatus || "",
+
+          page: params.page || 1,
+          limit: params.limit || 20,
         },
       });
- console.log(response.data)
+
+      console.log("PROJECTS RESPONSE:", response.data);
       return response.data;
     } catch (error) {
       console.error("FETCH PROJECTS ERROR:", error);
 
       return thunkAPI.rejectWithValue(
         error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch projects"
+        error.message ||
+        "Failed to fetch projects"
       );
     }
   }
@@ -52,13 +68,16 @@ export const fetchProjects = createAsyncThunk(
 // Initial State
 // ----------------------
 const initialState = {
-  completion: "All",
-  propertyType: "Apartment",
+  completion: "Off-Plan",
+  propertyType: "",
   location: "",
-  beds: "2",
-  baths: "3",
+  beds: "",
+  baths: "",
   minPrice: "",
   maxPrice: "",
+  developer: [],
+  emirates: [],
+  handoverYear: [],
 
   isBedBathOpen: false,
   isPriceOpen: false,
@@ -67,6 +86,8 @@ const initialState = {
   success: false,
   error: null,
   projects: [],
+  totalPages: 1,  // ADD THIS
+  currentPage: 1, // ADD THIS
 };
 
 // ----------------------
@@ -98,6 +119,16 @@ const searchSlice = createSlice({
     setMaxPrice: (state, action) => {
       state.maxPrice = action.payload;
     },
+    setDeveloper: (state, action) => {
+      state.developer = action.payload;
+    },
+
+    setEmirates: (state, action) => {
+      state.emirates = action.payload;
+    },
+    setHandoverYear: (state, action) => {
+      state.handoverYear = action.payload;
+    },
     toggleBedBath: (state) => {
       state.isBedBathOpen = !state.isBedBathOpen;
     },
@@ -114,34 +145,40 @@ const searchSlice = createSlice({
       state.error = null;
       state.projects = [];
     },
+    // Yeh add karo setProjects ke neeche
+    appendProjects: (state, action) => {
+      state.projects = [...state.projects, ...action.payload.data];
+      state.currentPage = action.payload.currentPage;
+    },
+    // ADD THIS ACTION FOR INFINITE SCROLL
+    setProjects: (state, action) => {
+      state.projects = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
     builder
-      // ----------------------
-      // Pending
-      // ----------------------
       .addCase(fetchProjects.pending, (state) => {
         state.loading = true;
         state.success = false;
         state.error = null;
       })
 
-      // ----------------------
-      // Fulfilled
-      // ----------------------
-    // searchSlice.js mein update karein
-.addCase(fetchProjects.fulfilled, (state, action) => {
-  state.loading = false;
-  state.success = true;
-  // action.payload pura object hai { success: true, data: [...] }
-  // Humein sirf data array store karna hai
-  state.projects = action.payload.data; 
-})
+      .addCase(fetchProjects.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.projects = action.payload?.data || [];
+        state.totalPages = action.payload?.totalPages || 1;
+        state.currentPage = action.payload?.page || 1;
 
-      // ----------------------
-      // Rejected
-      // ----------------------
+        console.log("✅ REDUX UPDATED:", {
+          page: action.payload?.page,
+          totalPages: action.payload?.totalPages,
+          dataLength: action.payload?.data?.length,
+          total: action.payload?.total,
+        });
+      })
+
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
@@ -158,10 +195,15 @@ export const {
   setBaths,
   setMinPrice,
   setMaxPrice,
+  setDeveloper,
+  setEmirates,
+  setHandoverYear,
   toggleBedBath,
   togglePrice,
   closeDropdowns,
   resetSearchState,
+  setProjects,
+  appendProjects, // EXPORT THIS
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

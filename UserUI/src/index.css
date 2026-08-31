@@ -18,11 +18,18 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: "General Sans";
+  src: url("./assets/Fonts/GeneralSans_Complete/GeneralSans_Complete/Fonts/WEB/fonts/GeneralSans-Semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Bold */
 @font-face {
   font-family: 'General Sans';
-  src: url('./assets/Fonts/GeneralSans_Complete/GeneralSans_Complete/Fonts/WEB/fonts/GeneralSans-Bold.woff2') format('woff2');
+  src: url('./assets/Fonts/GeneralSans_Complete/GeneralSans_Complete/Fonts/WEB/fonts/GeneralSans-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -32,6 +39,7 @@
 @layer base {
   html {
     font-family: 'General Sans', system-ui, sans-serif;
+    
   }
 }
 
@@ -48,4 +56,10 @@ html, body {
   display: flex;
   width: max-content;
   animation: marquee 40s linear infinite; /* Adjust speed here */
+}
+.Toastify__progress-bar--success{
+  background-color: #01155E !important ; 
+}
+.Toastify__zoom-enter svg {
+  fill: #01155E !important  ;
 }
