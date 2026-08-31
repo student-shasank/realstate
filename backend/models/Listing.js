@@ -1,5 +1,22 @@
 // listingModel.js
+//
+// UPDATED to match the payload actually sent by ListingCreation.jsx.
+// Fields that the frontend explicitly sends as `null` / DB-generated
+// placeholders (qr_code, qr_code_ext, public_url, off_plan_link,
+// offer_link, map_img, map_url, latlong, broker_info_json,
+// inventory_json, resale_units, adm_number, pdf_url, created_at,
+// youtube_links) are intentionally NOT stored — they're either
+// duplicates of another field we already store (adm_number ==
+// regulatoryInfo.permitNumber, pdf_url == brochureUrl, created_at ==
+// listingDate/addedOn) or are meant to be backend/DB generated later.
+// If a real consumer needs any of them, add them back explicitly
+// instead of storing dead columns.
+
 import mongoose from "mongoose";
+
+/* ────────────────────────────────────────────────────────────────
+ * Existing structured sub-schemas (kept, some extended)
+ * ──────────────────────────────────────────────────────────────── */
 
 const agentSchema = new mongoose.Schema({
   name: { type: String },
@@ -42,6 +59,10 @@ const projectInfoSchema = new mongoose.Schema({
   lastInspected: { type: String },
 });
 
+// Structured location object — this is what the detail-page mapper
+// reads (location.address, location.coordinates, etc). Populated from
+// the form's `location_detail` object, NOT the flat `location` string
+// (see `locationText` below for that).
 const locationSchema = new mongoose.Schema({
   address: { type: String },
   subCommunity: { type: String },
@@ -70,14 +91,32 @@ const paymentPlanStepSchema = new mongoose.Schema({
 const paymentPlanSchema = new mongoose.Schema({
   planName: { type: String },
   downPayment: { type: Number },
+  timelineQuarter: { type: String },
+  onBookingPercent: { type: Number },
+  onConstructionPercent: { type: Number },
+  onHandoverPercent: { type: Number },
+  postHandoverPercent: { type: Number },
   installmentPlan: [installmentSchema],
   steps: [paymentPlanStepSchema],
 });
 
+// Extended: now also carries baths/highest values/availability counts/
+// image, since the form's unit-type rows collect all of this. This is
+// the single source of truth for "unit types" — we do NOT keep a
+// separate duplicate `typical_units` array, since it's the exact same
+// data in a different shape. Any legacy consumer that expects the
+// off-plan `typical_units` shape should be updated to read this array
+// and remap field names, rather than us storing the data twice.
 const unitTypeSchema = new mongoose.Schema({
   bedrooms: { type: String },
+  baths: { type: Number },
   sqFt: { type: Number },
+  highestSqFt: { type: Number },
   startingPrice: { type: Number },
+  highestPrice: { type: Number },
+  availableUnits: { type: Number },
+  totalUnits: { type: Number },
+  image: { type: String },
   availability: {
     type: String,
     enum: ["available", "unavailable", "sold out"],
@@ -125,6 +164,134 @@ const investmentInsightsSchema = new mongoose.Schema({
   pricePerSqFt: { type: Number },
 });
 
+/* ────────────────────────────────────────────────────────────────
+ * NEW sub-schemas required by the updated form
+ * ──────────────────────────────────────────────────────────────── */
+
+const featuredSchema = new mongoose.Schema(
+  {
+    banner: { type: Boolean, default: false },
+    topListing: { type: Boolean, default: false },
+    search: { type: Boolean, default: false },
+    crmHome: { type: Boolean, default: false },
+    leadShare: { type: Boolean, default: false },
+    realtorsIn: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+const developerEntrySchema = new mongoose.Schema(
+  {
+    developerId: { type: String },
+    type: { type: String, default: "Developer" },
+    isCustomDeveloper: { type: Boolean, default: true },
+    name: { type: String },
+    email: { type: String },
+    website: { type: String },
+    address: { type: String },
+    workingTime: [{ type: mongoose.Schema.Types.Mixed }],
+    description: { type: String },
+  },
+  { _id: false }
+);
+
+// Flat mirror of buildingInfo, kept as an array because some listings
+// (multi-tower projects) may eventually have more than one building.
+// The form only fills one entry today — populated from buildingInfo.
+const buildingEntrySchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    yearOfCompletion: { type: Number },
+    totalFloors: { type: Number },
+    swimmingPools: { type: String },
+    totalParkingSpaces: { type: Number },
+    elevators: { type: String },
+  },
+  { _id: false }
+);
+
+const nearbyLocationSchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    area: { type: String },
+    distance: { type: String },
+  },
+  { _id: false }
+);
+
+const facilitySchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    description: { type: String },
+    image: { type: String },
+  },
+  { _id: false }
+);
+
+const salesExecutiveSchema = new mongoose.Schema(
+  {
+    name: { type: String },
+    email: { type: String },
+    phone: { type: String },
+    languages: { type: String },
+    role: { type: String },
+    message: { type: String },
+    useWhatsappBusinessApi: { type: Boolean, default: false },
+    whatsappApiEnabled: { type: Boolean, default: false },
+    companyWhatsappUrl: { type: String },
+    image: { type: String },
+  },
+  { _id: false }
+);
+
+const attachmentSchema = new mongoose.Schema(
+  {
+    attachmentTitle: { type: String },
+    attachmentUrl: { type: String },
+    fileType: { type: String },
+  },
+  { _id: false }
+);
+
+const amenitiesAndFeaturesSchema = new mongoose.Schema(
+  {
+    amenities: [{ type: mongoose.Schema.Types.Mixed }],
+    featuresNames: [{ type: String }],
+  },
+  { _id: false }
+);
+
+// Categorized gallery images, matching the off-plan doc's `images`
+// shape. `allImages` is the flattened mirror (feature first) that the
+// listings grid card / detail page carousel actually read.
+const imagesSchema = new mongoose.Schema(
+  {
+    feature: { type: String },
+    interior: [{ type: String }],
+    exterior: [{ type: String }],
+    general: [{ type: String }],
+    lobby: [{ type: String }],
+  },
+  { _id: false }
+);
+
+const cityDataSchema = new mongoose.Schema(
+  { id: { type: String }, name: { type: String } },
+  { _id: false }
+);
+const countryDataSchema = new mongoose.Schema(
+  { id: { type: String }, name: { type: String } },
+  { _id: false }
+);
+const districtDataSchema = new mongoose.Schema(
+  { id: { type: String }, name: { type: String } },
+  { _id: false }
+);
+
+/* ────────────────────────────────────────────────────────────────
+ * Main schema
+ * ──────────────────────────────────────────────────────────────── */
+
 const ListingSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -146,15 +313,20 @@ const ListingSchema = new mongoose.Schema(
       enum: ["buy", "sell"],
       default: "sell",
     },
+
+    // ── Status flags ──────────────────────────────────────────
+    // completionStatus/propertyStatus/availability/status/projectStatus
+    // are ALL forced server-side on this create endpoint (see
+    // controller) — never trust the client value for any of these.
     completionStatus: {
       type: String,
-      enum: ["off-plan", "ready", "preconstruction"], // physical state of property
+      enum: ["off-plan", "ready", "preconstruction"],
       default: "ready",
     },
     propertyStatus: {
       type: String,
       enum: ["pending", "active", "rejected", "sold"],
-      default: "active", // admin approval status
+      default: "active",
     },
     listingStatus: {
       type: String,
@@ -165,7 +337,28 @@ const ListingSchema = new mongoose.Schema(
       enum: ["available", "unavailable"],
       default: "available",
     },
+    // Root-level Off-Plan vs Ready flag (legacy mirror `status` field,
+    // below, already covers this via its enum) plus the field the
+    // detail-page badge actually reads:
+    
+project_status: {
+      type: String,
+      enum: [
+        "Announced",
+        "EOI",
+        "Start of Sales",
+        "On Sale",
+        "Out Of Stock",
+        "Sold Out",
+        "Ready",
+        "Pre-Construction",
+      ],
+      default: "On sale ",
+    },
+
     isFeatured: { type: Boolean, default: false },
+    featured: featuredSchema,
+
     furnishing: { type: String },
 
     bedrooms: { type: Number },
@@ -177,40 +370,98 @@ const ListingSchema = new mongoose.Schema(
     plotArea: { type: Number },
 
     developer: { type: String },
+    developerId: { type: String },
+    developerAddress: { type: String },
+    developerDescription: { type: String },
+    developerEmail: { type: String },
+    developerPhone: { type: String },
+    developerWebsite: { type: String },
+    developerWorkingTime: [{ type: mongoose.Schema.Types.Mixed }],
+    developerImageUrl: { type: String },
+    developersData: [developerEntrySchema],
+
     ownership: { type: String },
+    usage: { type: String, enum: ["residential", "commercial"] },
 
     yearBuilt: { type: Number },
     handoverDate: { type: String },
+    expectedCompletionDate: { type: String },
     listingDate: { type: Date },
     addedOn: { type: Date },
 
     description: { type: String },
     features: [{ type: String }],
+    facilities: [facilitySchema],
+    amenitiesAndFeatures: amenitiesAndFeaturesSchema,
 
-    images: [{ type: String }],
+    images: imagesSchema,
+    all_images: [{ type: String }],
     videos: [{ type: String }],
     youtubeVideoId: { type: String },
+    youtubeLinks: [{ type: String }],
     brochureUrl: { type: String },
+    attachments: [attachmentSchema],
 
+    // Agent (rich, detail-page facing)
     agent: agentSchema,
+    // Sales executive(s) — off-plan-shaped, carries extra fields
+    // (languages/role/message/whatsapp-api) beyond `agent`.
+    salesExecutives: [salesExecutiveSchema],
+
     internal: internalSchema,
     validatedInfo: validatedInfoSchema,
     projectInfo: projectInfoSchema,
+
+    // Structured location (from `location_detail` in the form)
     location: locationSchema,
+    // Flat "Title - City - Country" mirror (from `location` string in
+    // the form) — kept separate from the object above on purpose.
+    locationText: { type: String },
+    projectLocation: { type: String },
+    projectCity: { type: String },
+    cityData: cityDataSchema,
+    countryData: countryDataSchema,
+    districtData: [districtDataSchema],
+    nearbyLocations: [nearbyLocationSchema],
+
     buildingInfo: buildingInfoSchema,
+    buildings: [buildingEntrySchema],
+
     unitTypes: [unitTypeSchema],
     floorPlans: [floorPlanSchema],
+
     paymentPlan: paymentPlanSchema,
     investmentInsights: investmentInsightsSchema,
     regulatoryInfo: regulatoryInfoSchema,
 
-    // ── Legacy / search-compatible mirror fields ──────────────────
-    // These exist ONLY so the existing searchListings/sortListings
-    // controller (which was written for an older, flatter data shape)
-    // keeps working without being modified. They are auto-populated
-    // from the structured fields above at creation time — never edited
-    // directly by the admin form. Do not remove without also checking
-    // the search controller's field usage.
+    commissionPercentage: { type: Number },
+    commissionPercentageMax: { type: Number },
+    companyProjectId: { type: String },
+    featureImageAltText: { type: String },
+    metaTitle: { type: String },
+    metaDescription: { type: String },
+    website: [{ type: String }],
+
+    hasProperty: { type: Boolean, default: true },
+    inventoryOnRequest: { type: Boolean, default: false },
+    inventoryStatus: { type: Boolean, default: true },
+    noRealInventory: { type: Boolean, default: false },
+    priceUponRequest: { type: Boolean, default: false },
+    totalProperties: { type: Number },
+
+    // Cheap legacy mirrors so we don't need to re-derive on every read.
+    parkingInfo: { type: mongoose.Schema.Types.Mixed },
+    legacyPaymentPlans: [{ type: mongoose.Schema.Types.Mixed }],
+    areaStart: { type: Number },
+    areaEnd: { type: Number },
+    areaSize: { type: String, default: "sqft" },
+    priceStart: { type: Number },
+    priceEnd: { type: Number },
+
+    // ── Legacy / search-compatible mirror fields ──────────────
+    // Auto-derived from the fields above — never set by the admin
+    // form directly. Keeps the existing searchListings/sortListings
+    // controller working without touching it.
     status: {
       type: String,
       enum: [
@@ -229,8 +480,11 @@ const ListingSchema = new mongoose.Schema(
     developer_name: { type: String },
     min_price: { type: Number },
     max_price: { type: Number },
+    // NOTE: was `Number` before — changed to `String` because unit
+    // types can carry more than one distinct bath count, and we mirror
+    // that the same way `beds` already does ("1,2").
     beds: { type: String }, // comma-separated, e.g. "0,1,2"
-    baths: { type: Number },
+    baths: { type: String }, // comma-separated, e.g. "1,2"
     property_category: [{ type: String }],
     expected_delivery_date: { type: String }, // "YYYY-MM-DD" so `$regex: "^YYYY-"` matches
     created_date: { type: Date },
@@ -239,15 +493,6 @@ const ListingSchema = new mongoose.Schema(
 );
 
 // ── Indexes ──────────────────────────────────────────────────────
-// NOTE: indexes must be declared on the schema BEFORE the model is
-// compiled with mongoose.model(). Declaring them after export (as
-// before) still "worked" by accident, but it's the wrong place and
-// makes it easy to reference stale/incorrect field names — which is
-// exactly what happened below (city_name/district_name/developer_name
-// don't exist anywhere in this schema).
-
-// Fast lookups for the "Ready listings" queries (status + availability
-// + newest first) used by the admin dashboard / public listing pages.
 ListingSchema.index({
   completionStatus: 1,
   propertyStatus: 1,
@@ -255,8 +500,6 @@ ListingSchema.index({
   createdAt: -1,
 });
 
-// Supports the legacy searchListings/sortListings controller, which
-// filters/sorts on these mirror fields instead of the structured ones.
 ListingSchema.index({
   status: 1,
   city_name: 1,
@@ -265,7 +508,6 @@ ListingSchema.index({
   created_date: -1,
 });
 
-// Text search across the fields that actually exist on this schema.
 ListingSchema.index({
   title: "text",
   description: "text",

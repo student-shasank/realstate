@@ -73,7 +73,7 @@ const SALE_STATUS_MAP = {
   sold_out: "Sold Out",
   ready: "Ready",
 };
-
+ 
 /**
  * Build the mapped saleStatus array from raw query param
  */
@@ -93,14 +93,16 @@ const buildSaleStatusArray = (saleStatus) => {
 const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) => {
   const saleStatusArray = buildSaleStatusArray(saleStatus);
 
+  // ───── saleStatus filter (independent condition) ─────
   if (saleStatusArray.length > 0) {
     addAndCondition(query, {
       project_status: { $in: saleStatusArray },
     });
-    return;
   }
 
-  // No saleStatus → fall back to completion/propertyStatus
+  // ───── propertyStatus/completion filter (ALWAYS applied if present, ─────
+  // ─────  regardless of saleStatus — pehle yahan "return" tha jo isko  ─────
+  // ─────  skip kar deta tha jab saleStatus bhi diya gaya ho)          ─────
   const completionRaw = (completion || propertyStatus)
     ?.toLowerCase()
     .replace(/[\s-]/g, "");
