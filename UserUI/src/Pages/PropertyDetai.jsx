@@ -16,6 +16,11 @@ import {
   resetListingDetailState,
 } from "../features/dashboard/listingDetailSlice.jsx";
 import {
+  addFavoriteLocal,
+  removeFavoriteLocal,
+  toggleFavorite,
+} from "../features/dashboard/favoriteligting/favoriteSlice.jsx";
+import {
   MapPin, Bed, Bath, Square, Calendar, Hash, CheckCircle, Utensils, Baby, Camera, Thermometer, GlassWater, Store, Scissors,
   Shirt,
   Map,
@@ -29,6 +34,8 @@ import floorplan1 from "../assets/floorplan.png"
 import propertycommunity from "../assets/propertydetailcommunity.jpg"
 import Breadcrumbs from '../Components/Card/Breadcrumbs';
 import Broker from '../assets/brocker.jpeg';
+import LoginPopup from "../Pages/LoginPopup.jsx";
+import SignupPopup from "../Pages/SignupPopup.jsx";
 
 const AMENITY_MAP = {
   bbq: { label: "BBQ Area", icon: "bbq" },
@@ -69,7 +76,7 @@ const AmenityIcon = ({ type }) => {
 
 function ReviewCard({ agentAvatar }) {
   return (
-    <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-6 flex-1">
+    <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6 flex-1">
       <div className="flex items-center gap-3 mb-4">
         <img src={agentAvatar} alt="User" className="w-12 h-12 rounded-full object-cover" />
         <div className="flex-1">
@@ -119,24 +126,27 @@ function GalleryModal({
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-[1100px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+  // Share the property — uses native Share sheet (mobile/supported browsers)
+// and falls back to copying the link to clipboard otherwise.
 
-        <div className="flex items-center border-b border-[#D9E1F2] px-6 py-0 relative">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
+      <div className="bg-white rounded-none sm:rounded-2xl w-full h-full sm:h-auto max-w-full sm:max-w-[1100px] max-h-full sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+
+        <div className="flex items-center border-b border-[#D9E1F2] px-3 sm:px-6 py-0 relative overflow-x-auto">
           {selectedIndex !== null && activeTab === "photos" && (
             <button
               onClick={backToGrid}
-              className="flex items-center gap-2 px-4 py-4 text-[15px] font-semibold text-[#01155E] hover:text-[#254B86] transition-colors"
+              className="flex items-center gap-2 px-2 sm:px-4 py-3 sm:py-4 text-[13px] sm:text-[15px] font-semibold text-[#01155E] hover:text-[#254B86] transition-colors whitespace-nowrap"
             >
               <ArrowLeft size={18} />
-              Back to gallery
+              <span className="hidden sm:inline">Back to gallery</span>
             </button>
           )}
 
           <button
             onClick={() => setActiveTab("photos")}
-            className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "photos"
+            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === "photos"
               ? "border-[#01155E] text-[#01155E]"
               : "border-transparent text-[#67739E] hover:text-[#01155E]"
               }`}
@@ -146,7 +156,7 @@ function GalleryModal({
           </button>
           <button
             onClick={() => { setActiveTab("map"); setSelectedIndex(null); }}
-            className={`flex items-center gap-2 px-6 py-4 text-[18px] font-semibold border-b-2 transition-colors ${activeTab === "map"
+            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === "map"
               ? "border-[#01155E] text-[#01155E]"
               : "border-transparent text-[#67739E] hover:text-[#01155E]"
               }`}
@@ -157,7 +167,7 @@ function GalleryModal({
 
           <button
             onClick={onClose}
-            className="absolute right-4 top-3 w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-[#67739E] hover:text-[#01155E]"
+            className="absolute right-2 sm:right-4 top-2 sm:top-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-[#67739E] hover:text-[#01155E]"
           >
             <X size={22} />
           </button>
@@ -166,11 +176,11 @@ function GalleryModal({
         <div className="flex-1 overflow-y-auto relative">
           {activeTab === "photos" ? (
             selectedIndex === null ? (
-              <div className="p-4 grid grid-cols-2 gap-3">
+              <div className="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {images?.map((src, i) => (
                   <div
                     key={i}
-                    className="overflow-hidden rounded-[10px] h-[260px] cursor-pointer"
+                    className="overflow-hidden rounded-[10px] h-[220px] sm:h-[260px] cursor-pointer"
                     onClick={() => openImage(i)}
                   >
                     <img
@@ -182,10 +192,10 @@ function GalleryModal({
                 ))}
               </div>
             ) : (
-              <div className="relative bg-black flex items-center justify-center h-full min-h-[500px]">
+              <div className="relative bg-black flex items-center justify-center h-full min-h-[320px] sm:min-h-[500px]">
                 <button
                   onClick={showPrev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
                 >
                   <ChevronLeft size={22} />
                 </button>
@@ -193,17 +203,17 @@ function GalleryModal({
                 <img
                   src={getSafeImageUrl(images[selectedIndex])}
                   alt={`Property ${selectedIndex + 1}`}
-                  className="max-h-[70vh] max-w-[90%] object-contain rounded-md"
+                  className="max-h-[60vh] sm:max-h-[70vh] max-w-[85%] sm:max-w-[90%] object-contain rounded-md"
                 />
 
                 <button
                   onClick={showNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors z-10"
                 >
                   <ChevronRight size={22} />
                 </button>
 
-                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-[14px] bg-black/50 px-3 py-1 rounded-full">
+                <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-[13px] sm:text-[14px] bg-black/50 px-3 py-1 rounded-full">
                   {selectedIndex + 1} / {images.length}
                 </span>
               </div>
@@ -219,26 +229,26 @@ function GalleryModal({
           )}
         </div>
 
-        <div className="border-t border-[#D9E1F2] px-6 py-4 flex items-center justify-end bg-white">
+        <div className="border-t border-[#D9E1F2] px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-center sm:justify-end bg-white">
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-end w-full sm:w-auto">
             <button
               onClick={onCallClick}
-              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[13px] sm:text-[15px] hover:bg-gray-50 transition-colors"
             >
               <Phone size={16} /> Call
             </button>
             <button
               onClick={onEmailClick}
               disabled={isEmailSending}
-              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[15px] hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 border border-[#D9E1F2] rounded-lg text-[#01155E] font-semibold text-[13px] sm:text-[15px] hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <Mail size={16} /> {isEmailSending ? "Sending..." : "Email"}
             </button>
             
             <button
               onClick={onWhatsAppClick}
-              className="flex items-center gap-2 px-6 py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[15px] hover:bg-green-50 transition-colors"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[13px] sm:text-[15px] hover:bg-green-50 transition-colors"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -266,6 +276,8 @@ function SimilarPropertyCard({
   getBedroomsDisplay,
   navigate,
 }) {
+  const dispatch = useDispatch();
+
   const mappedItem = mapPropertyDetailData(item);
   const itemImages = extractAllImages(item);
 
@@ -276,6 +288,31 @@ function SimilarPropertyCard({
 
   const [currentImg, setCurrentImg] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Favorite / like functionality — same pattern as ListingCard
+  const itemId = item?._id || item?.id;
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+  const favorites = useSelector((state) => state.favorites.favorites || []);
+  const isFavorite = favorites.includes(itemId);
+
+  const handleFavorite = (e) => {
+    e.stopPropagation();
+
+    if (!itemId) return;
+
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    if (isFavorite) {
+      dispatch(removeFavoriteLocal(itemId));
+    } else {
+      dispatch(addFavoriteLocal(itemId));
+    }
+
+    dispatch(toggleFavorite(itemId));
+  };
 
   const handlePrev = (e) => {
     e.stopPropagation();
@@ -298,7 +335,7 @@ function SimilarPropertyCard({
       className="bg-white border border-[#D9E1F2] rounded-[10px] overflow-hidden group cursor-pointer transition-all duration-300 hover:shadow-[0_12px_28px_rgba(1,21,94,0.16)] hover:-translate-y-1"
     >
       <div
-        className="relative h-[240px] overflow-hidden"
+        className="relative h-[200px] sm:h-[220px] lg:h-[240px] overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => {
           setIsHovered(false);
@@ -313,15 +350,20 @@ function SimilarPropertyCard({
 
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
 
-        <div className="absolute top-3 left-3 bg-[#01155E]/80 backdrop-blur-md text-white text-[12px] px-3 py-1 rounded z-10">
+        <div className="absolute top-3 left-3 bg-[#01155E]/80 backdrop-blur-md text-white text-[11px] sm:text-[12px] px-2.5 sm:px-3 py-1 rounded z-10">
           {getDisplayStatus(mappedItem.completionStatus)}
         </div>
 
         <button
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleFavorite}
           className="absolute top-3 right-3 bg-white p-2 rounded-full shadow z-10 hover:bg-gray-50 transition-colors"
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
-          <Heart size={16} className="text-[#01155E]" />
+          <Heart
+            size={16}
+            fill={isFavorite ? "#01155E" : "none"}
+            className="text-[#01155E]"
+          />
         </button>
 
         {isHovered && galleryImages.length > 1 && (
@@ -359,11 +401,11 @@ function SimilarPropertyCard({
         )}
       </div>
 
-      <div className="p-5">
-        <h3 className="text-[20px] font-semibold text-[#01155E] mb-2 capitalize truncate">
+      <div className="p-4 sm:p-5">
+        <h3 className="text-[17px] sm:text-[18px] lg:text-[20px] font-semibold text-[#01155E] mb-2 capitalize truncate">
           {mappedItem.title || "—"}
         </h3>
-        <div className="flex items-center text-[#67739E] text-[16px] mb-4 truncate">
+        <div className="flex items-center text-[#67739E] text-[14px] sm:text-[15px] lg:text-[16px] mb-4 truncate">
           <MapPin size={14} className="mr-1 text-[#01155E] flex-shrink-0" />
           <span className="truncate">
             {[mappedItem.location?.address, mappedItem.location?.country]
@@ -375,13 +417,13 @@ function SimilarPropertyCard({
           </span>
         </div>
         <div className="flex justify-between border-y border-[#D9E1F2] py-3 mb-4">
-          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[14px] sm:text-[15px] lg:text-[16px]">
             <Bed size={16} /> {getBedroomsDisplay(mappedItem.bedrooms) || item.beds || "—"}
           </div>
-          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[14px] sm:text-[15px] lg:text-[16px]">
             <Bath size={16} /> {mappedItem.bathrooms ?? item.baths ?? "—"}
           </div>
-          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[16px]">
+          <div className="flex items-center gap-1.5 text-[#01155E] font-semibold text-[14px] sm:text-[15px] lg:text-[16px]">
             <Square size={16} />{" "}
             {mappedItem.builtUpArea
               ? `${mappedItem.builtUpArea} Sq Ft`
@@ -390,8 +432,8 @@ function SimilarPropertyCard({
               : "—"}
           </div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="text-[22px] font-semibold text-[#01155E]">
+        <div className="flex justify-between items-center flex-wrap gap-3">
+          <div className="text-[19px] sm:text-[20px] lg:text-[22px] font-semibold text-[#01155E]">
             {mappedItem.price_start || item.price_start
               ? `AED ${Number(
                   mappedItem.price_start || item.price_start
@@ -463,13 +505,13 @@ function SimilarPropertiesCarousel({ listings, getDisplayStatus, getBedroomsDisp
       <div
         ref={scrollRef}
         onScroll={updateScrollState}
-        className="similar-carousel-track flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2"
+        className="similar-carousel-track flex gap-4 sm:gap-5 lg:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-4 sm:px-0 -mx-4 sm:mx-0"
       >
         {listings.map((item) => (
           <div
             key={item._id}
             data-similar-card
-            className="snap-start shrink-0 w-[320px] sm:w-[360px] lg:w-[380px]"
+            className="snap-start shrink-0 w-[85vw] xs:w-[300px] sm:w-[360px] lg:w-[380px]"
           >
             <SimilarPropertyCard
               item={item}
@@ -554,6 +596,8 @@ export default function PropertyDetail() {
   // Call / Contact Us popup + Email(Connect) sending state — same pattern as ListingCard
   const [isCallPopupOpen, setIsCallPopupOpen] = useState(false);
   const [isEmailSending, setIsEmailSending] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const {
     title,
@@ -650,6 +694,29 @@ const getBedroomsDisplay = (val) => {
   const isLoggedIn = Boolean(localStorage.getItem("token"));
   const currentId = rawListing?._id || rawListing?.id;
 
+  // Favorite / like functionality — same pattern as ListingCard
+  const favorites = useSelector((state) => state.favorites.favorites || []);
+  const isFavorite = favorites.includes(currentId);
+
+  const handleFavoriteToggle = (e) => {
+    e.stopPropagation();
+
+    if (!currentId) return;
+
+    if (!isLoggedIn) {
+      setIsLoginOpen(true); 
+      return;
+    }
+
+    if (isFavorite) {
+      dispatch(removeFavoriteLocal(currentId));
+    } else {
+      dispatch(addFavoriteLocal(currentId));
+    }
+
+    dispatch(toggleFavorite(currentId));
+  };
+
   const agentName = agent?.name || rawListing?.agent_name || rawListing?.agentName || "Divyansh Chitkara";
 
   // Primary agent phone
@@ -696,7 +763,7 @@ const getBedroomsDisplay = (val) => {
   // Same behavior as ListingCard's handleConnect
   const handleEmailClick = async () => {
     if (!isLoggedIn) {
-      navigate("/login");
+      setIsLoginOpen(true);
       return;
     }
 
@@ -974,9 +1041,42 @@ const getBedroomsDisplay = (val) => {
   const hasCommunityImage = Boolean(
     community?.marketSupply?.image || location?.communityImage
   );
+  const handleShareClick = async () => {
+  const listingUrl = rawListing?._id
+    ? `${window.location.origin}/listing/${rawListing._id}`
+    : window.location.href;
+
+  const shareData = {
+    title: title || "Yupland Listing",
+    text: `Check out this property on Yupland: ${title || ""}`,
+    url: listingUrl,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(listingUrl);
+      toast.success("Link copied to clipboard");
+    } else {
+      const tempInput = document.createElement("input");
+      tempInput.value = listingUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      toast.success("Link copied to clipboard");
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError") {
+      toast.error("Unable to share right now");
+    }
+  }
+};
+
 
   return (
-    <div className="bg-white min-h-screen ">
+    <div className="bg-white min-h-screen overflow-x-hidden">
       {showGallery && (
         <GalleryModal
           images={images}
@@ -1034,12 +1134,12 @@ const getBedroomsDisplay = (val) => {
                 </div>
                 <a
                   href={`tel:${agentPhoneDial}`}
-                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                  className="text-[#01155E] text-[16px] sm:text-[20px] font-semibold hover:underline"
                 >
                   {agentPhoneRaw}
                 </a>
               </div>
- <div className="flex items-center justify-center gap-2.5">
+              <div className="flex items-center justify-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#22c55e">
                     <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
@@ -1047,7 +1147,7 @@ const getBedroomsDisplay = (val) => {
                 </div>
                 <a
                   href={`tel:${agentPhoneDial2}`}
-                  className="text-[#01155E] text-[18px] sm:text-[20px] font-semibold hover:underline"
+                  className="text-[#01155E] text-[16px] sm:text-[20px] font-semibold hover:underline"
                 >
                   {agentPhoneRaw2}
                 </a>
@@ -1075,26 +1175,43 @@ const getBedroomsDisplay = (val) => {
         </div>,
         document.body
       )}
+      <LoginPopup
+  isOpen={isLoginOpen}
+  onClose={() => setIsLoginOpen(false)}
+  openSignup={() => {
+    setIsLoginOpen(false);
+    setIsSignupOpen(true);
+  }}
+/>
+
+<SignupPopup
+  isOpen={isSignupOpen}
+  onClose={() => setIsSignupOpen(false)}
+  openLogin={() => {
+    setIsSignupOpen(false);
+    setIsLoginOpen(true);
+  }}
+/>
 
       {/* <Breadcrumbs /> */}
       {/* <Breadcrumbs customLabel={title} completionLabel={completionStatus} /> */}
       <Breadcrumbs customLabel={title} completionLabel={isOffPlan ? "Off-Plan" : "Ready"} />
-      <div className="max-w-[1290px] mx-auto pt-10 pb-20">
+      <div className="max-w-[1290px] mx-auto px-4 sm:px-6 lg:px-0 pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20">
 
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex-1 pr-0">
-            <h1 className="text-[48px] font-[Archivo] font-semibold text-[#01155E] leading-tight mb-3 capitalize">
+        <div className="flex flex-col lg:flex-row justify-between items-start mb-6 lg:mb-8 gap-5 lg:gap-0">
+          <div className="flex-1 pr-0 w-full">
+            <h1 className="text-[26px] sm:text-[34px] lg:text-[48px] font-[Archivo] font-semibold text-[#01155E] leading-tight mb-3 capitalize">
               {title || "—"}
             </h1>
 
-            <div className="flex items-center gap-4 mb-4">
-              <span className="bg-[#01155E] text-white text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
+            <div className="flex items-center gap-3 sm:gap-4 mb-4 flex-wrap">
+              <span className="bg-[#01155E] text-white text-[12px] sm:text-[13px] font-medium px-3 py-1.5 rounded-md uppercase">
                 {[getDisplayStatus(completionStatus), "initial sale"]
                   .filter(Boolean)
                   .join(" | ") || "—"}
               </span>
 
-              <div className="flex items-center gap-2 text-[#67739E] text-[16px] font-medium capitalize">
+              <div className="flex items-center gap-2 text-[#67739E] text-[14px] sm:text-[16px] font-medium capitalize">
                 <img
                   src={Appartmentimage}
                   alt="type"
@@ -1104,7 +1221,7 @@ const getBedroomsDisplay = (val) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-5 text-[#67739E] text-[18px] flex-wrap">
+            <div className="flex items-center gap-3 sm:gap-5 text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] flex-wrap">
               <div className="flex items-center gap-2">
                 <MapPin size={18} className="text-[#01155E]" />
                 <span>
@@ -1115,7 +1232,7 @@ const getBedroomsDisplay = (val) => {
                 </span>
               </div>
 
-              <div className="border-l border-[#D9E1F2] h-5" />
+              <div className="hidden sm:block border-l border-[#D9E1F2] h-5" />
 
               <div className="flex items-center gap-2">
                 {developerImage ? (
@@ -1133,7 +1250,7 @@ const getBedroomsDisplay = (val) => {
                 </span>
               </div>
 
-              <div className="border-l border-[#D9E1F2] h-5" />
+              <div className="hidden sm:block border-l border-[#D9E1F2] h-5" />
 
               <div className="flex items-center gap-2">
                 <Maximize size={18} className="text-[#01155E]" />
@@ -1142,46 +1259,68 @@ const getBedroomsDisplay = (val) => {
             </div>
           </div>
 
-          <div className="flex flex-col items-end">
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-[18px] font-semibold text-[#01155E]">
+          <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between w-full lg:w-auto">
+            <div className="flex items-baseline gap-2 mb-0 lg:mb-4">
+              <span className="text-[15px] sm:text-[18px] font-semibold text-[#01155E]">
                 Starting at
               </span>
-              <span className="text-[28px] font-semibold text-[#01155E] uppercase">
+              <span className="text-[20px] sm:text-[24px] lg:text-[28px] font-semibold text-[#01155E] uppercase">
                 AED {PROPERTY?.price_start ? Number(PROPERTY.price_start).toLocaleString() : "—"}
               </span>
             </div>
 
-            <div className="flex gap-3 mt-4">
-              <button className="w-[50px] h-[50px] flex items-center justify-center bg-[#F0F4F8] text-[#01155E] rounded-full hover:bg-gray-200 transition-all">
-                <Heart size={22} />
+            <div className="flex gap-3 mt-0 lg:mt-4">
+              <button
+                onClick={handleFavoriteToggle}
+                className={`w-[42px] h-[42px] sm:w-[50px] sm:h-[50px] flex items-center justify-center rounded-full transition-all ${
+                  isFavorite
+                    ? "bg-[#01155E] text-white"
+                    : "bg-[#F0F4F8] text-[#01155E] hover:bg-gray-200"
+                }`}
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              >
+                <Heart size={22} fill={isFavorite ? "currentColor" : "none"} />
               </button>
-              <button className="w-[50px] h-[50px] flex items-center justify-center bg-[#F0F4F8] text-[#01155E] rounded-full hover:bg-gray-200 transition-all">
-                <Share2 size={22} />
-              </button>
+              <button
+  onClick={handleShareClick}
+  className="w-[42px] h-[42px] sm:w-[50px] sm:h-[50px] flex items-center justify-center bg-[#F0F4F8] text-[#01155E] rounded-full hover:bg-gray-200 transition-all"
+  aria-label="Share this property"
+>
+  <Share2 size={22} />
+</button>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-[10px] h-[520px] mb-12">
-          <div className="col-span-7 relative h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-[10px] h-auto lg:h-[520px] mb-8 lg:mb-12">
+          <div className="col-span-1 lg:col-span-7 relative h-[240px] sm:h-[340px] lg:h-full">
             <img
               src={getSafeImageUrl(featureImage)}
-              className="w-full h-[521px]  rounded-[6px]"
+              className="w-full h-full lg:h-[521px] object-cover rounded-[6px]"
               alt="Main"
             />
 
-            <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm uppercase">
+            <span className="absolute top-3 left-3 bg-white text-[#01155E] text-[12px] sm:text-[13px] font-medium px-3 py-1.5 rounded-md shadow-sm uppercase">
               {getDisplayStatus(completionStatus)}
             </span>
 
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer">
                 <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1" />
               </div>
             </div>
+
+            {/* Mobile/tablet: thumbnails are hidden, so surface a quick
+                "View all photos" action directly on the hero image. */}
+            <button
+              onClick={() => setShowGallery(true)}
+              className="lg:hidden absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/60 text-white text-[12px] font-medium px-3 py-1.5 rounded-full backdrop-blur-sm"
+            >
+              <Image size={14} />
+              {totalImages} Photos
+            </button>
           </div>
-          <div className="col-span-5 grid grid-cols-2 gap-[10px] h-full">
+          <div className="hidden lg:grid col-span-5 grid-cols-2 gap-[10px] h-full">
             <img src={getSafeImageUrl(getImageByIndex(images, 1))} className="w-full h-[255px] object-cover rounded-[6px]" alt="s1" />
             <div className="relative h-[255px]">
               <img src={getSafeImageUrl(getImageByIndex(images, 2))} className="w-full h-full object-cover rounded-[6px]" alt="s2" />
@@ -1214,64 +1353,64 @@ const getBedroomsDisplay = (val) => {
           </div>
         </div>
 
-        <div className="flex gap-[30px]">
-          <div className="flex-1 min-w-0">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-[30px]">
+          <div className="flex-1 min-w-0 w-full">
 
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-[26px] font-semibold text-[#01155E]">Overview</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-5">
+              <h2 className="text-[22px] sm:text-[24px] lg:text-[26px] font-semibold text-[#01155E]">Overview</h2>
               <button
                 onClick={() => setPopupType("brochure")}
-                className="flex items-center gap-2 bg-[#01155E] text-white px-5 py-2.5 rounded-lg text-[14px] font-semibold"
+                className="flex items-center justify-center gap-2 bg-[#01155E] text-white px-5 py-2.5 rounded-lg text-[14px] font-semibold w-full sm:w-auto"
               >
                 <Download size={16} />
                 Download Brochure
               </button>
             </div>
 
-            <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
-                           <div className="flex justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8 flex-wrap gap-y-4">
+            <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6 lg:p-8 mb-8">
+                           <div className="flex justify-start sm:justify-between items-center pb-6 border-b border-[#D9E1F2] mb-8 flex-wrap gap-x-6 sm:gap-x-0 gap-y-4">
                 {overviewStats.map((item, i) => (
-                  <div key={i} className="flex flex-col items-start gap-1 min-w-[110px]">
+                  <div key={i} className="flex flex-col items-start gap-1 min-w-[100px] sm:min-w-[110px]">
                     <div className="flex items-center gap-2 flex-wrap">
                       {item.icon}
-                      <span className="text-[24px] font-semibold text-[#01155E] break-words">{item.val}</span>
+                      <span className="text-[20px] sm:text-[22px] lg:text-[24px] font-semibold text-[#01155E] break-words">{item.val}</span>
                     </div>
-                    <span className="text-[#67739E] text-[15px]">{item.label}</span>
+                    <span className="text-[#67739E] text-[13px] sm:text-[14px] lg:text-[15px]">{item.label}</span>
                   </div>
                 ))}
               </div>
 
-              <h3 className="text-[28px] font-[600] text-[#01155E] mb-6">Property Information</h3>
+              <h3 className="text-[22px] sm:text-[25px] lg:text-[28px] font-[600] text-[#01155E] mb-6">Property Information</h3>
               <div className="border border-[#D9E1F2] rounded-[10px] mb-6">
-                <div className="grid grid-cols-4 gap-y-6 p-6 border-b border-[#D9E1F2]">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 p-4 sm:p-6 border-b border-[#D9E1F2]">
                   {propertyInfoRows.slice(0, 4).map((item, i) => (
                     <div key={i}>
-                      <p className="text-[#67739E] text-[18px] mb-1 capitalize">{item.label}</p>
-                      <p className="text-[#01155E] font-semibold text-[18px] capitalize ">{item.value}</p>
+                      <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1 capitalize">{item.label}</p>
+                      <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px] capitalize ">{item.value}</p>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-4 gap-y-6 p-6 border-b border-[#D9E1F2]">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 p-4 sm:p-6 border-b border-[#D9E1F2]">
                   {propertyInfoRows.slice(4, 8).map((item, i) => (
                     <div key={i}>
-                      <p className="text-[#67739E] text-[18px] mb-1 capitalize">{item.label}</p>
-                      <p className="text-[#01155E] font-semibold text-[18px] capitalize">{item.value}</p>
+                      <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1 capitalize">{item.label}</p>
+                      <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px] capitalize">{item.value}</p>
                     </div>
                   ))}
                 </div>
                 {propertyInfoRows.slice(8).length > 0 && (
-                  <div className="grid grid-cols-4 gap-y-6 p-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 p-4 sm:p-6">
                     {propertyInfoRows.slice(8).map((item, i) => (
                       <div key={i}>
-                        <p className="text-[#67739E] text-[18px] mb-1 capitalize">{item.label}</p>
-                        <p className="text-[#01155E] font-semibold text-[18px] capitalize">{item.value}</p>
+                        <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1 capitalize">{item.label}</p>
+                        <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px] capitalize">{item.value}</p>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              <p className="text-[#67739E] text-[18px] leading-relaxed">
+              <p className="text-[#67739E] text-[15px] sm:text-[16px] lg:text-[18px] leading-relaxed">
                 <span
                   dangerouslySetInnerHTML={{
                     __html: showFullDesc
@@ -1292,38 +1431,38 @@ const getBedroomsDisplay = (val) => {
             </div>
 
             <div className="mb-8">
-              <h3 className="text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
-              <div className="flex gap-6">
+              <h3 className="text-[22px] sm:text-[24px] lg:text-[26px] font-[600] text-[#01155E] mb-6">Regulatory Information</h3>
+              <div className="flex flex-col lg:flex-row gap-6">
                 {!isOffPlan && (
-                  <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-6">
+                  <div className="flex-1 border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6">
                     <div className="grid grid-cols-2 gap-4 pb-5 border-b border-[#D9E1F2]">
                       <div>
-                        <p className="text-[#67739E] text-[18px] mb-1">Permit Number</p>
-                        <p className="text-[#01155E] font-semibold text-[18px]">{permitNumber}</p>
+                        <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1">Permit Number</p>
+                        <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{permitNumber}</p>
                       </div>
                       <div>
-                        <p className="text-[#67739E] text-[18px] mb-1">Zone Name</p>
-                        <p className="text-[#01155E] font-semibold text-[18px]">{zoneName}</p>
+                        <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1">Zone Name</p>
+                        <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{zoneName}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 py-5 border-b border-[#D9E1F2]">
                       <div>
-                        <p className="text-[#67739E] text-[18px] mb-1">RERA</p>
-                        <p className="text-[#01155E] font-semibold text-[18px]">{rera}</p>
+                        <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1">RERA</p>
+                        <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{rera}</p>
                       </div>
                       <div>
-                        <p className="text-[#67739E] text-[18px] mb-1">BRN</p>
-                        <p className="text-[#01155E] font-semibold text-[18px]">{brn}</p>
+                        <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1">BRN</p>
+                        <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{brn}</p>
                       </div>
                     </div>
                     <div className="pt-5">
-                      <p className="text-[#67739E] text-[18px] mb-1">Registered Agency</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{registeredAgency}</p>
+                      <p className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px] mb-1">Registered Agency</p>
+                      <p className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{registeredAgency}</p>
                     </div>
                   </div>
                 )}
 
-                <div className={`${isOffPlan ? "w-full" : "w-[280px]"} border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6`}>
+                <div className={`w-full ${isOffPlan ? "lg:w-full" : "lg:w-[280px]"} border border-[#D9E1F2] rounded-[10px] flex items-center justify-center p-6`}>
                   <div className="relative w-full h-full flex items-center justify-center">
                     <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-[#01155E] rounded-tl-[4px]" />
                     <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-[#01155E] rounded-tr-[4px]" />
@@ -1333,19 +1472,19 @@ const getBedroomsDisplay = (val) => {
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PERMIT-${permitNumber}-ZONE-${zoneName}-RERA-${rera}&color=01155E&bgcolor=ffffff`}
                       alt="QR Code"
-                      className="w-[180px] h-[180px]"
+                      className="w-[150px] h-[150px] sm:w-[180px] sm:h-[180px]"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Payment Plan</h2>
-            <div className="bg-[#1C4DFF0A] border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
+            <h2 className="text-[22px] sm:text-[24px] lg:text-[26px] font-semibold text-[#01155E] mb-5">Payment Plan</h2>
+            <div className="bg-[#1C4DFF0A] border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6 lg:p-8 mb-8">
               <div className="flex justify-between items-center border border-[#D9E1F2] rounded-lg px-4 py-3 mb-6 cursor-pointer bg-white">
                 <div className="flex items-center gap-2 text-[#67739E]">
                   <BanknoteArrowDown size={20} className="text-[#01155E]" />
-                  <span className="text-[18px] font-['Archivo'] text-[#01155E]">
+                  <span className="text-[15px] sm:text-[18px] font-['Archivo'] text-[#01155E]">
                     {paymentPlan?.planName || "Payment Plan 60/40"}
                   </span>
                 </div>
@@ -1364,7 +1503,7 @@ const getBedroomsDisplay = (val) => {
                   />
                 ))}
               </div>
-              <div className="flex text-[18px] font-medium text-[#01155E] mb-6">
+              <div className="flex text-[14px] sm:text-[16px] lg:text-[18px] font-medium text-[#01155E] mb-6">
                 {paymentPlan?.steps?.map((step, i) => (
                   <span key={i} style={{ width: `${step.percent}%` }}>
                     {step.percent}%
@@ -1374,25 +1513,25 @@ const getBedroomsDisplay = (val) => {
               <div className="space-y-4">
                 {paymentSteps.map((item, i) => (
                   <div key={i} className="flex justify-between items-center py-4 border-b border-[#D9E1F2] last:border-0">
-                    <span className="text-[#01155E] font-semibold text-[18px]">{item.label}</span>
-                    <span className="text-[#67739E] text-[18px]">{item.value}</span>
+                    <span className="text-[#01155E] font-semibold text-[14px] sm:text-[16px] lg:text-[18px]">{item.label}</span>
+                    <span className="text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px]">{item.value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <h2 className="text-[28px] font-semibold text-[#01155E] mb-7">Unit Types</h2>
+            <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-semibold text-[#01155E] mb-5 sm:mb-7">Unit Types</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
               {unitTypesList.map((unit, i) => (
-                <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-8 flex flex-col gap-6">
-                  <h3 className="text-[#01155E] font-semibold text-[24px]">
+                <div key={i} className="bg-[#F5F8FF] border border-[#D9E1F2] rounded-[15px] p-5 sm:p-6 lg:p-8 flex flex-col gap-4 sm:gap-6">
+                  <h3 className="text-[#01155E] font-semibold text-[19px] sm:text-[21px] lg:text-[24px]">
                     {unit.type === 0 || unit.type === "0"
                       ? "Studio"
                       : unit.type === 1 || unit.type === "1"
                         ? "1 Bedroom"
                         : `${unit.type} Bedrooms`}
                   </h3>
-                  <div className="flex flex-wrap gap-6 text-[#67739E] text-[18px]">
+                  <div className="flex flex-wrap gap-4 sm:gap-6 text-[#67739E] text-[15px] sm:text-[16px] lg:text-[18px]">
                     <span className="flex items-center gap-2">
                       <Maximize size={20} className="text-[#01155E]" />
                       {unit.sqft}
@@ -1404,7 +1543,7 @@ const getBedroomsDisplay = (val) => {
                   </div>
                   <button
                     onClick={() => setPopupType("availability")}
-                    className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-8 py-4 rounded-xl text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
+                    className="w-fit border border-[#01155E] bg-transparent text-[#01155E] font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[15px] sm:text-[18px] hover:bg-[#01155E] hover:text-white transition-all"
                   >
                     Check Availability
                   </button>
@@ -1413,36 +1552,36 @@ const getBedroomsDisplay = (val) => {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-[28px] font-bold text-[#01155E] mb-6">Building Information</h2>
-              <div className="border border-[#D9E1F2] rounded-[10px] p-6">
-                <div className="grid grid-cols-4 gap-y-6 pb-6 border-b border-[#D9E1F2]">
+              <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-bold text-[#01155E] mb-4 sm:mb-6">Building Information</h2>
+              <div className="border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 pb-6 border-b border-[#D9E1F2]">
                   {buildingInfoRow1.map((item, i) => (
                     <div key={i}>
-                      <p className="text-[#67739E] text-[16px] mb-2">{item.label}</p>
-                      <p className="text-[#01155E] font-bold text-[18px]">{item.value}</p>
+                      <p className="text-[#67739E] text-[13px] sm:text-[15px] lg:text-[16px] mb-2">{item.label}</p>
+                      <p className="text-[#01155E] font-bold text-[15px] sm:text-[17px] lg:text-[18px]">{item.value}</p>
                     </div>
                   ))}
                 </div>
-                <div className="grid grid-cols-4 gap-y-6 pt-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-6 pt-6">
                   {buildingInfoRow2.map((item, i) => (
                     <div key={i}>
-                      <p className="text-[#67739E] text-[16px] mb-2">{item.label}</p>
-                      <p className="text-[#01155E] font-semibold text-[18px]">{item.value}</p>
+                      <p className="text-[#67739E] text-[13px] sm:text-[15px] lg:text-[16px] mb-2">{item.label}</p>
+                      <p className="text-[#01155E] font-semibold text-[15px] sm:text-[17px] lg:text-[18px]">{item.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Amenites</h2>
-            <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-8 mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-5 mb-10">
+            <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-semibold text-[#01155E] mb-5">Amenites</h2>
+            <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6 lg:p-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 sm:gap-y-8 gap-x-5 mb-8 sm:mb-10">
                 {amenitiesList.map((item, i) => (
                   <div key={i} className="flex items-start gap-2 group">
                     <div className="flex-shrink-0 transition-transform group-hover:scale-110 pt-2px">
                       <AmenityIcon type={item.icon} />
                     </div>
-                    <span className="text-[#01155E] font-medium text-[17px] leading-tight">
+                    <span className="text-[#01155E] font-medium text-[15px] sm:text-[16px] lg:text-[17px] leading-tight">
                       {item.label}
                     </span>
                   </div>
@@ -1450,18 +1589,18 @@ const getBedroomsDisplay = (val) => {
               </div>
 
               <div className="flex justify-center pt-4 border-t border-gray-50">
-                <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-10 py-3.5 rounded-xl uppercase text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">
+                <button className="w-full sm:w-fit border-2 border-[#01155E] bg-transparent text-[#01155E] font-bold px-6 sm:px-10 py-3 sm:py-3.5 rounded-xl uppercase text-[13px] sm:text-[15px] tracking-wider hover:bg-[#01155E] hover:text-white transition-all duration-300">
                   View All Amenities
                 </button>
               </div>
             </div>
 
-            <h2 className="text-[26px] font-semibold text-[#01155E] mb-5">Floor Plans</h2>
+            <h2 className="text-[22px] sm:text-[24px] lg:text-[26px] font-semibold text-[#01155E] mb-5">Floor Plans</h2>
             <div className="mb-8">
               {floorPlansList.map((plan, index) => (
                 <div key={index} className="border border-[#D9E1F2] rounded-[10px] overflow-hidden mb-3">
                   <div
-                    className="bg-[#EEF2FF] p-5 flex justify-between items-center cursor-pointer"
+                    className="bg-[#EEF2FF] p-4 sm:p-5 flex flex-wrap justify-between items-center gap-3 cursor-pointer"
                     onClick={() =>
                       index === 0
                         ? setFloorPlan1Open(!floorPlan1Open)
@@ -1474,11 +1613,11 @@ const getBedroomsDisplay = (val) => {
                       ) : (
                         <ChevronDown size={20} className="text-[#01155E]" />
                       )}
-                      <span className="text-[#67739E] font-semibold text-[20px]">
+                      <span className="text-[#67739E] font-semibold text-[16px] sm:text-[18px] lg:text-[20px]">
                         {plan.bedrooms}
                       </span>
                     </div>
-                    <div className="flex gap-6 text-[#67739E] text-[18px]">
+                    <div className="flex flex-wrap gap-3 sm:gap-6 text-[#67739E] text-[14px] sm:text-[16px] lg:text-[18px]">
                       <span className="flex items-center gap-1.5">
                         <Maximize size={18} className="text-[#01155E]" />
                         {plan.sqFt} Sq Ft
@@ -1491,18 +1630,18 @@ const getBedroomsDisplay = (val) => {
                   </div>
 
                   {(index === 0 ? floorPlan1Open : floorPlan2Open) && (
-                    <div className="bg-white p-8">
+                    <div className="bg-white p-4 sm:p-6 lg:p-8">
                       <div className="flex justify-center mb-6">
                         <img
                           src={plan.planImage || floorplan1}
                           alt="Floor Plan"
-                          className="max-h-[380px] grayscale"
+                          className="max-h-[240px] sm:max-h-[320px] lg:max-h-[380px] w-auto grayscale"
                         />
                       </div>
                       {plan.description && (
                         <>
-                          <h4 className="font-semibold text-[#67739E] text-[18px] mb-4">Description:</h4>
-                          <p className="text-[#67739E] text-[18px] leading-relaxed">{plan.description}</p>
+                          <h4 className="font-semibold text-[#67739E] text-[16px] sm:text-[18px] mb-4">Description:</h4>
+                          <p className="text-[#67739E] text-[15px] sm:text-[16px] lg:text-[18px] leading-relaxed">{plan.description}</p>
                         </>
                       )}
                     </div>
@@ -1511,10 +1650,10 @@ const getBedroomsDisplay = (val) => {
               ))}
             </div>
 
-            <div className="flex justify-between items-center mb-7.5">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-5 sm:mb-7.5">
               <div>
-                <h2 className="text-[28px] font-semibold text-[#01155E]">Community</h2>
-                <p className="text-[#67739E] font-semibold text-[24px]">
+                <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-semibold text-[#01155E]">Community</h2>
+                <p className="text-[#67739E] font-semibold text-[18px] sm:text-[21px] lg:text-[24px]">
                   {community?.title || location?.community || "—"}
                 </p>
               </div>
@@ -1524,7 +1663,7 @@ const getBedroomsDisplay = (val) => {
                     navigate(`/communities/${community.slug}`);
                   }
                 }}
-                className="bg-[#01155E] text-white px-6 py-2.5 rounded-lg text-[18px] font-semibold"
+                className="bg-[#01155E] text-white px-5 sm:px-6 py-2.5 rounded-lg text-[15px] sm:text-[18px] font-semibold w-full sm:w-auto"
               >
                 Explore Community
               </button>
@@ -1537,7 +1676,7 @@ const getBedroomsDisplay = (val) => {
                 there is no community image. Using the `hasCommunityImage` flag here
                 for clarity. */}
             {hasCommunityImage && (
-              <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-[850px] h-[395px] mb-8">
+              <div className="rounded-[10px] overflow-hidden border border-[#D9E1F2] w-full h-[200px] sm:h-[300px] lg:w-[850px] lg:h-[395px] mb-8">
                 <img
                   src={getSafeImageUrl(
                     community?.marketSupply?.image || location?.communityImage
@@ -1557,24 +1696,24 @@ const getBedroomsDisplay = (val) => {
                 missing, so the flag is accurate). */}
             {hasInvestmentInsights && (
               <div className="border border-[#01155E33] rounded-[10px] overflow-hidden mb-8">
-                <div className="flex justify-between items-center px-6 py-4 border-b border-[#01155E33]">
-                  <h2 className="text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
-                  <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[15px] font-semibold">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 px-4 sm:px-6 py-4 border-b border-[#01155E33]">
+                  <h2 className="text-[19px] sm:text-[22px] font-bold text-[#01155E]">Investment Insights</h2>
+                  <button className="bg-[#01155E] text-white px-5 py-2.5 rounded-[8px] text-[14px] sm:text-[15px] font-semibold w-full sm:w-auto">
                     Unlock Investment Insights
                   </button>
                 </div>
-                <div className="grid grid-cols-3 px-6 py-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-0 px-4 sm:px-6 py-5">
                   <div>
-                    <p className="text-[#67739E] text-[15px] mb-1">Rental Yield</p>
-                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
+                    <p className="text-[#67739E] text-[14px] sm:text-[15px] mb-1">Rental Yield</p>
+                    <p className="text-[#01155E] font-bold text-[16px] sm:text-[17px]">{investmentInsights?.rentalYield || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[#67739E] text-[15px] mb-1">Price Trends</p>
-                    <p className="text-[#01155E] font-bold text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
+                    <p className="text-[#67739E] text-[14px] sm:text-[15px] mb-1">Price Trends</p>
+                    <p className="text-[#01155E] font-bold text-[16px] sm:text-[17px]">{investmentInsights?.priceTrend || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-[#67739E] text-[15px] mb-1">Price per sqft</p>
-                    <p className="text-[#01155E] font-bold text-[17px]">
+                    <p className="text-[#67739E] text-[14px] sm:text-[15px] mb-1">Price per sqft</p>
+                    <p className="text-[#01155E] font-bold text-[16px] sm:text-[17px]">
                       {investmentInsights?.pricePerSqFt || "—"}
                     </p>
                   </div>
@@ -1582,8 +1721,8 @@ const getBedroomsDisplay = (val) => {
               </div>
             )}
 
-            <div className="mt-10">
-              <h2 className="text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
+            <div className="mt-8 sm:mt-10">
+              <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-semibold text-[#01155E] mb-5">Location Map</h2>
               <PropertyMap
                 latlong={rawListing?.latlong}
                 coordinates={location?.coordinates}
@@ -1593,11 +1732,11 @@ const getBedroomsDisplay = (val) => {
 
             {youtubeEmbed && (
               <>
-                <h2 className="text-[28px] font-semibold text-[#01155E] mb-10 mt-10">
+                <h2 className="text-[22px] sm:text-[25px] lg:text-[28px] font-semibold text-[#01155E] mb-6 sm:mb-8 lg:mb-10 mt-8 sm:mt-10">
                   Project Video
                 </h2>
 
-                <div className="relative rounded-[10px] overflow-hidden mb-10 h-[380px]">
+                <div className="relative rounded-[10px] overflow-hidden mb-8 sm:mb-10 h-[220px] sm:h-[300px] lg:h-[380px]">
                   <iframe
                     width="100%"
                     height="100%"
@@ -1614,9 +1753,9 @@ const getBedroomsDisplay = (val) => {
 
           </div>
 
-          <div className="w-[410px] flex-shrink-0">
-            <div className="sticky top-8 space-y-6">
-              <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-6">
+          <div className="w-full lg:w-[410px] flex-shrink-0">
+            <div className="lg:sticky lg:top-8 space-y-6">
+              <div className="bg-white border border-[#D9E1F2] rounded-[10px] p-4 sm:p-6">
 
                 <div className="flex items-start gap-2 mb-4">
                   <Star
@@ -1624,7 +1763,7 @@ const getBedroomsDisplay = (val) => {
                     fill="#0e0d0d"
                     className="mt-1 flex-shrink-0"
                   />
-                  <span className="text-[#01155E] font-semibold text-[22px] capitalize leading-[1.3]">
+                  <span className="text-[#01155E] font-semibold text-[19px] sm:text-[22px] capitalize leading-[1.3]">
                     {title || "—"}
                   </span>
                 </div>
@@ -1635,7 +1774,7 @@ const getBedroomsDisplay = (val) => {
                   </span>
                 </div>
 
-                <div className="flex items-start gap-2 text-[#67739E] text-[18px] mb-4">
+                <div className="flex items-start gap-2 text-[#67739E] text-[15px] sm:text-[18px] mb-4">
                   <MapPin
                     size={19}
                     className="mt-1 flex-shrink-0 text-[#67739E]"
@@ -1652,7 +1791,7 @@ const getBedroomsDisplay = (val) => {
                 </div>
                 <hr className="border-[#D9E1F2] mb-4" />
 
-                <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
+                <div className="flex items-center gap-2 text-[#67739E] text-[15px] sm:text-[18px] mb-4">
                   {(PROPERTY?.developer_image || rawListing?.developer_image) ? (
                     <img
                       src={getSafeImageUrl(
@@ -1672,25 +1811,25 @@ const getBedroomsDisplay = (val) => {
 
                 <hr className="border-[#D9E1F2] mb-4" />
 
-                <div className="flex items-center gap-2 text-[#67739E] text-[18px] mb-4">
+                <div className="flex items-center gap-2 text-[#67739E] text-[15px] sm:text-[18px] mb-4">
                   <Square size={14} />
                   <span>{builtUpArea ? `${builtUpArea} Sq Ft` : sqft || "—"}</span>
                 </div>
 
                 <hr className="border-[#D9E1F2] mb-6" />
 
-                <div className="text-[20px] font-semibold text-[#01155E] mb-4">
+                <div className="text-[17px] sm:text-[20px] font-semibold text-[#01155E] mb-4">
                   Starting at  {currency}
-                  <span className="text-[36px] ml-2">
+                  <span className="text-[28px] sm:text-[36px] ml-2">
                     {price ? Number(price).toLocaleString() : "—"}
                   </span>
                 </div>
 
                 <hr className="border-[#D9E1F2] mb-4" />
 
-                <h4 className="text-[#01155E] font-semibold text-[20px] mb-4">Contact Us Now !</h4>
+                <h4 className="text-[#01155E] font-semibold text-[17px] sm:text-[20px] mb-4">Contact Us Now !</h4>
 
-                <div className="rounded-xl bg-[#F5F8FF] p-4 w-full max-w-[350px]">
+                <div className="rounded-xl bg-[#F5F8FF] p-4 w-full sm:max-w-[350px]">
   <div className="flex items-center gap-4 mb-4">
     <img
       src={Broker}
@@ -1698,7 +1837,7 @@ const getBedroomsDisplay = (val) => {
       className="w-14 h-14 rounded-full object-cover object-[center_20%] ring-2 ring-white shadow-sm"
     />
     <div>
-      <div className="font-semibold text-[#01155E] text-[18px] leading-none mb-1 mt-2">
+      <div className="font-semibold text-[#01155E] text-[16px] sm:text-[18px] leading-none mb-1 mt-2">
         Divyansh Chitkara
       </div>
      
@@ -1708,7 +1847,7 @@ const getBedroomsDisplay = (val) => {
   <div className="flex items-center gap-2.5">
     <button
       onClick={handleCallClick}
-      className="w-[46px] h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] text-[#01155E] rounded-[12px] shadow-sm hover:bg-[#01155E] hover:border-[#01155E] hover:text-white hover:shadow-md transition-all duration-200"
+      className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] text-[#01155E] rounded-[12px] shadow-sm hover:bg-[#01155E] hover:border-[#01155E] hover:text-white hover:shadow-md transition-all duration-200"
       aria-label="Call"
     >
       <Phone size={19} />
@@ -1716,7 +1855,7 @@ const getBedroomsDisplay = (val) => {
 
     <button
       onClick={handleWhatsAppClick}
-      className="w-[46px] h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] rounded-[12px] shadow-sm hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md transition-all duration-200 group"
+      className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] flex items-center justify-center bg-white border border-[#D9E1F2] rounded-[12px] shadow-sm hover:bg-[#25D366] hover:border-[#25D366] hover:shadow-md transition-all duration-200 group"
       aria-label="Chat on WhatsApp"
     >
       <svg width="19" height="19" viewBox="0 0 24 24" className="fill-[#25D366] group-hover:fill-white transition-colors">
@@ -1728,7 +1867,7 @@ const getBedroomsDisplay = (val) => {
     <button
       onClick={handleEmailClick}
       disabled={isEmailSending}
-      className="flex-1 h-[46px] bg-[#01155E] text-white rounded-[12px] font-semibold text-[15px] shadow-sm hover:bg-[#0A2470] hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex-1 h-[42px] sm:h-[46px] bg-[#01155E] text-white rounded-[12px] font-semibold text-[13px] sm:text-[15px] shadow-sm hover:bg-[#0A2470] hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isEmailSending ? "Connecting..." : "Request Details"}
     </button>
@@ -1740,8 +1879,8 @@ const getBedroomsDisplay = (val) => {
           </div>
         </div>
 
-        <div className="mt-16">
-          <h2 className="text-[30px] font-semibold text-[#01155E] text-center mb-10">
+        <div className="mt-12 sm:mt-14 lg:mt-16">
+          <h2 className="text-[22px] sm:text-[26px] lg:text-[30px] font-semibold text-[#01155E] text-center mb-6 sm:mb-8 lg:mb-10 px-2">
             Similar Properties In {location?.community || "this area"}
           </h2>
 
@@ -1767,10 +1906,10 @@ const getBedroomsDisplay = (val) => {
           onClick={() => setPopupType(null)}
         >
           <div
-            className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl"
+            className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-2xl font-bold text-[#01155E] mb-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-[#01155E] mb-2">
               {popupType === "brochure"
                 ? "Download Brochure"
                 : "Check Availability"}
@@ -1819,9 +1958,9 @@ const getBedroomsDisplay = (val) => {
         </div>
       )}
 
-      <div className="max-w-[1290px] mx-auto mt-12 mb-22 px-4">
+      <div className="max-w-[1290px] mx-auto mt-10 sm:mt-12 mb-14 sm:mb-22 px-4">
         <div className="border-t border-gray-200 pt-6">
-          <p className="text-[#67739E] font-normal text-[16px] leading-relaxed ">
+          <p className="text-[#67739E] font-normal text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed ">
             Property information, pricing, availability, specifications, and
             project details presented on this page are provided for general
             informational purposes only. Such information may change without

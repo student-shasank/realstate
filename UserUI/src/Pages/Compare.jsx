@@ -78,10 +78,10 @@ const Compare = () => {
   /* ── Small reusable sub-components ── */
 
   const InfoRow = ({ label, value, accent }) => (
-    <div className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
-      <span className="text-xs font-bold uppercase tracking-widest text-[#67739E]">{label}</span>
+    <div className="flex justify-between items-center py-2.5 sm:py-3 border-b border-gray-100 last:border-0 gap-3">
+      <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#67739E] shrink-0">{label}</span>
       <span
-        className="text-[18px] font-black text-right max-w-[55%] leading-snug text-[#01155E] capitalize"
+        className="text-[14px] sm:text-[16px] md:text-[18px] font-black text-right max-w-[55%] leading-snug text-[#01155E] capitalize break-words"
       >
         {value || "—"}
       </span>
@@ -89,17 +89,17 @@ const Compare = () => {
   );
 
   const SectionCard = ({ title, children }) => (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mt-5">
-      <p className="text-[10px] font-black uppercase tracking-[0.35em] text-gray-400 mb-4">{title}</p>
+    <div className="bg-white rounded-2xl md:rounded-3xl p-4 sm:p-5 md:p-6 shadow-sm border border-gray-100 mt-4 md:mt-5">
+      <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] md:tracking-[0.35em] text-gray-400 mb-3 md:mb-4">{title}</p>
       {children}
     </div>
   );
 
   const StatBox = ({ icon, value, label }) => (
-    <div className="flex-1 bg-gray-50 rounded-2xl p-4 flex flex-col items-center gap-1">
-      <div style={{ color: NAVY }} className="text-lg">{icon}</div>
-      <p className="text-xl font-black text-gray-900 leading-none">{value ?? "—"}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
+    <div className="flex-1 min-w-[70px] bg-gray-50 rounded-xl md:rounded-2xl p-2.5 sm:p-3 md:p-4 flex flex-col items-center gap-1">
+      <div style={{ color: NAVY }} className="text-base md:text-lg">{icon}</div>
+      <p className="text-base sm:text-lg md:text-xl font-black text-gray-900 leading-none">{value ?? "—"}</p>
+      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
     </div>
   );
 
@@ -115,11 +115,11 @@ const Compare = () => {
             />
           ))}
         </div>
-        <div className="flex flex-wrap gap-3 mt-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mt-3">
           {steps.map((s, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full" style={{ background: colors[i % colors.length] }} />
-              <span className="text-[10px] font-bold text-gray-500">
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-500">
                 {s.label} {s.percent}%
               </span>
             </div>
@@ -131,7 +131,7 @@ const Compare = () => {
 
   const AmenityPill = ({ label }) => (
     <div
-      className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100 bg-white text-gray-600 hover:text-white transition-all duration-200 cursor-default"
+      className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-gray-100 bg-white text-gray-600 hover:text-white transition-all duration-200 cursor-default"
       onMouseEnter={(e) => {
         e.currentTarget.style.background = NAVY;
         e.currentTarget.style.color = "#fff";
@@ -257,7 +257,7 @@ const Compare = () => {
     return (
       <div className="flex flex-col">
         {/* ── Hero Image ── */}
-        <div className="relative rounded-[2.5rem] overflow-hidden shadow-xl group mb-5" style={{ height: 340 }}>
+        <div className="relative rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-xl group mb-4 md:mb-5 h-[220px] sm:h-[280px] md:h-[340px]">
           <img
             src={getSafeImageUrl(featureImage)}
             alt="property"
@@ -265,15 +265,15 @@ const Compare = () => {
           />
           {/* gradient overlay */}
           <div
-            className="absolute inset-0 flex flex-col justify-between p-6"
+            className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5 md:p-6"
             style={{
               background: `linear-gradient(to top, ${NAVY}EE 0%, ${NAVY}44 50%, transparent 100%)`,
             }}
           >
             {/* Badges top */}
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start gap-2">
               <span
-                className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
+                className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border"
                 style={{
                   background: "rgba(201,168,76,0.15)",
                   borderColor: "rgba(201,168,76,0.5)",
@@ -283,7 +283,7 @@ const Compare = () => {
                 {finalCategory || "Property"}
               </span>
               <span
-                className="text-[16px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border"
+                className="text-[12px] sm:text-[14px] md:text-[16px] font-black uppercase tracking-widest px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border"
                 style={{
                   background: "rgba(29,158,117,0.15)",
                   borderColor: "rgba(29,158,117,0.5)",
@@ -296,14 +296,14 @@ const Compare = () => {
             </div>
             {/* Price + title bottom */}
             <div>
-              <p className="text-white text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
-              <p className="font-black leading-none mb-4" style={{ color: GOLD, fontSize: 28 }}>
-                <span className="text-[18px] font-bold mr-1">{currency}</span>
+              <p className="text-white text-[16px] sm:text-[20px] md:text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
+              <p className="font-black leading-none mb-3 md:mb-4 text-[20px] sm:text-[24px] md:text-[28px]" style={{ color: GOLD }}>
+                <span className="text-[14px] sm:text-[16px] md:text-[18px] font-bold mr-1">{currency}</span>
                 {finalMinPrice ? Number(finalMinPrice).toLocaleString() : "—"}
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3 items-center">
                 <button
-                  className="text-white text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200"
+                  className="text-white text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-white/20 backdrop-blur-sm transition-all duration-200"
                   style={{ background: "rgba(255,255,255,0.1)" }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.color = NAVY; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
@@ -312,10 +312,10 @@ const Compare = () => {
                   View Details
                 </button>
                 <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0"
                   style={{ background: "rgba(255,255,255,0.15)" }}
                 >
-                  <FaMoneyCheckAlt className="text-white text-sm" />
+                  <FaMoneyCheckAlt className="text-white text-xs sm:text-sm" />
                 </div>
               </div>
             </div>
@@ -323,7 +323,7 @@ const Compare = () => {
         </div>
 
         {/* ── Quick Stats ── */}
-        <div className="flex gap-3 mb-1">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-1">
           <StatBox icon={<FaBed />} value={bedArray?.[0] || "—"} label="Beds" />
           <StatBox icon={<FaBath />} value={baths || "—"} label="Baths" />
           <StatBox icon={<FaChartArea />} value={finalMinArea ? `${finalMinArea}` : null} label="SqFt" />
@@ -352,7 +352,7 @@ const Compare = () => {
           <InfoRow label="Max Price" value={finalMaxPrice ? `${currency} ${Number(finalMaxPrice).toLocaleString()}` : "—"} accent />
           <InfoRow label="Currency" value={currency} />
           <div className="mt-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Price Range</p>
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Price Range</p>
             <PayBar steps={paySteps} />
           </div>
         </SectionCard>
@@ -368,10 +368,10 @@ const Compare = () => {
         <SectionCard title="Location">
           <div className="flex items-start gap-3 mt-1">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
               style={{ background: NAVY }}
             >
-              <FaMapMarkerAlt className="text-white text-sm" />
+              <FaMapMarkerAlt className="text-white text-xs sm:text-sm" />
             </div>
             <div>
               <p className="font-black text-gray-900 text-sm">{cityName || "—"}</p>
@@ -406,32 +406,32 @@ const Compare = () => {
      MAIN RENDER
   ══════════════════════════════════════ */
   return (
-    <div className="min-h-screen py-12 px-4 md:px-8" style={{ background: "#EEF0F3" }}>
+    <div className="min-h-screen py-6 px-3 sm:py-8 sm:px-4 md:py-12 md:px-8 overflow-x-hidden" style={{ background: "#EEF0F3" }}>
       <div
-        className="max-w-[1500px] mx-auto rounded-[3rem] p-8 md:p-14 border-[16px] border-white"
+        className="max-w-[1500px] mx-auto rounded-2xl sm:rounded-3xl md:rounded-[3rem] p-4 sm:p-6 md:p-14 border-4 sm:border-8 md:border-[16px] border-white"
         style={{
           background: "#F8F9FB",
           boxShadow: "0 40px 80px -20px rgba(1,21,94,0.12)",
         }}
       >
         {/* ── Page Title ── */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 md:mb-12 px-1">
           <h1
-            className="text-4xl md:text-5xl text-[#01155E] font-['Archivo'] font-bold tracking-tight mb-2"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#01155E] font-['Archivo'] font-bold tracking-tight mb-2"
           >
             Compare Properties
           </h1>
-          <p className="text-sm text-[#67739E] font-bold uppercase tracking-widest">
+          <p className="text-xs sm:text-sm text-[#67739E] font-bold uppercase tracking-wide sm:tracking-widest">
             Select two listings from your favorites to compare side by side
           </p>
         </div>
 
         {/* ── Dropdown Selectors ── */}
-        <div className="flex flex-col md:flex-row justify-center gap-6 mb-12">
+        <div className="flex flex-col md:flex-row justify-center gap-4 sm:gap-6 mb-8 md:mb-12">
           {[0, 1].map((i) => (
             <div key={i} className="relative w-full max-w-sm mx-auto">
               <select
-                className="w-full appearance-none bg-white px-8 py-5 pr-12 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none uppercase tracking-widest cursor-pointer text-left border border-gray-100 transition-all hover:shadow-lg"
+                className="w-full appearance-none bg-white px-5 sm:px-6 md:px-8 py-3.5 sm:py-4 md:py-5 pr-12 rounded-2xl shadow-md text-[#01155E] font-black text-sm outline-none uppercase tracking-widest cursor-pointer text-left border border-gray-100 transition-all hover:shadow-lg"
                 value={getID(selected[i]) || ""}
                 onChange={(e) => handleSelect(i, e.target.value)}
               >
@@ -461,7 +461,7 @@ const Compare = () => {
 
         {/* ── Loading ── */}
         {loading && (
-          <div className="flex justify-center py-20">
+          <div className="flex justify-center py-16 md:py-20">
             <div
               className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
               style={{ borderColor: `${NAVY}40`, borderTopColor: NAVY }}
@@ -471,7 +471,7 @@ const Compare = () => {
 
         {/* ── Comparison Grid ── */}
         {!loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 relative">
             {/* VS Divider */}
             <div className="hidden md:flex absolute left-1/2 top-6 -translate-x-1/2 z-10 flex-col items-center gap-3">
               <div
@@ -489,6 +489,18 @@ const Compare = () => {
               />
             </div>
 
+            {/* Mobile-only VS badge between stacked cards */}
+            {selected[0] && selected[1] && (
+              <div className="flex md:hidden justify-center -my-2">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-[11px] shadow-lg"
+                  style={{ background: NAVY }}
+                >
+                  VS
+                </div>
+              </div>
+            )}
+
             {[0, 1].map((i) => (
               <div key={i}>
                 {selected[i] ? (
@@ -499,11 +511,10 @@ const Compare = () => {
                   />
                 ) : (
                   <div
-                    className="flex items-center justify-center rounded-[2.5rem] border-2 border-dashed border-gray-200"
-                    style={{ minHeight: 600 }}
+                    className="flex items-center justify-center rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border-2 border-dashed border-gray-200 h-[240px] sm:h-[360px] md:h-[600px]"
                   >
                     <p
-                      className="font-black uppercase tracking-[0.8em] text-gray-300 text-lg -rotate-90 select-none"
+                      className="font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] md:tracking-[0.8em] text-gray-300 text-xs sm:text-sm md:text-lg -rotate-90 select-none whitespace-nowrap"
                     >
                       Choose Listing
                     </p>

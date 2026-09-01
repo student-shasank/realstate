@@ -85,14 +85,14 @@ const PasswordModal = ({ onClose }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl font-['General_Sans']"
+        className="bg-white rounded-2xl p-5 sm:p-6 md:p-8 w-full max-w-md shadow-2xl font-['General_Sans'] max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-[22px] font-bold text-[#01155E]">Change Password</h3>
+        <div className="flex justify-between items-center mb-5 sm:mb-6">
+          <h3 className="text-[19px] sm:text-[22px] font-bold text-[#01155E]">Change Password</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#E9EEF6] flex items-center justify-center text-[#67739E] hover:bg-[#D9E1F2] transition-colors"
+            className="w-8 h-8 rounded-full bg-[#E9EEF6] flex items-center justify-center text-[#67739E] hover:bg-[#D9E1F2] transition-colors flex-shrink-0"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path
@@ -107,7 +107,7 @@ const PasswordModal = ({ onClose }) => {
 
         {["current", "newPass", "confirm"].map((field) => (
           <div key={field} className="mb-4">
-            <label className="block text-[#01155E] text-[14px] font-semibold mb-1.5">
+            <label className="block text-[#01155E] text-[13px] sm:text-[14px] font-semibold mb-1.5">
               {field === "current"
                 ? "Current Password"
                 : field === "newPass"
@@ -120,7 +120,7 @@ const PasswordModal = ({ onClose }) => {
                 placeholder="••••••••"
                 value={form[field]}
                 onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                className="w-full p-3 pr-10 border border-[#D9E1F2] rounded-[10px] text-[#01155E] text-[15px] focus:ring-2 focus:ring-[#01155E] focus:border-transparent outline-none transition-all"
+                className="w-full p-3 pr-10 border border-[#D9E1F2] rounded-[10px] text-[#01155E] text-[14px] sm:text-[15px] focus:ring-2 focus:ring-[#01155E] focus:border-transparent outline-none transition-all"
               />
               <button
                 type="button"
@@ -168,14 +168,14 @@ const PasswordModal = ({ onClose }) => {
           </div>
         ))}
 
-        <div className="flex gap-3 mt-6">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 py-3 border border-[#D9E1F2] text-[#67739E] rounded-[10px] font-semibold text-[15px] hover:bg-[#E9EEF6] transition-colors"
+            className="flex-1 py-3 border border-[#D9E1F2] text-[#67739E] rounded-[10px] font-semibold text-[14px] sm:text-[15px] hover:bg-[#E9EEF6] transition-colors"
           >
             Cancel
           </button>
-          <button className="flex-1 py-3 bg-[#01155E] text-white rounded-[10px] font-semibold text-[15px] hover:opacity-90 transition-opacity">
+          <button className="flex-1 py-3 bg-[#01155E] text-white rounded-[10px] font-semibold text-[14px] sm:text-[15px] hover:opacity-90 transition-opacity">
             Update Password
           </button>
         </div>
@@ -288,45 +288,45 @@ export default function Profile() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#F4F7FC] font-['General_Sans'] ">
-      <div className="w-full max-w-[1440px] mx-auto px-[120px] py-8">
+    <div className="w-full min-h-screen bg-[#F4F7FC] font-['General_Sans'] overflow-x-hidden">
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-10 lg:px-[120px] py-6 sm:py-7 lg:py-8">
         {/* ── PROFILE HEADER CARD ── */}
-        <div className="bg-white rounded-[16px] border border-[#D9E1F2] shadow-sm overflow-hidden mb-6 mt-30 max-w-[1200px]">
-          <div className="px-8 pb-6 mt-10">
+        <div className="bg-white rounded-[16px] border border-[#D9E1F2] shadow-sm overflow-hidden mb-6  max-w-[1200px]">
+          <div className="px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 mt-8 sm:mt-9 lg:mt-10">
             {/* Avatar row */}
-            <div className="flex items-end justify-between -mt-7 mb-4">
-              <div className="flex items-end gap-5">
-  <div className="w-[64px] h-[64px] rounded-full bg-[#01155E] border-4 border-white shadow-lg flex items-center justify-center text-white text-[26px] font-bold flex-shrink-0">
-    {user.name.charAt(0)}
-  </div>
+            <div className="flex flex-col sm:flex-row sm:items-end items-start justify-between gap-4 sm:gap-3 -mt-7 mb-4">
+              <div className="flex items-end gap-4 sm:gap-5 w-full sm:w-auto">
+                <div className="w-[56px] h-[56px] sm:w-[64px] sm:h-[64px] rounded-full bg-[#01155E] border-4 border-white shadow-lg flex items-center justify-center text-white text-[22px] sm:text-[26px] font-bold flex-shrink-0">
+                  {user.name.charAt(0)}
+                </div>
 
-  <div className="pb-1">
-    {editMode ? (
-      <input
-        value={editForm.name}
-        onChange={(e) =>
-          setEditForm({ ...editForm, name: e.target.value })
-        }
-        className="text-[22px] font-bold text-[#01155E] border-b-2 border-[#2F6BFF] outline-none bg-transparent w-[280px]"
-      />
-    ) : (
-      <h1 className="text-[22px] font-bold text-[#01155E]">
-        {user.name}
-      </h1>
-    )}
+                <div className="pb-1 min-w-0 flex-1 sm:flex-initial">
+                  {editMode ? (
+                    <input
+                      value={editForm.name}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, name: e.target.value })
+                      }
+                      className="text-[18px] sm:text-[22px] font-bold text-[#01155E] border-b-2 border-[#2F6BFF] outline-none bg-transparent w-full sm:w-[280px]"
+                    />
+                  ) : (
+                    <h1 className="text-[18px] sm:text-[22px] font-bold text-[#01155E] truncate">
+                      {user.name}
+                    </h1>
+                  )}
 
-    <p className="text-[#67739E] text-[14px]">
-      Member since {user.joinDate || "N/A"}
-    </p>
-  </div>
-</div>
+                  <p className="text-[#67739E] text-[13px] sm:text-[14px]">
+                    Member since {user.joinDate || "N/A"}
+                  </p>
+                </div>
+              </div>
 
               {/* Edit buttons */}
-              <div className="flex gap-2 pb-1">
+              <div className="flex flex-wrap gap-2 pb-1 w-full sm:w-auto justify-start sm:justify-end">
                 {editMode ? (
                   <>
                     {updateError && (
-                      <p className="text-red-500 text-[13px] self-center mr-2">{updateError}</p>
+                      <p className="text-red-500 text-[12px] sm:text-[13px] self-center mr-0 sm:mr-2 w-full sm:w-auto order-first sm:order-none">{updateError}</p>
                     )}
                     <button
                       onClick={() => {
@@ -334,14 +334,14 @@ export default function Profile() {
                         dispatch(resetUpdateUser());
                       }}
                       disabled={updateLoading}
-                      className="px-4 py-2 border border-[#D9E1F2] text-[#67739E] text-[14px] font-semibold rounded-[10px] hover:bg-[#E9EEF6] transition-colors disabled:opacity-50"
+                      className="px-4 py-2 border border-[#D9E1F2] text-[#67739E] text-[13px] sm:text-[14px] font-semibold rounded-[10px] hover:bg-[#E9EEF6] transition-colors disabled:opacity-50 flex-1 sm:flex-initial"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSaveEdit}
                       disabled={updateLoading}
-                      className="px-4 py-2 bg-[#01155E] text-white text-[14px] font-semibold rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center gap-2"
+                      className="px-4 py-2 bg-[#01155E] text-white text-[13px] sm:text-[14px] font-semibold rounded-[10px] hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2 flex-1 sm:flex-initial"
                     >
                       {updateLoading ? (
                         <>
@@ -356,7 +356,7 @@ export default function Profile() {
                 ) : (
                   <button
                     onClick={() => setEditMode(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-[#01155E] text-[#01155E] text-[14px] font-semibold rounded-[10px] hover:bg-[#01155E] hover:text-white transition-colors"
+                    className="flex items-center justify-center gap-2 px-4 py-2 border border-[#01155E] text-[#01155E] text-[13px] sm:text-[14px] font-semibold rounded-[10px] hover:bg-[#01155E] hover:text-white transition-colors w-full sm:w-auto"
                   >
                     <EditIcon />
                     Edit Profile
@@ -366,7 +366,7 @@ export default function Profile() {
             </div>
 
             {/* Info Grid */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {/* Email */}
               <div className="flex items-center gap-3 p-4 bg-[#F4F7FC] rounded-[10px]">
                 <div className="w-9 h-9 rounded-full bg-white border border-[#D9E1F2] flex items-center justify-center flex-shrink-0">
@@ -387,7 +387,7 @@ export default function Profile() {
                 <div className="w-9 h-9 rounded-full bg-white border border-[#D9E1F2] flex items-center justify-center flex-shrink-0">
                   <PhoneIcon />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-[#67739E] text-[11px] font-medium uppercase tracking-wide">
                     Phone
                   </p>
@@ -398,7 +398,7 @@ export default function Profile() {
                       className="text-[#01155E] text-[14px] font-semibold border-b border-[#2F6BFF] outline-none bg-transparent w-full"
                     />
                   ) : (
-                    <p className="text-[#01155E] text-[14px] font-semibold">
+                    <p className="text-[#01155E] text-[14px] font-semibold truncate">
                       {user.phone || "—"}
                     </p>
                   )}
@@ -406,7 +406,7 @@ export default function Profile() {
               </div>
 
               {/* Password */}
-              <div className="flex items-center gap-3 p-4 bg-[#F4F7FC] rounded-[10px]">
+              <div className="flex items-center gap-3 p-4 bg-[#F4F7FC] rounded-[10px] sm:col-span-2 lg:col-span-1">
                 <div className="w-9 h-9 rounded-full bg-white border border-[#D9E1F2] flex items-center justify-center flex-shrink-0">
                   <LockIcon />
                 </div>
@@ -432,7 +432,7 @@ export default function Profile() {
         </div>
 
         {/* ── TABS ── */}
-        <div className="flex gap-1 bg-white border border-[#D9E1F2] rounded-[10px] p-1 mb-6 w-fit shadow-sm">
+        <div className="flex gap-1 bg-white border border-[#D9E1F2] rounded-[10px] p-1 mb-6 w-full sm:w-fit shadow-sm overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {[
             { id: "favorites", label: `Favourite Listings (${favoriteListings.length})` },
             { id: "compare", label: "Compare" },
@@ -446,7 +446,7 @@ export default function Profile() {
                   setActiveTab(tab.id);
                 }
               }}
-              className={`px-6 py-2.5 rounded-[8px] text-[14px] font-semibold transition-all duration-200 ${
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-[8px] text-[13px] sm:text-[14px] font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? "bg-[#01155E] text-white shadow-sm"
                   : "text-[#67739E] hover:text-[#01155E] hover:bg-[#F4F7FC]"
@@ -472,14 +472,14 @@ export default function Profile() {
 
             {/* Empty state */}
             {!favLoading && favoriteListings.length === 0 && (
-              <div className="bg-white rounded-[16px] border border-[#D9E1F2] p-12 text-center shadow-sm">
+              <div className="bg-white rounded-[16px] border border-[#D9E1F2] p-6 sm:p-8 lg:p-12 text-center shadow-sm">
                 <div className="w-16 h-16 bg-[#E9EEF6] rounded-full flex items-center justify-center mx-auto mb-4">
                   <HeartIcon filled={false} />
                 </div>
-                <p className="text-[#01155E] text-[18px] font-semibold mb-1">
+                <p className="text-[#01155E] text-[16px] sm:text-[18px] font-semibold mb-1">
                   No Favourites Yet
                 </p>
-                <p className="text-[#67739E] text-[14px]">
+                <p className="text-[#67739E] text-[13px] sm:text-[14px]">
                   Like listings from the properties page to save them here.
                 </p>
               </div>
@@ -508,17 +508,17 @@ export default function Profile() {
           onClick={() => setShowLoginPrompt(false)}
         >
           <div
-            className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center font-['General_Sans']"
+            className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-sm shadow-2xl text-center font-['General_Sans']"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-14 h-14 bg-[#E9EEF6] rounded-full flex items-center justify-center mx-auto mb-4">
               <HeartIcon filled={false} />
             </div>
-            <h3 className="text-[20px] font-bold text-[#01155E] mb-2">Login Required</h3>
-            <p className="text-[#67739E] text-[14px] mb-6">
+            <h3 className="text-[18px] sm:text-[20px] font-bold text-[#01155E] mb-2">Login Required</h3>
+            <p className="text-[#67739E] text-[13px] sm:text-[14px] mb-6">
               Please login to save your favourite listings.
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowLoginPrompt(false)}
                 className="flex-1 py-3 border border-[#D9E1F2] text-[#67739E] rounded-[10px] font-semibold text-[14px] hover:bg-[#E9EEF6] transition-colors"

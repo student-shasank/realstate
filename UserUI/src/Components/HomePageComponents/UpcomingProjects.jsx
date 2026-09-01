@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { fetchProjects } from "../../features/dashboard/searchSlice.jsx";
 
@@ -8,6 +9,7 @@ import imageurl from "../../assets/underline.png";
 
 const UpcomingProjects = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const scrollRef = useRef(null);
 
   const { projects, loading } = useSelector((state) => state.search);
@@ -27,7 +29,7 @@ const UpcomingProjects = () => {
   // ----------------------------------------
   // SAFE LOCATION FORMATTER
   // ----------------------------------------
-  const getProjectLocation = (location, district, city) => {
+  const getProjectLocation = (location, districtData, cityData, projectCity) => {
     if (typeof location === "string" && location.trim()) {
       return location;
     }
@@ -42,13 +44,14 @@ const UpcomingProjects = () => {
           .filter(Boolean)
           .join(", ") ||
         location?.address ||
-        district ||
-        city ||
+        districtData?.[0]?.name ||
+        cityData?.name ||
+        projectCity ||
         "Dubai"
       );
     }
 
-    return district || city || "Dubai";
+    return districtData?.[0]?.name || cityData?.name || projectCity || "Dubai";
   };
 
   const scroll = (direction) => {
@@ -68,6 +71,14 @@ const UpcomingProjects = () => {
         behavior: "smooth",
       });
     }
+  };
+
+  // ----------------------------------------
+  // NAVIGATE TO DETAIL PAGE USING MONGO _id
+  // ----------------------------------------
+  const goToDetail = (project) => {
+    if (!project?._id) return;
+    navigate(`/listing/${project._id}`);
   };
 
   return (
@@ -142,9 +153,16 @@ const UpcomingProjects = () => {
                 }}
               >
                 {/* IMAGE */}
-                <div className="w-full h-[220px] md:h-[250px] lg:h-[280px] rounded-[20px] overflow-hidden shrink-0">
+                <div
+                  onClick={() => goToDetail(project)}
+                  className="w-full h-[220px] md:h-[250px] lg:h-[280px] rounded-[20px] overflow-hidden shrink-0 cursor-pointer"
+                >
                   <img
-                    src={project.feature_image || upcommingproject1}
+                    src={
+                      project.images?.feature ||
+                      project.feature_image ||
+                      upcommingproject1
+                    }
                     alt={
                       project.feature_image_alt_text ||
                       project.title ||
@@ -164,21 +182,27 @@ const UpcomingProjects = () => {
                       <span className="text-[#03144e99] truncate">
                         {getProjectLocation(
                           project?.location,
-                          project?.district_name,
-                          project?.city_name
+                          project?.district_data,
+                          project?.city_data,
+                          project?.project_city
                         )}
                       </span>
                     </div>
 
                     {/* PROPERTY CATEGORY */}
                     <p className="text-[#001A54] text-[15px] md:text-[16px] font-medium">
-                      {Array.isArray(project?.property_category)
-                        ? project.property_category.join(", ")
-                        : project?.property_category || "Property"}
+                      {Array.isArray(project?.property_types)
+                        ? project.property_types.join(", ")
+                        : project?.property_types ||
+                          project?.property_category ||
+                          "Property"}
                     </p>
 
                     {/* TITLE */}
-                    <h3 className="text-[#001A54] text-[18px] md:text-[20px] font-medium leading-tight line-clamp-2">
+                    <h3
+                      onClick={() => goToDetail(project)}
+                      className="text-[#001A54] text-[18px] md:text-[20px] font-medium leading-tight line-clamp-2 cursor-pointer"
+                    >
                       {project?.title || "Upcoming Project"}
                     </h3>
                   </div>
@@ -187,14 +211,17 @@ const UpcomingProjects = () => {
                   <div className="flex justify-between items-center gap-3">
                     {/* PRICE */}
                     <span className="text-[#001A54] text-[16px] md:text-[20px] font-bold">
-                      {project?.min_price
+                      {project?.price_start || project?.min_price
                         ? `${project?.currency || "AED"} ${Number(
-                            project.min_price
+                            project.price_start || project.min_price
                           ).toLocaleString()}`
                         : "Price on Request"}
                     </span>
 
-                    <button className="bg-[#001A54] text-white px-4 md:px-6 py-2 rounded-[8px] font-bold text-[13px] md:text-sm whitespace-nowrap">
+                    <button
+                      onClick={() => goToDetail(project)}
+                      className="bg-[#001A54] text-white px-4 md:px-6 py-2 rounded-[8px] font-bold text-[13px] md:text-sm whitespace-nowrap"
+                    >
                       Discover
                     </button>
                   </div>

@@ -74,6 +74,45 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const rawStatus = listing?.status || listing?.project_status || "";
   const listingStatus = rawStatus.toString().toLowerCase();
 
+  // Share the listing — uses native Share sheet (mobile/supported browsers)
+// and falls back to copying the link to clipboard otherwise.
+const handleShareClick = async (e) => {
+  e.stopPropagation();
+
+  const listingUrl = listing?._id
+    ? `${window.location.origin}/listing/${listing._id}`
+    : window.location.href;
+
+  const shareData = {
+    title: listing?.title || "Yupland Listing",
+    text: `Check out this property on Yupland: ${listing?.title || ""}`,
+    url: listingUrl,
+  };
+
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      await navigator.clipboard.writeText(listingUrl);
+      toast.success("Link copied to clipboard");
+    } else {
+      // Very old browser fallback
+      const tempInput = document.createElement("input");
+      tempInput.value = listingUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      toast.success("Link copied to clipboard");
+    }
+  } catch (err) {
+    // AbortError = user cancelled the native share sheet — ignore it
+    if (err?.name !== "AbortError") {
+      toast.error("Unable to share right now");
+    }
+  }
+};
+
   // Out of Stock should ONLY be driven by project_status specifically
   // (not the merged status/rawStatus used elsewhere).
   // project_status === "Sold Out" is what actually marks it out of stock.
@@ -497,14 +536,16 @@ const ListingCard = ({ listing, onRequireLogin }) => {
     <button
       key={btn.id}
       onClick={
-        isLikeBtn
-          ? handleFavorite
-          : isCallBtn
-            ? handleCallClick
-            : btn.id === "whatsapp"
-              ? handleWhatsAppClick
-              : (e) => e.stopPropagation()
-      }
+  isLikeBtn
+    ? handleFavorite
+    : isCallBtn
+      ? handleCallClick
+      : btn.id === "whatsapp"
+        ? handleWhatsAppClick
+        : btn.id === "share"
+          ? handleShareClick
+          : (e) => e.stopPropagation()
+}
       className={`group w-10 h-10 rounded-full border-2 border-transparent flex items-center justify-center transition-all duration-300 ${
         listing?.isFeatured ? "bg-white" : "bg-[#E2E8F0]"
       } hover:border-[#01155E] hover:bg-white`}

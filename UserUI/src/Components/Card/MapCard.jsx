@@ -269,7 +269,7 @@ const MapCard = ({ item, onRequireLogin }) => {
 
       {/* --- Image Section --- */}
       <div
-        className="relative w-full h-[240px] group rounded-t-2xl overflow-hidden"
+        className="relative w-full h-[200px] sm:h-[220px] lg:h-[240px] group rounded-t-2xl overflow-hidden"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -359,20 +359,20 @@ const MapCard = ({ item, onRequireLogin }) => {
       </div>
 
       {/* --- Details Section --- */}
-      <div className="pt-4 pb-4 px-4">
+      <div className="pt-3 pb-3 px-3 sm:pt-4 sm:pb-4 sm:px-4">
 
         {/* Price */}
-        <h3 className="text-[20px] leading-tight font-bold text-[#01155E]">
+        <h3 className="text-[18px] sm:text-[19px] lg:text-[20px] leading-tight font-bold text-[#01155E]">
           {displayPrice != null ? `AED ${Number(displayPrice).toLocaleString()}` : "Price on request"}
         </h3>
 
         {/* Title */}
-        <p className="mt-1.5 text-[16px] text-[#222222] font-semibold truncate">
+        <p className="mt-1.5 text-[15px] sm:text-[16px] text-[#222222] font-semibold truncate">
           {displayTitle}
         </p>
 
         {/* Location */}
-        <p className="text-[14px] text-[#67739E] mt-0.5 truncate">
+        <p className="text-[13px] sm:text-[14px] text-[#67739E] mt-0.5 truncate">
           {[displayDistrict, displayCity].filter(Boolean).join(", ") || "N/A"}
         </p>
 
@@ -380,7 +380,7 @@ const MapCard = ({ item, onRequireLogin }) => {
         <div className="h-px bg-gray-100 my-3" />
 
         {/* Specs — each on its own line */}
-        <div className="flex flex-col gap-1 text-[ #67739e] text-[14px]">
+        <div className="flex flex-col gap-1 text-[ #67739e] text-[13px] sm:text-[14px]">
 
           <div className="flex items-center gap-2">
             <img src={Icon3} className="w-4 h-4 shrink-0" alt="beds" />

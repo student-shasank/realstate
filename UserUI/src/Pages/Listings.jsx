@@ -633,10 +633,10 @@ const Listings = () => {
     for (let i = start; i <= end; i++) pageNumbers.push(i);
 
     const baseBtn =
-      "min-w-[40px] h-[40px] px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center";
+      "min-w-[36px] sm:min-w-[40px] h-[36px] sm:h-[40px] px-2.5 sm:px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center";
 
     return (
-      <div className="flex items-center justify-center gap-2 py-8 flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 py-6 sm:py-8 flex-wrap px-2">
         <button
           type="button"
           onClick={() => goToPage(currentPage - 1)}
@@ -708,14 +708,14 @@ const Listings = () => {
   };
 
   return (
-    <div className=" bg-white min-h-screen ">
+    <div className=" bg-white min-h-screen overflow-x-hidden ">
       <Breadcrumbs />
-      <div style={{ padding: "40px 20px", maxWidth: "1340px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1340px", margin: "0 auto" }} className="px-4 py-6 sm:px-5 sm:py-10">
         {/* NEW HEADER SECTION START */}
-        <div className="w-[1290px] mx-auto flex items-end justify-between mb-8 font-['Archivo']">
+        <div className="w-full lg:w-[1290px] mx-auto flex flex-col lg:flex-row lg:items-end items-start justify-between gap-4 lg:gap-0 mb-6 lg:mb-8 font-['Archivo']">
           <div className="relative">
             <h1
-              className="inline-block pb-3 mb-2 text-[32px] sm:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
+              className="inline-block pb-3 mb-2 text-[26px] sm:text-[32px] md:text-[40px] lg:text-[48px] font-bold text-[#001A54]"
               style={{
                 fontFamily: "Archivo, sans-serif",
                 backgroundImage: `url(${imageurl})`,
@@ -728,8 +728,8 @@ const Listings = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="relative" ref={sortRef}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 w-full lg:w-auto">
+            <div className="relative w-full sm:w-auto" ref={sortRef}>
               <button
                 type="button"
                 onClick={() => {
@@ -737,7 +737,7 @@ const Listings = () => {
                   closeAllDropdowns();
                   setIsSortOpen(!wasOpen);
                 }}
-                className={`h-[44px] min-w-[150px] px-4 flex items-center justify-between gap-3 bg-white border text-[15px] font-semibold text-[#01155E] transition-colors ${
+                className={`h-[44px] w-full sm:w-auto sm:min-w-[150px] px-4 flex items-center justify-between gap-3 bg-white border text-[15px] font-semibold text-[#01155E] transition-colors ${
                   isSortOpen
                     ? "border-[#01155E] rounded-t-[12px]"
                     : "border-[#D1D5DB] rounded-[12px]"
@@ -752,7 +752,7 @@ const Listings = () => {
               </button>
 
               {isSortOpen && (
-                <div className="absolute top-[44px] left-0 z-50 w-[260px] bg-white border border-[#01155E] rounded-b-[12px] shadow-[0_10px_20px_rgba(1,21,94,0.1)] overflow-hidden">
+                <div className="absolute top-[44px] left-0 z-50 w-[260px] max-w-[90vw] bg-white border border-[#01155E] rounded-b-[12px] shadow-[0_10px_20px_rgba(1,21,94,0.1)] overflow-hidden">
                   <div className="px-4 pt-3 pb-2">
                     <span className="text-[#01155E] text-[14px] font-bold">Sort by</span>
                   </div>
@@ -784,10 +784,10 @@ const Listings = () => {
               )}
             </div>
 
-            <div className="flex items-center bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1">
+            <div className="flex items-center justify-center sm:justify-start bg-white rounded-2xl border border-[#E2E5EC] p-1 gap-1 w-full sm:w-auto">
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+                className={`flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-[15px] sm:text-[16px] transition-all flex-1 sm:flex-none ${
                   viewMode === "list"
                     ? "bg-[#EEF2F9] text-[#01155E]"
                     : "text-[#01155E]/70 hover:text-[#01155E]"
@@ -807,7 +807,7 @@ const Listings = () => {
 
               <button
                 onClick={() => setViewMode("map")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[16px] transition-all ${
+                className={`flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-[15px] sm:text-[16px] transition-all flex-1 sm:flex-none ${
                   viewMode === "map"
                     ? "bg-[#EEF2F9] text-[#01155E]"
                     : "text-[#01155E]/70 hover:text-[#01155E]"
@@ -829,10 +829,10 @@ const Listings = () => {
         </div>
 
         {/* FILTERS SECTION */}
-        <div className="w-[1290px] min-h-[236px] mx-auto bg-[#1C4DFF0A] border border-[#E5E7EB] rounded-[10px] p-[30px] flex flex-col gap-[30px] items-center font-['Archivo']">
-          <div className="w-[1230px] flex flex-col gap-[16px]">
-            <div className="flex gap-[24px] w-full">
-              <div className="relative flex-1 max-w-[1026px]">
+        <div className="w-full lg:w-[1290px] min-h-0 lg:min-h-[236px] mx-auto bg-[#1C4DFF0A] border border-[#E5E7EB] rounded-[10px] p-4 sm:p-6 lg:p-[30px] flex flex-col gap-4 sm:gap-6 lg:gap-[30px] items-center font-['Archivo']">
+          <div className="w-full lg:w-[1230px] flex flex-col gap-[16px]">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-[24px] w-full">
+              <div className="relative flex-1 lg:max-w-[1026px]">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#01155E]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </span>
@@ -888,13 +888,13 @@ const Listings = () => {
                   // slice (search vs sort) is currently active
                   dispatch(isSortActive ? fetchSortedProjects(payload) : fetchProjects(payload));
                 }}
-                className="w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
+                className="w-full sm:w-[180px] h-[48px] bg-[#01155E] text-white rounded-[8px] font-bold text-[18px] flex items-center justify-center hover:bg-opacity-90 transition-all active:scale-95"
               >
                 Search
               </button>
             </div>
 
-            <div className="grid grid-cols-4 gap-x-[30px] gap-y-[16px] w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 lg:gap-x-[30px] gap-y-3 sm:gap-y-4 lg:gap-y-[16px] w-full">
               <DeveloperDropdown
                 selectedDevelopers={selectedDevelopers}
                 setSelectedDevelopers={(developers) => {
@@ -920,7 +920,7 @@ const Listings = () => {
                 </button>
 
                 {isBedBathOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-[320px] bg-white border border-gray-200 rounded-3xl shadow-xl z-50 p-6">
+                  <div className="absolute top-full left-0 mt-2 w-[92vw] max-w-[320px] sm:w-[320px] bg-white border border-gray-200 rounded-3xl shadow-xl z-50 p-4 sm:p-6">
                     <div className="mb-6">
                       <div className="flex items-center gap-2 mb-4">
                         <div className="w-5 h-5 border-2 border-black rounded-full flex items-center justify-center"></div>
@@ -966,8 +966,8 @@ const Listings = () => {
                 </button>
 
                 {isPriceOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-full md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-5">
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="absolute top-full right-0 mt-2 w-[92vw] max-w-[300px] md:w-[300px] bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-4 sm:p-5">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6">
                       <div>
                         <label className="text-gray-400 text-xs mb-1 block font-medium">Minimum</label>
                         <input
@@ -1033,7 +1033,7 @@ const Listings = () => {
                 </button>
 
                 {propertyTypeOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-[345px] bg-white rounded-[12px] shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
+                  <div className="absolute top-full left-0 mt-1 w-[92vw] max-w-[345px] sm:w-[345px] bg-white rounded-[12px] shadow-lg z-50 overflow-hidden border border-[#E5EAF4]">
                     <div className="flex items-center justify-between px-4 h-[42px] border-b border-[#EEF2F7]">
                       <span className="text-[14px] font-medium text-[#67739E]">
                         {propertyTab}
@@ -1240,7 +1240,7 @@ const Listings = () => {
               <select
                 disabled={isReadyCompletion}
                 title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
-                className={`h-[48px] border rounded-[16px] px-4 text-[14px] font-medium outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat ${
+                className={`h-[48px] border rounded-[16px] px-4 text-[14px] font-medium outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat w-full ${
                   isReadyCompletion
                     ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
                     : "bg-white border-[#D1D5DB] text-[#67739E] cursor-pointer"
@@ -1282,7 +1282,7 @@ const Listings = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="absolute top-full left-0 mt-0 z-50 w-full rounded-b-[16px] p-[12px] grid grid-cols-2 gap-[2px]">
+                  <div className="absolute top-full left-0 mt-0 z-50 w-full rounded-b-[16px] p-[12px] grid grid-cols-1 sm:grid-cols-2 gap-[2px] bg-white shadow-lg">
                     {emirates.map((emirate) => (
                       <div
                         key={emirate}
@@ -1342,9 +1342,9 @@ const Listings = () => {
               <PaginationBar />
             </div>
           ) : (
-            <div className="w-full max-w-[1440px] mx-auto mt-6 flex border border-[#E5E7EB] rounded-xl overflow-hidden bg-white h-[calc(100vh-160px)] min-h-[600px] shadow-sm">
+            <div className="w-full max-w-[1440px] mx-auto mt-6 flex flex-col lg:flex-row border border-[#E5E7EB] rounded-xl overflow-hidden bg-white h-auto lg:h-[calc(100vh-160px)] min-h-0 lg:min-h-[600px] shadow-sm">
               {/* LEFT SIDE: Scrollable Sidebar */}
-              <div className="w-[450px] lg:w-[500px] flex flex-col border-r border-[#E5E7EB] bg-[#F8F9FB]">
+              <div className="w-full lg:w-[500px] flex flex-col border-b lg:border-b-0 lg:border-r border-[#E5E7EB] bg-[#F8F9FB] max-h-[60vh] lg:max-h-none">
 
                 {/* Sidebar Header */}
                 <div className="sticky top-0 z-20 bg-white px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
@@ -1358,7 +1358,7 @@ const Listings = () => {
                 <div
                   className="flex-1 overflow-y-auto p-4 custom-scrollbar"
                 >
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {projects.map((item) => {
                       const itemId = item._id?.$oid || item._id;
 
@@ -1381,7 +1381,7 @@ const Listings = () => {
               </div>
 
               {/* RIGHT SIDE: Mapbox Interface */}
-              <div className="flex-1 relative bg-[#E8EEF4]">
+              <div className="w-full h-[350px] sm:h-[420px] lg:h-auto lg:flex-1 relative bg-[#E8EEF4]">
                 <div className="absolute top-4 right-4 z-10">
                   <button
                     onClick={() => setViewMode("list")}
@@ -1485,7 +1485,7 @@ const Listings = () => {
 
         <div className="max-w-[1290px] mx-auto mt-12 mb-8 px-4">
           <div className="border-t border-gray-200 pt-6">
-            <p className="text-[#67739E] font-normal text-[16px] leading-relaxed ">
+            <p className="text-[#67739E] font-normal text-[14px] sm:text-[16px] leading-relaxed ">
               Property information, pricing, availability, specifications, and
               project details presented on this page are provided for general
               informational purposes only. Such information may change without

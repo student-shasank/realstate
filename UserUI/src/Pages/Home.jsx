@@ -30,7 +30,7 @@ import Preconstruction from "../assets/preconstruction.svg"
 import DeveloperDropdown from "../Components/HomePageComponents/Developerslider/Devloperdropdown"
 import AwardsSection from '../Components/HomePageComponents/AwardsSection';
 import PropertyFlipbookSection from "../Components/HomePageComponents/Propertyflipbooksection.jsx"
-
+import {VITE_GOOGLE_MAPS_API_KEY} from "../Constant/constant.js"
 // ---------------------------------------------------------------------------
 // SHARED FONT PRINCIPLE
 // Every filter control (the closed "trigger" button AND the options inside
@@ -44,11 +44,19 @@ import PropertyFlipbookSection from "../Components/HomePageComponents/Propertyfl
 const DROPDOWN_TRIGGER_TEXT_CLASS = "text-sm font-medium font-['Archivo'] text-[#67739E]";
 const DROPDOWN_OPTION_TEXT_CLASS = "text-[14px] font-medium font-['Archivo'] text-[#67739E]";
 
+// ---------------------------------------------------------------------------
+// GOOGLE PLACES AUTOCOMPLETE
+// API key is read from the environment so it never gets hardcoded into the
+// bundle source. Add REACT_APP_GOOGLE_MAPS_API_KEY=your_key to your .env file.
+// ---------------------------------------------------------------------------
+const GOOGLE_MAPS_API_KEY = VITE_GOOGLE_MAPS_API_KEY;
+
 const Home = () => {
   const dispatch = useDispatch();
   const scrollRef = useRef(null);
   const bedBathRef = useRef(null);
   const priceRef = useRef(null);
+  const locationInputRef = useRef(null); // ref for the location input (Places Autocomplete target)
 
   const [handoverOpen, setHandoverOpen] = React.useState(false);
   const [selectedHandoverYears, setSelectedHandoverYears] = React.useState([]);
@@ -159,6 +167,80 @@ const Home = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [dispatch]);
+
+  // ---------------------------------------------------------------------
+  // Load Google Maps JavaScript API (with the Places library) once and
+  // attach the classic google.maps.places.Autocomplete widget to the
+  // location input. Suggestions are biased/restricted to Dubai/UAE.
+  // NOTE: this uses the "Places API" (legacy) — make sure it's enabled
+  // in Google Cloud Console → APIs & Services → Library → "Places API".
+  // ---------------------------------------------------------------------
+  useEffect(() => {
+    let autocomplete = null;
+    let listener = null;
+
+    const initAutocomplete = () => {
+      if (
+        !locationInputRef.current ||
+        !window.google ||
+        !window.google.maps ||
+        !window.google.maps.places
+      ) {
+        return;
+      }
+
+      // Roughly Dubai's bounding box — used to bias suggestions toward Dubai
+      const dubaiBounds = new window.google.maps.LatLngBounds(
+        { lat: 24.7921, lng: 54.8901 }, // SW
+        { lat: 25.3573, lng: 55.5646 }  // NE
+      );
+
+      autocomplete = new window.google.maps.places.Autocomplete(
+        locationInputRef.current,
+        {
+          bounds: dubaiBounds,
+          componentRestrictions: { country: 'ae' }, // restrict to UAE
+          fields: ['formatted_address', 'geometry', 'name'],
+          types: ['geocode'],
+        }
+      );
+
+      listener = autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        const selectedLocation = place.formatted_address || place.name || '';
+        if (selectedLocation) {
+          dispatch(setLocation(selectedLocation));
+        }
+      });
+    };
+
+    if (!GOOGLE_MAPS_API_KEY) {
+      return;
+    }
+
+    if (window.google && window.google.maps && window.google.maps.places) {
+      initAutocomplete();
+    } else {
+      const existingScript = document.getElementById('google-maps-script');
+      if (existingScript) {
+        existingScript.addEventListener('load', initAutocomplete);
+      } else {
+        const script = document.createElement('script');
+        script.id = 'google-maps-script';
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.onload = initAutocomplete;
+        document.head.appendChild(script);
+      }
+    }
+
+    return () => {
+      if (listener) {
+        window.google.maps.event.removeListener(listener);
+      }
+    };
   }, [dispatch]);
 
   const getPriceLabel = () => {
@@ -277,17 +359,8 @@ const Home = () => {
               </button>
             ))}
           </div> */}
-         <div
-  className="flex flex-row items-center bg-transparent mx-auto"
-  style={{
-    display: "inline-flex",
-    width: "1192px",
-    height: "70px",
-    padding: "12px",
-    gap: "16px",
-    justifyContent: "center",
-    alignItems: "center",
-  }}
+     <div
+  className="flex flex-nowrap items-center bg-transparent mx-auto w-full max-w-[1192px] gap-4 py-3 px-1 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
 >
   {[
     "Off-plan Properties",
@@ -304,25 +377,16 @@ const Home = () => {
           dispatch(setCompletion("Off-Plan"));
           params.set("completion", "Off-Plan");
           navigate(`/listings?${params.toString()}`);
-        } 
-        else if (tab === "Ready Properties") {
+        } else if (tab === "Ready Properties") {
           dispatch(setCompletion("Ready"));
           params.set("completion", "Ready");
           navigate(`/listings?${params.toString()}`);
-        } 
-        else if (tab === "New Launches") {
+        } else if (tab === "New Launches") {
           dispatch(setCompletion("Off-Plan"));
           params.set("completion", "Off-Plan");
-
-          // Show only these statuses
-          params.set(
-            "saleStatus",
-            "announced,presale_eoi,start_of_sales"
-          );
-
+          params.set("saleStatus", "announced,presale_eoi,start_of_sales");
           navigate(`/listings?${params.toString()}`);
-        } 
-        else if (tab === "Metro Expansion") {
+        } else if (tab === "Metro Expansion") {
           window.open(
             "https://www.google.com/maps/d/u/1/edit?mid=193yuyhpEkRom7IC2tBpfgYI2LVShBvo&usp=sharing",
             "_blank",
@@ -330,7 +394,7 @@ const Home = () => {
           );
         }
       }}
-      className="transition-all flex items-center justify-center font-['Archivo']"
+      className="transition-all flex items-center justify-center font-['Archivo'] whitespace-nowrap shrink-0"
       style={{
         width: "280px",
         height: "46px",
@@ -339,10 +403,8 @@ const Home = () => {
         fontSize: "20px",
         border: "none",
         cursor: "pointer",
-        backgroundColor:
-          tab === "Off-plan Properties" ? "#01155E" : "#FFFFFF",
-        color:
-          tab === "Off-plan Properties" ? "#FFFFFF" : "#5d6a92",
+        backgroundColor: tab === "Off-plan Properties" ? "#01155E" : "#FFFFFF",
+        color: tab === "Off-plan Properties" ? "#FFFFFF" : "#5d6a92",
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.08)",
       }}
     >
@@ -350,7 +412,6 @@ const Home = () => {
     </button>
   ))}
 </div>
-
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[18px] sm:rounded-[22px] lg:rounded-[25px] p-3 sm:p-4 lg:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
             <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-5">
               <div className="relative flex-grow">
@@ -358,6 +419,7 @@ const Home = () => {
                   <MapPin className="h-5 w-5 text-[#01155E]" />
                 </div>
 <input
+  ref={locationInputRef}
   type="text"
   placeholder="Enter Location"
   className="w-full pl-12 pr-4 py-2.5 bg-white rounded-lg outline-none text-[#01155E] font-medium font-['Archivo'] shadow-sm"

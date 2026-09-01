@@ -129,9 +129,8 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
       {/* HOVER CARD - matches reference design */}
       {showPopup && (
         <div
-          className="absolute z-50 bg-white rounded-2xl shadow-2xl overflow-visible"
+          className="absolute z-50 bg-white rounded-2xl shadow-2xl overflow-visible w-[240px] sm:w-[290px] lg:w-[340px] max-w-[85vw]"
           style={{
-            width: "340px",
             bottom: "56px",
             left: "50%",
             transform: "translateX(-50%)",
@@ -168,12 +167,9 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
             </svg>
           </button>
 
-          <div className="flex" style={{ gap: "14px" }}>
+          <div className="flex gap-2.5 sm:gap-3 lg:gap-3.5">
             {/* LEFT: Image with badge */}
-            <div
-              className="relative rounded-xl overflow-hidden flex-shrink-0"
-              style={{ width: "130px", height: "160px" }}
-            >
+            <div className="relative rounded-xl overflow-hidden flex-shrink-0 w-[92px] h-[115px] sm:w-[115px] sm:h-[145px] lg:w-[130px] lg:h-[160px]">
               <img
                 src={getMarkerImage(item)}
                 alt={item?.feature_image_alt_text || item?.title}
@@ -205,16 +201,16 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
             {/* RIGHT: Details */}
             <div className="flex flex-col justify-start pt-1 min-w-0 flex-1">
               <p
-                className="text-[#01155E] font-bold truncate"
-                style={{ fontSize: "17px", lineHeight: "1.2" }}
+                className="text-[#01155E] font-bold truncate text-[15px] sm:text-[16px] lg:text-[17px]"
+                style={{ lineHeight: "1.2" }}
                 title={item?.title}
               >
                 {item?.title || "Property Title"}
               </p>
 
               <p
-                className="text-[#67739E] truncate"
-                style={{ fontSize: "13px", marginTop: "2px" }}
+                className="text-[#67739E] truncate text-[12px] sm:text-[12.5px] lg:text-[13px]"
+                style={{ marginTop: "2px" }}
               >
                 {item?.developer_name || "Developer Name"}
               </p>
@@ -226,17 +222,17 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
                 }}
               />
 
-              <p className="text-[#67739E]" style={{ fontSize: "13px" }}>
+              <p className="text-[#67739E] text-[12px] sm:text-[12.5px] lg:text-[13px]">
                 from:
               </p>
               <p
-                className="font-bold text-[#01155E]"
-                style={{ fontSize: "22px", marginTop: "2px" }}
+                className="font-bold text-[#01155E] text-[18px] sm:text-[20px] lg:text-[22px]"
+                style={{ marginTop: "2px" }}
               >
                 {formatPrice(item)}
               </p>
 
-              <p className="text-gray-400" style={{ fontSize: "13px", marginTop: "8px" }}>
+              <p className="text-gray-400 text-[12px] sm:text-[12.5px] lg:text-[13px]" style={{ marginTop: "8px" }}>
                 {formatDeliveryQuarter(item)}
               </p>
             </div>

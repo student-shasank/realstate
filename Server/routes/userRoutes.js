@@ -12,9 +12,10 @@ import {
 } from "../controllers/communityController.js";
 import { getDevelopers }  from "../controllers/getDevlopers.js"
 import {getSimilarListings}  from "../controllers/Similarlistingcontroller.js"
+import { createContact } from "../controllers/Contactcontroller.js";
 
 const router = Router();
-
+router.post("/contact",createContact)
 router.get("/dashboard", protect, dashboard);
 
 router.put("/update/:id",  updateUser);
@@ -33,6 +34,7 @@ router.get("/profile/:slug", getCommunityPublicProfile);
 router.get("/developers", getDevelopers);
 router.get("/sort", sortListings);
 router.get("/similar",getSimilarListings)
+
 
 
 export default router;
