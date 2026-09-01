@@ -111,7 +111,17 @@ function GalleryModal({
   isEmailSending,
 }) {
   const [activeTab, setActiveTab] = useState("photos");
-  const [selectedIndex, setSelectedIndex] = useState(null); // null = grid view, number = single image view
+  const [selectedIndex, setSelectedIndex] = useState(null);
+
+  // 🆕 Body scroll lock jab tak modal khula hai — page ka apna
+  // scrollbar nahi aayega, jo layout shift/hide issue create karta tha.
+  useEffect(() => {
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, []);
 
   const openImage = (i) => setSelectedIndex(i);
   const backToGrid = () => setSelectedIndex(null);
@@ -126,48 +136,51 @@ function GalleryModal({
     setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  // Share the property — uses native Share sheet (mobile/supported browsers)
-// and falls back to copying the link to clipboard otherwise.
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
       <div className="bg-white rounded-none sm:rounded-2xl w-full h-full sm:h-auto max-w-full sm:max-w-[1100px] max-h-full sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
 
-        <div className="flex items-center border-b border-[#D9E1F2] px-3 sm:px-6 py-0 relative overflow-x-auto">
-          {selectedIndex !== null && activeTab === "photos" && (
+        {/* 🔧 FIX: header ab ek flex row hai — LEFT side (tabs) scroll
+            karta hai chhoti screens par, RIGHT side (close button) kabhi
+            scroll/overflow ke saath nahi hilta, hamesha visible rehta hai. */}
+        <div className="flex items-center justify-between border-b border-[#D9E1F2] pr-2 sm:pr-4">
+          <div className="flex items-center px-3 sm:px-6 py-0 overflow-x-auto min-w-0">
+            {selectedIndex !== null && activeTab === "photos" && (
+              <button
+                onClick={backToGrid}
+                className="flex items-center gap-2 px-2 sm:px-4 py-3 sm:py-4 text-[13px] sm:text-[15px] font-semibold text-[#01155E] hover:text-[#254B86] transition-colors whitespace-nowrap flex-shrink-0"
+              >
+                <ArrowLeft size={18} />
+                <span className="hidden sm:inline">Back to gallery</span>
+              </button>
+            )}
+
             <button
-              onClick={backToGrid}
-              className="flex items-center gap-2 px-2 sm:px-4 py-3 sm:py-4 text-[13px] sm:text-[15px] font-semibold text-[#01155E] hover:text-[#254B86] transition-colors whitespace-nowrap"
+              onClick={() => setActiveTab("photos")}
+              className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === "photos"
+                ? "border-[#01155E] text-[#01155E]"
+                : "border-transparent text-[#67739E] hover:text-[#01155E]"
+                }`}
             >
-              <ArrowLeft size={18} />
-              <span className="hidden sm:inline">Back to gallery</span>
+              <Image size={18} />
+              Photos ({images?.length || 0})
             </button>
-          )}
+            <button
+              onClick={() => { setActiveTab("map"); setSelectedIndex(null); }}
+              className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === "map"
+                ? "border-[#01155E] text-[#01155E]"
+                : "border-transparent text-[#67739E] hover:text-[#01155E]"
+                }`}
+            >
+              <MapPin size={18} />
+              Map
+            </button>
+          </div>
 
-          <button
-            onClick={() => setActiveTab("photos")}
-            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === "photos"
-              ? "border-[#01155E] text-[#01155E]"
-              : "border-transparent text-[#67739E] hover:text-[#01155E]"
-              }`}
-          >
-            <Image size={18} />
-            Photos ({images?.length || 0})
-          </button>
-          <button
-            onClick={() => { setActiveTab("map"); setSelectedIndex(null); }}
-            className={`flex items-center gap-2 px-3 sm:px-6 py-3 sm:py-4 text-[14px] sm:text-[18px] font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === "map"
-              ? "border-[#01155E] text-[#01155E]"
-              : "border-transparent text-[#67739E] hover:text-[#01155E]"
-              }`}
-          >
-            <MapPin size={18} />
-            Map
-          </button>
-
+          {/* 🆕 close button ab apna alag, non-scrolling flex item hai */}
           <button
             onClick={onClose}
-            className="absolute right-2 sm:right-4 top-2 sm:top-3 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-[#67739E] hover:text-[#01155E]"
+            className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-[#67739E] hover:text-[#01155E]"
           >
             <X size={22} />
           </button>
@@ -230,7 +243,6 @@ function GalleryModal({
         </div>
 
         <div className="border-t border-[#D9E1F2] px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-center sm:justify-end bg-white">
-
           <div className="flex flex-wrap gap-2 sm:gap-3 justify-center sm:justify-end w-full sm:w-auto">
             <button
               onClick={onCallClick}
@@ -245,7 +257,7 @@ function GalleryModal({
             >
               <Mail size={16} /> {isEmailSending ? "Sending..." : "Email"}
             </button>
-            
+
             <button
               onClick={onWhatsAppClick}
               className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 border border-[#D9E1F2] rounded-lg text-[#25D366] font-semibold text-[13px] sm:text-[15px] hover:bg-green-50 transition-colors"
@@ -262,6 +274,7 @@ function GalleryModal({
     </div>
   );
 }
+
 
 // ============================================================
 // 🆕 SimilarPropertyCard — each card gets its OWN image carousel

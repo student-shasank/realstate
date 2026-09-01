@@ -93,16 +93,14 @@ const buildSaleStatusArray = (saleStatus) => {
 const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) => {
   const saleStatusArray = buildSaleStatusArray(saleStatus);
 
-  // ───── saleStatus filter (independent condition) ─────
   if (saleStatusArray.length > 0) {
     addAndCondition(query, {
       project_status: { $in: saleStatusArray },
     });
+    return;
   }
 
-  // ───── propertyStatus/completion filter (ALWAYS applied if present, ─────
-  // ─────  regardless of saleStatus — pehle yahan "return" tha jo isko  ─────
-  // ─────  skip kar deta tha jab saleStatus bhi diya gaya ho)          ─────
+  // No saleStatus → fall back to completion/propertyStatus
   const completionRaw = (completion || propertyStatus)
     ?.toLowerCase()
     .replace(/[\s-]/g, "");
