@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Listing from "../models/Listing.js";
 import { sendEnquiryEmail } from "../utils/sendEnquiryEmail.js";
 
@@ -19,7 +20,22 @@ export const sendListingEnquiry = async (req, res) => {
       });
     }
 
-    const listing = await Listing.findById(listingId);
+    if (!mongoose.Types.ObjectId.isValid(listingId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid listingId",
+      });
+    }
+
+    // RAW MongoDB document fetch
+    const listing = await Listing.collection.findOne({
+      _id: new mongoose.Types.ObjectId(listingId),
+    });
+
+    console.log(
+      "RAW LISTING DATA:",
+      JSON.stringify(listing, null, 2)
+    );
 
     if (!listing) {
       return res.status(404).json({
@@ -40,7 +56,11 @@ export const sendListingEnquiry = async (req, res) => {
     await sendEnquiryEmail({
       listing,
       to: toEmail,
-      enquirer: { name, email, phone },
+      enquirer: {
+        name,
+        email,
+        phone,
+      },
       requestType: requestType || "general",
     });
 

@@ -4,39 +4,39 @@ import Listing from "../models/Listing.js";
 // HELPERS
 // ─────────────────────────────────────────────
 
-/**
- * Safely push conditions into query.$and
- */
+/** Safely push conditions into query.$and */
 const addAndCondition = (query, condition) => {
   if (!query.$and) query.$and = [];
   query.$and.push(condition);
 };
 
+/** Escape user input before using it inside a $regex (prevents regex-injection / ReDoS / crashes) */
+const escapeRegex = (str = "") => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
- * Normalize beds string "0,1,1.5,2,2.5" → check if requested bed count exists
- * DB stores beds as comma-separated string e.g. "0,1,1.5,2,2.5"
- * We match if the requested bed value exists anywhere in that string
+ * Beds: DB stores project-level `beds` as a comma string e.g. "0,1,1.5,2,2.5"
+ * (many projects will have this as null — a unit-level project with no
+ * flat beds summary. If your real unit data lives elsewhere, e.g.
+ * `typical_units[].bedrooms`, extend this fallback accordingly.)
  */
 const buildBedsCondition = (beds) => {
   if (!beds) return null;
 
-  if (beds === "Studio" || beds === "0") {
-    return {
-      beds: { $regex: /(^|,)\s*0\s*(,|$)/ },
-    };
-  }
-
-  const bedNum = parseFloat(beds);
+  const isStudio = beds === "Studio" || beds === "0";
+  const bedNum = isStudio ? 0 : parseFloat(beds);
   if (isNaN(bedNum)) return null;
 
+  const escaped = escapeRegex(String(bedNum));
   return {
-    beds: { $regex: `(^|,)\\s*${bedNum}\\s*(,|$)` },
+    $or: [
+      { beds: { $regex: `(^|,)\\s*${escaped}\\s*(,|$)` } },
+      // fallback: unit-level bedroom info, if your schema stores it there
+      { "typical_units.bedrooms": bedNum },
+    ],
   };
 };
 
-/**
- * Completion status normalization
- */
+/** Completion status normalization (frontend value → DB `project_status` value) */
 const COMPLETION_MAP = {
   "off-plan": "On Sale",
   offplan: "On Sale",
@@ -55,13 +55,9 @@ const normalizeCompletion = (value) => {
 };
 
 /**
- * Sale status normalization (frontend value → DB value)
- * Shared by searchListings & sortListings so both stay in sync.
- *
- * NOTE: "out_of_stock" from the frontend filter is intentionally mapped
- * to "Sold Out" — that's the actual value stored in project_status for
- * out-of-stock properties. There is no separate "Out Of Stock" value in
- * the DB, so both out_of_stock and sold_out resolve to "Sold Out".
+ * Sale status normalization (frontend value → DB `project_status` value).
+ * out_of_stock / sold_out both resolve to "Sold Out" — there is no
+ * separate "Out Of Stock" value in the DB.
  */
 const SALE_STATUS_MAP = {
   on_sale: "On Sale",
@@ -73,10 +69,7 @@ const SALE_STATUS_MAP = {
   sold_out: "Sold Out",
   ready: "Ready",
 };
- 
-/**
- * Build the mapped saleStatus array from raw query param
- */
+
 const buildSaleStatusArray = (saleStatus) => {
   if (!saleStatus) return [];
   return saleStatus
@@ -85,25 +78,16 @@ const buildSaleStatusArray = (saleStatus) => {
     .filter(Boolean);
 };
 
-/**
- * Apply saleStatus / completion filtering onto the query.
- * Only checks `project_status` — whatever value comes in for saleStatus
- * (or completion/propertyStatus) is searched against project_status only.
- */
+/** Apply saleStatus / completion filtering onto `project_status` */
 const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) => {
   const saleStatusArray = buildSaleStatusArray(saleStatus);
 
   if (saleStatusArray.length > 0) {
-    addAndCondition(query, {
-      project_status: { $in: saleStatusArray },
-    });
+    addAndCondition(query, { project_status: { $in: saleStatusArray } });
     return;
   }
 
-  // No saleStatus → fall back to completion/propertyStatus
-  const completionRaw = (completion || propertyStatus)
-    ?.toLowerCase()
-    .replace(/[\s-]/g, "");
+  const completionRaw = (completion || propertyStatus)?.toLowerCase().replace(/[\s-]/g, "");
 
   if (completionRaw === "offplan") {
     addAndCondition(query, {
@@ -119,395 +103,318 @@ const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) =>
 };
 
 // ─────────────────────────────────────────────
-// CONTROLLER: EXISTING SEARCH ENDPOINT
+// PRICE FILTER (AED) — FIXED
 // ─────────────────────────────────────────────
 
+/**
+ * Cleans an incoming price value from the request (minPrice/maxPrice etc).
+ * Handles values like: 500000, "500000", "AED 500,000", "500,000.50",
+ * " 1200000 ", "aed1200000" — strips everything except digits and a
+ * single decimal point, then parses to a Number.
+ * Returns null for 0 / "" / null / undefined / NaN (= "no filter set").
+ */
+const parseAedAmount = (raw) => {
+  if (raw === undefined || raw === null || raw === "") return null;
+
+  const cleaned = String(raw)
+    .replace(/aed/gi, "")
+    .replace(/[^0-9.]/g, ""); // strip currency symbols, commas, spaces, letters
+
+  if (cleaned === "") return null;
+
+  const v = Number(cleaned);
+  return Number.isFinite(v) && v > 0 ? v : null;
+};
+
+/**
+ * Mongo aggregation expression that turns a possibly-messy string field
+ * (e.g. "31,150,000.00", "AED 31150000", " 31150000.00 ") into a clean
+ * double, so $gte/$lte comparisons against AED amounts work reliably
+ * regardless of how the field was stored.
+ */
+const cleanPriceFieldExpr = (fieldPath) => ({
+  $convert: {
+    input: {
+      $trim: {
+        input: {
+          $replaceAll: {
+            input: {
+              $replaceAll: {
+                input: {
+                  $toUpper: { $toString: { $ifNull: [fieldPath, "0"] } },
+                },
+                find: "AED",
+                replacement: "",
+              },
+            },
+            find: ",",
+            replacement: "",
+          },
+        },
+      },
+    },
+    to: "double",
+    onError: 0,
+    onNull: 0,
+  },
+});
+
+/**
+ * Price range filter (AED) — STRICT, based on `price_start` only
+ * (i.e. the "Starting at AED ..." value shown on the listing card).
+ *
+ * We deliberately do NOT use `price_end` / range-overlap logic here:
+ * a project should only match if its own starting/unit price actually
+ * falls inside the requested budget, not just because some far more
+ * expensive unit inside the project happens to be >= minPrice.
+ *
+ * - minPrice only  → price_start >= minPrice
+ * - maxPrice only  → price_start <= maxPrice
+ * - both           → minPrice <= price_start <= maxPrice
+ *
+ * DB stores `price_start` as a string, sometimes with commas / "AED"
+ * prefixes / stray whitespace, so we normalize it to a clean double
+ * (in AED) via $expr before comparing.
+ */
+const applyPriceFilter = (query, { minPrice, maxPrice, min_price, max_price }) => {
+  const reqMin = parseAedAmount(minPrice ?? min_price);
+  const reqMax = parseAedAmount(maxPrice ?? max_price);
+
+  if (!reqMin && !reqMax) return;
+
+  const startPriceExpr = cleanPriceFieldExpr("$price_start");
+  const exprAnd = [];
+
+  if (reqMin) exprAnd.push({ $gte: [startPriceExpr, reqMin] });
+  if (reqMax) exprAnd.push({ $lte: [startPriceExpr, reqMax] });
+
+  addAndCondition(query, { $expr: { $and: exprAnd } });
+};
+
+/**
+ * Emirates / city filter.
+ * DB has no flat `city_name` field. City lives in `city_data.name`
+ * and, redundantly, in `project_city`. We match either.
+ */
+const applyEmiratesFilter = (query, emirates) => {
+  if (!emirates) return;
+  const emiratesArray = emirates.split(",").map((e) => e.trim()).filter(Boolean);
+  if (emiratesArray.length === 0) return;
+
+  addAndCondition(query, {
+    $or: emiratesArray.flatMap((em) => {
+      const esc = escapeRegex(em);
+      return [
+        { "city_data.name": { $regex: `^${esc}$`, $options: "i" } },
+        { project_city: { $regex: `^${esc}$`, $options: "i" } },
+      ];
+    }),
+  });
+};
+
+/**
+ * District / free-text location search.
+ * `district_name` doesn't exist — DB has `district_data: [{ name }]`.
+ */
+const applyLocationFilter = (query, location) => {
+  const loc = location?.trim();
+  if (!loc) return;
+  const esc = escapeRegex(loc);
+
+  addAndCondition(query, {
+    $or: [
+      { title: { $regex: esc, $options: "i" } },
+      { location: { $regex: esc, $options: "i" } },
+      { "district_data.name": { $regex: esc, $options: "i" } },
+      { "city_data.name": { $regex: esc, $options: "i" } },
+      { project_city: { $regex: esc, $options: "i" } },
+    ],
+  });
+};
+
+/**
+ * Property type filter.
+ * DB field is `property_types` (flat array of strings, e.g.
+ * ['Apartments']), not `property_category`.
+ */
+const applyPropertyTypeFilter = (query, propertyType) => {
+  const pType = propertyType?.trim();
+  if (!pType || pType.toLowerCase() === "all") return;
+  const esc = escapeRegex(pType);
+  addAndCondition(query, {
+    property_types: { $elemMatch: { $regex: esc, $options: "i" } },
+  });
+};
+
+/** Bathrooms filter — do NOT silently include listings with baths:null */
+const applyBathsFilter = (query, baths) => {
+  if (!baths) return;
+  const bathNum = parseFloat(baths);
+  if (isNaN(bathNum)) return;
+  addAndCondition(query, {
+    $or: [{ baths: { $gte: bathNum } }, { baths: { $gte: String(bathNum) } }],
+  });
+};
+
+/** Developer filter */
+const applyDeveloperFilter = (query, developer) => {
+  if (!developer) return;
+  const developersArray = developer.split(",").map((d) => d.trim()).filter(Boolean);
+  if (developersArray.length === 0) return;
+  addAndCondition(query, {
+    $or: developersArray.map((dev) => ({
+      developer_name: { $regex: escapeRegex(dev), $options: "i" },
+    })),
+  });
+};
+
+/**
+ * Handover year filter.
+ * DB field is `expected_completion_date` (e.g. '2028-06-30'),
+ * not `expected_delivery_date`.
+ */
+const applyHandoverYearFilter = (query, handoverYear) => {
+  if (!handoverYear) return;
+  const yearsArray = handoverYear
+    .split(",")
+    .map((y) => y.trim().replace(/^Q[1-4]\s*/i, ""))
+    .filter((y) => /^\d{4}$/.test(y));
+  if (yearsArray.length === 0) return;
+  addAndCondition(query, {
+    $or: yearsArray.map((year) => ({
+      expected_completion_date: { $regex: `^${year}-` },
+    })),
+  });
+};
+
+/**
+ * Builds the full Mongo query object from raw req.query.
+ * Shared by both searchListings and sortListings so filter logic
+ * only lives in ONE place.
+ */
+const buildListingQuery = (params) => {
+  const {
+    beds,
+    baths,
+    minPrice,
+    maxPrice,
+    min_price,
+    max_price,
+    propertyType,
+    property_type,
+    completion,
+    propertyStatus,
+    developer,
+    emirates,
+    handoverYear,
+    saleStatus,
+    location,
+  } = params;
+
+  const query = {};
+
+  applyLocationFilter(query, location);
+  applyEmiratesFilter(query, emirates);
+  applyStatusFilter(query, { saleStatus, completion, propertyStatus });
+  applyPropertyTypeFilter(query, propertyType || property_type);
+
+  if (beds) {
+    const bedsCondition = buildBedsCondition(beds);
+    if (bedsCondition) addAndCondition(query, bedsCondition);
+  }
+
+  applyBathsFilter(query, baths);
+  applyPriceFilter(query, { minPrice, maxPrice, min_price, max_price });
+  applyDeveloperFilter(query, developer);
+  applyHandoverYearFilter(query, handoverYear);
+
+  return query;
+};
+
+/** Safe pagination parsing */
+const parsePagination = (page, limit) => {
+  const pageNum = Math.max(1, Number.isFinite(Number(page)) ? Number(page) : 1);
+  const limitRaw = Number.isFinite(Number(limit)) ? Number(limit) : 20;
+  const limitNum = Math.min(100, Math.max(1, limitRaw));
+  const skip = (pageNum - 1) * limitNum;
+  return { pageNum, limitNum, skip };
+};
+
+const runListingQuery = async (query, sort, page, limit) => {
+  const { pageNum, limitNum, skip } = parsePagination(page, limit);
+
+  const [total, listings] = await Promise.all([
+    Listing.countDocuments(query),
+    Listing.find(query).sort(sort).skip(skip).limit(limitNum).lean(),
+  ]);
+
+  return {
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum) || 0,
+    count: listings.length,
+    data: listings,
+  };
+};
+
+// ─────────────────────────────────────────────
+// CONTROLLER: SEARCH ENDPOINT
+// GET /api/projects/search
+// ─────────────────────────────────────────────
 export const searchListings = async (req, res) => {
   try {
-    const {
-      beds,
-      baths,
-      minPrice,
-      maxPrice,
-      min_price,
-      max_price,
-      propertyType,
-      property_type,
-      completion,
-      propertyStatus,
-      developer,
-      emirates,
-      handoverYear,
-      saleStatus,
-      location,
-      page = 1,
-      limit = 20,
-    } = req.query;
+    const { page = 1, limit = 20 } = req.query;
+    const query = buildListingQuery(req.query);
 
-    const query = {};
-
-    // ───── Location Search ─────
-    const loc = location?.trim();
-    if (loc) {
-      addAndCondition(query, {
-        $or: [
-          { title: { $regex: loc, $options: "i" } },
-          { location: { $regex: loc, $options: "i" } },
-          { district_name: { $regex: loc, $options: "i" } },
-          { city_name: { $regex: loc, $options: "i" } },
-        ],
-      });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("🔍 [SEARCH] MONGO QUERY:", JSON.stringify(query, null, 2));
     }
 
-    // ───── Emirates ─────
-    if (emirates) {
-      const emiratesArray = emirates
-        .split(",")
-        .map((e) => e.trim())
-        .filter(Boolean);
+    const result = await runListingQuery(
+      query,
+      { isFeatured: -1, created_date: -1 },
+      page,
+      limit
+    );
 
-      if (emiratesArray.length > 0) {
-        addAndCondition(query, {
-          $or: emiratesArray.map((em) => ({
-            city_name: { $regex: `^${em}$`, $options: "i" },
-          })),
-        });
-      }
-    }
-
-    // ───── Status Filter (checks status AND project_status) ─────
-    applyStatusFilter(query, { saleStatus, completion, propertyStatus });
-
-    // ───── Property Type ─────
-    const pType = (propertyType || property_type)?.trim();
-    if (pType && pType.toLowerCase() !== "all") {
-      const escapedType = pType.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      addAndCondition(query, {
-        property_category: {
-          $elemMatch: { $regex: escapedType, $options: "i" },
-        },
-      });
-    }
-
-    // ───── Bedrooms ─────
-    if (beds) {
-      const bedsCondition = buildBedsCondition(beds);
-
-      if (bedsCondition) {
-        addAndCondition(query, {
-          $or: [bedsCondition],
-        });
-      }
-    }
-
-    // ───── Bathrooms ─────
-    if (baths) {
-      const bathNum = parseFloat(baths);
-
-      if (!isNaN(bathNum)) {
-        addAndCondition(query, {
-          $or: [
-            { baths: { $gte: bathNum } },
-            { baths: { $gte: String(bathNum) } },
-            { baths: null },
-          ],
-        });
-      }
-    }
-
-    // ───── Price Range ─────
-    const reqMin = Number(minPrice || min_price || 0) || null;
-    const reqMax = Number(maxPrice || max_price || 0) || null;
-
-    if (reqMin || reqMax) {
-      const priceConditions = {};
-      if (reqMin) priceConditions.max_price = { $gte: reqMin };
-      if (reqMax) priceConditions.min_price = { $lte: reqMax };
-      addAndCondition(query, priceConditions);
-    }
-
-    // ───── Developer ─────
-    if (developer) {
-      const developersArray = developer
-        .split(",")
-        .map((d) => d.trim())
-        .filter(Boolean);
-
-      if (developersArray.length > 0) {
-        addAndCondition(query, {
-          $or: developersArray.map((dev) => ({
-            developer_name: { $regex: dev, $options: "i" },
-          })),
-        });
-      }
-    }
-
-    // ───── Handover Year ─────
-    if (handoverYear) {
-      const yearsArray = handoverYear
-        .split(",")
-        .map((y) => y.trim().replace(/^Q[1-4]\s*/i, ""))
-        .filter((y) => /^\d{4}$/.test(y));
-
-      if (yearsArray.length > 0) {
-        addAndCondition(query, {
-          $or: yearsArray.map((year) => ({
-            expected_delivery_date: { $regex: `^${year}-` },
-          })),
-        });
-      }
-    }
-
-    console.log("📥 REQ QUERY:", req.query);
-    console.log("🔍 MONGO QUERY:", JSON.stringify(query, null, 2));
-
-    const pageNum = Math.max(1, Number(page));
-    const limitNum = Math.min(100, Math.max(1, Number(limit)));
-    const skip = (pageNum - 1) * limitNum;
-
-    console.log("📄 PAGINATION DEBUG:", {
-      requestedPage: Number(page),
-      pageNum,
-      limitNum,
-      skip,
-      expectedRange: `Item ${skip + 1} to ${skip + limitNum}`,
-    });
-
-    const [total, listings] = await Promise.all([
-      Listing.countDocuments(query),
-      Listing.find(query)
-        .sort({ isFeatured: -1, created_date: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-    ]);
-
-    console.log("📊 RESPONSE DEBUG:", {
-      totalDocuments: total,
-      returnedCount: listings.length,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
-      firstItemId: listings[0]?._id,
-      lastItemId: listings[listings.length - 1]?._id,
-    });
-
-    return res.status(200).json({
-      success: true,
-      total,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
-      count: listings.length,
-      data: listings,
-    });
+    return res.status(200).json({ success: true, ...result });
   } catch (error) {
     console.error("❌ SEARCH ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 // ─────────────────────────────────────────────
 // CONTROLLER: SORT ENDPOINT
 // GET /api/projects/sort
-// Same filters as searchListings — plus a `sortBy` query param
-// that decides Mongo `.sort()`.
+// Same filters as searchListings — plus a `sortBy` query param.
 // ─────────────────────────────────────────────
-
 const SORT_MAP = {
   most_popular: { isFeatured: -1, created_date: -1 },
   featured: { isFeatured: -1, created_date: -1 },
   newest: { created_date: -1 },
-  price_asc: { min_price: 1 },
-  price_desc: { max_price: -1 },
-  beds_asc: { beds: 1 },   // NOTE: beds string field hai, lexical sort hoga
-  beds_desc: { beds: -1 }, // (numeric sort ke liye future me min_beds field banao)
+  price_asc: { price_start: 1 },
+  price_desc: { price_end: -1 },
+  beds_asc: { beds: 1 }, // NOTE: `beds` is a string field → lexical sort, not numeric
+  beds_desc: { beds: -1 },
 };
 
 export const sortListings = async (req, res) => {
   try {
-    const {
-      beds,
-      baths,
-      minPrice,
-      maxPrice,
-      min_price,
-      max_price,
-      propertyType,
-      property_type,
-      completion,
-      propertyStatus,
-      developer,
-      emirates,
-      handoverYear,
-      saleStatus,
-      location,
-      sortBy = "most_popular",
-      page = 1,
-      limit = 20,
-    } = req.query;
-
-    const query = {};
-
-    // ───── Location Search ─────
-    const loc = location?.trim();
-    if (loc) {
-      addAndCondition(query, {
-        $or: [
-          { title: { $regex: loc, $options: "i" } },
-          { location: { $regex: loc, $options: "i" } },
-          { district_name: { $regex: loc, $options: "i" } },
-          { city_name: { $regex: loc, $options: "i" } },
-        ],
-      });
-    }
-
-    // ───── Emirates ─────
-    if (emirates) {
-      const emiratesArray = emirates
-        .split(",")
-        .map((e) => e.trim())
-        .filter(Boolean);
-
-      if (emiratesArray.length > 0) {
-        addAndCondition(query, {
-          $or: emiratesArray.map((em) => ({
-            city_name: { $regex: `^${em}$`, $options: "i" },
-          })),
-        });
-      }
-    }
-
-    // ───── Status Filter (checks status AND project_status) ─────
-    applyStatusFilter(query, { saleStatus, completion, propertyStatus });
-
-    // ───── Property Type ─────
-    const pType = (propertyType || property_type)?.trim();
-    if (pType && pType.toLowerCase() !== "all") {
-      const escapedType = pType.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      addAndCondition(query, {
-        property_category: {
-          $elemMatch: { $regex: escapedType, $options: "i" },
-        },
-      });
-    }
-
-    // ───── Bedrooms ─────
-    if (beds) {
-      const bedsCondition = buildBedsCondition(beds);
-      if (bedsCondition) {
-        addAndCondition(query, { $or: [bedsCondition] });
-      }
-    }
-
-    // ───── Bathrooms ─────
-    if (baths) {
-      const bathNum = parseFloat(baths);
-      if (!isNaN(bathNum)) {
-        addAndCondition(query, {
-          $or: [
-            { baths: { $gte: bathNum } },
-            { baths: { $gte: String(bathNum) } },
-            { baths: null },
-          ],
-        });
-      }
-    }
-
-    // ───── Price Range ─────
-    const reqMin = Number(minPrice || min_price || 0) || null;
-    const reqMax = Number(maxPrice || max_price || 0) || null;
-
-    if (reqMin || reqMax) {
-      const priceConditions = {};
-      if (reqMin) priceConditions.max_price = { $gte: reqMin };
-      if (reqMax) priceConditions.min_price = { $lte: reqMax };
-      addAndCondition(query, priceConditions);
-    }
-
-    // ───── Developer ─────
-    if (developer) {
-      const developersArray = developer
-        .split(",")
-        .map((d) => d.trim())
-        .filter(Boolean);
-
-      if (developersArray.length > 0) {
-        addAndCondition(query, {
-          $or: developersArray.map((dev) => ({
-            developer_name: { $regex: dev, $options: "i" },
-          })),
-        });
-      }
-    }
-
-    // ───── Handover Year ─────
-    if (handoverYear) {
-      const yearsArray = handoverYear
-        .split(",")
-        .map((y) => y.trim().replace(/^Q[1-4]\s*/i, ""))
-        .filter((y) => /^\d{4}$/.test(y));
-
-      if (yearsArray.length > 0) {
-        addAndCondition(query, {
-          $or: yearsArray.map((year) => ({
-            expected_delivery_date: { $regex: `^${year}-` },
-          })),
-        });
-      }
-    }
-
-    console.log("📥 [SORT] REQ QUERY:", req.query);
-    console.log("🔍 [SORT] MONGO QUERY:", JSON.stringify(query, null, 2));
-
+    const { page = 1, limit = 20, sortBy = "most_popular" } = req.query;
+    const query = buildListingQuery(req.query);
     const sortOption = SORT_MAP[sortBy] || SORT_MAP.most_popular;
-    console.log("↕️ [SORT] sortBy:", sortBy, "→", sortOption);
 
-    const pageNum = Math.max(1, Number(page));
-    const limitNum = Math.min(100, Math.max(1, Number(limit)));
-    const skip = (pageNum - 1) * limitNum;
+    if (process.env.NODE_ENV !== "production") {
+      console.log("🔍 [SORT] MONGO QUERY:", JSON.stringify(query, null, 2));
+      console.log("↕️ [SORT] sortBy:", sortBy, "→", sortOption);
+    }
 
-    console.log("📄 [SORT] PAGINATION DEBUG:", {
-      requestedPage: Number(page),
-      pageNum,
-      limitNum,
-      skip,
-      expectedRange: `Item ${skip + 1} to ${skip + limitNum}`,
-    });
+    const result = await runListingQuery(query, sortOption, page, limit);
 
-    const [total, listings] = await Promise.all([
-      Listing.countDocuments(query),
-      Listing.find(query)
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-    ]);
-
-    console.log("📊 [SORT] RESPONSE DEBUG:", {
-      totalDocuments: total,
-      returnedCount: listings.length,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
-      firstItemId: listings[0]?._id,
-      lastItemId: listings[listings.length - 1]?._id,
-    });
-
-    return res.status(200).json({
-      success: true,
-      sortBy,
-      total,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
-      count: listings.length,
-      data: listings,
-    });
+    return res.status(200).json({ success: true, sortBy, ...result });
   } catch (error) {
     console.error("❌ SORT ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
