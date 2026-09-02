@@ -192,17 +192,30 @@ export default function Profile() {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const storedUser = getStoredUser();
-  const [user, setUser] = useState({
-    name: storedUser.name || storedUser.username || "User",
-    email: storedUser.email || "",
-    phone: storedUser.phone || storedUser.phoneNumber || "",
-    joinDate: storedUser.createdAt
-      ? new Date(storedUser.createdAt).toLocaleDateString("en-US", {
-          month: "long",
-          year: "numeric",
-        })
-      : "",
-  });
+ const fullName = [
+  storedUser.firstName,
+  storedUser.lastName,
+]
+  .filter(Boolean)
+  .join(" ");
+
+const [user, setUser] = useState({
+  name:
+    fullName ||
+    storedUser.name ||
+    storedUser.username ||
+    "User",
+
+  email: storedUser.email || "",
+  phone: storedUser.phone || storedUser.phoneNumber || "",
+
+  joinDate: storedUser.createdAt
+    ? new Date(storedUser.createdAt).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      })
+    : "",
+});
   const [editForm, setEditForm] = useState({ name: user.name, phone: user.phone });
 
   const dispatch = useDispatch();

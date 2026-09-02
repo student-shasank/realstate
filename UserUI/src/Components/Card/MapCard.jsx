@@ -162,7 +162,7 @@ const MapCard = ({ item, onRequireLogin }) => {
     null;
 
   // ── Status badge ────────────────────────────────────────────
-  const displayStatus = item?.completion_status || mapped?.completionStatus || null;
+  const displayStatus = item?.status || mapped?.completionStatus || null;
 
   // ── Images ──────────────────────────────────────────────────
   // fallback images (agar all_images khali ho)
