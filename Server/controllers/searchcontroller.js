@@ -219,15 +219,18 @@ const applyEmiratesFilter = (query, emirates) => {
 const applyLocationFilter = (query, location) => {
   const loc = location?.trim();
   if (!loc) return;
+
   const esc = escapeRegex(loc);
+  const regex = new RegExp(esc, "i"); // ✅ RegExp object — mongoose subdocument cast crash avoid karta hai
 
   addAndCondition(query, {
     $or: [
-      { title: { $regex: esc, $options: "i" } },
-      { location: { $regex: esc, $options: "i" } },
-      { "district_data.name": { $regex: esc, $options: "i" } },
-      { "city_data.name": { $regex: esc, $options: "i" } },
-      { project_city: { $regex: esc, $options: "i" } },
+      { title: regex },
+      { location: regex },
+      { project_location: regex },
+      { project_city: regex },
+      { "city_data.name": regex },
+      { "district_data.name": regex },
     ],
   });
 };

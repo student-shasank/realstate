@@ -89,6 +89,7 @@ const Listings = () => {
   const handoverRef = useRef(null);
   const emiratesRef = useRef(null);
   const saleStatusRef = useRef(null);
+  const paymentRef = useRef(null);
   const resultsRef = useRef(null); // used to scroll results into view on page change
 
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
@@ -104,6 +105,11 @@ const Listings = () => {
   const [selectedSaleStatus, setSelectedSaleStatus] = useState([]);
   const [selectedDevelopers, setSelectedDevelopers] = useState([]);
   const [hoveredListingId, setHoveredListingId] = useState(null);
+
+  // Payment Plan — mirrors the same "During Construction" / "Post Handover"
+  // dropdown used on Home.jsx. Not applicable when "Ready" is selected.
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [paymentPlan, setPaymentPlan] = useState("");
 
 
 
@@ -208,14 +214,18 @@ const Listings = () => {
     return "Properties for sale in UAE";
   };
 
-  // Clear any stale Handover Year selection, close its dropdown, and
-  // strip it from the URL as soon as "Ready" is selected, so a disabled
-  // filter can't silently stay applied to the query.
+  // Clear any stale Handover Year / Payment Plan selection, close their
+  // dropdowns, and strip them from the URL as soon as "Ready" is
+  // selected, so a disabled filter can't silently stay applied to the
+  // query.
   useEffect(() => {
     if (isReadyCompletion) {
       setSelectedHandoverYears([]);
       setIsHandoverOpen(false);
       updateParams("handoverYear", "");
+      setPaymentPlan("");
+      setPaymentOpen(false);
+      updateParams("paymentPlan", "");
     }
     // Sale Status option set differs between Ready and Off-Plan, so clear
     // any stale selection and strip it from the URL whenever completion
@@ -253,6 +263,7 @@ const Listings = () => {
         emirates: selectedEmirates,
         handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
         saleStatus: selectedSaleStatus,
+        paymentPlan: isReadyCompletion ? "" : paymentPlan,
         sortBy: selectedSort,
         page: pageNumber,
         limit: 20,
@@ -279,6 +290,7 @@ const Listings = () => {
       selectedEmirates,
       selectedHandoverYears,
       selectedSaleStatus,
+      paymentPlan,
       selectedSort,
       isSortActive,
       isReadyCompletion,
@@ -317,6 +329,11 @@ const Listings = () => {
       : [];
     setSelectedSaleStatus(saleStatusArray);
 
+    // Payment Plan — not applicable when "Ready" is selected, same as
+    // Handover Year above.
+    const urlPaymentPlan = urlIsReady ? "" : (searchParams.get("paymentPlan") || "");
+    setPaymentPlan(urlPaymentPlan);
+
     const developerArray = urlDeveloper
       ? urlDeveloper.split(",").map((item) => item.trim()).filter(Boolean)
       : [];
@@ -345,6 +362,7 @@ const Listings = () => {
       emirates: emiratesArray,
       handoverYear: handoverYearArray,
       saleStatus: saleStatusArray,
+      paymentPlan: urlPaymentPlan,
       sortBy: urlSortBy,
       page: 1,          // IMPORTANT: Page 1
       limit: 20,         // IMPORTANT: 20 per page
@@ -381,6 +399,7 @@ const Listings = () => {
       emirates: selectedEmirates,
       handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
       saleStatus: selectedSaleStatus,
+      paymentPlan: isReadyCompletion ? "" : paymentPlan,
       sortBy: value,
       page: 1,
       limit: 20,
@@ -402,6 +421,7 @@ const Listings = () => {
     setIsSaleStatusOpen(false);
     setIsOpen(false);
     setIsSortOpen(false);
+    setPaymentOpen(false);
   };
 
 
@@ -426,6 +446,9 @@ const Listings = () => {
       const isOutsideSaleStatus =
         saleStatusRef.current && !saleStatusRef.current.contains(event.target);
 
+      const isOutsidePayment =
+        paymentRef.current && !paymentRef.current.contains(event.target);
+
       // FIX: this was referenced but never defined before — caused a
       // ReferenceError every time this handler ran.
       const isOutsideSort =
@@ -438,6 +461,7 @@ const Listings = () => {
         isOutsideHandover &&
         isOutsideEmirates &&
         isOutsideSaleStatus &&
+        isOutsidePayment &&
         isOutsideSort
       ) {
         closeAllDropdowns();
@@ -501,6 +525,9 @@ const Listings = () => {
     setSelectedSaleStatus([]);
     setIsSaleStatusOpen(false);
     setIsOpen(false);
+    setPaymentPlan("");
+    setPaymentOpen(false);
+    updateParams("paymentPlan", "");
     dispatch(setDeveloper(""));
     setSelectedDevelopers([]);
     setSelectedEmirates([]);
@@ -571,6 +598,15 @@ const Listings = () => {
 
     setSelectedSaleStatus(updatedStatus);
     updateParams("saleStatus", updatedStatus.join(","));
+  };
+
+  // Payment Plan change handler — same "single select" behaviour as
+  // Home.jsx (radio-style, closes on select). Not applicable for Ready.
+  const handlePaymentPlanChange = (value) => {
+    if (isReadyCompletion) return;
+    setPaymentPlan(value);
+    setPaymentOpen(false);
+    updateParams("paymentPlan", value);
   };
 
   const emirates = [
@@ -855,6 +891,7 @@ const Listings = () => {
         emirates: selectedEmirates,
         handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
         saleStatus: selectedSaleStatus,
+        paymentPlan: isReadyCompletion ? "" : paymentPlan,
         sortBy: selectedSort,
         page: 1,
         limit: 20,
@@ -880,6 +917,7 @@ const Listings = () => {
                     emirates: selectedEmirates,
                     handoverYear: isReadyCompletion ? [] : selectedHandoverYears,
                     saleStatus: selectedSaleStatus,
+                    paymentPlan: isReadyCompletion ? "" : paymentPlan,
                     sortBy: selectedSort,
                     page: 1,
                     limit: 20,
@@ -1236,18 +1274,67 @@ const Listings = () => {
 
               {/* Payment Plan — disabled whenever "Ready" completion is
                   selected, since payment plans only apply to off-plan
-                  projects. */}
-              <select
-                disabled={isReadyCompletion}
-                title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
-                className={`h-[48px] border rounded-[16px] px-4 text-[14px] font-medium outline-none appearance-none bg-[url('https://cdn-icons-png.flaticon.com/512/271/271210.png')] bg-[length:12px] bg-[right_15px_center] bg-no-repeat w-full ${
-                  isReadyCompletion
-                    ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
-                    : "bg-white border-[#D1D5DB] text-[#67739E] cursor-pointer"
-                }`}
-              >
-                <option value="">Payment Plan</option>
-              </select>
+                  projects. Mirrors the same dropdown used on Home.jsx. */}
+              <div className="relative w-full font-['General_Sans']" ref={paymentRef}>
+                <button
+                  type="button"
+                  disabled={isReadyCompletion}
+                  onClick={() => {
+                    if (isReadyCompletion) return;
+                    const wasOpen = paymentOpen;
+                    closeAllDropdowns();
+                    setPaymentOpen(!wasOpen);
+                  }}
+                  title={isReadyCompletion ? "Not applicable for Ready properties" : undefined}
+                  className={`w-full h-[48px] px-[12px] flex items-center justify-between border text-[14px] font-medium transition-all ${
+                    isReadyCompletion
+                      ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-70"
+                      : "bg-white border-[#D1D5DB] text-[#67739E]"
+                  }`}
+                  style={{ borderRadius: paymentOpen && !isReadyCompletion ? "16px 16px 0 0" : "16px" }}
+                >
+                  <span className="truncate">{paymentPlan || "Payment Plan"}</span>
+
+                  <svg
+                    className={`w-5 h-5 ${isReadyCompletion ? "text-gray-400" : "text-[#01155E]"} transition-transform duration-200 ${paymentOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {!isReadyCompletion && paymentOpen && (
+                  <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
+                    <div className="p-0">
+                      {['During Construction', 'Post Handover'].map((plan, index) => (
+                        <button
+                          key={plan}
+                          type="button"
+                          onClick={() => handlePaymentPlanChange(plan)}
+                          className={`w-full h-[48px] px-[12px] flex items-center gap-[40px] bg-white border-b border-[#D9E1F2] text-[#67739E] text-[14px] font-medium hover:bg-[#F8FAFF] transition-colors ${index === 1 ? "rounded-b-[16px] border-b-0" : ""}`}
+                        >
+                          <div className="w-[24px] flex justify-center flex-shrink-0">
+                            <div className="w-[16px] h-[16px] rounded-full border border-[#67739E] flex items-center justify-center">
+                              {paymentPlan === plan && (
+                                <div className="w-[8px] h-[8px] rounded-full bg-[#01155E]" />
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="truncate">{plan}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="relative w-full font-['General_Sans']" ref={emiratesRef}>
                 <button
