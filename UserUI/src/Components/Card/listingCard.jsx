@@ -74,6 +74,15 @@ const ListingCard = ({ listing, onRequireLogin }) => {
   const rawStatus = listing?.status || listing?.project_status || "";
   const listingStatus = rawStatus.toString().toLowerCase();
 
+  const isOffPlan = [
+  "off-plan",
+  "offplan",
+  "announced",
+  "eoi",
+  "start of sales",
+  "on sale",
+].includes(listingStatus);
+
   // Share the listing — uses native Share sheet (mobile/supported browsers)
 // and falls back to copying the link to clipboard otherwise.
 const handleShareClick = async (e) => {
@@ -386,15 +395,7 @@ const handleShareClick = async (e) => {
         {/* Status Badge */}
         <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-[6px] text-[#01155E] text-[14px] leading-[150%] capitalize z-20">
           <span className="font-semibold">
-            {[
-              "announced",
-              "eoi",
-              "start of sales",
-              "on sale",
-              "out of stock",
-            ].includes(listingStatus)
-              ? "Off-plan"
-              : rawStatus || "N/A"}
+            {isOffPlan ? "Off-Plan" : rawStatus || "N/A"}
           </span>
         </div>
         {listing?.isFeatured && (
@@ -636,54 +637,40 @@ const handleShareClick = async (e) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-            {isOutOfStock ? (
-              <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
-                Out of Stock
-              </span>
-            ) : listingStatus === "announced" ? (
-              listingPrice && Number(listingPrice) > 0 ? (
-                <>
-                  <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
-                    Starting at
-                  </span>
-                  <span className="text-[20px] sm:text-[24px] mr-2">
-                    {listing?.currency?.toUpperCase()}
-                  </span>
-                  <span className="text-[26px] sm:text-[32px]">
-                    {formatNumber(listingPrice)}
-                  </span>
-                </>
-              ) : (
-                <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
-                  Coming Soon
-                </span>
-              )
-            ) : ["offplan", "on sale", "eoi", "start of sales"].includes(
-                listingStatus,
-              ) ? (
-              <>
-                <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
-                  Starting at
-                </span>
-                <span className="text-[20px] sm:text-[24px] mr-2">
-                  {listing?.currency?.toUpperCase()}
-                </span>
-                <span className="text-[26px] sm:text-[32px]">
-                  {formatNumber(listingPrice) || "1,000,239"}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="text-[20px] sm:text-[24px] mr-2">
-                  {listing?.currency?.toUpperCase()}
-                </span>
-                <span className="text-[26px] sm:text-[32px]">
-                  {listingPrice
-                    ? Number(listingPrice).toLocaleString()
-                    : "10,00,239"}
-                </span>
-              </>
-            )}
+         {isOutOfStock ? (
+  <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
+    Out of Stock
+  </span>
+) : listingStatus === "announced" &&
+  (!listingPrice || Number(listingPrice) <= 0) ? (
+  <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
+    Coming Soon
+  </span>
+) : isOffPlan ? (
+  <>
+    <span className="text-[20px] sm:text-[24px] font-semibold mr-1">
+      Starting at
+    </span>
+
+    <span className="text-[20px] sm:text-[24px] mr-2">
+      {listing?.currency?.toUpperCase()}
+    </span>
+
+    <span className="text-[26px] sm:text-[32px]">
+      {formatNumber(listingPrice)}
+    </span>
+  </>
+) : (
+  <>
+    <span className="text-[20px] sm:text-[24px] mr-2">
+      {listing?.currency?.toUpperCase()}
+    </span>
+
+    <span className="text-[26px] sm:text-[32px]">
+      {listingPrice ? Number(listingPrice).toLocaleString() : "N/A"}
+    </span>
+  </>
+)}
           </div>
 
           <div className="flex gap-3 w-full sm:w-auto">

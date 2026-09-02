@@ -1,6 +1,11 @@
 // Base API URL
+<<<<<<< HEAD
   export const BASE_URL = "https://realstate-1-8kv8.onrender.com/api/user";
  // export const BASE_URL = "http://localhost:5000/api/user";
+=======
+ // export const BASE_URL = "https://realstate-1-8kv8.onrender.com/api/user";
+  export const BASE_URL = "http://localhost:5000/api/user";
+>>>>>>> c3172c316e69aa669fffa9edbd6acdbeb861c196
 // -----------------------
 // Auth Endpoints
 // -----------------------
