@@ -360,6 +360,51 @@ const runListingQuery = async (query, sort, page, limit) => {
   };
 };
 
+/**
+ * Numeric price sort via aggregation.
+ * price_start / price_end are stored as strings in DB (e.g. "2792000.00"),
+ * so we convert them to clean doubles before sorting, using the same
+ * cleaning logic used in applyPriceFilter.
+ *
+ * priceField: "price_start" | "price_end"
+ * direction: 1 (low → high) | -1 (high → low)
+ */
+const runPriceSortQuery = async (query, priceField, direction, page, limit) => {
+  const { pageNum, limitNum, skip } = parsePagination(page, limit);
+
+  const pipeline = [
+    { $match: query },
+    {
+      $addFields: {
+        __sortPrice: cleanPriceFieldExpr(`$${priceField}`),
+      },
+    },
+    {
+      $facet: {
+        data: [
+          { $sort: { __sortPrice: direction, _id: 1 } }, // _id: 1 = stable tie-break
+          { $skip: skip },
+          { $limit: limitNum },
+          { $project: { __sortPrice: 0 } },
+        ],
+        totalCount: [{ $count: "count" }],
+      },
+    },
+  ];
+
+  const [result] = await Listing.aggregate(pipeline);
+  const total = result?.totalCount?.[0]?.count || 0;
+  const listings = result?.data || [];
+
+  return {
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum) || 0,
+    count: listings.length,
+    data: listings,
+  };
+};
+
 // ─────────────────────────────────────────────
 // CONTROLLER: SEARCH ENDPOINT
 // GET /api/projects/search
@@ -396,8 +441,6 @@ const SORT_MAP = {
   most_popular: { isFeatured: -1, created_date: -1 },
   featured: { isFeatured: -1, created_date: -1 },
   newest: { created_date: -1 },
-  price_asc: { price_start: 1 },
-  price_desc: { price_end: -1 },
   beds_asc: { beds: 1 }, // NOTE: `beds` is a string field → lexical sort, not numeric
   beds_desc: { beds: -1 },
 };
@@ -406,14 +449,24 @@ export const sortListings = async (req, res) => {
   try {
     const { page = 1, limit = 20, sortBy = "most_popular" } = req.query;
     const query = buildListingQuery(req.query);
-    const sortOption = SORT_MAP[sortBy] || SORT_MAP.most_popular;
 
     if (process.env.NODE_ENV !== "production") {
       console.log("🔍 [SORT] MONGO QUERY:", JSON.stringify(query, null, 2));
-      console.log("↕️ [SORT] sortBy:", sortBy, "→", sortOption);
+      console.log("↕️ [SORT] sortBy:", sortBy);
     }
 
-    const result = await runListingQuery(query, sortOption, page, limit);
+    let result;
+
+    if (sortBy === "price_asc") {
+      // Low → High, based on price_start (starting price shown on card)
+      result = await runPriceSortQuery(query, "price_start", 1, page, limit);
+    } else if (sortBy === "price_desc") {
+      // High → Low, based on price_start (same field used for asc, for consistent ordering)
+      result = await runPriceSortQuery(query, "price_start", -1, page, limit);
+    } else {
+      const sortOption = SORT_MAP[sortBy] || SORT_MAP.most_popular;
+      result = await runListingQuery(query, sortOption, page, limit);
+    }
 
     return res.status(200).json({ success: true, sortBy, ...result });
   } catch (error) {
