@@ -45,6 +45,11 @@ export const fetchProjects = createAsyncThunk(
             ? params.saleStatus.map((item) => item.toLowerCase().trim()).join(",")
             : params.saleStatus || "",
 
+          // FIX: paymentPlan was never forwarded to the backend, so the
+          // "During Construction" / "Post Handover" dropdown had zero
+          // effect on results — the API never received the value.
+          paymentPlan: params.paymentPlan || "",
+
           page: params.page || 1,
           limit: params.limit || 20,
         },

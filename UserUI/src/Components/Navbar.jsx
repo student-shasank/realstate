@@ -128,7 +128,7 @@ useEffect(() => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 w-full z-50 transition-shadow duration-300 ${
+        className={`fixed top-0 left-0 right-0 w-full z-100 transition-shadow duration-300 ${
           scrolled ? "shadow-md" : ""
         }`}
       >

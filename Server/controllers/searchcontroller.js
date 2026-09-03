@@ -103,6 +103,80 @@ const applyStatusFilter = (query, { saleStatus, completion, propertyStatus }) =>
 };
 
 // ─────────────────────────────────────────────
+// PAYMENT PLAN FILTER (During Construction / Post Handover)
+// ─────────────────────────────────────────────
+
+/**
+ * Frontend sends the human label ("During Construction" / "Post Handover").
+ * We normalize it to the DB's `milestone_type` vocabulary:
+ *   on_booking | during_construction | on_handover | post_handover
+ */
+const PAYMENT_PLAN_MAP = {
+  "during construction": "during_construction",
+  during_construction: "during_construction",
+  "post handover": "post_handover",
+  post_handover: "post_handover",
+};
+
+/**
+ * Not applicable to Ready properties (already enforced on the frontend,
+ * this is just defense-in-depth on the backend).
+ *
+ * DB shape (see `new_payment_plans` on a project doc):
+ *   new_payment_plans: [
+ *     {
+ *       info: { ..., post_handover_percent: "10.00" | null, ... },
+ *       milestones: [
+ *         { milestone_type: "during_construction", ... },
+ *         { milestone_type: "on_handover", ... },
+ *         { milestone_type: "post_handover", ... }  // only if plan has one
+ *       ]
+ *     },
+ *     ...
+ *   ]
+ *
+ * "Post Handover"      → project has >=1 plan whose milestones include a
+ *                         `post_handover` stage (i.e. `post_handover_percent`
+ *                         is set / not null), meaning payments continue
+ *                         after handover.
+ * "During Construction" → project has >=1 plan with a `during_construction`
+ *                         stage, AND does not rely on a post-handover stage,
+ *                         i.e. paid off fully during construction + handover.
+ */
+const applyPaymentPlanFilter = (query, paymentPlan) => {
+  const raw = paymentPlan?.trim().toLowerCase();
+  if (!raw) return;
+
+  const milestoneType = PAYMENT_PLAN_MAP[raw];
+  if (!milestoneType) return; // unknown value → ignore, don't over-filter
+
+  if (milestoneType === "post_handover") {
+    addAndCondition(query, {
+      $or: [
+        { "new_payment_plans.milestones.milestone_type": "post_handover" },
+        {
+          "new_payment_plans.info.post_handover_percent": {
+            $exists: true,
+            $ne: null,
+          },
+        },
+      ],
+    });
+  } else {
+    // during_construction: must have a during_construction milestone,
+    // and must NOT have a post_handover milestone in ANY plan —
+    // otherwise it would also match the "Post Handover" filter, which
+    // defeats the purpose of the two being mutually exclusive options.
+    addAndCondition(query, {
+      "new_payment_plans.milestones.milestone_type": "during_construction",
+    });
+    addAndCondition(query, {
+      "new_payment_plans.milestones.milestone_type": { $ne: "post_handover" },
+    });
+  }
+};
+
+// ─────────────────────────────────────────────
 // PRICE FILTER (AED) — FIXED
 // ─────────────────────────────────────────────
 
@@ -293,7 +367,9 @@ const applyHandoverYearFilter = (query, handoverYear) => {
 /**
  * Builds the full Mongo query object from raw req.query.
  * Shared by both searchListings and sortListings so filter logic
- * only lives in ONE place.
+ * only lives in ONE place — this is exactly why we only had to add
+ * `applyPaymentPlanFilter` here ONCE for it to work on both the
+ * search endpoint and the sort endpoint.
  */
 const buildListingQuery = (params) => {
   const {
@@ -312,6 +388,7 @@ const buildListingQuery = (params) => {
     handoverYear,
     saleStatus,
     location,
+    paymentPlan, // ✅ ADDED
   } = params;
 
   const query = {};
@@ -330,6 +407,7 @@ const buildListingQuery = (params) => {
   applyPriceFilter(query, { minPrice, maxPrice, min_price, max_price });
   applyDeveloperFilter(query, developer);
   applyHandoverYearFilter(query, handoverYear);
+  applyPaymentPlanFilter(query, paymentPlan); // ✅ ADDED
 
   return query;
 };
@@ -435,7 +513,9 @@ export const searchListings = async (req, res) => {
 // ─────────────────────────────────────────────
 // CONTROLLER: SORT ENDPOINT
 // GET /api/projects/sort
-// Same filters as searchListings — plus a `sortBy` query param.
+// Same filters as searchListings (including paymentPlan, since both
+// routes go through the same buildListingQuery) — plus a `sortBy`
+// query param.
 // ─────────────────────────────────────────────
 const SORT_MAP = {
   most_popular: { isFeatured: -1, created_date: -1 },
