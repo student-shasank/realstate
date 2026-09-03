@@ -243,12 +243,42 @@ const Home = () => {
     };
   }, [dispatch]);
 
-  const getPriceLabel = () => {
-    if (!minPrice && !maxPrice) return 'Price (AED)';
-    const min = minPrice ? `${(parseInt(minPrice) / 1000).toLocaleString()}k` : '0';
-    const max = maxPrice ? `${(parseInt(maxPrice) / 1000).toLocaleString()}k` : 'Any';
-    return `${min} - ${max}`;
+ const getPriceLabel = () => {
+  if (!minPrice && !maxPrice) return "Price";
+
+  const formatPrice = (value) => {
+    const num = Number(value);
+    if (!num) return "";
+
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(
+        num % 1000000 === 0 ? 0 : 1
+      )}M`;
+    }
+
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(
+        num % 1000 === 0 ? 0 : 1
+      )}K`;
+    }
+
+    return num.toString();
   };
+
+  if (minPrice && maxPrice) {
+    return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+  }
+
+  if (minPrice) {
+    return `From ${formatPrice(minPrice)}`;
+  }
+
+  if (maxPrice) {
+    return `Up to ${formatPrice(maxPrice)}`;
+  }
+
+  return "Price";
+};
 
 
   const navigate = useNavigate();

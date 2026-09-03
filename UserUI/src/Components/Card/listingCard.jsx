@@ -484,7 +484,7 @@ const handleShareClick = async (e) => {
 
       {/* RIGHT: CONTENT SECTION */}
       <div
-        className={`flex-1 p-5 lg:p-[30px] flex flex-col justify-between ${
+        className={`flex-1 p-5 lg:p-[24px] flex flex-col justify-between ${
           listing?.isFeatured ? "bg-[#E9EEF6]" : "bg-white"
         }`}
       >
