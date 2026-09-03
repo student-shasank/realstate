@@ -637,11 +637,11 @@ const handleShareClick = async (e) => {
         {/* Bottom Row: Price and View Button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div className="text-[#01155E] text-[18px] font-semibold leading-[125%]">
-         {isOutOfStock ? (
+        {isOutOfStock ? (
   <span className="text-[24px] sm:text-[28px] font-semibold text-red-600">
     Out of Stock
   </span>
-) : listingStatus === "announced" &&
+) : (listing?.project_status || "").toString().trim().toLowerCase() === "announced" &&
   (!listingPrice || Number(listingPrice) <= 0) ? (
   <span className="text-[24px] sm:text-[28px] font-semibold text-[#01155E]">
     Coming Soon

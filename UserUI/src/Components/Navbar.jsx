@@ -432,6 +432,15 @@ useEffect(() => {
                       >
                         👤 My Profile
                       </button>
+                       <button
+                        onClick={() => {
+                          navigate("/compare");
+                          setProfileOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"
+                      >
+                        Compare Page
+                      </button>
 
                       <button
                         onClick={handleLogout}
