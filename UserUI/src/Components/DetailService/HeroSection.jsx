@@ -1,6 +1,7 @@
 import React from 'react';
 import backgroundImage from '../../../src/assets/detailservicebackground.png';
 import formbackground from '../../../src/assets/formbackground.jpg';
+import { Link } from 'react-router-dom';
 
 function HeroSection() {
   // Title for consistent rendering with your reference
@@ -81,9 +82,16 @@ function HeroSection() {
               </button>
             </form>
 
-            <p className="mt-1 text-center text-[11px] md:text-[14px] text-white opacity-90 leading-relaxed">
-              By submitting this form, you acknowledge that you have read and agree to the Yupland Terms of Use, Privacy Policy, and Disclaimer, and consent to being contacted by Yupland or relevant licensed brokerages, developers, or service providers regarding your inquiry.
-            </p>
+           <p className="mt-1 text-center text-[11px] md:text-[14px] text-white opacity-90 leading-relaxed">
+  By submitting this form, you acknowledge that you have read and agree to
+  the Yupland Terms of Use,{" "}
+  <Link to="/privacy" className="underline hover:text-gray-200 transition-colors">
+    Privacy Policy
+  </Link>
+  , and Disclaimer, and consent to being contacted by Yupland or relevant
+  licensed brokerages, developers, or service providers regarding your
+  inquiry.
+</p>
           </div>
 
         </div>

@@ -1311,7 +1311,7 @@ const Listings = () => {
                 </button>
 
                 {!isReadyCompletion && paymentOpen && (
-                  <div className="absolute top-full left-0 z-50 mt-0 w-full bg-white rounded-b-[16px]">
+                  <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-3xl shadow-2xl z-50 p-3 flex flex-col gap-2">
                     <div className="p-0">
                       {['During Construction', 'Post Handover'].map((plan, index) => (
                         <button
@@ -1406,7 +1406,9 @@ const Listings = () => {
         {loading && <p style={{ textAlign: 'center', marginTop: '20px' }}>Loading listings...</p>}
         {!loading && error && <p style={{ color: "red", textAlign: 'center' }}>{error}</p>}
         {!loading && success && projects?.length === 0 && (
-          <p style={{ textAlign: 'center' }}>No listings found.</p>
+         <p style={{ textAlign: "center", marginTop: "30px" }}>
+  No listings found.
+</p>
         )}
 
         {!loading && projects?.length > 0 && (
@@ -1456,7 +1458,14 @@ const Listings = () => {
                           onMouseEnter={() => setHoveredListingId(itemId)}
                           onMouseLeave={() => setHoveredListingId(null)}
                         >
-                          <MapCard item={item} isHovered={hoveredListingId === itemId} />
+                          <MapCard
+  item={item}
+  isHovered={hoveredListingId === itemId}
+  onRequireLogin={() => {
+    const event = new CustomEvent("openLogin");
+    window.dispatchEvent(event);
+  }}
+/>
                         </div>
                       );
                     })}

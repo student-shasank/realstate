@@ -40,6 +40,7 @@ import ContactUs from "./Pages/ContactUs";
 import WhatsAppFloatButton from "../src/Components/Card/WhatsAppFloatButton";
 import SignupPopup from "./Pages/landingSignuppopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
 import LoginPopup from "./Pages/LoginPopup"; // 👈 path apne folder structure ke hisaab se adjust kar lena
+import NotFound from "./Pages/NotFound";
 
 
 
@@ -132,7 +133,7 @@ function App() {
         <Route path="/investorVisaAdvisory" element={<InvestorVisaAdvisory />} />
           <Route path="/market-insights" element={<Blog />} />
 <Route path="/market-insights/:slug" element={<BlogDetail />} />
-        
+        <Route path="*" element={<NotFound />} />
       </Routes>
    
 

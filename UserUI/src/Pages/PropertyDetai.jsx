@@ -137,7 +137,7 @@ function GalleryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
       <div className="bg-white rounded-none sm:rounded-2xl w-full h-full sm:h-auto max-w-full sm:max-w-[1100px] max-h-full sm:max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
 
         {/* 🔧 FIX: header ab ek flex row hai — LEFT side (tabs) scroll
@@ -855,7 +855,14 @@ const getBedroomsDisplay = (val) => {
 
   const formatPrice = (val, cur = currency) =>
     val ? `${cur} ${Number(val).toLocaleString()}` : "—";
-
+const cleanPaymentPlanTitle = (title) => {
+  if (!title) return "Payment Plan 60/40";
+  const ratioMatch = title.match(/(\d+\/\d+)/);
+  if (ratioMatch) {
+    return `Payment Plan ${ratioMatch[1]}`;
+  }
+  return title.replace(/\s*\d+(\.\d+)?%\s*Discount\s*/i, "").trim();
+};
   const paymentSteps =
     paymentPlan?.steps?.length > 0
       ? paymentPlan.steps.map((s) => ({ label: s.label, value: `${s.percent}%` }))
@@ -1498,7 +1505,7 @@ const getBedroomsDisplay = (val) => {
                 <div className="flex items-center gap-2 text-[#67739E]">
                   <BanknoteArrowDown size={20} className="text-[#01155E]" />
                   <span className="text-[15px] sm:text-[18px] font-['Archivo'] text-[#01155E]">
-                    {paymentPlan?.planName || "Payment Plan 60/40"}
+                    {cleanPaymentPlanTitle(paymentPlan?.planName)}
                   </span>
                 </div>
                 <ChevronDown size={20} className="text-[#67739E]" />
@@ -1673,7 +1680,7 @@ const getBedroomsDisplay = (val) => {
               <button
                 onClick={() => {
                   if (community?.slug) {
-                    navigate(`/communities/${community.slug}`);
+                    navigate(`/communities`);
                   }
                 }}
                 className="bg-[#01155E] text-white px-5 sm:px-6 py-2.5 rounded-lg text-[15px] sm:text-[18px] font-semibold w-full sm:w-auto"

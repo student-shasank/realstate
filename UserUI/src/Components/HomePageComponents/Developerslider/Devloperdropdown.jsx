@@ -125,7 +125,7 @@ export default function DeveloperDropdown({
               top: coords.top,
               left: coords.left,
               width: 345, // fixed panel width, independent of trigger width
-              zIndex: 999999,
+              zIndex: 99,
             }}
             className="bg-white rounded-[12px] shadow-lg overflow-hidden border border-[#E5EAF4]"
           >

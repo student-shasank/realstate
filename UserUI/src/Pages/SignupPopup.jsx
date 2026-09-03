@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerAsync, resetRegisterState } from "../features/Authentation/RegisterSlice";
 import { toast } from "react-toastify";
 import formbackground from "../assets/formbackground.jpg"; // Image import
+import { Link } from "react-router-dom";
 
 function SignupPopup({ isOpen, onClose, openLogin }) {
   const dispatch = useDispatch();
@@ -149,9 +150,14 @@ function SignupPopup({ isOpen, onClose, openLogin }) {
           </button>
         </p>
 
-        <p className="text-center text-[11px] md:text-[13px] text-white opacity-80 leading-tight">
-          By submitting this form, you acknowledge that you have read and agree to the Yupland Terms of Use, Privacy Policy, and Disclaimer.
-        </p>
+       <p className="text-center text-[11px] md:text-[13px] text-white opacity-80 leading-tight">
+  By submitting this form, you acknowledge that you have read and agree to
+  the Yupland Terms of Use,{" "}
+  <Link to="/privacy" className="underline hover:text-gray-200 transition-colors">
+    Privacy Policy
+  </Link>
+  , and Disclaimer.
+</p>
       </div>
     </div>
   );
