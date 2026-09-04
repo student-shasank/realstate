@@ -97,6 +97,8 @@ function App() {
     );
   }, [favorites]);
 
+ 
+
   return (
     <>
      <WhatsAppFloatButton phone="971505773767" message="Hi, I'm interested in your properties" />

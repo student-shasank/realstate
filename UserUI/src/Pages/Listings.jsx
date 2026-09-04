@@ -865,7 +865,7 @@ const Listings = () => {
         </div>
 
         {/* FILTERS SECTION */}
-        <div className="w-full lg:w-[1290px] min-h-0 lg:min-h-[236px] mx-auto bg-[#1C4DFF0A] border border-[#E5E7EB] rounded-[10px] p-4 sm:p-6 lg:p-[30px] flex flex-col gap-4 sm:gap-6 lg:gap-[30px] items-center font-['Archivo']">
+        <div className="w-full lg:w-[1290px] min-h-0 lg:min-h-[236px] mx-auto bg-[#1C4DFF0A] rounded-[10px] p-4 sm:p-6 lg:p-[30px] flex flex-col gap-4 sm:gap-6 lg:gap-[30px] items-center font-['Archivo']">
           <div className="w-full lg:w-[1230px] flex flex-col gap-[16px]">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-[24px] w-full">
               <div className="relative flex-1 lg:max-w-[1026px]">

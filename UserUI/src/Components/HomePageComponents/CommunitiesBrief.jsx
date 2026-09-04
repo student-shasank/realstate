@@ -74,7 +74,7 @@ export default function CommunitiesBrief() {
 
             <div className="absolute bottom-6 left-6 md:top-8 md:left-8 max-w-[85%] border-l-[3px] border-white pl-4">
               <p className="text-[20px] md:text-[22px] font-semibold text-white underline decoration-white">
-                Jumeirah Village
+                Jumeirah Village Circle
               </p>
 
               <p className="text-[15px] md:text-[20px] text-white font-light leading-relaxed mt-1">
