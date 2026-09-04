@@ -33,5 +33,6 @@ export const UPDATE_SELLER_LEAD_NOTE_API = (id) =>
 export const DELETE_SELLER_LEAD_API = (id) =>
   `${BASE_URL}/admin/seller-leads/${id}/permanent`;
 
+export const ADMIN_CONTACTS_URL = `${BASE_URL}/admin/contact`;
 
 

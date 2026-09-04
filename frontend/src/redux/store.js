@@ -7,6 +7,7 @@ import dashboardReducer from "../features/dashboard/dashboardSlice"
 import listingReducer from "../features/dashboard/listingSlice"
 import communityReducer from "../features/communitySlice"
 import sellerLeadsReducer from "../features/sellerLeads/sellerLeadsSlice";
+import contactAdminReducer from "../features/ContactSlice"
 
 
 
@@ -19,6 +20,7 @@ export const store = configureStore({
        listing: listingReducer,
        community: communityReducer,
          sellerLeads: sellerLeadsReducer,
+           contactAdmin: contactAdminReducer,
   },
 });
 
