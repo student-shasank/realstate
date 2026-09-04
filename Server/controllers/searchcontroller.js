@@ -374,7 +374,13 @@ const buildLocationScoreStage = (location) => {
   const cityTerm = parts[parts.length - 1];
   const areaTerms = parts.slice(0, -1);
 
-  // For plain string fields (title, location, project_location, project_city, city_data.name)
+  // Longer / more specific terms (e.g. "Jumeirah Village Circle") should
+  // outrank shorter, broader terms that happen to be a substring of a
+  // DIFFERENT area's name (e.g. "Jumeirah Village" also matches
+  // "Jumeirah Village Triangle"). Sorting by length lets the most
+  // specific match win.
+  const sortedAreaTerms = [...areaTerms].sort((a, b) => b.length - a.length);
+
   const regexMatchOn = (field, term) => ({
     $regexMatch: {
       input: { $ifNull: [field, ""] },
@@ -383,10 +389,6 @@ const buildLocationScoreStage = (location) => {
     },
   });
 
-  // For array-of-object fields (e.g. district_data: [{ name }]) — referencing
-  // "$district_data.name" in aggregation returns an ARRAY of names, not a
-  // string, so $regexMatch can't be used directly. We map over the array
-  // and check if ANY element matches.
   const regexMatchOnArrayField = (arrayField, term) => ({
     $anyElementTrue: {
       $map: {
@@ -403,30 +405,36 @@ const buildLocationScoreStage = (location) => {
     },
   });
 
-  const areaMatchExprs = areaTerms.flatMap((term) => [
-    regexMatchOn("$title", term),
-    regexMatchOn("$location", term),
-    regexMatchOn("$project_location", term),
-    regexMatchOnArrayField("$district_data.name", term), // ✅ fixed
-  ]);
+  const areaTermMatchExpr = (term) => ({
+    $or: [
+      regexMatchOn("$title", term),
+      regexMatchOn("$location", term),
+      regexMatchOn("$project_location", term),
+      regexMatchOnArrayField("$district_data.name", term),
+    ],
+  });
 
-  const cityMatchExprs = [
-    regexMatchOn("$project_city", cityTerm),
-    regexMatchOn("$city_data.name", cityTerm),
-  ];
+  const cityMatchExpr = {
+    $or: [
+      regexMatchOn("$project_city", cityTerm),
+      regexMatchOn("$city_data.name", cityTerm),
+    ],
+  };
+
+  // Most specific term → highest score. e.g. with 2 area terms:
+  // sortedAreaTerms[0] (longest, most specific) → score 3
+  // sortedAreaTerms[1] (shorter, broader)       → score 2
+  // city-only match                              → score 1
+  const branches = sortedAreaTerms.map((term, idx) => ({
+    case: areaTermMatchExpr(term),
+    then: sortedAreaTerms.length - idx + 1,
+  }));
+  branches.push({ case: cityMatchExpr, then: 1 });
 
   return {
     $addFields: {
       __locationScore: {
-        $switch: {
-          branches: [
-            ...(areaMatchExprs.length
-              ? [{ case: { $or: areaMatchExprs }, then: 2 }]
-              : []),
-            { case: { $or: cityMatchExprs }, then: 1 },
-          ],
-          default: 0,
-        },
+        $switch: { branches, default: 0 },
       },
     },
   };

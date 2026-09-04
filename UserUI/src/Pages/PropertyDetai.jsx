@@ -10,6 +10,8 @@ import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.
 import { sendListingEnquiry, resetEnquiryState } from "../features/Enquiery/enquirySlice.js";
 import { toast } from 'react-toastify';
 import { fetchSimilarListings, resetSimilarListingsState } from "../features/dashboard/similarPropertiesSlice.jsx";
+import { formatNumber } from "../Components/utils/formatCurrency.js";
+// phir jahan bhi Number(x).toLocaleString() hai, wahan formatNumber(x) use karo
 
 import {
   fetchListingDetail,
@@ -288,6 +290,7 @@ function SimilarPropertyCard({
   getDisplayStatus,
   getBedroomsDisplay,
   navigate,
+  onRequireLogin,
 }) {
   const dispatch = useDispatch();
 
@@ -308,24 +311,24 @@ function SimilarPropertyCard({
   const favorites = useSelector((state) => state.favorites.favorites || []);
   const isFavorite = favorites.includes(itemId);
 
-  const handleFavorite = (e) => {
-    e.stopPropagation();
+ const handleFavorite = (e) => {
+  e.stopPropagation();
 
-    if (!itemId) return;
+  if (!itemId) return;
 
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
+  if (!isLoggedIn) {
+    onRequireLogin?.();
+    return;
+  }
 
-    if (isFavorite) {
-      dispatch(removeFavoriteLocal(itemId));
-    } else {
-      dispatch(addFavoriteLocal(itemId));
-    }
+  if (isFavorite) {
+    dispatch(removeFavoriteLocal(itemId));
+  } else {
+    dispatch(addFavoriteLocal(itemId));
+  }
 
-    dispatch(toggleFavorite(itemId));
-  };
+  dispatch(toggleFavorite(itemId));
+};
 
   const handlePrev = (e) => {
     e.stopPropagation();
@@ -447,11 +450,9 @@ function SimilarPropertyCard({
         </div>
         <div className="flex justify-between items-center flex-wrap gap-3">
           <div className="text-[19px] sm:text-[20px] lg:text-[22px] font-semibold text-[#01155E]">
-            {mappedItem.price_start || item.price_start
-              ? `AED ${Number(
-                  mappedItem.price_start || item.price_start
-                ).toLocaleString()}`
-              : "Price on request"}
+           {mappedItem.price_start || item.price_start
+  ? `AED ${formatNumber(mappedItem.price_start || item.price_start)}`
+  : "Price on request"}
           </div>
           <button
             onClick={(e) => {
@@ -476,7 +477,7 @@ function SimilarPropertyCard({
 // partial 4th-card "peek" on wide screens, matching the pattern
 // used on real estate sites like Bayut/Property Finder.
 // ============================================================
-function SimilarPropertiesCarousel({ listings, getDisplayStatus, getBedroomsDisplay, navigate }) {
+function SimilarPropertiesCarousel({ listings, getDisplayStatus, getBedroomsDisplay, navigate, onRequireLogin }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -531,6 +532,7 @@ function SimilarPropertiesCarousel({ listings, getDisplayStatus, getBedroomsDisp
               getDisplayStatus={getDisplayStatus}
               getBedroomsDisplay={getBedroomsDisplay}
               navigate={navigate}
+              onRequireLogin={onRequireLogin}
             />
           </div>
         ))}
@@ -852,9 +854,8 @@ const getBedroomsDisplay = (val) => {
     brn = "Approved",
     registeredAgency = "RTO"
   } = regulatoryInfo;
-
-  const formatPrice = (val, cur = currency) =>
-    val ? `${cur} ${Number(val).toLocaleString()}` : "—";
+const formatPrice = (val, cur = currency) =>
+  val ? `${cur} ${formatNumber(val)}` : "—";
 const cleanPaymentPlanTitle = (title) => {
   if (!title) return "Payment Plan 60/40";
   const ratioMatch = title.match(/(\d+\/\d+)/);
@@ -1285,7 +1286,7 @@ const cleanPaymentPlanTitle = (title) => {
                 Starting at
               </span>
               <span className="text-[20px] sm:text-[24px] lg:text-[28px] font-semibold text-[#01155E] uppercase">
-                AED {PROPERTY?.price_start ? Number(PROPERTY.price_start).toLocaleString() : "—"}
+              AED {PROPERTY?.price_start ? formatNumber(PROPERTY.price_start) : "—"}
               </span>
             </div>
 
@@ -1644,7 +1645,7 @@ const cleanPaymentPlanTitle = (title) => {
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Banknote size={12} className="text-[#01155E]" />
-                        Starting at {currency} {Number(plan.startingPrice).toLocaleString()}
+                        Starting at {currency} {formatNumber(plan.startingPrice)}
                       </span>
                     </div>
                   </div>
@@ -1841,7 +1842,7 @@ const cleanPaymentPlanTitle = (title) => {
                 <div className="text-[17px] sm:text-[20px] font-semibold text-[#01155E] mb-4">
                   Starting at  {currency}
                   <span className="text-[28px] sm:text-[36px] ml-2">
-                    {price ? Number(price).toLocaleString() : "—"}
+                    {price ? formatNumber(price) : "—"}
                   </span>
                 </div>
 
@@ -1914,6 +1915,7 @@ const cleanPaymentPlanTitle = (title) => {
               getDisplayStatus={getDisplayStatus}
               getBedroomsDisplay={getBedroomsDisplay}
               navigate={navigate}
+                onRequireLogin={() => setIsLoginOpen(true)}
             />
           )}
         </div>
