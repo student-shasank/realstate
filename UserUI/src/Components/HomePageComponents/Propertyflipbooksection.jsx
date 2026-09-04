@@ -51,17 +51,22 @@ export default function PropertyFlipbookSection({
 
   const reportLink =
  "https://acrobat.adobe.com/id/urn:aaid:sc:AP:3c0df375-ee73-4cd2-92d2-19651d06fc96";
-  const handleGetReport = () => {
+ const handleGetReport = (e) => {
+  e?.stopPropagation();
+
+  if (!getIsLoggedIn()) {
+    setShowLoginPopup(true);
+    return;
+  }
+
   window.open(reportLink, "_blank", "noopener,noreferrer");
 };
 
-  const handleUnlockClick = () => {
-    if (getIsLoggedIn()) {
-      setIsLoggedIn(true);
-      return;
-    }
+ const handleUnlockClick = () => {
+  if (!getIsLoggedIn()) {
     setShowLoginPopup(true);
-  };
+  }
+};
 
   const handleLoginClose = () => {
     setShowLoginPopup(false);

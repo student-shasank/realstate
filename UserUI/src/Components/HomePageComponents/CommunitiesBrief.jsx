@@ -2,8 +2,10 @@ import React from "react";
 import imageurl from "../../assets/underline.png";
 import firstcard from "../../assets/community.jpg";
 import Secondcard from "../../assets/community.jpg";
+import { useNavigate } from "react-router-dom";
 
 export default function CommunitiesBrief() {
+  const navigate = useNavigate();
   return (
     <section className="w-full bg-white overflow-hidden">
       {/* --- Header Section --- */}
@@ -38,9 +40,12 @@ export default function CommunitiesBrief() {
           </p>
         </div>
 
-        <button className="mt-8 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]">
-          Discover Your Neighbourhood
-        </button>
+       <button
+  onClick={() => navigate("/communities")}
+  className="mt-8 bg-[#001A54] text-white w-full sm:w-auto min-w-[280px] lg:w-[431px] h-[50px] rounded-md text-[16px] lg:text-[20px] font-semibold transition-all duration-300 hover:bg-[#01206b]"
+>
+  Discover Your Neighbourhood
+</button>
       </div>
 
       {/* --- Cards Section --- */}

@@ -77,7 +77,7 @@ const ChooseYourStrategy = () => {
                   Ready properties are fully completed units that are available for ownership, occupancy, or rental use, representing assets that are already constructed and operational.
                 </p>
                 <div>
-                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] pt-[45px]">Advantages:</span>
+                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] pt-[17px]">Advantages:</span>
                   <ul className="list-disc pl-5 sm:space-y-2">
                     <li>Suitable for buyers seeking immediate property utilisation</li>
                     <li>Ability to generate rental income without a development or construction period</li>
@@ -86,7 +86,7 @@ const ChooseYourStrategy = () => {
                   </ul>
                 </div>
                 <div>
-                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] pt-[20px]">Best suited for:</span>
+                  <span className="font-bold block mb-3 text-[#01155E] text-[20px] font-['Archivo'] ">Best suited for:</span>
                   <ul className="list-disc pl-5 sm:space-y-2">
                     <li>Buyers planning personal use within a near-term timeframe</li>
                     <li>Investors prioritising rental income generation and cash flow</li>

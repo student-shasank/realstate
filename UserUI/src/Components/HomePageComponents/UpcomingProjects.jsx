@@ -6,6 +6,7 @@ import { fetchProjects } from "../../features/dashboard/searchSlice.jsx";
 
 import upcommingproject1 from "../../assets/upcommingproject1.jpg";
 import imageurl from "../../assets/underline.png";
+import { formatNumber } from "../utils/formatCurrency.js";
 
 const UpcomingProjects = () => {
   const dispatch = useDispatch();
@@ -210,13 +211,18 @@ const UpcomingProjects = () => {
                   {/* FOOTER */}
                   <div className="flex justify-between items-center gap-3">
                     {/* PRICE */}
-                    <span className="text-[#001A54] text-[16px] md:text-[20px] font-bold">
-                      {project?.price_start || project?.min_price
-                        ? `${project?.currency || "AED"} ${Number(
-                            project.price_start || project.min_price
-                          ).toLocaleString()}`
-                        : "Price on Request"}
-                    </span>
+                   <span className="text-[#001A54] text-[16px] md:text-[20px] font-bold">
+  {project?.price_start || project?.min_price ? (
+    <>
+      <span className="mr-1">
+        {(project?.currency || "AED").toUpperCase()}
+      </span>
+      {formatNumber(project.price_start || project.min_price)}
+    </>
+  ) : (
+    "Price on Request"
+  )}
+</span>
 
                     <button
                       onClick={() => goToDetail(project)}

@@ -4,6 +4,7 @@ import {fetchListingByIdThunk  } from "../features/dashboard/fetchListingById";
 import { useNavigate } from "react-router-dom";
 import { mapPropertyDetailData } from '../Components/utils/Propertydetailmapper.jsx';
 import { extractAllImages, getSafeImageUrl } from '../Components/utils/imageExtractor.jsx';
+import { formatNumber } from "../Components/utils/formatCurrency.js";
 
 import {
   FaBed, FaBath, FaChartArea, FaUserTie, FaMoneyCheckAlt,
@@ -205,6 +206,21 @@ const Compare = () => {
       _id
     } = rawData;
 
+    // ============================================================
+    // 🔧 FIX (price): off-plan docs often store price_start /
+    // price_end (and sometimes min_price/max_price) as the STRING
+    // '0.00' when the developer hasn't set a real price yet. A
+    // plain `??` fallback happily accepts that '0.00' string and
+    // renders "AED 0.00" instead of moving on / showing "—".
+    // toValidPrice() treats null/undefined/empty/NaN/<=0 as "no
+    // price" so those cases are skipped properly.
+    // ============================================================
+    const toValidPrice = (val) => {
+      if (val === null || val === undefined || val === "") return null;
+      const n = Number(val);
+      return !isNaN(n) && n > 0 ? n : null;
+    };
+
     /* ── Normalized values so both schemas render correctly ── */
     const featureImage =
   feature_image ||
@@ -218,8 +234,14 @@ const Compare = () => {
     const cityName = city_name || city_data?.name;
     const districtName = district_name || district_data?.[0]?.name;
 
-    const finalMinPrice = min_price ?? price_start;
-    const finalMaxPrice = max_price ?? price_end;
+    // ============================================================
+    // 🔧 FIX (price): resolve through toValidPrice so a fake
+    // '0.00' string from one field doesn't win over a real value
+    // in the fallback field, and so downstream formatting is
+    // always a clean number (no decimals) via formatNumber().
+    // ============================================================
+    const finalMinPrice = toValidPrice(min_price) ?? toValidPrice(price_start);
+    const finalMaxPrice = toValidPrice(max_price) ?? toValidPrice(price_end);
 
     const finalMinArea = min_area ?? area_start;
     const finalMaxArea = max_area ?? area_end;
@@ -244,10 +266,18 @@ const Compare = () => {
         ? `${finalMinArea} - ${finalMaxArea}`
         : (finalMinArea || finalMaxArea || "—");
 
+    // ============================================================
+    // 🔧 FIX (price): use formatNumber() (same UAE/AED standard
+    // formatter used across MapCard/MapMarker) instead of raw
+    // Number().toLocaleString(), and fall back to "—" instead of
+    // "AED 0" when there is no valid price at all.
+    // ============================================================
     const priceRange =
       finalMinPrice && finalMaxPrice
-        ? `${currency} ${Number(finalMinPrice).toLocaleString()} - ${Number(finalMaxPrice).toLocaleString()}`
-        : `${currency} ${Number(finalMinPrice || 0).toLocaleString()}`;
+        ? `${currency} ${formatNumber(finalMinPrice)} - ${formatNumber(finalMaxPrice)}`
+        : finalMinPrice
+        ? `${currency} ${formatNumber(finalMinPrice)}`
+        : "—";
 
     const paySteps = [
       { label: "Min Price", percent: 50 },
@@ -299,7 +329,7 @@ const Compare = () => {
               <p className="text-white text-[16px] sm:text-[20px] md:text-[24px] font-bold mb-1 line-clamp-1 opacity-80 capitalize">{title || "—"}</p>
               <p className="font-black leading-none mb-3 md:mb-4 text-[20px] sm:text-[24px] md:text-[28px]" style={{ color: GOLD }}>
                 <span className="text-[14px] sm:text-[16px] md:text-[18px] font-bold mr-1">{currency}</span>
-                {finalMinPrice ? Number(finalMinPrice).toLocaleString() : "—"}
+                {finalMinPrice ? formatNumber(finalMinPrice) : "—"}
               </p>
               <div className="flex gap-2 sm:gap-3 items-center">
                 <button
@@ -348,8 +378,8 @@ const Compare = () => {
 
         {/* ── Price Details ── */}
         <SectionCard title="Price Details">
-          <InfoRow label="Min Price" value={finalMinPrice ? `${currency} ${Number(finalMinPrice).toLocaleString()}` : "—"} accent />
-          <InfoRow label="Max Price" value={finalMaxPrice ? `${currency} ${Number(finalMaxPrice).toLocaleString()}` : "—"} accent />
+          <InfoRow label="Min Price" value={finalMinPrice ? `${currency} ${formatNumber(finalMinPrice)}` : "—"} accent />
+          <InfoRow label="Max Price" value={finalMaxPrice ? `${currency} ${formatNumber(finalMaxPrice)}` : "—"} accent />
           <InfoRow label="Currency" value={currency} />
           <div className="mt-4">
             <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Price Range</p>

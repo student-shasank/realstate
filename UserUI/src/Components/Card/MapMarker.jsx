@@ -1,5 +1,6 @@
 import { useState } from "react";
 import listingimage from "../../assets/ListingCard.jpg";
+import { formatNumber } from "../utils/formatCurrency.js";
 
 const MapMarker = ({ item, isActive = false, onClose }) => {
   const [hovered, setHovered] = useState(false);
@@ -38,10 +39,10 @@ const MapMarker = ({ item, isActive = false, onClose }) => {
 
   // Format price range or single price
   const formatPrice = (item) => {
-    const price = getPrice(item);
-    if (!price) return "Price on request";
-    return `AED ${price.toLocaleString("en-US")}`;
-  };
+  const price = getPrice(item);
+  if (!price) return "Price on request";
+  return `AED ${formatNumber(price)}`;
+};
 
   // Compact price for the marker pill itself (e.g. "1.4M", "709K")
   const formatCompactPrice = (item) => {

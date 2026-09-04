@@ -10,6 +10,7 @@ import DevelopmentAdvisory from "../../assets/services/Development Advisory1.png
 import HandoverSnagging from "../../assets/services/Handover and snagging1.png";
 import Mortgage from "../../assets/services/mortgage1.png";
 import ResidencyImage from "../../assets/services/Residency image1.png";
+import { useNavigate } from "react-router-dom";
 
 const ServicesSection = () => {
   const services = [
@@ -62,6 +63,8 @@ const ServicesSection = () => {
     //   path: "/investorVisaAdvisory",
     // },
   ];
+
+  const navigate = useNavigate();
   return (
     <section className="w-full bg-white px-4 sm:px-6 lg:px-8 py-12 lg:py-[120px]">
 
@@ -125,9 +128,12 @@ const ServicesSection = () => {
 
         {/* View All */}
         <div className="flex justify-center md:justify-end mt-10">
-          <div className="font-medium text-[20px] lg:text-[24px] text-[#01155E] underline cursor-pointer hover:text-blue-700 transition">
-            View All
-          </div>
+          <div
+  onClick={() => navigate("/service")}
+  className="font-medium text-[20px] lg:text-[24px] text-[#01155E] underline cursor-pointer hover:text-blue-700 transition"
+>
+  View All
+</div>
         </div>
       </div>
     </section>

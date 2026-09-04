@@ -13,6 +13,7 @@ import {
   removeFavoriteLocal,
   toggleFavorite,
 } from "../../features/dashboard/favoriteligting/favoriteSlice.jsx";
+import { formatNumber } from "../utils/formatCurrency.js";
 
 // ============================================================
 // 🔧 FIX: MapCard was reading ONLY the raw off-plan field names
@@ -363,7 +364,7 @@ const MapCard = ({ item, onRequireLogin }) => {
 
         {/* Price */}
         <h3 className="text-[18px] sm:text-[19px] lg:text-[20px] leading-tight font-bold text-[#01155E]">
-          {displayPrice != null ? `AED ${Number(displayPrice).toLocaleString()}` : "Price on request"}
+         {displayPrice != null ? `AED ${formatNumber(displayPrice)}` : "Price on request"}
         </h3>
 
         {/* Title */}
@@ -399,7 +400,7 @@ const MapCard = ({ item, onRequireLogin }) => {
           <div className="flex items-center gap-2">
             <img src={Icon1} className="w-4 h-4 shrink-0" alt="area" />
             <span className="font-medium  text-[#67739e]">
-              {displayArea != null ? Number(displayArea).toLocaleString() : "N/A"} sqft
+             {displayArea != null ? formatNumber(displayArea) : "N/A"} sqft
             </span>
           </div>
         </div>
