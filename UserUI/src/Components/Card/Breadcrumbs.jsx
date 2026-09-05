@@ -55,11 +55,6 @@ const Breadcrumbs = ({ customLabel, completionLabel }) => {
     if (routeLabels[value.toLowerCase()]) return routeLabels[value.toLowerCase()];
 
     // 2. Check if the value is a MongoDB ID (24 character hex string)
-    // If so, show the property title if we have it
-    // if (/^[0-9a-fA-F]{24}$/.test(value)) {
-    //   return customLabel || "Property Detail";
-    // }
-    // 2. Check if the value is a MongoDB ID (24 character hex string)
     // OR a numeric listing ID (e.g. "3071", "1298")
     // If so, show the property title if we have it
     if (/^[0-9a-fA-F]{24}$/.test(value) || /^\d+$/.test(value)) {
@@ -71,6 +66,23 @@ const Breadcrumbs = ({ customLabel, completionLabel }) => {
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
+  };
+
+  // Build the actual href for a given path segment.
+  // The "listing" (singular) segment is a detail-page route
+  // (/listing/:id) and has no page of its own — clicking its
+  // breadcrumb should go to the real listings page (/listings)
+  // instead, carrying over the completion filter if we know it.
+  const getRouteTo = (value, index) => {
+    const isLast = index === pathnames.length - 1;
+
+    if (value.toLowerCase() === "listing" && !isLast) {
+      if (isReadyCompletion) return "/listings?completion=ready";
+      if (isOffPlanCompletion) return "/listings?completion=off-plan";
+      return "/listings";
+    }
+
+    return `/${pathnames.slice(0, index + 1).join("/")}`;
   };
 
   return (
@@ -86,7 +98,7 @@ const Breadcrumbs = ({ customLabel, completionLabel }) => {
         </Link>
 
         {pathnames.map((value, index) => {
-          const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
+          const routeTo = getRouteTo(value, index);
           const isLast = index === pathnames.length - 1;
           const label = formatLabel(value);
 
