@@ -5,7 +5,7 @@
 // Auth Endpoints
 //export const BASE_URL = "http://65.2.3.113/api/user";
 export const BASE_URL =
-  "https://wings-journalism-casey-massive.trycloudflare.com/api/user";
+  "https://consisting-segment-express-edited.trycloudflare.com/api/user";
 
 // -----------------------
 export const LOGIN_URL = `${BASE_URL}/auth/login`;
