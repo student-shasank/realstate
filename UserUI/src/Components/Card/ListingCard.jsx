@@ -6,7 +6,7 @@ import heartIcon from "../../assets/like.svg";
 import callIcon from "../../assets/phone5.png";
 import whatsappIcon from "../../assets/whatsap.png";
 import shareIcon from "../../assets/share5.png";
-import listingimage from "../../assets/ListingCard.jpg";
+import listingimage from "../../assets/listingcard.jpg";
 import Icon1 from "../../assets/icon1.png";
 import Icon2 from "../../assets/icon2.png";
 import Icon3 from "../../assets/icon3.png";

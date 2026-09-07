@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import listingimage from '../../assets/ListingCard.jpg'
+import listingimage from '../../assets/listingcard.jpg'
 import { BedDouble, Bath, Square } from "lucide-react";
 import Icon1 from '../../assets/icon1.png'
 import Icon2 from '../../assets/icon2.png'

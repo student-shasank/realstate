@@ -1,5 +1,5 @@
 import { useState } from "react";
-import listingimage from "../../assets/ListingCard.jpg";
+import listingimage from "../../assets/listingcard.jpg";
 import { formatNumber } from "../utils/formatCurrency.js";
 
 const MapMarker = ({ item, isActive = false, onClose }) => {
